@@ -10,6 +10,7 @@
 # modules can be found. Also, no pollution of namespace will be allowed.
 
 import array_manip
+import som
 
 # Create data source translators for reading in two NeXus files
 
@@ -27,15 +28,15 @@ if len(SOM1) != len(SOM2):
 
 # Create SOM3
 
-SOM3 = SOM(len(SOM1))
+SOM3 = som.SOM()
 
 # Loop on spectrum to do subtraction
 
-for counter in range(len(SOM1)):
-    SOM3[counter].x = SOM3[counter].x
-    SOM3[counter].y,
-    SOM3[counter].y_var = sub_ncerr(SOM1[counter].y, SOM1[counter].y_var,
-                                    SOM2[counter].y, SOM2[counter].y_var)
+for (SO1, SO2) in map(None, SOM1, SOM2):
+    SO3 = so.SO()
+    SO3.x = SO1.x
+    SO3.y, SO3.y_var = sub_ncerr(SO1.y, SO1.y_var, SO2.y, SO2.y_var)
+    SOM3.append(SO3)
     
 # Create output formatting object
 
