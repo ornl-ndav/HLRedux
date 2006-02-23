@@ -7,10 +7,14 @@
 ###############################################################################
 
 # Import appropriate modules here. NOTE: $PYTHONPATH must reflect where
-# modules can be found. Also, no pollution of namespace will be allowed.
+# modules can be found.
 
-import array_manip
-import som
+from array_manip import sub_ncerr
+from dst_base import DST_BASE
+from so import SO
+from som import SOM
+
+filename_SOM3 = "stuff1.dat"
 
 # Create data source translators for reading in two NeXus files
 
@@ -28,9 +32,14 @@ if len(SOM1) != len(SOM2):
 
 # Create SOM3
 
-SOM3 = som.SOM()
-
+SOM3 = SOM()
+SOM3.attr_list = SOM1.attr_list
+SOM3.attr_list["filename"] = filename_SOM3
+SOM3.attr_list["parents"] = {"SOM1" : SOM1.attr_list["filename"],
+                             "SOM2" : SOM2.attr_list["filename"]}                    
 # Loop on spectrum to do subtraction
+
+SOM3.attr_list["operations"] = {"Step 1" : "Subtraction (SOM1 - SOM2)"}
 
 for (SO1, SO2) in map(None, SOM1, SOM2):
     SO3 = so.SO()
@@ -38,15 +47,11 @@ for (SO1, SO2) in map(None, SOM1, SOM2):
     SO3.y, SO3.y_var = sub_ncerr(SO1.y, SO1.y_var, SO2.y, SO2.y_var)
     SOM3.append(SO3)
     
-# Create output formatting object
+# Create output formatting object for 3 column ASCII
 
+a3c = DST_BASE.getInstance("text/Spec", resource)
 
+# Push SOM3 into output formatter
 
-# Push attibute object into formatter
-
-
-
-# Push SOM3 into into formatter
-
-
+a3c.write(SOM3,args)
 
