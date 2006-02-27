@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 ###############################################################################
 #
 # This script is the driver for the Null Integration Test
@@ -10,16 +11,25 @@
 # modules can be found.
 
 from array_manip import sub_ncerr
-from dst_base import DST_BASE
+import dst_base 
 from so import SO
 from som import SOM
+from sys import argv, exit
 from time import localtime, strftime, time
 
-filename_SOM3 = "stuff1.dat"
+# Read in command line arguments for input file and output file names
 
+try:
+    filename_SOM12 = argv[1]
+    filename_SOM3 = argv[2]
+except IndexError:
+    print "Usage:",argv[0],"<input file> <output file>"
+    exit(-1)
+    
 # Create data source translators for reading in two NeXus files
 
-
+dst1 = dst_base.getInstance("application/x-NeXus", filename_SOM12)
+dst2 = dst_base.getInstance("application/x-NeXus", filename_SOM12)
 
 # Push attributes into SOM1 and SOM2
 
@@ -35,7 +45,7 @@ if len(SOM1) != len(SOM2):
 
 SOM3 = SOM()
 
-# Add attibutes
+# Add attibutes to SOM3
 
 SOM3.attr_list = SOM1.attr_list
 SOM3.attr_list["filename"] = filename_SOM3
@@ -61,11 +71,11 @@ resource = open(filename_SOM3, "w")
 # Create output formatting object for 3 column ASCII and pass it a file
 # object
 
-a3c = DST_BASE.getInstance("text/Spec", resource)
+a3c = dst_base.getInstance("text/Spec", resource)
 
 # Push SOM3 into output formatter
 
-a3c.write(SOM3,args)
+a3c.writeSOM(SOM3)
 
 # Close resource by issuing release_resource call on formatter
 
