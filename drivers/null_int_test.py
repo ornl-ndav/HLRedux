@@ -34,10 +34,12 @@ dst2 = dst_base.getInstance("application/x-NeXus", filename_SOM12)
 # Retrieve the SOMs from the DSTs
 
 som_id = ("/entry/data", 1)
-so_axis="time_of_flight"
+so_axis = "time_of_flight"
+starting_ids = (140, 125)
+ending_ids = (160, 135)
 
-SOM1 = dst1.getSOM(som_id, so_axis)
-SOM2 = dst2.getSOM(som_id, so_axis)
+SOM1 = dst1.getSOM(som_id, so_axis, start_id=starting_ids, end_id=ending_ids)
+SOM2 = dst2.getSOM(som_id, so_axis, start_id=starting_ids, end_id=ending_ids)
 
 if len(SOM1) != len(SOM2):
     raise IndexError, "SOM1 and SOM2 are not the same length!"
