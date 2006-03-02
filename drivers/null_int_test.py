@@ -59,7 +59,7 @@ SOM3.attr_list["parents"] = {"SOM1" : SOM1.attr_list["filename"],
 SOM3.attr_list["operations"] = [("Step 1", "Subtraction (SOM1 - SOM2)")]
 
 for (SO1, SO2) in map(None, SOM1, SOM2):
-    SO3 = so.SO()
+    SO3 = SO()
     SO3.x = SO1.x
     SO3.y, SO3.y_var = sub_ncerr(SO1.y, SO1.y_var, SO2.y, SO2.y_var)
     SOM3.append(SO3)
