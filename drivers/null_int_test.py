@@ -62,7 +62,7 @@ for (SO1, SO2) in map(None, SOM1, SOM2):
     SO3 = SO()
     SO3.x = SO1.x
     SO3.id = SO1.id
-    SO3.y, SO3.y_var = sub_ncerr(SO1.y, SO1.var_y, SO2.y, SO2.var_y)
+    SO3.y, SO3.var_y = sub_ncerr(SO1.y, SO1.var_y, SO2.y, SO2.var_y)
     SOM3.append(SO3)
 
 # Create output file object
