@@ -31,12 +31,12 @@ except IndexError:
 dst1 = dst_base.getInstance("application/x-NeXus", filename_SOM12)
 dst2 = dst_base.getInstance("application/x-NeXus", filename_SOM12)
 
-# Push attributes into SOM1 and SOM2
+# Retrieve the SOMs from the DSTs
 
+som_id = ("/entry/data", 1)
 
-
-# Push spectrum into SOM1 and SOM2
-
+SOM1 = dst1.getSOM(som_id)
+SOM2 = dst2.getSOM(som_id)
 
 if len(SOM1) != len(SOM2):
     raise IndexError, "SOM1 and SOM2 are not the same length!"
