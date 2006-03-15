@@ -7,9 +7,10 @@ def copy_attr(source,destination):
         destination.attr_list[key]=source.attr_list[key]
 
 def add_ncerr(left,right):
-    TITLE=SOM.som.SOM.TITLE
-    X_UNITS=SOM.som.SOM.X_UNITS
-    Y_UNITS=SOM.som.SOM.Y_UNITS
+    TITLE      = SOM.som.SOM.TITLE
+    X_UNITS    = SOM.som.SOM.X_UNITS
+    Y_UNITS    = SOM.som.SOM.Y_UNITS
+    OPERATIONS = "operations"
 
     def add_som_som(som1,som2):
         # check that there is the same number of so
@@ -32,6 +33,15 @@ def add_ncerr(left,right):
         # do the calculation
         for (so1,so2) in map(None,som1,som2):
             result.append(add_so_so(so1,so2))
+
+        # update the attribute list to include operation
+        if result.attr_list.has_key(OPERATIONS):
+            operations=result.attr_list[OPERATIONS]
+        else:
+            operations=[]
+        operations.append(("Step ?","add_ncerr(%s,%s)" % (som1,som2)))
+        result.attr_list[OPERATIONS]=operations
+
         return result
 
     def add_som_so(som,so):
@@ -44,7 +54,17 @@ def add_ncerr(left,right):
         # do the calculation
         for it in som:
             result.append(add_so_so(it,so))
+
+        # update the attribute list to include operation
+        if result.attr_list.has_key(OPERATIONS):
+            operations=result.attr_list[OPERATIONS]
+        else:
+            operations=[]
+        operations.append(("Step ?","add_ncerr(%s,%s)" % (som,so)))
+        result.attr_list[OPERATIONS]=operations
+
         return result
+
     def add_som_num(som,num):
         # create empty result som
         result=SOM.som.SOM()
@@ -55,7 +75,17 @@ def add_ncerr(left,right):
         # do the calculation
         for it in som:
             result.append(add_so_num(it,num))
+
+        # update the attribute list to include operation
+        if result.attr_list.has_key(OPERATIONS):
+            operations=result.attr_list[OPERATIONS]
+        else:
+            operations=[]
+        operations.append(("Step ?","add_ncerr(%s,%s)" % (som,num)))
+        result.attr_list[OPERATIONS]=operations
+
         return result
+    
     def add_so_so(so1,so2):
         if so1.x!=so2.x:
             raise RunTimeError,"x axis must be equal to add spectra"
