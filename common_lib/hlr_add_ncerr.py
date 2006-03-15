@@ -7,9 +7,21 @@ def copy_attr(source,destination):
         destination.attr_list[key]=source.attr_list[key]
 
 def add_ncerr(left,right):
+    TITLE=SOM.som.SOM.TITLE
+    X_UNITS=SOM.som.SOM.X_UNITS
+    Y_UNITS=SOM.som.SOM.Y_UNITS
+
     def add_som_som(som1,som2):
+        # check that there is the same number of so
         if len(som1)!=len(som2):
             raise IndexError,"Can only add SOMs with same number of spectra"
+        #check that the units match up
+        if som1.attr_list[X_UNITS]!=som2.attr_list[X_UNITS]:
+            raise RuntimeError,"X units do not match"
+        if som1.attr_list[Y_UNITS]!=som2.attr_list[Y_UNITS]:
+            raise RuntimeError,"Y units do not match"
+        
+
         # create empty result som
         result=SOM.som.SOM()
 
@@ -73,9 +85,9 @@ def add_ncerr(left,right):
 
     # determine if the left is a som
     try:
-        left.attr_list[SOM.som.SOM.TITLE]
+        left.attr_list[TITLE]
         try:
-            right.attr_list[SOM.som.SOM.TITLE]
+            right.attr_list[TITLE]
             return add_som_som(left,right)
         except AttributeError:
             try:
@@ -90,7 +102,7 @@ def add_ncerr(left,right):
     try: 
         left.id
         try:
-            right.attr_list[SOM.som.SOM.TITLE]
+            right.attr_list[TITLE]
             return add_som_so(right,left)
         except AttributeError:
             try:
@@ -103,7 +115,7 @@ def add_ncerr(left,right):
 
     # left must be a tuple
     try:
-        right.attr_list[SOM.som.SOM.TITLE]
+        right.attr_list[TITLE]
         return add_som_num(right,left)
     except AttributeError:
         right.id
