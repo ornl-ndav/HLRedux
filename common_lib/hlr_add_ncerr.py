@@ -34,6 +34,10 @@ def add_ncerr(left,right):
     Exceptions:
     ----------
     <- TypeError is raised if the tuple/tuple case is presented to the function
+    <- IndexError is raised if the two SOMs do not contain the same number
+       of spectra
+    <- RunTimeError is raised if the x-axis units of the SOMs do not match
+    <- RunTimeError is raised if the y-axis units of the SOMs do not match
     <- RunTimeError is raised if the x-axes of the two SOs are not equal
     """
 
