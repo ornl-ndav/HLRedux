@@ -29,7 +29,7 @@ def div_ncerr(left,right):
 
     Returns:
     -------
-    <- A SOM containing the results of the division
+    <- A SOM or SO containing the results of the division
 
     Exceptions:
     ----------

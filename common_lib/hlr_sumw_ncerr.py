@@ -29,7 +29,7 @@ def sumw_ncerr(obj1,obj2):
 
     Returns:
     -------
-    <- A SOM containing the results of the weighted sum
+    <- A SOM or SO containing the results of the weighted sum
 
     Exceptions:
     ----------

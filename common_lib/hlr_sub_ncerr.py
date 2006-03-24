@@ -29,7 +29,7 @@ def sub_ncerr(left,right):
 
     Returns:
     -------
-    <- A SOM containing the results of the subtraction
+    <- A SOM or SO containing the results of the subtraction
 
     Exceptions:
     ----------

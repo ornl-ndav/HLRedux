@@ -29,7 +29,7 @@ def add_ncerr(left,right):
 
     Returns:
     -------
-    <- A SOM containing the results of the addition
+    <- A SOM or SO containing the results of the addition
 
     Exceptions:
     ----------
