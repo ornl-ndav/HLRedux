@@ -3,10 +3,40 @@ import SOM.so
 import SOM.som
 
 def copy_attr(source,destination):
+    """
+    This function copies the attributes from the source SOM to the destination
+    SOM.
+
+    Parameters:
+    ----------
+    -> source is the SOM from which to copy the attributes
+    -> destination is the SOM that receives the copied attributes
+    """
+
     for key in source.attr_list.keys():
         destination.attr_list[key]=source.attr_list[key]
 
 def add_ncerr(left,right):
+    """
+    This function adds two objects (SOM, SO or tuple[val,val_err2]) and
+    returns the result of the addition in an SOM. The function does not
+    handle the case of tuple/tuple.
+
+    Parameters:
+    ----------
+    -> left  Object on the left of the addition sign
+    -> right Object on the right of the addition sign
+
+    Returns:
+    -------
+    <- A SOM containing the results of the addition
+
+    Exceptions:
+    ----------
+    <- TypeError is raised if the tuple/tuple case is presented to the function
+    <- RunTimeError is raised if the x-axes of the two SOs are not equal
+    """
+
     TITLE      = SOM.som.SOM.TITLE
     X_UNITS    = SOM.som.SOM.X_UNITS
     Y_UNITS    = SOM.som.SOM.Y_UNITS
@@ -21,7 +51,7 @@ def add_ncerr(left,right):
             raise RuntimeError,"X units do not match"
         if som1.attr_list[Y_UNITS]!=som2.attr_list[Y_UNITS]:
             raise RuntimeError,"Y units do not match"
-        
+
 
         # create empty result som
         result=SOM.som.SOM()
@@ -29,7 +59,7 @@ def add_ncerr(left,right):
         # attributes from som1 clobber those from som2
         copy_attr(som2,result)
         copy_attr(som1,result)
-        
+
         # do the calculation
         for (so1,so2) in map(None,som1,som2):
             result.append(add_so_so(so1,so2))
@@ -50,7 +80,7 @@ def add_ncerr(left,right):
 
         # copy attributes from som
         copy_attr(som,result)
-        
+
         # do the calculation
         for it in som:
             result.append(add_so_so(it,so))
@@ -71,7 +101,7 @@ def add_ncerr(left,right):
 
         # copy attributes from som
         copy_attr(som,result)
-        
+
         # do the calculation
         for it in som:
             result.append(add_so_num(it,num))
@@ -85,7 +115,7 @@ def add_ncerr(left,right):
         result.attr_list[OPERATIONS]=operations
 
         return result
-    
+
     def add_so_so(so1,so2):
         if so1.x!=so2.x:
             raise RunTimeError,"x axis must be equal to add spectra"
@@ -94,7 +124,7 @@ def add_ncerr(left,right):
         result=SOM.so.SO()
         result.id=so1.id
         result.x=so1.x
-        
+
         # do the math
         (result.y,result.var_y)=array_manip.add_ncerr(so1.y,so1.var_y,
                                                       so2.y,so2.var_y)
@@ -129,7 +159,7 @@ def add_ncerr(left,right):
         pass
 
     # determine if left is a so
-    try: 
+    try:
         left.id
         try:
             right.attr_list[TITLE]
