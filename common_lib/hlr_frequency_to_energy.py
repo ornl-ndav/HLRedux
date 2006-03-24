@@ -39,7 +39,7 @@ def frequency_to_energy(obj):
        recognizes
     <- RuntimeError is raised if the SOM x-axis units are not THz
     """
-    
+
     TITLE=SOM.som.SOM.TITLE
     X_UNITS=SOM.som.SOM.X_UNITS
 
@@ -64,7 +64,7 @@ def frequency_to_energy(obj):
         # list is set to zero (I hope)
         so_var_x=nessi_list.NessiList(len(so.x))
         # END SNS-FIXME
-        
+
         # set up the result
         result=SOM.so.SO()
         result.id=so.id
@@ -73,9 +73,9 @@ def frequency_to_energy(obj):
 
         (result.x, var_x_throwaway)=axis_manip.frequency_to_energy(so.x,
                                                                    so_var_x)
-        
+
         return result
-    
+
     def f2e_num(num):
         # do the calculation
         (energy, energy_err2)=axis_manip.frequency_to_energy(num[0],num[1])
@@ -142,5 +142,5 @@ if __name__=="__main__":
     print "********** frequency_to_energy"
     print "* rebin so :",so_to_str(frequency_to_energy(som1[0]))
     print "* rebin som:",frequency_to_energy(som1)
-    
-    
+
+

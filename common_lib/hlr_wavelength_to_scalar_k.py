@@ -39,7 +39,7 @@ def wavelength_to_scalar_k(obj):
        recognizes
     <- RuntimeError is raised if the SOM x-axis units are not Angstroms
     """
-    
+
     TITLE=SOM.som.SOM.TITLE
     X_UNITS=SOM.som.SOM.X_UNITS
 
@@ -64,7 +64,7 @@ def wavelength_to_scalar_k(obj):
         # list is set to zero (I hope)
         so_var_x=nessi_list.NessiList(len(so.x))
         # END SNS-FIXME
-        
+
         # set up the result
         result=SOM.so.SO()
         result.id=so.id
@@ -73,9 +73,9 @@ def wavelength_to_scalar_k(obj):
 
         (result.x,var_x_throwaway)=axis_manip.wavelength_to_scalar_k(so.x,
                                                                      so_var_x)
-        
+
         return result
-    
+
     def w2sk_num(num):
         # do the calculation
         (scalar_k, scalar_k_err2)=axis_manip.wavelength_to_scalar_k(num[0],
@@ -143,4 +143,4 @@ if __name__=="__main__":
     print "********** wavelength_to_scalar_k"
     print "* rebin so :",so_to_str(wavelength_to_scalar_k(som1[0]))
     print "* rebin som:",wavelength_to_scalar_k(som1)
-    
+

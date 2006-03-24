@@ -35,7 +35,7 @@ def rebin_axis_1D(obj,axis):
     <- TypeError is raised if the rebinning axis given is not a NessiList
     <- TypeError is raised if object being rebinned is not a SOM or a SO
     """
-    
+
     TITLE=SOM.som.SOM.TITLE
 
     def rebin_som(som, axis):
@@ -85,7 +85,7 @@ def rebin_axis_1D(obj,axis):
 
 if __name__=="__main__":
     import nessi_list
-    
+
     def generate_so(start,stop=0):
         if stop<start:
             stop=start
