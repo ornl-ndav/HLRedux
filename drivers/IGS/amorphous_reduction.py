@@ -111,5 +111,13 @@ def step21():
     """Step 21. Sum all spectrum together using function 3.10."""
     pass
 
-if __name__=="__main__":
+def run():
+    # Michael works here
     pass
+
+if __name__=="__main__":
+    # Pete works here
+
+    run()
+    
+
