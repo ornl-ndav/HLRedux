@@ -4,12 +4,12 @@ This program covers the functionality outlined in 2.2.1 Powder or
 amorphous material reduction in <CHANGE:DR_Lib_RS.doc>.
 """
 
-def step1(config, data_som):
+def step1(config):
     """Step 1. Apply dead time correction to each I(TOF) using
     function 3.38. The result is ItiXY(TOF)."""
     
-    if !config.use_dead_time:
-        return data_som
+    if not config.use_dead_time:
+        return None
 
     return data_som
 
@@ -18,7 +18,7 @@ def step2(config):
     with ItNXY(TOF) as data1 and ItNBXY(TOF) as data2. The result is
     ItbNXY(TOF)."""
 
-    if !config.norm_bkg and !config.norm:
+    if not config.norm_bkg and not config.norm:
         return None
     
     return None
@@ -28,7 +28,7 @@ def step3(config, data_som):
     with ItDXY(TOF) as data1 and ItDCXY(TOF) as data2. The result of
     this is ItdDXY(TOF)."""
 
-    if !config.dark_current:
+    if not config.dark_current:
         return data_som
     
     return data_som
@@ -160,7 +160,7 @@ def step20(config, data_som):
     """Step 20. Rebin onto user defined two dimensional grid using
     function 3.13."""
 
-    if config.Q_bins=None and config.E_bins=None:
+    if config.Q_bins==None and config.E_bins==None:
         config.banks_separate=True
         return data_som
     
@@ -174,8 +174,11 @@ def step21(config, data_som):
 
     return data_som
 
-def run():
+def run(config):
     # Michael works here
+
+    if config.data==None:
+        raise RuntimeError, "Need pass a data file name to the driver script."
 
     d_som1 = step1(config)
     n_som1 = step2(config)
