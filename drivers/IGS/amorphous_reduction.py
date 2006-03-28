@@ -4,55 +4,67 @@ This program covers the functionality outlined in 2.2.1 Powder or
 amorphous material reduction in <CHANGE:DR_Lib_RS.doc>.
 """
 
-def step1(config):
+def dead_time_correction(config, data_som):
     """Step 1. Apply dead time correction to each I(TOF) using
     function 3.38. The result is ItiXY(TOF)."""
-    
-    if not config.use_dead_time:
-        return None
 
     return data_som
 
-def step2(config):
+def subtract_norm_bkg_from_norm(config,norm_som, norm_bkg_som):
     """Step 2. Subtract measured normalization background using 3.6
     with ItNXY(TOF) as data1 and ItNBXY(TOF) as data2. The result is
     ItbNXY(TOF)."""
 
-    if not config.norm_bkg and not config.norm:
+    if norm_som==None:
         return None
-    
-    return None
+    elif norm_bkg_som==None:
+        return norm_som
 
-def step3(config, data_som):
+    import hlr_sub_ncerr
+
+    return sub_ncerr(norm_som, norm_bkg_som)
+
+def subtract_dark_current_from_data(config, data_som, dc_som):
     """Step 3. Subtract the dark current spectrum using function 3.6
     with ItDXY(TOF) as data1 and ItDCXY(TOF) as data2. The result of
     this is ItdDXY(TOF)."""
 
-    if not config.dark_current:
+    if dc_som==None:
         return data_som
-    
-    return data_som
 
-def step4(config, data_som):
+    import hlr_sub_ncerr
+
+    return sub_ncerr(data_som, dc_som)
+
+def determine_time_indep_bkg(config, data_som):
     """Step 4. Determine the sample dependent, time independent
     background B by fitting a line to predetermined end points of
     ItdDXY(TOF) using function 3.43."""
 
-    if config.no_tib:
-        return None
+    kwargs = ""
 
-    return None
+    if not config.TOF_start==None:
+        kwargs = "start=".TOF_start
 
-def step5(config, data_som, B=None):
+    if not config.TOF_end==None:
+        kwargs = kwargs."end=".TOF_end
+
+    import hlr_weighted_average
+
+    return weighted_average(data_som, kwargs)
+
+def subtract_time_indep_bkg(config, data_som, B):
     """Step 5. Subtract B from the data spectrum using function 3.2
     with ItdDXY(TOF) as data1 and B as a. The result is ItdsDXY(TOF)."""
 
-    if config.no_tib:
+    if B == None:
         return data_som
 
-    return data_som
+    import hlr_subtract_time_indep_bkg
 
-def step6(config, data_som):
+    return subtract_time_indep_bkg(data_som, B)
+
+def subtract_bkg_from_data(config, data_som):
     """Step 6. Subtract the measured background spectrum from the data
     spectrum using function 3.6 with ItdsDXY(TOF) as data1 and
     ItBXY(TOF) as data2. The result of this is ItdsbDXY(TOF)."""
@@ -178,14 +190,64 @@ def run(config):
     # Michael works here
 
     if config.data==None:
-        raise RuntimeError, "Need pass a data file name to the driver script."
+        raise RuntimeError, "Need to pass a data filename to the driver \
+        script."
 
-    d_som1 = step1(config)
-    n_som1 = step2(config)
-    d_som2 = step3(config, d_som1)
-    B = step4(config, d_som2)
-    d_som3 = step5(config, d_som2, B)
-    d_som4 = step6(config, d_som3)
+    import dst_base
+    
+    data_dst = dst_base.getInstance("application/x-NeXus", config.data)
+    som_id = ("/entry/data", 1)
+    so_axis = "time_of_flight"
+
+    d_som1 = data_dst.getSOM(som_id, so_axis)
+
+    if not config.use_dead_time:
+        d_som2 = dead_time_correction(config, d_som1)
+    else:
+        d_som2 = d_som1
+
+    if not config.norm==None:
+        norm_dst = dst_base.getInstance("application/x-NeXus", config.norm)
+        n_som1 = norm_dst.getSOM(som_id, so_axis)
+    else:
+        n_som1 = None
+        
+    if not config.norm_bkg==None
+        norm_bkg_dst = dst_base.getInstance("application/x-NeXus",\
+                                            config.norm_bkg)
+        n_bkg_som1 = norm_bkg_dst.getSOM(som_id, so_axis)
+    else:
+        n_bkg_som1 = None
+
+
+    n_som2 = subtract_norm_bkg_from_norm(config, n_som1, n_bkg_som1)
+
+    if not config.dark_current==None:
+        dc_dst = dst_base.getInstance("application/x-NeXus",\
+                                      config.dark_current)
+        dc_som1 = dst_base.getSOM(som_id, so_axis)
+    else:
+        dc_som1 = None
+        
+    d_som3 = subtract_dark_current_from_data(config, d_som2, dc_som1)
+
+    if not config.no_tib:
+        B = determine_time_indep_bkg(config, d_som3)
+    else:
+        B = None
+
+    d_som4 = subtract_time_indep_bkg(config, d_som3, B)
+
+    if not config.bkg==None:
+        bkg_dst = dst_base.getInstance("application/x-NeXus",\
+                                      config.dark_current)
+        bkg_som1 = dst_base.getSOM(som_id, so_axis)
+    else:
+        bkg_som1 = None
+
+    d_som4 = subtract_bkg_from_data(config, d_som3, bkg_som1)
+
+    
     d_som5 = step7(config, d_som4, n_som1)
     d_som6, m_som1 = step8(config, d_som5)
     m_eff = step9(config, m_som1)
