@@ -4,6 +4,31 @@ This program covers the functionality outlined in 2.2.1 Powder or
 amorphous material reduction in <CHANGE:DR_Lib_RS.doc>.
 """
 
+class Configure:
+    def __init__(self):
+        self.verbose=None
+        self.data=None
+        self.output=None
+        self.dead_time=None
+        self.dead_time_units=None
+        self.norm=None
+        self.norm_bkg=None
+        self.dark_current=None
+        self.no_tib=None # don't perform time-independent background
+        self.bkg=None
+        self.no_norm=None # this should be implicit from whether the
+                          # normalization data is specified
+        self.no_mon_norm=None
+        self.mon_geom=None
+        self.det_geom=None
+        self.mon_eff=None
+        self.det_eff=None
+        self.Q_bins=None
+        self.E_bins=None
+        self.banks_separate=None # should be a description of how to
+                                 # combine banks
+        
+
 def dead_time_correction(config, data_som):
     """Step 1. Apply dead time correction to each I(TOF) using
     function 3.38. The result is ItiXY(TOF)."""
@@ -211,13 +236,18 @@ def run(config):
 
     import dst_base
 
-    data_dst = dst_base.getInstance("application/x-NeXus", config.data)
+    try:
+        data_dst = dst_base.getInstance("application/x-NeXus", config.data)
+    except SystemError:
+        print "ERROR: Failed to data read file %s" % config.data
+        import sys
+        sys.exit(-1)
     som_id = ("/entry/data", 1)
     so_axis = "time_of_flight"
 
     d_som1 = data_dst.getSOM(som_id, so_axis)
 
-    if not config.use_dead_time:
+    if config.dead_time!=None:
         d_som2 = dead_time_correction(config, d_som1)
     else:
         d_som2 = d_som1
@@ -352,7 +382,62 @@ def run(config):
     a3c.writeSOM(d_som14)
     a3c.release_resource()
 
+def file_exists(filename):
+    import os.path
+    return os.path.isfile(filename)
+
+def split_physical(thing):
+    if thing==None:
+        return (None,None)
+    import re
+    start_re=re.compile(r'\d+\.?\d*')
+    number=start_re.findall(thing)
+    if len(number)!=1:
+        raise RuntimeError,"Discovered multiple numbers while parsing [%s]"\
+              % thing
+    number=number[0]
+    units=start_re.sub("",thing)
+    return (number,units)
+
 if __name__=="__main__":
     # Pete works here
-    pass
-#    run()
+    from optparse import OptionParser
+
+    # set up the options available
+    parser=OptionParser("usage: %prog [options] <datafile>")
+    parser.add_option("-v","--verbose",action="store_true",default=False,
+                      dest="verbose",
+                      help="Enable verbose print statements")
+    parser.add_option("-q","--quiet",action="store_false",dest="verbose",
+                      help="Disable verbose print statements")
+    parser.add_option("-o","--output",default=None,
+                      help="Specify the output file name (the '.srf' file)")
+    parser.add_option("","--dead-time",default=None,dest="dead_time",
+                      help="Dead time with units (no spaces)")
+    (options,args)=parser.parse_args()
+    print "OPTIONS =",options # REMOVE
+    print # REMOVE
+
+    # set up the configuration
+    config=Configure()
+    # get the datafile name and check it
+    if len(args)==1:
+        config.data=args[0]
+        if not file_exists(config.data):
+            parser.error("Data file [%s] does not exist" % config.data)
+    else:
+        parser.error("Did not specify a datafile")
+    # create the output file name if there isn't one supplied
+    if options.output:
+        config.output=options.output
+    else:
+        import re
+        nxs=re.compile(r'\.nxs')
+        config.output=nxs.sub("",config.data)+".srf"
+    # set the verbosity
+    config.verbose=options.verbose
+    # set the dead time
+    (config.dead_time,config.dead_time_units)=split_physical(options.dead_time)
+
+    # run the program
+    run(config)
