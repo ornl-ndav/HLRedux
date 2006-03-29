@@ -77,6 +77,14 @@ def wavelength_to_scalar_Q(obj):
                                                                      pathlength[0],
                                                                      pathlength[1])
 
+        rev_var_y = result.var_y
+        rev_y = result.y
+        rev_x = result.x
+
+        result.x = axis_manip.reverse_array_cp(rev_x)
+        result.y = axis_manip.reverse_array_cp(rev_y)
+        result.var_y = axis_manip.reverse_array_cp(rev_var_y)
+
         return result
 
     def w2sQ_num(num):

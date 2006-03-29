@@ -74,6 +74,14 @@ def wavelength_to_energy(obj):
         (result.x, var_x_throwaway)=axis_manip.wavelength_to_energy(so.x,
                                                                     so_var_x)
 
+        rev_var_y = result.var_y
+        rev_y = result.y
+        rev_x = result.x
+
+        result.x = axis_manip.reverse_array_cp(rev_x)
+        result.y = axis_manip.reverse_array_cp(rev_y)
+        result.var_y = axis_manip.reverse_array_cp(rev_var_y)
+
         return result
 
     def w2e_num(num):
