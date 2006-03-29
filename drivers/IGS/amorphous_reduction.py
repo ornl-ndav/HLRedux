@@ -181,7 +181,7 @@ def calc_scalar_Q(config, data_som, k_final):
 def rebin_final(config, data_som):
     """Step 20. Rebin onto user defined two dimensional grid using
     function 3.13."""
-    
+
     import hlr_rebin_axis_2D
     return hlr_rebin_axis_2D.rebin_axis_2D(data_som, config.Q_bins,\
                                            config.E_bins)
@@ -204,7 +204,7 @@ def run(config):
         config.output="temp.srf"
 
     import dst_base
-    
+
     data_dst = dst_base.getInstance("application/x-NeXus", config.data)
     som_id = ("/entry/data", 1)
     so_axis = "time_of_flight"
@@ -222,7 +222,7 @@ def run(config):
         norm_dst.release_resource()
     else:
         n_som1 = None
-        
+
     if not config.norm_bkg==None:
         norm_bkg_dst = dst_base.getInstance("application/x-NeXus",\
                                             config.norm_bkg)
@@ -239,7 +239,7 @@ def run(config):
         dc_dst.release_resource()
     else:
         dc_som1 = None
-        
+
     d_som3 = subtract_dark_current_from_data(config, d_som2, dc_som1)
 
     if not config.no_tib:
@@ -288,7 +288,7 @@ def run(config):
                                         config.mon_eff)
         m_eff1 = meff_dst.getSOM("/entry/monitor2")
         m_eff2 = rebin_mon_eff(config, m_som2, m_eff1)
-        
+
     m_som3 = eff_correct_mon(config, m_som2, m_eff2)
 
     if config.det_eff==None:
@@ -298,23 +298,23 @@ def run(config):
                                           config.det_eff)
         det_eff1 = deteff_dst.getSOM("/entry/dectector")
         det_eff2 = rebin_det_eff(config, d_som6, det_eff1)
-    
+
     d_som7 = eff_correct_data(config, d_som6, det_eff2)
 
     d_som8 = norm_data_by_mon(config, d_som7, m_som3)
-    
+
     d_som9 = calc_k_initial(config, d_som8)
-    
+
     d_som10 = calc_E_initial(config, d_som9)
 
     data_dst.release_resource()
-    
+
     k_final = calc_k_final(config)
-    
+
     E_final = calc_E_final(config)
-    
+
     d_som11 = energy_transfer(config, d_som10, E_final)
-    
+
     d_som12 = calc_scalar_Q(config, d_som11, k_final)
 
     if config.Q_bins==None or config.E_bins==None:
@@ -335,7 +335,5 @@ def run(config):
 
 if __name__=="__main__":
     # Pete works here
-
-    run()
-    
-
+    pass
+#    run()
