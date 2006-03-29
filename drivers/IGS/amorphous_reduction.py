@@ -125,9 +125,8 @@ def rebin_mon_eff(config, mon2_som, mon2_eff):
     wavelength axis using 3.12. The input is the efficiency
     eM2(lambda) with the output being erM2(lambda)."""
 
-    # Need DR-HLR function for rebinning two SOMs
-    
-    return mon2_eff
+    import hlr_rebin_efficiency
+    return hlr_rebin_efficiency.rebin_efficiency(mon2_som, mon2_eff)
 
 def eff_correct_mon(config, mon2_som, mon2_eff):
     """Step 10. Divide ItM2(lambda) by erM2(lambda) using function
@@ -144,9 +143,8 @@ def rebin_det_eff(config, data_som, det_eff):
     as ItbdnDXY(lambda) by using function 3.12. The result is
     erDXY(lambda)"""
 
-    # Need DR-HLR function for rebinning two SOMs
-
-    return det_eff
+    import hlr_rebin_efficiency
+    return hlr_rebin_efficiency.rebin_efficiency(data_som, det_eff)
 
 def eff_correct_data(config, data_som, det_eff):
     """Step 12. Correct ItbdneDXY(lambda) for detector efficiency by
@@ -220,19 +218,19 @@ def rebin_final(config, data_som):
 def sum_all_spectra(config, data_som):
     """Step 21. Sum all spectrum together using function 3.10."""
 
-    # Need DR-HLR function for combining all spectra
-    pass
+    import hlr_sum_all_spectra
+    return hlr_sum_all_spectra.sum_all_spectra(data_som)
 
 def run(config):
     # Michael works here
 
     if config.data==None:
-        raise RuntimeError, "Need to pass a data filename to the driver \
-        script."
+        raise RuntimeError, "Need to pass a data filename to the driver "\
+        +"script."
 
     if config.output==None:
-        print "No output file name specified. Using temp.srf"
-        config.output="temp.srf"
+        print "No output file name specified. Using temp.a3c"
+        config.output="temp.a3c"
 
     import dst_base
 
