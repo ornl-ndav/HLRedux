@@ -21,7 +21,6 @@ def subtract_norm_bkg_from_norm(config,norm_som, norm_bkg_som):
         return norm_som
 
     import hlr_sub_ncerr
-
     return hlr_sub_ncerr.sub_ncerr(norm_som, norm_bkg_som)
 
 def subtract_dark_current_from_data(config, data_som, dc_som):
@@ -33,7 +32,6 @@ def subtract_dark_current_from_data(config, data_som, dc_som):
         return data_som
 
     import hlr_sub_ncerr
-
     return hlr_sub_ncerr.sub_ncerr(data_som, dc_som)
 
 def determine_time_indep_bkg(config, data_som):
@@ -44,13 +42,12 @@ def determine_time_indep_bkg(config, data_som):
     kwargs = ""
 
     if not config.TOF_start==None:
-        kwargs = "start=".TOF_start
+        kwargs = "start="+TOF_start
 
     if not config.TOF_end==None:
-        kwargs = kwargs."end=".TOF_end
+        kwargs = kwargs+", end="+TOF_end
 
     import hlr_weighted_average
-
     return hlr_weighted_average.weighted_average(data_som, kwargs)
 
 def subtract_time_indep_bkg(config, data_som, B):
@@ -61,7 +58,6 @@ def subtract_time_indep_bkg(config, data_som, B):
         return data_som
 
     import hlr_subtract_time_indep_bkg
-
     return hlr_subtract_time_indep_bkg.subtract_time_indep_bkg(data_som, B)
 
 def subtract_bkg_from_data(config, data_som, bkg_som):
@@ -73,7 +69,6 @@ def subtract_bkg_from_data(config, data_som, bkg_som):
         return data_som
 
     import hlr_sub_ncerr
-
     return hlr_sub_ncerr.sub_ncerr(data_som, bkg_som)
 
 def norm_data_by_van(config, data_som, norm_som):
@@ -81,7 +76,6 @@ def norm_data_by_van(config, data_som, norm_som):
     ItbNXY(TOF), using function 3.9. The result is ItdsbnDXY(TOF)."""
 
     import hlr_div_ncerr
-
     return hlr_div_ncerr.div_ncerr(data_som, norm_som)
 
 def convert_data_and_mon_to_wavelength(config, data_som, mon2_som):
@@ -157,17 +151,17 @@ def calc_E_initial(config, data_som):
     import hlr_wavelength_to_energy
     return hlr_wavelength_to_energy.wavelength_to_energy(data_som)
 
-def calc_k_final(config, wavelength_final):
+def calc_k_final(config):
     """Step 16. Calculate final wavevector using function 3.24."""
 
     import hlr_wavelength_to_scalar_k
-    return hlr_wavelength_to_scalar_k.wavelength_to_scalar_k(wavelength_final)
+    return hlr_wavelength_to_scalar_k.wavelength_to_scalar_k(config.wavelength_final)
 
-def calc_E_final(config, wavelength_final):
+def calc_E_final(config):
     """Step 17. Calculate final energy using function 3.22."""
 
     import hlr_wavelength_to_energy
-    return hlr_wavelength_to_energy.wavelength_to_energy(wavelength_final)
+    return hlr_wavelength_to_energy.wavelength_to_energy(config.wavelength_final)
 
 def calc_energy_transfer(config, data_som, energy_final):
     """Step 18. Calculate energy transfer using function 3.30."""
@@ -229,13 +223,12 @@ def run(config):
     else:
         n_som1 = None
         
-    if not config.norm_bkg==None
+    if not config.norm_bkg==None:
         norm_bkg_dst = dst_base.getInstance("application/x-NeXus",\
                                             config.norm_bkg)
         n_bkg_som1 = norm_bkg_dst.getSOM(som_id, so_axis)
     else:
         n_bkg_som1 = None
-
 
     n_som2 = subtract_norm_bkg_from_norm(config, n_som1, n_bkg_som1)
 
@@ -258,7 +251,7 @@ def run(config):
 
     if not config.bkg==None:
         bkg_dst = dst_base.getInstance("application/x-NeXus",\
-                                      config.dark_current)
+                                       config.dark_current)
         bkg_som1 = dst_base.getSOM(som_id, so_axis)
         bkg_dst.release_resource()
     else:
@@ -276,14 +269,24 @@ def run(config):
     else:
         som_id = ("/entry/monitor2", 1)
         m_som1 = data_dst.getSOM(som_id, so_axis)
-    
+
+    # Note: wavelength_final MUST be a tuple
+    if config.wavelength_final==None:
+        config.wavlength_final = data_dst.getParam("wavelength_final")
+
+    dsom5.attr_list["Wavelength_final"]=config.wavelength_final
+
+    if config.mon_geom:
+        pass
+
     d_som6, m_som2 = convert_data_and_mon_to_wavelength(config, d_som5, m_som1)
 
     if config.mon_eff==None:
         m_eff1 = None
     else:
-        # SNS-FIXME
-        # read in montior efficiency
+        meff_dst = dst_base.getInstance("text/xml",\
+                                        config.mon_eff)
+        m_eff1 = meff_dst.getSOM("/entry/monitor2")
         m_eff2 = rebin_mon_eff(config, m_som2, m_eff1)
         
     m_som3 = eff_correct_mon(config, m_som2, m_eff2)
@@ -291,8 +294,9 @@ def run(config):
     if config.det_eff==None:
         det_eff2 = None
     else:
-        # SNS-FIXME
-        # read in detector efficiency
+        deteff_dst = dst_base.getInstance("text/xml",\
+                                          config.det_eff)
+        det_eff1 = deteff_dst.getSOM("/entry/dectector")
         det_eff2 = rebin_det_eff(config, d_som6, det_eff1)
     
     d_som7 = eff_correct_data(config, d_som6, det_eff2)
@@ -303,12 +307,11 @@ def run(config):
     
     d_som10 = calc_E_initial(config, d_som9)
 
-    # SNS-FIXME
-    # Where to we get wavelength_final from?
+    data_dst.release_resource()
     
-    k_final = calc_k_final(config, wavelength_final)
+    k_final = calc_k_final(config)
     
-    E_final = calc_E_final(config, wavelength_final)
+    E_final = calc_E_final(config)
     
     d_som11 = energy_transfer(config, d_som10, E_final)
     
@@ -325,9 +328,10 @@ def run(config):
     else:
         d_som14 = d_som13
 
-    # SNS-FIXME
-    # Write output file
-    
+    resource = open(config.output, "w")
+    a3c = dst_base.getInstance("text/Spec", resource)
+    a3c.writeSOM(d_som14)
+    a3c.release_resource()
 
 if __name__=="__main__":
     # Pete works here
