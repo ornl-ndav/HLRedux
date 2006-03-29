@@ -100,6 +100,8 @@ def rebin_mon_eff(config, mon2_som, mon2_eff):
     wavelength axis using 3.12. The input is the efficiency
     eM2(lambda) with the output being erM2(lambda)."""
 
+    # Need DR-HLR function for rebinning two SOMs
+    
     return mon2_eff
 
 def eff_correct_mon(config, mon2_som, mon2_eff):
@@ -109,12 +111,15 @@ def eff_correct_mon(config, mon2_som, mon2_eff):
     if mon2_eff == None:
         return mon2_som
 
-    return mon2_som
+    import hlr_div_ncerr
+    return hlr_div_ncerr.div_ncerr(mon2_som, mon2_eff)
 
 def rebin_det_eff(config, data_som, det_eff):
     """Step 11. Rebin eDXY(lambda) to the same binning in wavelength
     as ItbdnDXY(lambda) by using function 3.12. The result is
     erDXY(lambda)"""
+
+    # Need DR-HLR function for rebinning two SOMs
 
     return det_eff
 
@@ -126,7 +131,8 @@ def eff_correct_data(config, data_som, det_eff):
     if det_eff==None:
         return data_som
 
-    return data_som
+    import hlr_div_ncerr
+    return hlr_div_ncerr.div_ncerr(data_som, det_eff)
 
 def norm_data_by_mon(config, data_som, mon_som):
     """Step 13. Normalize by the integrated monitor intensity using
@@ -189,7 +195,7 @@ def rebin_final(config, data_som):
 def sum_all_spectra(config, data_som):
     """Step 21. Sum all spectrum together using function 3.10."""
 
-    # Need HLR function for combining all spectra
+    # Need DR-HLR function for combining all spectra
     pass
 
 def run(config):
@@ -276,8 +282,21 @@ def run(config):
 
     dsom5.attr_list["Wavelength_final"]=config.wavelength_final
 
+    data_dst.release_resource()
+
     if config.mon_geom:
-        pass
+        mon_geom_dst = dst_base.getInstance("text/xml",\
+                                            config.mon_geom)
+        mon_geom = mon_geom_dst.getGeometry()
+        mon_geom_dst.release_resource()
+        m_som1.setGeometry(mon_geom)
+
+    if config.det_geom:
+        det_geom_dst = dst_base.getInstance("text/xml",\
+                                            config.det_geom)
+        det_geom = det_geom_dst.getGeometry()
+        det_geom_dst.release_resource()
+        d_som5.setGeometry(det_geom)
 
     d_som6, m_som2 = convert_data_and_mon_to_wavelength(config, d_som5, m_som1)
 
@@ -307,8 +326,6 @@ def run(config):
 
     d_som10 = calc_E_initial(config, d_som9)
 
-    data_dst.release_resource()
-
     k_final = calc_k_final(config)
 
     E_final = calc_E_final(config)
@@ -321,6 +338,7 @@ def run(config):
         config.banks_separate=True
         d_som13 = d_som12
     else:
+        config.banks_separate=False
         d_som13 = rebin_final(config, d_som12)
 
     if not config.banks_separate:
@@ -328,6 +346,7 @@ def run(config):
     else:
         d_som14 = d_som13
 
+    # Writing 3 column ASCII file
     resource = open(config.output, "w")
     a3c = dst_base.getInstance("text/Spec", resource)
     a3c.writeSOM(d_som14)
