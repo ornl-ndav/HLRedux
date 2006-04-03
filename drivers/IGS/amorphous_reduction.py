@@ -399,17 +399,12 @@ def split_physical(thing):
 
 if __name__=="__main__":
     # Pete works here
-    from optparse import OptionParser
+    import hlr_options
+#    from optparse import OptionParser
 
     # set up the options available
-    parser=OptionParser("usage: %prog [options] <datafile>")
-    parser.add_option("-v","--verbose",action="store_true",default=False,
-                      dest="verbose",
-                      help="Enable verbose print statements")
-    parser.add_option("-q","--quiet",action="store_false",dest="verbose",
-                      help="Disable verbose print statements")
-    parser.add_option("-o","--output",default=None,
-                      help="Specify the output file name (the '.srf' file)")
+    parser=hlr_options.SNSOptions("usage: %prog [options] <datafile>")
+#    parser=OptionParser("usage: %prog [options] <datafile>")
     parser.add_option("","--dead-time",default=None,dest="dead_time",
                       help="Dead time with units (no spaces)")
     (options,args)=parser.parse_args()
