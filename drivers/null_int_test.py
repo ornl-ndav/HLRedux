@@ -38,8 +38,8 @@ so_axis = "time_of_flight"
 starting_ids = (20, 190)
 ending_ids = (30, 250)
 
-SOM1 = dst1.getSOM(som_id, so_axis, start_id=starting_ids, end_id=ending_ids)
-SOM2 = dst2.getSOM(som_id, so_axis, start_id=starting_ids, end_id=ending_ids)
+SOM1 = dst1.getSOM(som_id, so_axis)
+SOM2 = dst2.getSOM(som_id, so_axis)
 
 if len(SOM1) != len(SOM2):
     raise IndexError, "SOM1 and SOM2 are not the same length!"
