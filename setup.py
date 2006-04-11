@@ -13,6 +13,7 @@ import getopt
 import os
 import sys
 
+# Package name and version information
 PACKAGE = "HLRedux"
 VERSION = "1.0.0itc1"
 
@@ -90,7 +91,6 @@ def parseCommandLine():
     else:
         instruments = ["All"]
 
-    print "0:",instruments
     return instruments
 
 
@@ -117,7 +117,6 @@ def getScripts(instruments):
             else:
                 print "No such instrument", inst
 
-    print "1:",scripts
     return scripts
 
 
