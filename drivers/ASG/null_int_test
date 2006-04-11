@@ -38,8 +38,8 @@ so_axis = "time_of_flight"
 starting_ids = (20, 190)
 ending_ids = (30, 250)
 
-SOM1 = dst1.getSOM(som_id, so_axis)
-SOM2 = dst2.getSOM(som_id, so_axis)
+SOM1 = dst1.getSOM(som_id, so_axis, start_id=starting_ids, end_id=ending_ids)
+SOM2 = dst2.getSOM(som_id, so_axis, start_id=starting_ids, end_id=ending_ids)
 
 if len(SOM1) != len(SOM2):
     raise IndexError, "SOM1 and SOM2 are not the same length!"
@@ -50,11 +50,8 @@ SOM3 = SOM()
 
 # Add attibutes to SOM3
 
-SOM3.attr_list = SOM1.attr_list
+SOM3.copyAttributes(SOM1)
 SOM3.attr_list["filename"] = filename_SOM3
-SOM3.attr_list["epoch"] = time()
-SOM3.attr_list["timestamp"] = strftime("%Y-%m-%d %T",
-                                       localtime(SOM3.attr_list["epoch"]))
 SOM3.attr_list["parents"] = {"SOM1" : SOM1.attr_list["filename"],
                              "SOM2" : SOM2.attr_list["filename"]}                    
 # Loop on spectrum to do subtraction
@@ -63,7 +60,7 @@ SOM3.attr_list["operations"] = [("Step 1", "Subtraction (SOM1 - SOM2)")]
 
 for (SO1, SO2) in map(None, SOM1, SOM2):
     SO3 = SO()
-    SO3.x = SO1.x
+    SO3.axis[0].val = SO1.axis[0].val
     SO3.id = SO1.id
     SO3.y, SO3.var_y = sub_ncerr(SO1.y, SO1.var_y, SO2.y, SO2.var_y)
     SOM3.append(SO3)
