@@ -11,9 +11,9 @@
 # modules can be found.
 
 from array_manip import sub_ncerr
-import dst_base 
-from so import SO
-from som import SOM
+import DST
+from SOM import SO
+from SOM import SOM
 from sys import argv, exit
 from time import localtime, strftime, time
 
@@ -28,8 +28,8 @@ except IndexError:
     
 # Create data source translators for reading in two NeXus files
 
-dst1 = dst_base.getInstance("application/x-NeXus", filename_SOM12)
-dst2 = dst_base.getInstance("application/x-NeXus", filename_SOM12)
+dst1 = DST.getInstance("application/x-NeXus", filename_SOM12)
+dst2 = DST.getInstance("application/x-NeXus", filename_SOM12)
 
 # Retrieve the SOMs from the DSTs
 
@@ -75,7 +75,7 @@ resource = open(filename_SOM3, "w")
 # Create output formatting object for 3 column ASCII and pass it a file
 # object
 
-a3c = dst_base.getInstance("text/Spec", resource)
+a3c = DST.getInstance("text/Spec", resource)
 
 # Push SOM3 into output formatter
 
