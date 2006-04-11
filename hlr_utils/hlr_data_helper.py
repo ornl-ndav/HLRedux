@@ -24,10 +24,10 @@ def get_length(obj1,obj2=None):
     This function returns the length appropriate for itterating
     through the objects.
     """
-    return 0
+    return 1
 
 def get_descr(obj1,obj2=None):
-    return SOM_type
+    return (SOM_type,SOM_type)
 
 def get_value(obj,index=0,descr=None):
     """
