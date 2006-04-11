@@ -147,6 +147,24 @@ def add_ncerr(left,right):
 
         return result
 
+    # import the helper functions
+    import hlr_utils
+
+    # set up for working through data
+    result,res_descr=hlr_utils.empty_result(left,right)
+    l_descr=hlr_utils.get_descr(left)
+    r_descr=hlr_utils.get_descr(right)
+
+    # iterate through the values
+    for i in range(hlr_utils.get_length(left,right)):
+        value=array_manip.add_ncerr(hlr_utils.get_value(left,i,l_descr),
+                                    hlr_utils.get_err2(left,i,l_descr),
+                                    hlr_utils.get_value(right,i,r_descr),
+                                    hlr_utils.get_err2(right,i,r_descr))
+        hlr_utils.result_insert(result,res_descr,value)
+
+    return result
+"""
     # determine if the left is a som
     try:
         left.attr_list[TITLE]
@@ -186,6 +204,7 @@ def add_ncerr(left,right):
         return add_so_num(right,left)
 
     raise TypeError,"Do not know what to do with supplied types"
+"""
 
 if __name__=="__main__":
     def generate_so(start,stop=0):
