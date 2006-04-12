@@ -2,21 +2,8 @@ import axis_manip
 import SOM.so
 import SOM.som
 
-def copy_attr(source,destination):
-    """
-    This function copies the attributes from the source SOM to the destination
-    SOM.
-
-    Parameters:
-    ----------
-    -> source is the SOM from which to copy the attributes
-    -> destination is the SOM that receives the copied attributes
-    """
-
-    for key in source.attr_list.keys():
-        destination.attr_list[key]=source.attr_list[key]
-
-def init_scatt_wavevector_to_scalar_Q(initk,scattk):
+def init_scatt_wavevector_to_scalar_Q(initk,scattk,polar=None,
+                                      units="1/Angstroms"):
     """
     This function takes an initial wavevector and a scattered wavevector as a
     tuple and a SOM, a tuple and a SO  or two tuples and calculates the
@@ -42,191 +29,66 @@ def init_scatt_wavevector_to_scalar_Q(initk,scattk):
     <- RuntimeError is raised if the SOM x-axis units are not 1/Angstroms
     """
 
-    TITLE=SOM.som.SOM.TITLE
-    X_UNITS=SOM.som.SOM.X_UNITS
+    # import the helper functions
+    import hlr_utils
 
-    def isk2sQ_som_num(som,num):
-        if som.attr_list[X_UNITS]!="1/Angstroms":
-            raise RuntimeError,"X units are not 1/Angstroms"
+    # set up for working through data
+    result,res_descr=hlr_utils.empty_result(initk,scattk)
+    i_descr,s_descr=hlr_utils.get_descr(initk,scattk)
 
-        # create empty result som
-        result=SOM.som.SOM()
+    # error checking for types
+    if i_descr == "SOM" and s_descr == "SOM":
+        raise TypeError, "SOM-SOM operation not supported"
+    elif i_descr == "SOM" and s_descr == "SO":
+        raise TypeError, "SOM-SO operation not supported"
+    elif i_descr == "SO" and s_descr == "SOM":
+        raise TypeError, "SO-SOM operation not supported"
+    elif i_descr == "SO" and s_descr == "SO":
+        raise TypeError, "SO-SO operation not supported"
 
-        # copy attributes from som
-        copy_attr(som,result)
+    result=hlr_utils.copy_som_attr(result,res_descr,initk,i_descr,
+                                   scattk,s_descr)
+    if res_descr == "SOM":
+        index = hlr_utils.hlr_1D_units(result, units)
+        result = hlr_utils.hlr_force_units(result, units, index)
 
-        # do the calculation
-        for it in som:
-            result.append(isk2sQ_so_num(it,num))
-
-        return result
-
-    def isk2sQ_num_som(num,som):
-        if som.attr_list[X_UNITS]!="1/Angstroms":
-            raise RuntimeError,"X units are not 1/Angstroms"
-
-        # create empty result som
-        result=SOM.som.SOM()
-
-        # copy attributes from som
-        copy_attr(som,result)
-
-        # do the calculation
-        for it in som:
-            result.append(isk2sQ_num_so(num,it))
-
-        return result
-
-    def isk2sQ_so_num(so,num):
-        # BEGIN SNS-FIXME
-        import nessi_list
-        # dummy placeholder for x variance
-        # list is set to zero (I hope)
-        so_var_x=nessi_list.NessiList(len(so.x))
+    if polar == None:
         polar = [0.785398163, 0.01]
-        # END SNS-FIXME
 
-        # set up the result
-        result=SOM.so.SO()
-        result.id=so.id
-        result.y=so.y
-        result.var_y=so.var_y
+    # iterate through the values
+    for i in range(hlr_utils.get_length(initk,scattk)):
+        val1 = hlr_utils.get_value(initk,i,i_descr,"x")
+        err2_1 = hlr_utils.get_err2(initk,i,i_descr,"x")
+        val2 = hlr_utils.get_value(scattk,i,s_descr,"x")
+        err2_2 = hlr_utils.get_err2(scattk,i,s_descr,"x")
 
-        (result.x,\
-         var_x_throwaway)\
-         =axis_manip.init_scatt_wavevector_to_scalar_Q(so.x,
-                                                       so_var_x,
-                                                       num[0],
-                                                       num[1],
-                                                       polar[0],
-                                                       polar[1])
+        value=axis_manip.init_scatt_wavevector_to_scalar_Q(val1, err2_1,
+                                                           val2, err2_2,
+                                                           polar[0], polar[1])
 
-        return result
+        map_so = hlr_utils.get_map_so(initk,scattk,i)
+        hlr_utils.result_insert(result,res_descr,value,map_so,"x")
 
-    def isk2sQ_num_so(num,so):
-        # BEGIN SNS-FIXME
-        import nessi_list
-        # dummy placeholder for x variance
-        # list is set to zero (I hope)
-        so_var_x=nessi_list.NessiList(len(so.x))
-        polar = [0.785398163, 0.01]
-        # END SNS-FIXME
+    return result
 
-        # set up the result
-        result=SOM.so.SO()
-        result.id=so.id
-        result.y=so.y
-        result.var_y=so.var_y
-
-        (result.x,\
-         var_x_throwaway)\
-         =axis_manip.init_scatt_wavevector_to_scalar_Q(num[0],
-                                                       num[1],
-                                                       so.x,
-                                                       so_var_x,
-                                                       polar[0],
-                                                       polar[1])
-
-        return result
-
-    def isk2sQ_num_num(num1,num2):
-        # BEGIN SNS-FIXME
-        polar = [0.785398163, 0.01]
-        # END SNS-FIXME
-
-        (scalar_Q,\
-         scalar_Q_err2)\
-         =axis_manip.init_scatt_wavevector_to_scalar_Q(num1[0], num1[1],
-                                                       num2[0], num2[1],
-                                                       polar[0], polar[1])
-
-        return scalar_Q,scalar_Q_err2
-
-    # determine if the initk is a som
-    try:
-        initk.attr_list[TITLE]
-        try:
-            scattk.attr_list[TITLE]
-            raise TypeError, "SOM-SOM operation not supported"
-        except AttributeError:
-            try:
-                scattk.id
-                raise TypeError, "SOM-SO operation not supported"
-            except AttributeError:
-                return isk2sQ_som_num(initk,scattk)
-    except AttributeError: # initk is a so
-        pass
-
-    # determine if initk is a so
-    try:
-        initk.id
-        try:
-            scattk.attr_list[TITLE]
-            raise TypeError, "SO-SOM operation not supported"
-        except AttributeError:
-            try:
-                scattk.id
-                raise TypeError, "SO-SO operation not supported"
-            except AttributeError:
-                return isk2sQ_so_num(initk,scattk)
-    except AttributeError: # initk is a tuple
-        pass
-
-    # initk must be a tuple
-    try:
-        scattk.attr_list[TITLE]
-        return isk2sQ_num_som(initk,scattk)
-    except AttributeError:
-        try:
-            scattk.id
-            return isk2sQ_num_so(initk,scattk)
-        except AttributeError:
-            return isk2sQ_num_num(initk,scattk)
 
 if __name__=="__main__":
-    X_UNITS=SOM.som.SOM.X_UNITS
+    import hlr_test
 
-    def generate_so(start,stop=0):
-        if stop<start:
-            stop=start
-            start=0
-
-        so=SOM.so.SO()
-        if start==stop:
-            return so
-
-        so.x.extend(range(stop-start+1))
-        so.y.extend(range(start,stop))
-        so.var_y.extend(range(start,stop))
-        return so
-
-    def so_to_str(so):
-        if so==None:
-            return None
-        else:
-            return so.id,so.x,so.y,so.var_y
-
-    som1=SOM.som.SOM()
-    som1.attr_list[X_UNITS]="1/Angstroms"
-    count=0
-    for i in range(2):
-        so=generate_so(count,count+5)
-        so.id=i+1
-        som1.append(so)
-        count+=5
+    som1=hlr_test.generate_som()
+    som1.setAllAxisUnits(["1/Angstroms"])
 
     print "********** SOM1"
-    print "* ",so_to_str(som1[0])
-    print "* ",so_to_str(som1[1])
+    print "* ",som1[0]
+    print "* ",som1[1]
 
     print "********** init_scatt_wavevector_to_scalar_Q"
-    print "* scal-scal:",init_scatt_wavevector_to_scalar_Q((2,1),(1,1))
-    print "* so  -scal:",so_to_str(init_scatt_wavevector_to_scalar_Q(som1[0],\
-                                                                     (1,1)))
-    print "* scal-so  :",so_to_str(init_scatt_wavevector_to_scalar_Q((1,1),\
-                                                                     som1[0]))
     print "* som -scal:",init_scatt_wavevector_to_scalar_Q(som1,(1,1))
     print "* scal-som :",init_scatt_wavevector_to_scalar_Q((1,1),som1)
+    print "* so  -scal:",init_scatt_wavevector_to_scalar_Q(som1[0],(1,1))
+    print "* scal-so  :",init_scatt_wavevector_to_scalar_Q((1,1),som1[0])
+    print "* scal-scal:",init_scatt_wavevector_to_scalar_Q((2,1),(1,1))
+
 
 
 
