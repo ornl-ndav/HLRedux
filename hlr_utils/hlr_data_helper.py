@@ -48,7 +48,7 @@ def empty_result(obj1,obj2=None):
         return ([], num_type)
 
 
-def result_insert(result,descr,value,map_so,axis="y",pap=0):
+def result_insert(result,descr,value,map_so,axis="y",pap=0,xvals=None):
     """
     This function takes value and puts it into the result in an
     appropriate fashion. The description is used for decision making.
@@ -87,6 +87,21 @@ def result_insert(result,descr,value,map_so,axis="y",pap=0):
                         so.axis[i].var = map_so.axis[i].var
 
             result.append(so)
+        elif axis.lower() == "all":
+            so = SOM.SO(map_so.dim())
+            so.id = map_so.id
+            so.y = value[0]
+            so.var_y = value[1]
+            for i in range(len(xvals)):
+                if i % 2 == 0:
+                    so.axis[i].val = xvals[i]
+                elif i % 2 != 0:
+                    if map_so.axis[i-1].var == None:
+                        so.axis[i-1].val = xvals[i]
+                    else:
+                        so.axis[i-1].var = xvals[i]
+
+            result.append(so)
     elif (result_type == SO_type):
         if axis.lower() == "y":
             result.y = value[0]
@@ -107,7 +122,20 @@ def result_insert(result,descr,value,map_so,axis="y",pap=0):
                     result.axis[i].val = map_so.axis[i].val
                     if map_so.axis[i].var != None:
                         result.axis[i].var = map_so.axis[i].var
-            
+
+        elif axis.lower() == "all":
+            result.id = map_so.id
+            result.y = value[0]
+            result.var_y = value[1]
+            for i in range(len(xvals)):
+                if i % 2 == 0:
+                    result.axis[i].val = xvals[i]
+                elif i % 2 != 0:
+                    if map_so.axis[i-1].var == None:
+                        result.axis[i-1].val = xvals[i]
+                    else:
+                        result.axis[i-1].var = xvals[i]
+
     elif (result_type == num_type):
         result.append(value[0])
         result.append(value[1])
