@@ -72,13 +72,20 @@ if __name__=="__main__":
     som1=hlr_test.generate_som()
     som1.setAllAxisUnits(["Angstroms"])
 
+    som2=hlr_test.generate_som()
+    som2.setAllAxisUnits(["Angstroms"])
+
     print "********** SOM1"
     print "* ",som1[0]
     print "* ",som1[1]
 
+    print "********** SOM2"
+    print "* ",som2[0]
+    print "* ",som2[1]
+
     print "********** wavelength_to_energy"
     print "* som  :",wavelength_to_energy(som1)
-    print "* so   :",wavelength_to_energy(som1[0])
+    print "* so   :",wavelength_to_energy(som1[1])
     print "* scal :",wavelength_to_energy([1,1])
 
 
