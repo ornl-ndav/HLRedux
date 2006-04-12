@@ -17,7 +17,7 @@ import sys
 PACKAGE = "HLRedux"
 VERSION = "1.0.0itc1"
 
-package_list = ['', 'common_lib', 'dr_lib', 'hlr_utils']
+package_list = ['', 'common_lib', 'dr_lib', 'hlr_utils', 'hlr_test']
 
 instrument_scripts = {
     "ASG" : [
