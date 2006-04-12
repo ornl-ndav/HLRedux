@@ -76,9 +76,11 @@ if __name__=="__main__":
     print "* ",som2[1]
 
     print "********** sumw_ncerr"
-    print "* so +so  :",sumw_ncerr(som1[0],som2[1])
-    print "* som+so  :",sumw_ncerr(som1,som2[0])
     print "* som+som :",sumw_ncerr(som1,som2)
+    print "* som+so  :",sumw_ncerr(som1,som2[0])
+    print "* so +so  :",sumw_ncerr(som1[0],som2[1])
+
+
 
 
 
