@@ -35,14 +35,12 @@ def add_ncerr(left,right):
 
     # error check information
     if (r_descr=="SOM" and l_descr!="SOM") \
-           or (r_descr=="SO" and l_descr!="SO"):
-        temp=left
-        left=right
-        right=temp
+           or (r_descr=="SO" and l_descr=="number"):
+        left,right = hlr_utils.swap_args(left,right)
     elif r_descr=="SOM" and l_descr=="SOM":
         hlr_utils.hlr_math_compatible(left,right)
     elif l_descr=="number" and r_descr=="number":
-        raise RuntimeError
+        raise RuntimeError, "tuple, tuple operation is not supported!"
 
     # iterate through the values
     for i in range(hlr_utils.get_length(left,right)):
@@ -50,58 +48,28 @@ def add_ncerr(left,right):
                                     hlr_utils.get_err2(left,i,l_descr),
                                     hlr_utils.get_value(right,i,r_descr),
                                     hlr_utils.get_err2(right,i,r_descr))
-        
-        hlr_utils.result_insert(result,res_descr,value)
+
+        map_so = hlr_utils.get_map_so(left,i)
+        hlr_utils.result_insert(result,res_descr,value,map_so)
 
     return result
 
 if __name__=="__main__":
-    def generate_so(start,stop=0):
-        if stop<start:
-            stop=start
-            start=0
+    import hlr_test
 
-        so=SOM.so.SO()
-        if start==stop:
-            return so
-
-        so.x.extend(range(stop-start))
-        so.y.extend(range(start,stop))
-        so.var_y.extend(range(start,stop))
-        return so
-
-    def so_to_str(so):
-        if so==None:
-            return None
-        else:
-            return so.id,so.x,so.y,so.var_y
-
-    som1=SOM.som.SOM()
-    count=0
-    for i in range(2):
-        so=generate_so(count,count+5)
-        so.id=i+1
-        som1.append(so)
-        count+=5
-
-    som2=SOM.som.SOM()
-    count=0
-    for i in range(2):
-        so=generate_so(count,count+5)
-        so.id=i+1
-        som2.append(so)
-        count+=5
+    som1=hlr_test.generate_som()
+    som2=hlr_test.generate_som()
 
     print "********** SOM1"
-    print "* ",so_to_str(som1[0])
-    print "* ",so_to_str(som1[1])
+    print "* ",som1[0]
+    print "* ",som1[1]
     print "********** SOM2"
-    print "* ",so_to_str(som2[0])
-    print "* ",so_to_str(som2[1])
+    print "* ",som2[0]
+    print "* ",som2[1]
 
     print "********** add_ncerr"
-    print "* so +scal:",so_to_str(add_ncerr(som1[0],(1,1)))
-    print "* so +so  :",so_to_str(add_ncerr(som1[0],som1[1]))
+    print "* so +scal:",add_ncerr(som1[0],(1,1))
+    print "* so +so  :",add_ncerr(som1[0],som1[1])
     print "* som+scal:",add_ncerr(som1,(1,1))
     print "* som+so  :",add_ncerr(som1,som1[0])
     print "* som+som :",add_ncerr(som1,som2)
