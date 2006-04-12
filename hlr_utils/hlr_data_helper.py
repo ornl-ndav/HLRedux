@@ -30,7 +30,7 @@ def empty_result(obj1,obj2=None):
         if obj1_type == SOM_type:
             return (SOM.SOM(), SOM_type)
         elif obj1_type == SO_type:
-            return (SOM.SO(), SO_type)
+            return (SOM.SO(obj1.dim()), SO_type)
         else:
             return ([], num_type)
     
@@ -43,7 +43,10 @@ def empty_result(obj1,obj2=None):
     elif (obj1_type == SO_type and obj2_type == SO_type) or \
              (obj1_type == num_type and obj2_type == SO_type) or \
              (obj1_type == SO_type and obj2_type == num_type):
-        return (SOM.SO(), SO_type)
+        if obj1_type == SO_type:
+            return (SOM.SO(obj1.dim()), SO_type)
+        elif obj2_type == SO_type:
+            return (SOM.SO(obj2.dim()), SO_type)
     else:
         return ([], num_type)
 
@@ -97,7 +100,7 @@ def result_insert(result,descr,value,map_so,axis="y",pap=0,xvals=None):
                     so.axis[i].val = xvals[i]
                 elif i % 2 != 0:
                     if map_so.axis[i-1].var == None:
-                        so.axis[i-1].val = xvals[i]
+                        so.axis[i].val = xvals[i]
                     else:
                         so.axis[i-1].var = xvals[i]
 
@@ -132,13 +135,16 @@ def result_insert(result,descr,value,map_so,axis="y",pap=0,xvals=None):
                     result.axis[i].val = xvals[i]
                 elif i % 2 != 0:
                     if map_so.axis[i-1].var == None:
-                        result.axis[i-1].val = xvals[i]
+                        result.axis[i].val = xvals[i]
                     else:
                         result.axis[i-1].var = xvals[i]
 
     elif (result_type == num_type):
-        result.append(value[0])
-        result.append(value[1])
+        if axis.lower() == "all":
+            result.append([value])
+        else:
+            result.append(value[0])
+            result.append(value[1])
     else:
         raise TypeError, "Object type not recognized by result_insert"\
               +" function."
