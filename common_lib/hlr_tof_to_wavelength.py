@@ -53,7 +53,7 @@ def tof_to_wavelength(obj,pathlength=None,units="microseconds"):
         value=axis_manip.tof_to_wavelength(val, err2,
                                            pathlength[0], pathlength[1])
 
-        map_so = hlr_utils.get_map_so(obj,i)
+        map_so = hlr_utils.get_map_so(obj,None,i)
         hlr_utils.result_insert(result,res_descr,value,map_so,"x",axis)
 
     return result
@@ -70,5 +70,6 @@ if __name__=="__main__":
     print "* ",som1[1]
 
     print "********** tof_to_wavelength"
-    print "* rebin so :",tof_to_wavelength(som1[0])
-    print "* rebin som:",tof_to_wavelength(som1)
+    print "* tof_to_wavelength som :",tof_to_wavelength(som1)
+    print "* tof_to_wavelength so  :",tof_to_wavelength(som1[0])
+    print "* tof_to_wavelength scal:",tof_to_wavelength([1,1])

@@ -57,7 +57,7 @@ def add_ncerr(left,right):
                                     val2,
                                     hlr_utils.get_err2(right,i,r_descr))
 
-        map_so = hlr_utils.get_map_so(left,i)
+        map_so = hlr_utils.get_map_so(left,None,i)
         hlr_utils.result_insert(result,res_descr,value,map_so)
 
     return result
