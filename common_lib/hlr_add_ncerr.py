@@ -37,16 +37,24 @@ def add_ncerr(left,right):
     if (r_descr=="SOM" and l_descr!="SOM") \
            or (r_descr=="SO" and l_descr=="number"):
         left,right = hlr_utils.swap_args(left,right)
+        l_descr,r_descr = hlr_utils.swap_args(l_descr,r_descr)
     elif r_descr=="SOM" and l_descr=="SOM":
-        hlr_utils.hlr_math_compatible(left,right)
+        hlr_utils.hlr_math_compatible(left,l_descr,right,r_descr)
     elif l_descr=="number" and r_descr=="number":
         raise RuntimeError, "tuple, tuple operation is not supported!"
 
+    result=hlr_utils.copy_som_attr(result,res_descr,left,l_descr,right,r_descr)
+
     # iterate through the values
     for i in range(hlr_utils.get_length(left,right)):
-        value=array_manip.add_ncerr(hlr_utils.get_value(left,i,l_descr),
+        val1 = hlr_utils.get_value(left,i,l_descr)
+        val2 = hlr_utils.get_value(right,i,r_descr)
+        (descr_1,descr_2)=hlr_utils.get_descr(val1, val2)
+        hlr_utils.hlr_math_compatible(val1, descr_1, val2, descr_2)
+
+        value=array_manip.add_ncerr(val1,
                                     hlr_utils.get_err2(left,i,l_descr),
-                                    hlr_utils.get_value(right,i,r_descr),
+                                    val2,
                                     hlr_utils.get_err2(right,i,r_descr))
 
         map_so = hlr_utils.get_map_so(left,i)
