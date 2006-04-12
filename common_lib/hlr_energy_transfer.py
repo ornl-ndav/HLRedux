@@ -2,7 +2,7 @@ import axis_manip
 import SOM.so
 import SOM.som
 
-def energy_transfer(left,right):
+def energy_transfer(left,right,units="meV"):
     """
     This function takes a tuple and a SOM, a tuple and a SO or two tuples and
     calculates the energy transfer in units of THz. The SOM principle axis
@@ -42,6 +42,9 @@ def energy_transfer(left,right):
         raise TypeError, "SO-SO operation not supported"
     
     result=hlr_utils.copy_som_attr(result,res_descr,left,l_descr,right,r_descr)
+    if res_descr == "SOM":
+        index = hlr_utils.hlr_1D_units(result, units)
+        result = hlr_utils.hlr_force_units(result, "THz", index)
 
     # iterate through the values
     for i in range(hlr_utils.get_length(left,right)):

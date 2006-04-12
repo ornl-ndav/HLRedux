@@ -41,6 +41,8 @@ def tof_to_wavelength(obj,pathlength=None,units="microseconds"):
         axis = 0
 
     result=hlr_utils.copy_som_attr(result,res_descr,obj,o_descr)
+    if res_descr == "SOM":
+        result = hlr_utils.hlr_force_units(result, "Angstroms", axis)
 
     if pathlength == None:
         pathlength=[20.0, 0.1]
