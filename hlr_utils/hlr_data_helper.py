@@ -7,7 +7,7 @@ SO_type="SO"
 num_type="number"
 empty_type=""
 
-def empty_result(obj1,obj2):
+def empty_result(obj1,obj2=None):
     """
     This function inspects the arguments and returns an appropriate
     return type for an operation using the arguments. The object can
@@ -23,8 +23,16 @@ def empty_result(obj1,obj2):
     <- A tuple containing the requested object (SOM, SO or tuple) and the
        corresponding descriptor
     """
-    
+
     obj1_type = get_type(obj1)
+    if obj2 == None:
+        if obj1_type == SOM_type:
+            return (SOM.SOM(), SOM_type)
+        elif obj1_type == SO_type:
+            return (SOM.SO(), SO_type)
+        else:
+            return ([], num_type)
+    
     obj2_type = get_type(obj2)
 
     if (obj1_type == SOM_type and obj2_type == SOM_type) or \
@@ -43,6 +51,10 @@ def result_insert(result,descr,value,map_so,axis="y",pap=0):
     """
     This function takes value and puts it into the result in an
     appropriate fashion. The description is used for decision making.
+
+    Parameters:
+    ----------
+    
     """
     if descr == None:
         result_type = get_type(result)
@@ -51,7 +63,7 @@ def result_insert(result,descr,value,map_so,axis="y",pap=0):
 
     if (result_type == SOM_type):
         if axis.lower() == "y":
-            so = SOM.SO()
+            so = SOM.SO(map_so.dim())
             so.y = value[0]
             so.var_y = value[1]
             so.id = map_so.id
@@ -59,9 +71,19 @@ def result_insert(result,descr,value,map_so,axis="y",pap=0):
 
             result.append(so)
         elif axis.lower() == "x":
-            so = SOM.SO()
+            so = SOM.SO(map_so.dim())
             so.id = map_so.id
-
+            so.y = map_so.y
+            so.var_y = map_so.var_y
+            for i in range(map_so.dim()):
+                if i == pap:
+                    so.axis[pap].val = value[0]
+                    if map_so.axis[pap].var != None:
+                        so.axis[pap].var = value[1]
+                else:
+                    so.axis[i].val = map_so.axis[i].val
+                    if map_so.axis[i].var != None:
+                        so.axis[i].var = map_so.axis[i].var
 
             result.append(so)
     elif (result_type == SO_type):
@@ -70,14 +92,27 @@ def result_insert(result,descr,value,map_so,axis="y",pap=0):
             result.var_y = value[1]
             result.id = map_so.id
             result.axis = map_so.axis
-            return result.y
+
         elif axis.lower() == "x":
             result.id = map_so.id
+            result.y = map_so.y
+            result.var_y = map_so.var_y
+            for i in range(map_so.dim()):
+                if i == pap:
+                    result.axis[pap].val = value[0]
+                    if map_so.axis[pap].var != None:
+                        result.axis[pap].var = value[1]
+                else:
+                    result.axis[i].val = map_so.axis[i].val
+                    if map_so.axis[i].var != None:
+                        result.axis[i].var = map_so.axis[i].var
+            
     elif (result_type == num_type):
         result[0] = value[0]
         result[1] = value[1]
     else:
-        raise TypeError, "Object type not recognized by get_value function."
+        raise TypeError, "Object type not recognized by result_insert"\
+              +" function."
 
 
 def get_length(obj1,obj2=None):
@@ -161,16 +196,17 @@ def get_value(obj,index=0,descr=None,axis="y",pap=0):
         obj_type = get_type(obj)
     else:
         obj_type = descr
+
     if (obj_type == SOM_type):
         if axis.lower() == "y":
             return obj[index].y
         elif axis.lower() == "x":
-            return obj[index][pap].val
+            return obj[index].axis[pap].val
     elif (obj_type == SO_type):
         if axis.lower() == "y":
             return obj.y
         elif axis.lower() == "x":
-            return obj[pap].val
+            return obj.axis[pap].val
     elif (obj_type == num_type):
         return obj[0]
     else:
@@ -210,18 +246,18 @@ def get_err2(obj,index,descr=None,axis="y",pap=0):
         if axis.lower() == "y":
             return obj[index].var_y
         elif axis.lower() == "x":
-            if obj[index][pap].var == None:
-                return nessi_list.NessiList(len(obj[index][pap].val))
+            if obj[index].axis[pap].var == None:
+                return nessi_list.NessiList(len(obj[index].axis[pap].val))
             else:
-                return obj[index][pap].var
+                return obj[index].axis[pap].var
     elif (obj_type == SO_type):
         if axis.lower() == "y":
             return obj.var_y
         elif axis.lower() == "x":
-            if obj[pap].var == None:
-                return nessi_list.NessiList(len(obj[pap].val))
+            if obj.axis[pap].var == None:
+                return nessi_list.NessiList(len(obj.axis[pap].val))
             else:
-                return obj[pap].var
+                return obj.axis[pap].var
     elif (obj_type == num_type):
         return obj[1]
     else:
@@ -299,3 +335,42 @@ def get_map_so(obj,index):
         return obj[index]
     else:
         return None
+
+
+def copy_som_attr(result, res_descr, obj1, obj1_descr,
+                  obj2=None, obj2_descr=None, force=1):
+    """
+    This function takes a result object and one or two other arbitrary
+    objects and copies the attributes from the objects to the result object if
+    the arbitrary objects are SOMs.
+
+    Parameters:
+    ----------
+    -> result is SOM, SO or tuple
+    -> res_descr is the descriptor for the result object
+    -> obj1 is SOM, SO or tuple
+    -> obj1_descr is the descriptor for the obj1 object
+    -> obj2 (OPTIONAL) is SOM, SO or tuple
+    -> obj2_descr (OPTIONAL) is the descriptor for the obj2 object
+    -> force (OPTIONAL) is a flag that says which object to copy last
+
+    Returns:
+    -------
+    <- A SOM with copied attributes
+    """
+
+    if res_descr != SOM_type:
+        return result
+
+    if force == 1:
+        if obj2 != None and obj2_descr == SOM_type:
+            result.copyAttributes(obj2)
+        if obj1_descr == SOM_type:
+            result.copyAttributes(obj1)
+    else:
+        if obj1_descr == SOM_type:
+            result.copyAttributes(obj1)
+        if obj2 != None and obj2_descr == SOM_type:
+            result.copyAttributes(obj2)
+
+    return result

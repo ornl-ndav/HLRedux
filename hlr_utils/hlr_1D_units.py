@@ -16,6 +16,8 @@ def hlr_1D_units(som, units):
     if not som.hasAxisUnits(units):
         raise RuntimeError,"No primary axis with %s units" % units
 
+    return som.axisUnitsAt(units)
+
 def hlr_force_units(som, units, dim=1):
     """
     This function takse a SOM, a unit string and an optional dimension
