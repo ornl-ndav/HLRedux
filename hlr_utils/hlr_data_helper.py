@@ -25,6 +25,7 @@ def empty_result(obj1,obj2=None):
     """
 
     obj1_type = get_type(obj1)
+
     if obj2 == None:
         if obj1_type == SOM_type:
             return (SOM.SOM(), SOM_type)
@@ -38,7 +39,7 @@ def empty_result(obj1,obj2=None):
     if (obj1_type == SOM_type and obj2_type == SOM_type) or \
            (obj1_type == SOM_type and obj2_type != SOM_type) or \
            (obj1_type != SOM_type and obj2_type == SOM_type):
-        return (SOM.SOM(),SOM_type)
+        return (SOM.SOM(), SOM_type)
     elif (obj1_type == SO_type and obj2_type == SO_type) or \
              (obj1_type == num_type and obj2_type == SO_type) or \
              (obj1_type == SO_type and obj2_type == num_type):
@@ -108,8 +109,8 @@ def result_insert(result,descr,value,map_so,axis="y",pap=0):
                         result.axis[i].var = map_so.axis[i].var
             
     elif (result_type == num_type):
-        result[0] = value[0]
-        result[1] = value[1]
+        result.append(value[0])
+        result.append(value[1])
     else:
         raise TypeError, "Object type not recognized by result_insert"\
               +" function."
@@ -313,26 +314,44 @@ def swap_args(left,right):
 
     return left,right
 
-def get_map_so(obj,index):
+def get_map_so(obj1,obj2,index):
     """
     This function takes a SOM and returns the first SO for use in mapping. If
     the object is a SO, it is immediately returned.
 
     Parameters:
     ----------
-    -> obj is a SOM or SO
+    -> obj1 is a SOM, SO or tuple
+    -> obj2 is a SOM, SO or tuple
 
     Returns:
     -------
     <- A mapping SO (can be None if obj is a tuple or empty
     """
 
-    obj_type = get_type(obj)
+    obj1_type = get_type(obj1)
+    if obj2 == None:
+        if obj1_type == SO_type:
+            return obj1
+        elif obj1_type == SOM_type:
+            return obj1[index]
+        else:
+            return None
 
-    if obj_type == SO_type:
-        return obj
-    elif obj_type == SOM_type:
-        return obj[index]
+    obj2_type = get_type(obj2)
+
+    if obj1_type == SO_type and obj2_type == SO_type:
+        return obj1
+    elif obj1_type == SO_type and obj2_type == num_type:
+        return obj1
+    elif obj1_type == num_type and obj2_type == SO_type:
+        return obj2
+    elif obj1_type == SOM_type and obj2_type == SOM_type:
+        return obj1[index]
+    elif obj1_type == SOM_type and obj2_type != SOM_type:
+        return obj1[index]
+    elif obj1_type != SOM_type and obj2_type == SOM_type:
+        return obj2[index]
     else:
         return None
 
