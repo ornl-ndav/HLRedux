@@ -21,7 +21,7 @@ def generate_so(type,start,stop=0,dim=1):
         stop=start
         start=0
         
-    so=SOM.SO()
+    so=SOM.SO(dim)
     if start==stop:
         return so
 
@@ -32,13 +32,20 @@ def generate_so(type,start,stop=0,dim=1):
 
     for i in range(dim):
         so.axis[i].val.extend(range(num))
-    so.y.extend(range(start,stop))
-    so.var_y.extend(range(start,stop))
+        size = len(so.axis[i].val)
+
+        if i == 0:
+            so.y.extend(range(start,stop))
+            so.var_y.extend(range(start,stop))
+        else:
+            for j in range(size - 2):
+                so.y.extend(range(start,stop))
+                so.var_y.extend(range(start,stop))
 
     return so
 
 
-def generate_som(type="histogram"):
+def generate_som(type="histogram",dim=1):
     """
     This function generates a SOM for testing purposes.
 
@@ -54,7 +61,7 @@ def generate_som(type="histogram"):
     som = SOM.SOM()
     count=0
     for i in range(2):
-        so=generate_so(type,count,count+5)
+        so=generate_so(type,count,count+5,dim)
         so.id=i+1
         som.append(so)
         count+=5
