@@ -2,20 +2,6 @@ import axis_manip
 import SOM.so
 import SOM.som
 
-def copy_attr(source,destination):
-    """
-    This function copies the attributes from the source SOM to the destination
-    SOM.
-
-    Parameters:
-    ----------
-    -> source is the SOM from which to copy the attributes
-    -> destination is the SOM that receives the copied attributes
-    """
-
-    for key in source.attr_list.keys():
-        destination.attr_list[key]=source.attr_list[key]
-
 def reverse_array_cp(obj):
     """
     This function reverses the y and var_y tuples of all the SOs in a SOM or
@@ -36,80 +22,39 @@ def reverse_array_cp(obj):
     <- TypeError is raised if a tuple is presented to the function
     """
 
-    TITLE      = SOM.som.SOM.TITLE
+    # import the helper functions
+    import hlr_utils
 
-    def reverse_som(som):
-        # create empty result som
-        result=SOM.som.SOM()
+    # set up for working through data
+    result,res_descr=hlr_utils.empty_result(obj)
+    o_descr,d_descr=hlr_utils.get_descr(obj)
 
-        copy_attr(som,result)
+    result=hlr_utils.copy_som_attr(result,res_descr,obj,o_descr)
 
-        # do the reversing
-        for so in som:
-            result.append(reverse_so(so))
+    # iterate through the values
+    for i in range(hlr_utils.get_length(obj)):
+        val = hlr_utils.get_value(obj,i,o_descr)
+        err2 = hlr_utils.get_err2(obj,i,o_descr)
 
-        return result
+        value = []
+        value.append(axis_manip.reverse_array_cp(val))
+        value.append(axis_manip.reverse_array_cp(err2))
 
-    def reverse_so(so):
-        # set up the result
-        result=SOM.so.SO()
-        result.id=so.id
-        result.x=so.x
+        map_so = hlr_utils.get_map_so(obj,None,i)
+        hlr_utils.result_insert(result,res_descr,value,map_so)
 
-        # do the reversing
-        result.y = axis_manip.reverse_array_cp(so.y)
-        result.var_y = axis_manip.reverse_array_cp(so.var_y)
-
-        return result
-
-    # determine if the obj is a som
-    try:
-        obj.attr_list[TITLE]
-        return reverse_som(obj)
-    except AttributeError:
-        pass
-
-    # determine if obj is a so
-    try:
-        obj.id
-        return reverse_so(obj)
-
-    except AttributeError:
-        raise TypeError, "Do not understand how to reverse given type"
+    return result
 
 if __name__=="__main__":
-    def generate_so(start,stop=0):
-        if stop<start:
-            stop=start
-            start=0
+    import hlr_test
 
-        so=SOM.so.SO()
-        if start==stop:
-            return so
-
-        so.x.extend(range(stop-start))
-        so.y.extend(range(start,stop))
-        so.var_y.extend(range(start,stop))
-        return so
-
-    def so_to_str(so):
-        if so==None:
-            return None
-        else:
-            return so.id,so.x,so.y,so.var_y
-
-    som1=SOM.som.SOM()
-    count=0
-    for i in range(2):
-        so=generate_so(count,count+5)
-        so.id=i+1
-        som1.append(so)
-        count+=5
+    som1=hlr_test.generate_som()
 
     print "********** SOM1"
-    print "* ",so_to_str(som1[0])
-    print "* ",so_to_str(som1[1])
+    print "* ",som1[0]
+    print "* ",som1[1]
 
     print "********** reverse_array_cp"
-    print "* rev so :",so_to_str(reverse_array_cp(som1[0]))
     print "* rev som:",reverse_array_cp(som1)
+    print "* rev so :",reverse_array_cp(som1[0])
+

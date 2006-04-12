@@ -2,20 +2,6 @@ import axis_manip
 import SOM.so
 import SOM.som
 
-def copy_attr(source,destination):
-    """
-    This function copies the attributes from the source SOM to the destination
-    SOM.
-
-    Parameters:
-    ----------
-    -> source is the SOM from which to copy the attributes
-    -> destination is the SOM that receives the copied attributes
-    """
-
-    for key in source.attr_list.keys():
-        destination.attr_list[key]=source.attr_list[key]
-
 def energy_transfer(left,right):
     """
     This function takes a tuple and a SOM, a tuple and a SO or two tuples and
@@ -38,175 +24,62 @@ def energy_transfer(left,right):
     <- RuntimeError is raised if the x-axis units are not meV
     """
 
-    TITLE=SOM.som.SOM.TITLE
-    X_UNITS=SOM.som.SOM.X_UNITS
+    # import the helper functions
+    import hlr_utils
 
-    def et_som_num(som,num):
-        # create empty result som
-        result=SOM.som.SOM()
+    # set up for working through data
+    result,res_descr=hlr_utils.empty_result(left,right)
+    l_descr,r_descr=hlr_utils.get_descr(left,right)
 
-        # copy attributes from som
-        copy_attr(som,result)
+    # error checking for types
+    if l_descr == "SOM" and r_descr == "SOM":
+        raise TypeError, "SOM-SOM operation not supported"
+    elif l_descr == "SOM" and r_descr == "SO":
+        raise TypeError, "SOM-SO operation not supported"
+    elif l_descr == "SO" and r_descr == "SOM":
+        raise TypeError, "SO-SOM operation not supported"
+    elif l_descr == "SO" and r_descr == "SO":
+        raise TypeError, "SO-SO operation not supported"
+    
+    result=hlr_utils.copy_som_attr(result,res_descr,left,l_descr,right,r_descr)
 
-        # do the calculation
-        for it in som:
-            result.append(et_so_num(it,num))
+    # iterate through the values
+    for i in range(hlr_utils.get_length(left,right)):
+        val1 = hlr_utils.get_value(left,i,l_descr,"x")
+        err2_1 = hlr_utils.get_err2(left,i,l_descr,"x")
+        val2 = hlr_utils.get_value(right,i,r_descr,"x")
+        err2_2 = hlr_utils.get_err2(right,i,r_descr,"x")
 
-        return result
+        value=axis_manip.energy_transfer(val1, err2_1, val2, err2_2)
 
-    def et_num_som(num,som):
-        # create empty result som
-        result=SOM.som.SOM()
+        map_so = hlr_utils.get_map_so(left,right,i)
+        hlr_utils.result_insert(result,res_descr,value,map_so,"x")
 
-        # copy attributes from som
-        copy_attr(som,result)
+    return result
 
-        # do the calculation
-        for it in som:
-            result.append(et_num_so(num,it))
-
-        return result
-
-    def et_so_num(so,num):
-        # BEGIN SNS-FIXME
-        import nessi_list
-        # dummy placeholder for x variance
-        # list is set to zero (I hope)
-        so_var_x=nessi_list.NessiList(len(so.x))
-        # END SNS-FIXME
-
-        # set up the result
-        result=SOM.so.SO()
-        result.id=so.id
-        result.y=so.y
-        result.var_y=so.var_y
-
-        # do the calculation
-        (result.x,var_x_throwaway)=axis_manip.energy_transfer(so.x,so_var_x,
-                                                              num[0],num[1])
-
-        return result
-
-    def et_num_so(num,so):
-        # BEGIN SNS-FIXME
-        import nessi_list
-        # dummy placeholder for x variance
-        # list is set to zero (I hope)
-        so_var_x=nessi_list.NessiList(len(so.x))
-        # END SNS-FIXME
-
-        # set up the result
-        result=SOM.so.SO()
-        result.id=so.id
-        result.y=so.y
-        result.var_y=so.var_y
-
-        # do the calculation
-        (result.x,var_x_throwaway)=axis_manip.energy_transfer(num[0],num[1],
-                                                              so.x,so_var_x)
-
-        return result
-
-    def et_num_num(num1,num2):
-
-        #do the calculation
-        return axis_manip.energy_transfer(num1[0],num1[1],num2[0],num2[1])
-
-    # determine if the left is a som
-    try:
-        left.attr_list[TITLE]
-        try:
-            right.attr_list[TITLE]
-            raise TypeError, "SOM-SOM operation not supported"
-        except AttributeError:
-            try:
-                right.id
-                raise TypeError, "SOM-SO operation not supported"
-            except AttributeError:
-                return et_som_num(left,right)
-    except AttributeError: # left is a so
-        pass
-
-    # determine if left is a so
-    try:
-        left.id
-        try:
-            right.attr_list[TITLE]
-            raise TypeError, "SO-SOM operation not supported"
-        except AttributeError:
-            try:
-                right.id
-                raise TypeError, "SO-SO operation not supported"
-            except AttributeError:
-                return et_so_num(left,right)
-    except AttributeError: # left is a tuple
-        pass
-
-    # left must be a tuple
-    try:
-        right.attr_list[TITLE]
-        return et_num_som(left,right)
-    except AttributeError:
-        try:
-            right.id
-            return et_num_so(left,right)
-        except AttributeError:
-            return et_num_num(left,right)
 
 if __name__=="__main__":
-    X_UNITS=SOM.som.SOM.X_UNITS
+    import hlr_test
 
-    def generate_so(start,stop=0):
-        if stop<start:
-            stop=start
-            start=0
-
-        so=SOM.so.SO()
-        if start==stop:
-            return so
-
-        so.x.extend(range(stop-start+1))
-        so.y.extend(range(start,stop))
-        so.var_y.extend(range(start,stop))
-        return so
-
-    def so_to_str(so):
-        if so==None:
-            return None
-        else:
-            return so.id,so.x,so.y,so.var_y
-
-    som1=SOM.som.SOM()
-    som1.attr_list[X_UNITS]="meV"
-    count=0
-    for i in range(2):
-        so=generate_so(count,count+5)
-        so.id=i+1
-        som1.append(so)
-        count+=5
-
-    som2=SOM.som.SOM()
-    som2.attr_list[X_UNITS]="meV"
-    count=0
-    for i in range(2):
-        so=generate_so(count,count+5)
-        so.id=i+1
-        som2.append(so)
-        count+=5
+    som1=hlr_test.generate_som()
+    som1.setAllAxisUnits(["meV"])
+    som2=hlr_test.generate_som()
+    som2.setAllAxisUnits(["meV"])
 
     print "********** SOM1"
-    print "* ",so_to_str(som1[0])
-    print "* ",so_to_str(som1[1])
+    print "* ",som1[0]
+    print "* ",som1[1]
     print "********** SOM2"
-    print "* ",so_to_str(som2[0])
-    print "* ",so_to_str(som2[1])
+    print "* ",som2[0]
+    print "* ",som2[1]
 
     print "********** energy_transfer"
-    print "* scal-scal:",energy_transfer((2,1),(1,1))
-    print "* so  -scal:",so_to_str(energy_transfer(som1[0],(1,1)))
-    print "* scal-so  :",so_to_str(energy_transfer((1,1),som1[0]))
     print "* som -scal:",energy_transfer(som1,(1,1))
     print "* scal-som :",energy_transfer((1,1),som1)
+    print "* so  -scal:",energy_transfer(som1[0],(1,1))
+    print "* scal-so  :",energy_transfer((1,1),som1[0])
+    print "* scal-scal:",energy_transfer((2,1),(1,1))
+
 
 
 
