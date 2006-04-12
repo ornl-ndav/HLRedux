@@ -8,6 +8,10 @@ def hlr_1D_units(som, units):
     -> som is the SOM to search the primary axes for units
     -> units is the units to search the SOM primary axes for
 
+    Returns:
+    -------
+    <- The first index containing the requested units
+
     Exceptions:
     ----------
     <- RuntimeError is raised if the requested units are not found
@@ -30,6 +34,11 @@ def hlr_force_units(som, units, dim=1):
     -> units is the units to replace the current one in the SOM
     -> dim is the order of the primary axis. It's actual position in the SOM
        list is dim-1
+
+    Returns:
+    -------
+    <- The SOM with the units forced to the requested units
     """
     
-    som.setAxisUnits(units,dim-1)
+    som.setAxisUnits(dim-1,units)
+    return som
