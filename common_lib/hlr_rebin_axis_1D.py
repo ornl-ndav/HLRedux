@@ -2,21 +2,7 @@ import axis_manip
 import SOM.so
 import SOM.som
 
-def copy_attr(source,destination):
-    """
-    This function copies the attributes from the source SOM to the destination
-    SOM.
-
-    Parameters:
-    ----------
-    -> source is the SOM from which to copy the attributes
-    -> destination is the SOM that receives the copied attributes
-    """
-
-    for key in source.attr_list.keys():
-        destination.attr_list[key]=source.attr_list[key]
-
-def rebin_axis_1D(obj,axis):
+def rebin_axis_1D(obj,axis_out):
     """
     This function rebins the primary axis for a SOM or a SO based on the
     given NessiList axis.
@@ -24,7 +10,7 @@ def rebin_axis_1D(obj,axis):
     Parameters:
     ----------
     -> obj is the SOM or SO to be rebinned
-    -> axis is a NessiList containing the axis to rebin the SOM or SO to
+    -> axis_out is a NessiList containing the axis to rebin the SOM or SO to
 
     Returns:
     -------
@@ -36,91 +22,54 @@ def rebin_axis_1D(obj,axis):
     <- TypeError is raised if object being rebinned is not a SOM or a SO
     """
 
-    TITLE=SOM.som.SOM.TITLE
+    # import the helper functions
+    import hlr_utils
 
-    def rebin_som(som, axis):
-        # create empty result som
-        result=SOM.som.SOM()
-
-        copy_attr(som,result)
-
-        # do the rebinning
-        for so in som:
-            result.append(rebin_so(so,axis))
-
-        return result
-
-    def rebin_so(so,axis):
-        # set up the result
-        result=SOM.so.SO()
-        result.id=so.id
-        result.x=axis
-
-        # do the rebinning
-        (result.y, result.var_y)=axis_manip.rebin_axis_1D(so.x,so.y,so.var_y,
-                                                          axis)
-
-        return result
-
-    # Rebinning axis must be a NessiList. Fail now before getting too far.
+    # set up for working through data
     try:
-        axis.__type__
+        axis_out.__type__
     except AttributeError:
-        raise TypeError, "Axis must be a NessiList!"
+        raise TypeError, "Rebinning axis must be a NessiList!"
+        
+    o_descr,d_descr=hlr_utils.get_descr(obj)
 
-    # determine if the obj is a som
-    try:
-        obj.attr_list[TITLE]
-        return rebin_som(obj,axis)
-
-    except AttributeError:
-        pass
-
-    # determine if obj is a so
-    try:
-        obj.id
-        return rebin_so(obj,axis)
-    except AttributeError:
+    if o_descr == "number":
         raise TypeError, "Do not know how to handle given type"
+    
+    result,res_descr=hlr_utils.empty_result(obj)
+
+    result=hlr_utils.copy_som_attr(result,res_descr,obj,o_descr)
+
+    # iterate through the values
+    for i in range(hlr_utils.get_length(obj)):
+        axis_in = hlr_utils.get_value(obj,i,o_descr,"x",0)
+        val = hlr_utils.get_value(obj,i,o_descr)
+        err2 = hlr_utils.get_err2(obj,i,o_descr)
+
+        value=axis_manip.rebin_axis_1D(axis_in, val, err2, axis_out)
+        xvals=[]
+        xvals.append(axis_out)
+
+        map_so = hlr_utils.get_map_so(obj,None,i)
+        hlr_utils.result_insert(result,res_descr,value,map_so,"all",0,xvals)
+
+    return result
+
 
 if __name__=="__main__":
     import nessi_list
+    import hlr_test
 
-    def generate_so(start,stop=0):
-        if stop<start:
-            stop=start
-            start=0
-
-        so=SOM.so.SO()
-        if start==stop:
-            return so
-
-        so.x.extend(range(stop-start+1))
-        so.y.extend(range(start,stop))
-        so.var_y.extend(range(start,stop))
-        return so
-
-    def so_to_str(so):
-        if so==None:
-            return None
-        else:
-            return so.id,so.x,so.y,so.var_y
-
-    som1=SOM.som.SOM()
-    count=0
-    for i in range(2):
-        so=generate_so(count,count+5)
-        so.id=i+1
-        som1.append(so)
-        count+=5
+    som1=hlr_test.generate_som()
 
     axis=nessi_list.NessiList()
     axis.extend(0,2.5,5)
 
     print "********** SOM1"
-    print "* ",so_to_str(som1[0])
-    print "* ",so_to_str(som1[1])
+    print "* ",som1[0]
+    print "* ",som1[1]
 
     print "********** rebin_axis_1D"
-    print "* rebin so :",so_to_str(rebin_axis_1D(som1[0],axis))
     print "* rebin som:",rebin_axis_1D(som1,axis)
+    print "* rebin so :",rebin_axis_1D(som1[0],axis)
+

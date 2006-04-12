@@ -2,21 +2,7 @@ import axis_manip
 import SOM.so
 import SOM.som
 
-def copy_attr(source,destination):
-    """
-    This function copies the attributes from the source SOM to the destination
-    SOM.
-
-    Parameters:
-    ----------
-    -> source is the SOM from which to copy the attributes
-    -> destination is the SOM that receives the copied attributes
-    """
-
-    for key in source.attr_list.keys():
-        destination.attr_list[key]=source.attr_list[key]
-
-def wavelength_to_scalar_k(obj):
+def wavelength_to_scalar_k(obj,units="Angstroms"):
     """
     This function converts a primary axis of a SOM or SO from wavelength
     to scalar_k. The wavelength axis for a SOM must be in units of Angstroms.
@@ -40,115 +26,68 @@ def wavelength_to_scalar_k(obj):
     <- RuntimeError is raised if the SOM x-axis units are not Angstroms
     """
 
-    TITLE=SOM.som.SOM.TITLE
-    X_UNITS=SOM.som.SOM.X_UNITS
+    # import the helper functions
+    import hlr_utils
 
-    def w2sk_som(som):
-        if som.attr_list[X_UNITS]!="Angstroms":
-            raise RuntimeError,"X units are not Angstroms"
+    # set up for working through data
+    result,res_descr=hlr_utils.empty_result(obj)
+    o_descr,d_descr=hlr_utils.get_descr(obj)
 
-        # create empty result som
-        result=SOM.som.SOM()
+    # Primary axis for transformation. If a SO is passed, the function, will
+    # assume the axis for transformation is at the 0 position
+    if o_descr == "SOM":
+        axis = hlr_utils.hlr_1D_units(obj, units)
+    else:
+        axis = 0
 
-        copy_attr(som,result)
+    result=hlr_utils.copy_som_attr(result,res_descr,obj,o_descr)
+    if res_descr == "SOM":
+        result = hlr_utils.hlr_force_units(result, "1/Angstroms", axis)
 
-        for so in som:
-            result.append(w2sk_so(so))
+    # iterate through the values
+    for i in range(hlr_utils.get_length(obj)):
+        val = hlr_utils.get_value(obj,i,o_descr,"x",axis)
+        err2 = hlr_utils.get_err2(obj,i,o_descr,"x",axis)
 
-        return result
+        value=axis_manip.wavelength_to_scalar_k(val, err2)
+        if o_descr != "number":
+            rev_value = []
+            rev_value.append(axis_manip.reverse_array_cp(value[0]))
+            rev_value.append(axis_manip.reverse_array_cp(value[1]))
+        else:
+            rev_value = value
+            
+        map_so = hlr_utils.get_map_so(obj,None,i)
+        if map_so != None:
+            print "Got here"
+            map_so.y=axis_manip.reverse_array_cp(map_so.y)
+            map_so.var_y=axis_manip.reverse_array_cp(map_so.var_y)
+        
+        hlr_utils.result_insert(result,res_descr,rev_value,map_so,"x",axis)
 
-    def w2sk_so(so):
-        # BEGIN SNS-FIXME
-        import nessi_list
-        # dummy placeholder for x variance
-        # list is set to zero (I hope)
-        so_var_x=nessi_list.NessiList(len(so.x))
-        # END SNS-FIXME
+    return result
 
-        # set up the result
-        result=SOM.so.SO()
-        result.id=so.id
-        result.y=so.y
-        result.var_y=so.var_y
-
-        (result.x,var_x_throwaway)=axis_manip.wavelength_to_scalar_k(so.x,
-                                                                     so_var_x)
-
-        rev_var_y = result.var_y
-        rev_y = result.y
-        rev_x = result.x
-
-        result.x = axis_manip.reverse_array_cp(rev_x)
-        result.y = axis_manip.reverse_array_cp(rev_y)
-        result.var_y = axis_manip.reverse_array_cp(rev_var_y)
-
-        return result
-
-    def w2sk_num(num):
-        # do the calculation
-        (scalar_k, scalar_k_err2)=axis_manip.wavelength_to_scalar_k(num[0],
-                                                                    num[1])
-
-        return scalar_k,scalar_k_err2
-
-    # determine if the obj is a som
-    try:
-        obj.attr_list[TITLE]
-        return w2sk_som(obj)
-
-    except AttributeError: # obj is a so
-        pass
-
-    # determine if obj is a so
-    try:
-        obj.id
-        return w2sk_so(obj)
-
-    except AttributeError:
-        pass
-
-    # obj must be a tuple
-    return w2sk_num(obj)
-
-    raise TypeError,"Do not know what to do with supplied types"
 
 if __name__=="__main__":
-    X_UNITS=SOM.som.SOM.X_UNITS
+    import hlr_test
 
-    def generate_so(start,stop=0):
-        if stop<start:
-            stop=start
-            start=0
+    som1=hlr_test.generate_som()
+    som1.setAllAxisUnits(["Angstroms"])
 
-        so=SOM.so.SO()
-        if start==stop:
-            return so
-
-        so.x.extend(range(stop-start+1))
-        so.y.extend(range(start,stop))
-        so.var_y.extend(range(start,stop))
-        return so
-
-    def so_to_str(so):
-        if so==None:
-            return None
-        else:
-            return so.id,so.x,so.y,so.var_y
-
-    som1=SOM.som.SOM()
-    som1.attr_list[X_UNITS]="Angstroms"
-    count=0
-    for i in range(2):
-        so=generate_so(count,count+5)
-        so.id=i+1
-        som1.append(so)
-        count+=5
+    som2=hlr_test.generate_som()
+    som2.setAllAxisUnits(["Angstroms"])
 
     print "********** SOM1"
-    print "* ",so_to_str(som1[0])
-    print "* ",so_to_str(som1[1])
+    print "* ",som1[0]
+    print "* ",som1[1]
+
+    print "********** SOM2"
+    print "* ",som2[0]
+    print "* ",som2[1]
 
     print "********** wavelength_to_scalar_k"
-    print "* rebin so :",so_to_str(wavelength_to_scalar_k(som1[0]))
-    print "* rebin som:",wavelength_to_scalar_k(som1)
+    print "* som  :",wavelength_to_scalar_k(som1)
+    print "* so   :",wavelength_to_scalar_k(som2[0])
+    print "* scal :",wavelength_to_scalar_k([1,1])
+
 
