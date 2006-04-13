@@ -1,6 +1,6 @@
 import SOM
 
-def generate_so(type,start,stop=0,dim=1):
+def generate_so(type,start,stop=0,dim=1,extra=0):
     """
     This function generates a SO for testing purposes. The SO can be either
     a histogram or density.
@@ -35,12 +35,12 @@ def generate_so(type,start,stop=0,dim=1):
         size = len(so.axis[i].val)
 
         if i == 0:
-            so.y.extend(range(start,stop))
-            so.var_y.extend(range(start,stop))
+            so.y.extend(range(start+extra,stop+extra))
+            so.var_y.extend(range(start+extra,stop+extra))
         else:
             for j in range(size - 2):
-                so.y.extend(range(start,stop))
-                so.var_y.extend(range(start,stop))
+                so.y.extend(range(start+extra,stop+extra))
+                so.var_y.extend(range(start+extra,stop+extra))
 
     return so
 
