@@ -57,7 +57,6 @@ def wavelength_to_scalar_k(obj,units="Angstroms"):
             
         map_so = hlr_utils.get_map_so(obj,None,i)
         if map_so != None:
-            print "Got here"
             map_so.y=axis_manip.reverse_array_cp(map_so.y)
             map_so.var_y=axis_manip.reverse_array_cp(map_so.var_y)
         
