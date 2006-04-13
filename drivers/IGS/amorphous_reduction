@@ -45,8 +45,7 @@ def subtract_norm_bkg_from_norm(config,norm_som, norm_bkg_som):
     elif norm_bkg_som==None:
         return norm_som
 
-    import hlr_sub_ncerr
-    return hlr_sub_ncerr.sub_ncerr(norm_som, norm_bkg_som)
+    return common_lib.sub_ncerr(norm_som, norm_bkg_som)
 
 def subtract_dark_current_from_data(config, data_som, dc_som):
     """Step 3. Subtract the dark current spectrum using function 3.6
@@ -56,8 +55,7 @@ def subtract_dark_current_from_data(config, data_som, dc_som):
     if dc_som==None:
         return data_som
 
-    import hlr_sub_ncerr
-    return hlr_sub_ncerr.sub_ncerr(data_som, dc_som)
+    return common_lib.sub_ncerr(data_som, dc_som)
 
 def determine_time_indep_bkg(config, data_som):
     """Step 4. Determine the sample dependent, time independent
@@ -72,8 +70,7 @@ def determine_time_indep_bkg(config, data_som):
     if not config.TOF_end==None:
         kwargs = kwargs+", end="+TOF_end
 
-    import hlr_weighted_average
-    return hlr_weighted_average.weighted_average(data_som, kwargs)
+    return common_lib.weighted_average(data_som, kwargs)
 
 def subtract_time_indep_bkg(config, data_som, B):
     """Step 5. Subtract B from the data spectrum using function 3.2
@@ -82,8 +79,7 @@ def subtract_time_indep_bkg(config, data_som, B):
     if B == None:
         return data_som
 
-    import hlr_subtract_time_indep_bkg
-    return hlr_subtract_time_indep_bkg.subtract_time_indep_bkg(data_som, B)
+    return dr_lib.subtract_time_indep_bkg(data_som, B)
 
 def subtract_bkg_from_data(config, data_som, bkg_som):
     """Step 6. Subtract the measured background spectrum from the data
@@ -93,15 +89,13 @@ def subtract_bkg_from_data(config, data_som, bkg_som):
     if config.no_bkg_sub:
         return data_som
 
-    import hlr_sub_ncerr
-    return hlr_sub_ncerr.sub_ncerr(data_som, bkg_som)
+    return common_lib.sub_ncerr(data_som, bkg_som)
 
 def norm_data_by_van(config, data_som, norm_som):
     """Step 7. Normalize ItdsbDXY(TOF) by vanadium spectrum,
     ItbNXY(TOF), using function 3.9. The result is ItdsbnDXY(TOF)."""
 
-    import hlr_div_ncerr
-    return hlr_div_ncerr.div_ncerr(data_som, norm_som)
+    return common_lib.div_ncerr(data_som, norm_som)
 
 def convert_data_and_mon_to_wavelength(config, data_som, mon2_som):
     """Step 8. Convert ItM2(TOF) and ItdsbnDXY(TOF) to ItM2(lambda)
@@ -109,14 +103,11 @@ def convert_data_and_mon_to_wavelength(config, data_som, mon2_som):
     for DXY."""
 
     if mon2_som!=None:
-        import hlr_tof_to_wavelength
-        mon2_som1 = hlr_tof_to_wavelength.tof_to_wavelength(mon2_som)
+        mon2_som1 = common_lib.tof_to_wavelength(mon2_som)
     else:
         mon2_som1 = None
 
-    import hlr_tof_initial_wavelength_igs
-    data_som1=hlr_tof_initial_wavelength_igs.tof_initial_wavelength_igs(\
-        data_som)
+    data_som1=common_lib.tof_initial_wavelength_igs(data_som)
 
     return data_som1, mon2_som1
 
@@ -125,8 +116,7 @@ def rebin_mon_eff(config, mon2_som, mon2_eff):
     wavelength axis using 3.12. The input is the efficiency
     eM2(lambda) with the output being erM2(lambda)."""
 
-    import hlr_rebin_efficiency
-    return hlr_rebin_efficiency.rebin_efficiency(mon2_som, mon2_eff)
+    return dr_lib.rebin_efficiency(mon2_som, mon2_eff)
 
 def eff_correct_mon(config, mon2_som, mon2_eff):
     """Step 10. Divide ItM2(lambda) by erM2(lambda) using function
@@ -135,16 +125,14 @@ def eff_correct_mon(config, mon2_som, mon2_eff):
     if mon2_eff == None:
         return mon2_som
 
-    import hlr_div_ncerr
-    return hlr_div_ncerr.div_ncerr(mon2_som, mon2_eff)
+    return common_lib.div_ncerr(mon2_som, mon2_eff)
 
 def rebin_det_eff(config, data_som, det_eff):
     """Step 11. Rebin eDXY(lambda) to the same binning in wavelength
     as ItbdnDXY(lambda) by using function 3.12. The result is
     erDXY(lambda)"""
 
-    import hlr_rebin_efficiency
-    return hlr_rebin_efficiency.rebin_efficiency(data_som, det_eff)
+    return dr_lib.rebin_efficiency(data_som, det_eff)
 
 def eff_correct_data(config, data_som, det_eff):
     """Step 12. Correct ItbdneDXY(lambda) for detector efficiency by
@@ -154,8 +142,7 @@ def eff_correct_data(config, data_som, det_eff):
     if det_eff==None:
         return data_som
 
-    import hlr_div_ncerr
-    return hlr_div_ncerr.div_ncerr(data_som, det_eff)
+    return common_lib.div_ncerr(data_som, det_eff)
 
 def norm_data_by_mon(config, data_som, mon_som):
     """Step 13. Normalize by the integrated monitor intensity using
@@ -165,65 +152,52 @@ def norm_data_by_mon(config, data_som, mon_som):
     if mon_som==None:
         return data_som
 
-    import hlr_div_ncerr
-    return hlr_div_ncerr.div_ncerr(data_som, mon_som)
+    return common_lib.div_ncerr(data_som, mon_som)
 
 def calc_k_initial(config, data_som):
     """Step 14. Calculate initial wavevector using function 3.24."""
 
-    import hlr_wavelength_to_scalar_k
-    return hlr_wavelength_to_scalar_k.wavelength_to_scalar_k(data_som)
+    return common_lib.wavelength_to_scalar_k(data_som)
 
 def calc_E_initial(config, data_som):
     """Step 15. Calculate incident energy using function 3.22."""
 
-    import hlr_wavelength_to_energy
-    return hlr_wavelength_to_energy.wavelength_to_energy(data_som)
+    return common_lib.wavelength_to_energy(data_som)
 
 def calc_k_final(config):
     """Step 16. Calculate final wavevector using function 3.24."""
 
-    import hlr_wavelength_to_scalar_k
-    return hlr_wavelength_to_scalar_k.wavelength_to_scalar_k(config.wavelength_final)
+    return common_lib.wavelength_to_scalar_k(config.wavelength_final)
 
 def calc_E_final(config):
     """Step 17. Calculate final energy using function 3.22."""
 
-    import hlr_wavelength_to_energy
-    return hlr_wavelength_to_energy.wavelength_to_energy(config.wavelength_final)
+    return common_lib.wavelength_to_energy(config.wavelength_final)
 
 def calc_energy_transfer(config, data_som, energy_final):
     """Step 18. Calculate energy transfer using function 3.30."""
 
-    import hlr_energy_transfer
-    data_som1 = hlr_energy_transfer.energy_transfer(data_som, energy_final)
+    data_som1 = common_lib.energy_transfer(data_som, energy_final)
 
-    import hlr_frequency_to_energy
-    return hlr_frequency_to_energy.frequency_to_energy(data_som1)
+    return common_lib.frequency_to_energy(data_som1)
 
 def calc_scalar_Q(config, data_som, k_final):
     """Step 19. Calculate momentum transfer using function 3.33."""
 
-    import hlr_init_scatt_wavevector_to_scalar_Q
-    return hlr_init_scatt_wavevector_to_scalar_Q.init_scatt_wavevector_to_scalar_Q(data_som, k_final)
+    return common_lib.init_scatt_wavevector_to_scalar_Q(data_som, k_final)
 
 def rebin_final(config, data_som):
     """Step 20. Rebin onto user defined two dimensional grid using
     function 3.13."""
 
-    import hlr_rebin_axis_2D
-    return hlr_rebin_axis_2D.rebin_axis_2D(data_som, config.Q_bins,\
-                                           config.E_bins)
+    return common_lib.rebin_axis_2D(data_som, config.Q_bins, config.E_bins)
 
 def sum_all_spectra(config, data_som):
     """Step 21. Sum all spectrum together using function 3.10."""
 
-    import hlr_sum_all_spectra
-    return hlr_sum_all_spectra.sum_all_spectra(data_som)
+    return dr_lib.sum_all_spectra(data_som)
 
 def run(config):
-    # Michael works here
-
     if config.data==None:
         raise RuntimeError, "Need to pass a data filename to the driver "\
         +"script."
@@ -232,10 +206,10 @@ def run(config):
         print "No output file name specified. Using temp.a3c"
         config.output="temp.a3c"
 
-    import dst_base
+    import DST
 
     try:
-        data_dst = dst_base.getInstance("application/x-NeXus", config.data)
+        data_dst = DST.getInstance("application/x-NeXus", config.data)
     except SystemError:
         print "ERROR: Failed to data read file %s" % config.data
         import sys
@@ -251,15 +225,14 @@ def run(config):
         d_som2 = d_som1
 
     if not config.norm==None:
-        norm_dst = dst_base.getInstance("application/x-NeXus", config.norm)
+        norm_dst = DST.getInstance("application/x-NeXus", config.norm)
         n_som1 = norm_dst.getSOM(som_id, so_axis)
         norm_dst.release_resource()
     else:
         n_som1 = None
 
     if not config.norm_bkg==None:
-        norm_bkg_dst = dst_base.getInstance("application/x-NeXus",\
-                                            config.norm_bkg)
+        norm_bkg_dst = DST.getInstance("application/x-NeXus", config.norm_bkg)
         n_bkg_som1 = norm_bkg_dst.getSOM(som_id, so_axis)
     else:
         n_bkg_som1 = None
@@ -267,9 +240,8 @@ def run(config):
     n_som2 = subtract_norm_bkg_from_norm(config, n_som1, n_bkg_som1)
 
     if not config.dark_current==None:
-        dc_dst = dst_base.getInstance("application/x-NeXus",\
-                                      config.dark_current)
-        dc_som1 = dst_base.getSOM(som_id, so_axis)
+        dc_dst = DST.getInstance("application/x-NeXus", config.dark_current)
+        dc_som1 = dc_dst.getSOM(som_id, so_axis)
         dc_dst.release_resource()
     else:
         dc_som1 = None
@@ -284,9 +256,8 @@ def run(config):
     d_som4 = subtract_time_indep_bkg(config, d_som3, B)
 
     if not config.bkg==None:
-        bkg_dst = dst_base.getInstance("application/x-NeXus",\
-                                       config.dark_current)
-        bkg_som1 = dst_base.getSOM(som_id, so_axis)
+        bkg_dst = DST.getInstance("application/x-NeXus", config.dark_current)
+        bkg_som1 = bkg_dst.getSOM(som_id, so_axis)
         bkg_dst.release_resource()
     else:
         bkg_som1 = None
@@ -313,15 +284,13 @@ def run(config):
     data_dst.release_resource()
 
     if config.mon_geom:
-        mon_geom_dst = dst_base.getInstance("text/xml",\
-                                            config.mon_geom)
+        mon_geom_dst = DST.getInstance("text/xml", config.mon_geom)
         mon_geom = mon_geom_dst.getGeometry()
         mon_geom_dst.release_resource()
         m_som1.setGeometry(mon_geom)
 
     if config.det_geom:
-        det_geom_dst = dst_base.getInstance("text/xml",\
-                                            config.det_geom)
+        det_geom_dst = DST.getInstance("text/xml", config.det_geom)
         det_geom = det_geom_dst.getGeometry()
         det_geom_dst.release_resource()
         d_som5.setGeometry(det_geom)
@@ -331,8 +300,7 @@ def run(config):
     if config.mon_eff==None:
         m_eff1 = None
     else:
-        meff_dst = dst_base.getInstance("text/xml",\
-                                        config.mon_eff)
+        meff_dst = DST.getInstance("text/xml", config.mon_eff)
         m_eff1 = meff_dst.getSOM("/entry/monitor2")
         m_eff2 = rebin_mon_eff(config, m_som2, m_eff1)
 
@@ -341,8 +309,7 @@ def run(config):
     if config.det_eff==None:
         det_eff2 = None
     else:
-        deteff_dst = dst_base.getInstance("text/xml",\
-                                          config.det_eff)
+        deteff_dst = DST.getInstance("text/xml", config.det_eff)
         det_eff1 = deteff_dst.getSOM("/entry/dectector")
         det_eff2 = rebin_det_eff(config, d_som6, det_eff1)
 
@@ -376,7 +343,7 @@ def run(config):
 
     # Writing 3 column ASCII file
     resource = open(config.output, "w")
-    a3c = dst_base.getInstance("text/Spec", resource)
+    a3c = DST.getInstance("text/Spec", resource)
     a3c.writeSOM(d_som14)
     a3c.release_resource()
 
@@ -398,12 +365,14 @@ def split_physical(thing):
     return (number,units)
 
 if __name__=="__main__":
-    # Pete works here
-    import hlr_options
+    import common_lib
+    import dr_lib
+    import hlr_utils
+    
 #    from optparse import OptionParser
 
     # set up the options available
-    parser=hlr_options.SNSOptions("usage: %prog [options] <datafile>")
+    parser=hlr_utils.SNSOptions("usage: %prog [options] <datafile>")
 #    parser=OptionParser("usage: %prog [options] <datafile>")
     parser.add_option("","--dead-time",default=None,dest="dead_time",
                       help="Dead time with units (no spaces)")
