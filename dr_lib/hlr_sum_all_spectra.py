@@ -1,5 +1,3 @@
-import SOM
-
 def sum_all_spectra(obj):
     """
     This function takes all the SOs in a SOM and sums them together using the
@@ -19,8 +17,47 @@ def sum_all_spectra(obj):
     <- TypeError is raised if anything other than a SOM is given 
     """
 
+    # import the helper functions
+    import hlr_utils
+
+    o_descr,d_descr=hlr_utils.get_descr(obj)
+
+    if o_descr != "SOM":
+        raise TypeError, "Function argument must be a SOM"
+
+    result,res_descr=hlr_utils.empty_result(obj)
+
+    result=hlr_utils.copy_som_attr(result,res_descr,obj,o_descr)
+
+    # iterate through the values
+    import common_lib
+
+    so_id_list = []
+
+    for i in range(hlr_utils.get_length(obj)):
+        if i == 0:
+            val1 = hlr_utils.get_value(obj,i,o_descr,"all")
+            val2 = hlr_utils.get_value(obj,i+1,o_descr,"all")
+            value = common_lib.sumw_ncerr(val1, val2)
+            so_id_list.append(val1.id)
+            so_id_list.append(val2.id)
+        elif i == 1:
+            pass
+        else:
+            val = hlr_utils.get_value(obj,i,o_descr,"all")
+            value = common_lib.sumw_ncerr(val, value)
+            so_id_list.append(val.id)
+
+
+    hlr_utils.result_insert(result,res_descr,value,None,"all")
+    result.attr_list["Summed IDs"] = so_id_list
+    result[0].id = 0
+            
+    return result
+
 if __name__=="__main__":
     import hlr_test
+    import SOM
     
     som1=SOM.SOM()
     so1=hlr_test.generate_so("histogram",0,5,1,1)
@@ -34,7 +71,9 @@ if __name__=="__main__":
     som1.append(so3)
 
     print "********** SOM1"
-    print "* ",som1
+    print "* ",som1[0]
+    print "* ",som1[1]
+    print "* ",som1[2]
 
     print "********** sum_all_spectra"
     print "* som:",sum_all_spectra(som1)

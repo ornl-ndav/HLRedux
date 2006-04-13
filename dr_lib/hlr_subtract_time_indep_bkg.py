@@ -1,5 +1,3 @@
-import SOM
-
 def subtract_time_indep_bkg(obj, B_list):
     """
     This function takes a SOM or a SO and a list of time-independent background
@@ -21,11 +19,48 @@ def subtract_time_indep_bkg(obj, B_list):
     Exceptions:
     ----------
     <- IndexError is raised if the B_list object is empty
-    <- TypeError is raised if the first argument is not a SOM
+    <- TypeError is raised if the first argument is not a SOM or SO
     <- RuntimeError is raised if the SOM and list are not the same length
     """
-    
 
+    if len(B_list) <= 0:
+        raise IndexError, "List of time-independent background cannot be empty"
+
+    # import the helper functions
+    import hlr_utils
+
+    o_descr,l_descr=hlr_utils.get_descr(obj,B_list)
+
+    if o_descr == "number":
+        raise TypeError, "First argument must be a SOM or a SO!"
+
+    result,res_descr=hlr_utils.empty_result(obj)
+
+    result=hlr_utils.copy_som_attr(result,res_descr,obj,o_descr)
+
+    import common_lib
+
+    # test B_list for size
+    B_size = len(B_list)
+    if B_size > 1:
+        multi = True
+    else:
+        multi = False
+
+    # iterate through the values
+    for i in range(hlr_utils.get_length(obj)):
+
+        val1 = hlr_utils.get_value(obj,i,o_descr,"all")
+        if multi:
+            val2 = hlr_utils.get_value(B_list,i,l_descr,"all")
+        else:
+            val2 = hlr_utils.get_value(B_list,0,l_descr,"all")
+            
+        value = common_lib.sub_ncerr(val1, val2)
+
+        hlr_utils.result_insert(result,res_descr,value,None,"all")
+
+    return result
 
 if __name__=="__main__":
     import hlr_test

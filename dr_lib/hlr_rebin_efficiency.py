@@ -1,5 +1,3 @@
-import SOM
-
 def rebin_efficiency(obj1, obj2, units="Angstroms"):
     """
     This function takes two SOMs or two SOs and rebins the data for obj2 onto
@@ -49,21 +47,21 @@ def rebin_efficiency(obj1, obj2, units="Angstroms"):
 
     # iterate through the values
     import common_lib
-    
+
     for i in range(hlr_utils.get_length(obj1,obj2)):
-        val = hlr_utils.get_value(obj1,i,o1_descr,"x")
+        val1 = hlr_utils.get_value(obj1,i,o1_descr,"x")
+        val2 = hlr_utils.get_value(obj2,i,o2_descr,"all")
         
-        value=common_lib.rebin_axis_1D(obj2, val)
-        print "1:",value
+        value=common_lib.rebin_axis_1D(val2, val1)
         
-        map_so = hlr_utils.get_map_so(obj2,None,i)
-        hlr_utils.result_insert(result,res_descr,value,map_so,"x")
-        
-        return result
+        hlr_utils.result_insert(result,res_descr,value,None,"all")
+
+    return result
                                                     
     
 if __name__=="__main__":
     import hlr_test
+    import SOM
         
     som1=hlr_test.generate_som()
     som1.setAllAxisUnits(["Angstroms"])
