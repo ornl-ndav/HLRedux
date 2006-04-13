@@ -7,77 +7,81 @@
 #
 ###############################################################################
 
-# Import appropriate modules here. NOTE: $PYTHONPATH must reflect where
-# modules can be found.
+def main():
+    # Import appropriate modules here. NOTE: $PYTHONPATH must reflect where
+    # modules can be found.
 
-from array_manip import sub_ncerr
-import DST
-from SOM import SO
-from SOM import SOM
-from sys import argv, exit
-from time import localtime, strftime, time
+    from array_manip import sub_ncerr
+    import DST
+    from SOM import SO
+    from SOM import SOM
+    from sys import argv, exit
+    from time import localtime, strftime, time
 
-# Read in command line arguments for input file and output file names
+    # Read in command line arguments for input file and output file names
 
-try:
-    filename_SOM12 = argv[1]
-    filename_SOM3 = argv[2]
-except IndexError:
-    print "Usage:",argv[0],"<input file> <output file>"
-    exit(-1)
+    try:
+        filename_SOM12 = argv[1]
+        filename_SOM3 = argv[2]
+    except IndexError:
+        print "Usage:",argv[0],"<input file> <output file>"
+        exit(-1)
     
-# Create data source translators for reading in two NeXus files
+    # Create data source translators for reading in two NeXus files
 
-dst1 = DST.getInstance("application/x-NeXus", filename_SOM12)
-dst2 = DST.getInstance("application/x-NeXus", filename_SOM12)
+    dst1 = DST.getInstance("application/x-NeXus", filename_SOM12)
+    dst2 = DST.getInstance("application/x-NeXus", filename_SOM12)
 
-# Retrieve the SOMs from the DSTs
+    # Retrieve the SOMs from the DSTs
 
-som_id = ("/entry/data", 1)
-so_axis = "time_of_flight"
-starting_ids = (20, 190)
-ending_ids = (30, 250)
+    som_id = ("/entry/data", 1)
+    so_axis = "time_of_flight"
+    starting_ids = (20, 190)
+    ending_ids = (30, 250)
 
-SOM1 = dst1.getSOM(som_id, so_axis, start_id=starting_ids, end_id=ending_ids)
-SOM2 = dst2.getSOM(som_id, so_axis, start_id=starting_ids, end_id=ending_ids)
+    SOM1 = dst1.getSOM(som_id, so_axis, start_id=starting_ids, end_id=ending_ids)
+    SOM2 = dst2.getSOM(som_id, so_axis, start_id=starting_ids, end_id=ending_ids)
 
-if len(SOM1) != len(SOM2):
-    raise IndexError, "SOM1 and SOM2 are not the same length!"
+    if len(SOM1) != len(SOM2):
+        raise IndexError, "SOM1 and SOM2 are not the same length!"
 
-# Create SOM3
+    # Create SOM3
 
-SOM3 = SOM()
+    SOM3 = SOM()
 
-# Add attibutes to SOM3
+    # Add attibutes to SOM3
 
-SOM3.copyAttributes(SOM1)
-SOM3.attr_list["filename"] = filename_SOM3
-SOM3.attr_list["parents"] = {"SOM1" : SOM1.attr_list["filename"],
-                             "SOM2" : SOM2.attr_list["filename"]}                    
-# Loop on spectrum to do subtraction
+    SOM3.copyAttributes(SOM1)
+    SOM3.attr_list["filename"] = filename_SOM3
+    SOM3.attr_list["parents"] = {"SOM1" : SOM1.attr_list["filename"],
+                                 "SOM2" : SOM2.attr_list["filename"]}                    
+    # Loop on spectrum to do subtraction
 
-SOM3.attr_list["operations"] = [("Step 1", "Subtraction (SOM1 - SOM2)")]
+    SOM3.attr_list["operations"] = [("Step 1", "Subtraction (SOM1 - SOM2)")]
 
-for (SO1, SO2) in map(None, SOM1, SOM2):
-    SO3 = SO()
-    SO3.axis[0].val = SO1.axis[0].val
-    SO3.id = SO1.id
-    SO3.y, SO3.var_y = sub_ncerr(SO1.y, SO1.var_y, SO2.y, SO2.var_y)
-    SOM3.append(SO3)
+    for (SO1, SO2) in map(None, SOM1, SOM2):
+        SO3 = SO()
+        SO3.axis[0].val = SO1.axis[0].val
+        SO3.id = SO1.id
+        SO3.y, SO3.var_y = sub_ncerr(SO1.y, SO1.var_y, SO2.y, SO2.var_y)
+        SOM3.append(SO3)
 
-# Create output file object
+    # Create output file object
 
-resource = open(filename_SOM3, "w")
+    resource = open(filename_SOM3, "w")
     
-# Create output formatting object for 3 column ASCII and pass it a file
-# object
+    # Create output formatting object for 3 column ASCII and pass it a
+    # file object
 
-a3c = DST.getInstance("text/Spec", resource)
+    a3c = DST.getInstance("text/Spec", resource)
 
-# Push SOM3 into output formatter
+    # Push SOM3 into output formatter
 
-a3c.writeSOM(SOM3)
+    a3c.writeSOM(SOM3)
 
-# Close resource by issuing release_resource call on formatter
+    # Close resource by issuing release_resource call on formatter
 
-a3c.release_resource()
+    a3c.release_resource()
+
+if __name__=="__main__":
+    main()
