@@ -42,15 +42,41 @@ def energy_transfer(left,right,units="meV"):
         index = hlr_utils.hlr_1D_units(result, units)
         result = hlr_utils.hlr_force_units(result, "THz", index)
 
+    if l_descr == "number":
+        size = len(left)
+        if size > 2:
+            l_multi = True
+        else:
+            l_multi = False
+    else:
+        l_multi = False
+
+    if r_descr == "number":
+        size = len(right)
+        if size > 2:
+            r_multi = True
+        else:
+            r_multi = False
+    else:
+        r_multi = False
+
     # iterate through the values
     import axis_manip
     
     for i in range(hlr_utils.get_length(left,right)):
-        val1 = hlr_utils.get_value(left,i,l_descr,"x")
-        err2_1 = hlr_utils.get_err2(left,i,l_descr,"x")
-        val2 = hlr_utils.get_value(right,i,r_descr,"x")
-        err2_2 = hlr_utils.get_err2(right,i,r_descr,"x")
-
+        if l_multi:
+            val1 = hlr_utils.get_value(left,i,l_descr,"x")
+            err2_1 = hlr_utils.get_err2(left,i,l_descr,"x")
+        else:
+            val1 = hlr_utils.get_value(left,0,l_descr,"x")
+            err2_1 = hlr_utils.get_err2(left,0,l_descr,"x")
+        if r_multi:
+            val2 = hlr_utils.get_value(right,i,r_descr,"x")
+            err2_2 = hlr_utils.get_err2(right,i,r_descr,"x")
+        else:
+            val2 = hlr_utils.get_value(right,0,r_descr,"x")
+            err2_2 = hlr_utils.get_err2(right,0,r_descr,"x")
+            
         value=axis_manip.energy_transfer(val1, err2_1, val2, err2_2)
 
         map_so = hlr_utils.get_map_so(left,right,i)
