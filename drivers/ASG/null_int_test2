@@ -10,10 +10,8 @@
 # Import appropriate modules here. NOTE: $PYTHONPATH must reflect where
 # modules can be found.
 
-from common_lib import hlr_sub_ncerr
+import common_lib
 import DST
-from SOM import SO
-from SOM import SOM
 from sys import argv, exit
 from time import localtime, strftime, time
 
@@ -41,12 +39,11 @@ ending_ids = (30, 250)
 SOM1 = dst1.getSOM(som_id, so_axis, start_id=starting_ids, end_id=ending_ids)
 SOM2 = dst2.getSOM(som_id, so_axis, start_id=starting_ids, end_id=ending_ids)
 
-SOM3.attr_list["operations"] = [("Step 1", "Subtraction (SOM1 - SOM2)")]
-
 # Do the subtraction
-SOM3 = hlr_sub_ncerr(SOM1, SOM2)
+SOM3 = common_lib.sub_ncerr(SOM1, SOM2)
 
 SOM3.attr_list["filename"] = filename_SOM3
+SOM3.attr_list["operations"] = [("Step 1", "Subtraction (SOM1 - SOM2)")]
 SOM3.attr_list["parents"] = {"SOM1" : SOM1.attr_list["filename"],
                              "SOM2" : SOM2.attr_list["filename"]}                    
 # Create output file object
