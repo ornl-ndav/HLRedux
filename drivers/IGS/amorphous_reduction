@@ -13,7 +13,7 @@ class Configure:
         self.dead_time_units=None
         self.norm=None
         self.norm_bkg=None
-        self.dark_current=None
+        self.dark_count=None
         self.no_tib=None # don't perform time-independent background
         self.bkg=None
         self.no_norm=None # this should be implicit from whether the
@@ -27,7 +27,9 @@ class Configure:
         self.E_bins=None
         self.banks_separate=None # should be a description of how to
                                  # combine banks
-        
+        self.TOF_start=None
+        self.TOF_end=None
+        self.wavelength_final=None
 
 def dead_time_correction(config, data_som):
     """Step 1. Apply dead time correction to each I(TOF) using
@@ -47,8 +49,8 @@ def subtract_norm_bkg_from_norm(config,norm_som, norm_bkg_som):
 
     return common_lib.sub_ncerr(norm_som, norm_bkg_som)
 
-def subtract_dark_current_from_data(config, data_som, dc_som):
-    """Step 3. Subtract the dark current spectrum using function 3.6
+def subtract_dark_count_from_data(config, data_som, dc_som):
+    """Step 3. Subtract the dark count spectrum using function 3.6
     with ItDXY(TOF) as data1 and ItDCXY(TOF) as data2. The result of
     this is ItdDXY(TOF)."""
 
@@ -62,15 +64,15 @@ def determine_time_indep_bkg(config, data_som):
     background B by fitting a line to predetermined end points of
     ItdDXY(TOF) using function 3.43."""
 
-    kwargs = ""
+    kwargs = {}
 
     if not config.TOF_start==None:
-        kwargs = "start="+TOF_start
+        kwargs["start"]=TOF_start
 
     if not config.TOF_end==None:
-        kwargs = kwargs+", end="+TOF_end
+        kwargs["end"]=TOF_end
 
-    return common_lib.weighted_average(data_som, kwargs)
+    return common_lib.weighted_average(data_som, **kwargs)
 
 def subtract_time_indep_bkg(config, data_som, B):
     """Step 5. Subtract B from the data spectrum using function 3.2
@@ -86,7 +88,7 @@ def subtract_bkg_from_data(config, data_som, bkg_som):
     spectrum using function 3.6 with ItdsDXY(TOF) as data1 and
     ItBXY(TOF) as data2. The result of this is ItdsbDXY(TOF)."""
 
-    if config.no_bkg_sub:
+    if bkg_som == None:
         return data_som
 
     return common_lib.sub_ncerr(data_som, bkg_som)
@@ -107,7 +109,10 @@ def convert_data_and_mon_to_wavelength(config, data_som, mon2_som):
     else:
         mon2_som1 = None
 
-    data_som1=common_lib.tof_initial_wavelength_igs(data_som)
+    data_som1=common_lib.tof_to_initial_wavelength_igs(data_som,
+                                                       config.wavelength_final,
+                                                       None,None,None,
+                                                       "microsecond")
 
     return data_som1, mon2_som1
 
@@ -198,6 +203,10 @@ def sum_all_spectra(config, data_som):
     return dr_lib.sum_all_spectra(data_som)
 
 def run(config):
+    import gc
+    #gc.set_debug(gc.DEBUG_STATS)
+    print "0:",gc.get_threshold()
+    
     if config.data==None:
         raise RuntimeError, "Need to pass a data filename to the driver "\
         +"script."
@@ -217,14 +226,25 @@ def run(config):
     som_id = ("/entry/data", 1)
     so_axis = "time_of_flight"
 
+    if config.verbose:
+        print "Reading data file"
+        
     d_som1 = data_dst.getSOM(som_id, so_axis)
 
     if config.dead_time!=None:
+        if config.verbose:
+            print "Doing dead-time correction"
+            
         d_som2 = dead_time_correction(config, d_som1)
     else:
         d_som2 = d_som1
 
+    del d_som1
+
     if not config.norm==None:
+        if config.verbose:
+            print "Reading normalization file"
+            
         norm_dst = DST.getInstance("application/x-NeXus", config.norm)
         n_som1 = norm_dst.getSOM(som_id, so_axis)
         norm_dst.release_resource()
@@ -232,119 +252,252 @@ def run(config):
         n_som1 = None
 
     if not config.norm_bkg==None:
+        if config.verbose:
+            print "Reading normalization background file"
+            
         norm_bkg_dst = DST.getInstance("application/x-NeXus", config.norm_bkg)
         n_bkg_som1 = norm_bkg_dst.getSOM(som_id, so_axis)
     else:
         n_bkg_som1 = None
 
+    if config.verbose and n_bkg_som1 != None:
+        print "Subtracting background for normalization"
+        
     n_som2 = subtract_norm_bkg_from_norm(config, n_som1, n_bkg_som1)
 
-    if not config.dark_current==None:
-        dc_dst = DST.getInstance("application/x-NeXus", config.dark_current)
+    if not config.dark_count==None:
+        if option.verbose:
+            print "Reading dark count file"
+            
+        dc_dst = DST.getInstance("application/x-NeXus", config.dark_count)
         dc_som1 = dc_dst.getSOM(som_id, so_axis)
         dc_dst.release_resource()
     else:
         dc_som1 = None
 
-    d_som3 = subtract_dark_current_from_data(config, d_som2, dc_som1)
+    if config.verbose and dc_som1 != None:
+        print "Subtracting dark count from data"
+        
+    d_som3 = subtract_dark_count_from_data(config, d_som2, dc_som1)
 
+    del d_som2
+    del dc_som1
+
+    print "*************** GARBAGE COLLECT FIRING ****************"
+    gc.collect()
+    print "*************** GARBAGE COLLECT DONE ****************"
+    
     if not config.no_tib:
+        if config.verbose:
+            print "Determining time-independent background from data"
+            
         B = determine_time_indep_bkg(config, d_som3)
     else:
         B = None
 
+    if config.verbose and B != None:
+        print "Subtracting time-independent background from data"
+        
     d_som4 = subtract_time_indep_bkg(config, d_som3, B)
 
-    if not config.bkg==None:
-        bkg_dst = DST.getInstance("application/x-NeXus", config.dark_current)
+    del d_som3
+    del B
+
+    print "*************** GARBAGE COLLECT FIRING ****************"
+    gc.collect()
+    print "*************** GARBAGE COLLECT DONE ****************"
+    
+
+    if not config.data_bkg==None:
+        if config.verbose:
+            print "Reading in background data file"
+            
+        bkg_dst = DST.getInstance("application/x-NeXus", config.data_bkg)
         bkg_som1 = bkg_dst.getSOM(som_id, so_axis)
         bkg_dst.release_resource()
     else:
         bkg_som1 = None
 
-    d_som4 = subtract_bkg_from_data(config, d_som3, bkg_som1)
+    if config.verbose and bkg_som1 != None:
+        print "Subtracting background from data"
+        
+    d_som5 = subtract_bkg_from_data(config, d_som4, bkg_som1)
 
-    if not config.no_norm:
-        d_som5 = norm_data_by_van(config, d_som4, n_som1)
+    del d_som4
+    del bkg_som1
+
+    print "*************** GARBAGE COLLECT FIRING ****************"
+    gc.collect()
+    print "*************** GARBAGE COLLECT DONE ****************"
+    
+    if n_som2 != None:
+        if config.verbose:
+            print "Normalizing data by normalization data"
+        d_som6 = norm_data_by_van(config, d_som5, n_som2)
     else:
-        d_som5 = d_som4
+        d_som6 = d_som5
 
+    del d_som5
+    del n_som2
+
+    print "*************** GARBAGE COLLECT FIRING ****************"
+    gc.collect()
+    print "*************** GARBAGE COLLECT DONE ****************"
+    
     if config.no_mon_norm:
         m_som1 = None
     else:
+        if config.verbose:
+            print "Reading in monitor data from data file"
         som_id = ("/entry/monitor2", 1)
         m_som1 = data_dst.getSOM(som_id, so_axis)
 
     # Note: wavelength_final MUST be a tuple
     if config.wavelength_final==None:
-        config.wavlength_final = data_dst.getParam("wavelength_final")
+        config.wavelength_final = (7.0, 0.1)
+        #config.wavlength_final = data_dst.getParam("wavelength_final")
 
-    dsom5.attr_list["Wavelength_final"]=config.wavelength_final
+    d_som6.attr_list["Wavelength_final"]=config.wavelength_final
 
     data_dst.release_resource()
 
     if config.mon_geom:
+        if config.verbose:
+            print "Reading monitor geometry file"
+            
         mon_geom_dst = DST.getInstance("text/xml", config.mon_geom)
         mon_geom = mon_geom_dst.getGeometry()
         mon_geom_dst.release_resource()
         m_som1.setGeometry(mon_geom)
 
     if config.det_geom:
+        if config.verbose:
+            print "Reading in detector geometry file"
+            
         det_geom_dst = DST.getInstance("text/xml", config.det_geom)
         det_geom = det_geom_dst.getGeometry()
         det_geom_dst.release_resource()
         d_som5.setGeometry(det_geom)
 
-    d_som6, m_som2 = convert_data_and_mon_to_wavelength(config, d_som5, m_som1)
+    if config.verbose:
+        print "Converting TOF to wavelength"
+        
+    d_som7, m_som2 = convert_data_and_mon_to_wavelength(config, d_som6, m_som1)
+
+    del d_som6
+    del m_som1
+
+    print "*************** GARBAGE COLLECT FIRING ****************"
+    gc.collect()
+    print "*************** GARBAGE COLLECT DONE ****************"
+    
 
     if config.mon_eff==None:
-        m_eff1 = None
+        m_eff2 = None
     else:
-        meff_dst = DST.getInstance("text/xml", config.mon_eff)
-        m_eff1 = meff_dst.getSOM("/entry/monitor2")
+        if config.verbose:
+            print "Reading monitor efficiency file"
+            
+        mon_eff_dst = DST.getInstance("text/xml", config.mon_eff)
+        m_eff1 = mon_eff_dst.getSOM("/entry/monitor2")
+        mon_eff_dst.release_resource()
+        if config.verbose:
+            print "Rebinning monitor efficiency"
         m_eff2 = rebin_mon_eff(config, m_som2, m_eff1)
 
+    if config.verbose and m_eff2 != None:
+        print "Correcting monitor data for efficiency"
+        
     m_som3 = eff_correct_mon(config, m_som2, m_eff2)
 
     if config.det_eff==None:
         det_eff2 = None
     else:
-        deteff_dst = DST.getInstance("text/xml", config.det_eff)
-        det_eff1 = deteff_dst.getSOM("/entry/dectector")
-        det_eff2 = rebin_det_eff(config, d_som6, det_eff1)
+        if config.verbose:
+            print "Reading detector efficiency file"
+            
+        det_eff_dst = DST.getInstance("text/xml", config.det_eff)
+        det_eff1 = det_eff_dst.getSOM("/entry/dectector")
+        det_eff_dst.release_resource()
+        if config.verbose:
+            print "Rebinning detector efficiency"
+        det_eff2 = rebin_det_eff(config, d_som7, det_eff1)
 
-    d_som7 = eff_correct_data(config, d_som6, det_eff2)
+    if config.verbose and det_eff2 != None:
+        print "Correcting data for detector efficiency"
 
-    d_som8 = norm_data_by_mon(config, d_som7, m_som3)
+    d_som8 = eff_correct_data(config, d_som7, det_eff2)
 
-    d_som9 = calc_k_initial(config, d_som8)
+    if config.verbose and m_som3 != None:
+        print "Normalizing data by monitor"
+        
+    d_som9 = norm_data_by_mon(config, d_som8, m_som3)
 
-    d_som10 = calc_E_initial(config, d_som9)
+    if config.verbose:
+        print "Converting initial wavelength to k_initial"
+        
+    d_som10 = calc_k_initial(config, d_som9)
 
+    if config.verbose:
+        print "Converting initial wavelength to E_initial"
+        
+    d_som11 = calc_E_initial(config, d_som9)
+
+    del d_som9
+
+    print "*************** GARBAGE COLLECT FIRING ****************"
+    gc.collect()
+    print "*************** GARBAGE COLLECT DONE ****************"
+
+    if config.verbose:
+        print "Converting final wavelength to k_final"
+        
     k_final = calc_k_final(config)
 
+    if config.verbose:
+        print "Converting final wavelength to E_final"
+        
     E_final = calc_E_final(config)
 
-    d_som11 = energy_transfer(config, d_som10, E_final)
+    if config.verbose:
+        print "Calculating energy transfer"
+        
+    d_som12 = calc_energy_transfer(config, d_som11, E_final)
 
-    d_som12 = calc_scalar_Q(config, d_som11, k_final)
+    if config.verbose:
+        print "Calculating scalar momentum transfer"
+
+    del d_som11
+
+    print "*************** GARBAGE COLLECT FIRING ****************"
+    gc.collect()
+    print "*************** GARBAGE COLLECT DONE ****************"
+        
+    d_som13 = calc_scalar_Q(config, d_som10, k_final)
+
+    del d_som10
+
+    print "*************** GARBAGE COLLECT FIRING ****************"
+    gc.collect()
+    print "*************** GARBAGE COLLECT DONE ****************"
 
     if config.Q_bins==None or config.E_bins==None:
         config.banks_separate=True
-        d_som13 = d_som12
+        d_som14 = d_som12
     else:
         config.banks_separate=False
-        d_som13 = rebin_final(config, d_som12)
+        d_som14 = rebin_final(config, d_som12)
 
     if not config.banks_separate:
-        d_som14 = sum_all_spectra(config, d_som13)
+        d_som15 = sum_all_spectra(config, d_som14)
     else:
-        d_som14 = d_som13
+        d_som15 = d_som14
 
     # Writing 3 column ASCII file
     resource = open(config.output, "w")
     a3c = DST.getInstance("text/Spec", resource)
-    a3c.writeSOM(d_som14)
+    a3c.writeSOM(d_som13)
+    a3c.writeSOM(d_som15)
     a3c.release_resource()
 
 def file_exists(filename):
@@ -369,16 +522,40 @@ if __name__=="__main__":
     import dr_lib
     import hlr_utils
     
-#    from optparse import OptionParser
-
     # set up the options available
     parser=hlr_utils.SNSOptions("usage: %prog [options] <datafile>")
-#    parser=OptionParser("usage: %prog [options] <datafile>")
+
+    # Add BSS specific options
     parser.add_option("","--dead-time",default=None,dest="dead_time",
                       help="Dead time with units (no spaces)")
+    parser.add_option("","--tof-start",default=None,dest="TOF_start",
+                      help="Specify the starting TOF bin for time-independent"\
+                      +"background estimation")
+    parser.add_option("","--tof-end",default=None,dest="TOF_end",
+                      help="Specify the ending TOF bin for time-independent"\
+                      +"background estimation")
+    parser.add_option("","--no_mon_norm",action="store_true",
+                      dest="no_mon_norm",
+                      help="Flag for turning off monitor normalization")
+    parser.add_option("","--no_tib",action="store_true",
+                      dest="no_tib",
+                      help="Flag for turning off time-independent background"\
+                      +"subtraction")
+    parser.add_option("","--final-wavelength",default=None,
+                      dest="wavelength_final",
+                      help="Specify the final wavelength"\
+                      +" [lambda, err^2 lambda] in Angstroms")
+    parser.add_option("","--mon_eff",default=None, dest="mon_eff",
+                      help="Specify the monitor efficiency file")
+    parser.add_option("","--det_eff",default=None, dest="det_eff",
+                      help="Specify the detector efficiency file")
+    parser.add_option("","--mon_geom",default=None, dest="mon_geom",
+                      help="Specify the monitor geometry file")
+    parser.add_option("","--det_geom",default=None, dest="det_geom",
+                      help="Specify the detector geometry file")
+    
+
     (options,args)=parser.parse_args()
-    print "OPTIONS =",options # REMOVE
-    print # REMOVE
 
     # set up the configuration
     config=Configure()
@@ -398,8 +575,26 @@ if __name__=="__main__":
         config.output=nxs.sub("",config.data)+".srf"
     # set the verbosity
     config.verbose=options.verbose
+    config.output=options.output
+    config.norm=options.norm
+    config.norm_bkg=options.norm_bkg
+    config.data_bkg=options.data_bkg
+    config.dark_count=options.dark_count
+    config.mon_eff=options.mon_eff
+    config.det_eff=options.det_eff
+    config.mon_geom=options.mon_geom
+    config.det_geom=options.det_geom
+    
     # set the dead time
     (config.dead_time,config.dead_time_units)=split_physical(options.dead_time)
-
+    # set the TOF start bin
+    config.TOF_start=options.TOF_start
+    # set the TOF end bin
+    config.TOF_end=options.TOF_end
+    # set no_mon_norm flag
+    config.no_mon_norm=options.no_mon_norm
+    # set no_tib flag
+    config.no_tib=options.no_tib
+    config.wavelength_final=options.wavelength_final
     # run the program
     run(config)
