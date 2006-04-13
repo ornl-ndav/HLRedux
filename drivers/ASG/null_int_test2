@@ -1,0 +1,67 @@
+#!/usr/bin/env python
+###############################################################################
+#
+# This script is the driver for the Null Integration Test Mark 2
+#
+# $Id$
+#
+###############################################################################
+
+# Import appropriate modules here. NOTE: $PYTHONPATH must reflect where
+# modules can be found.
+
+from common_lib import hlr_sub_ncerr
+import DST
+from SOM import SO
+from SOM import SOM
+from sys import argv, exit
+from time import localtime, strftime, time
+
+# Read in command line arguments for input file and output file names
+
+try:
+    filename_SOM12 = argv[1]
+    filename_SOM3 = argv[2]
+except IndexError:
+    print "Usage:",argv[0],"<input file> <output file>"
+    exit(-1)
+    
+# Create data source translators for reading in two NeXus files
+
+dst1 = DST.getInstance("application/x-NeXus", filename_SOM12)
+dst2 = DST.getInstance("application/x-NeXus", filename_SOM12)
+
+# Retrieve the SOMs from the DSTs
+
+som_id = ("/entry/data", 1)
+so_axis = "time_of_flight"
+starting_ids = (20, 190)
+ending_ids = (30, 250)
+
+SOM1 = dst1.getSOM(som_id, so_axis, start_id=starting_ids, end_id=ending_ids)
+SOM2 = dst2.getSOM(som_id, so_axis, start_id=starting_ids, end_id=ending_ids)
+
+SOM3.attr_list["operations"] = [("Step 1", "Subtraction (SOM1 - SOM2)")]
+
+# Do the subtraction
+SOM3 = hlr_sub_ncerr(SOM1, SOM2)
+
+SOM3.attr_list["filename"] = filename_SOM3
+SOM3.attr_list["parents"] = {"SOM1" : SOM1.attr_list["filename"],
+                             "SOM2" : SOM2.attr_list["filename"]}                    
+# Create output file object
+
+resource = open(filename_SOM3, "w")
+    
+# Create output formatting object for 3 column ASCII and pass it a file
+# object
+
+a3c = DST.getInstance("text/Spec", resource)
+
+# Push SOM3 into output formatter
+
+a3c.writeSOM(SOM3)
+
+# Close resource by issuing release_resource call on formatter
+
+a3c.release_resource()
