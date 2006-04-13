@@ -1,7 +1,3 @@
-import axis_manip
-import SOM.so
-import SOM.som
-
 def rebin_axis_1D(obj,axis_out):
     """
     This function rebins the primary axis for a SOM or a SO based on the
@@ -41,6 +37,8 @@ def rebin_axis_1D(obj,axis_out):
     result=hlr_utils.copy_som_attr(result,res_descr,obj,o_descr)
 
     # iterate through the values
+    import axis_manip
+    
     for i in range(hlr_utils.get_length(obj)):
         axis_in = hlr_utils.get_value(obj,i,o_descr,"x",0)
         val = hlr_utils.get_value(obj,i,o_descr)
@@ -57,8 +55,8 @@ def rebin_axis_1D(obj,axis_out):
 
 
 if __name__=="__main__":
-    import nessi_list
     import hlr_test
+    import nessi_list
 
     som1=hlr_test.generate_som()
 

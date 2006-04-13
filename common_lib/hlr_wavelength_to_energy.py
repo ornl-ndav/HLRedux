@@ -1,7 +1,3 @@
-import axis_manip
-import SOM.so
-import SOM.som
-
 def wavelength_to_energy(obj,units="Angstroms"):
     """
     This function converts a primary axis of a SOM or SO from wavelength
@@ -44,6 +40,8 @@ def wavelength_to_energy(obj,units="Angstroms"):
         result = hlr_utils.hlr_force_units(result, "meV", axis)
 
     # iterate through the values
+    import axis_manip
+    
     for i in range(hlr_utils.get_length(obj)):
         val = hlr_utils.get_value(obj,i,o_descr,"x",axis)
         err2 = hlr_utils.get_err2(obj,i,o_descr,"x",axis)

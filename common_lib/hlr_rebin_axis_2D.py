@@ -1,7 +1,3 @@
-import axis_manip
-import SOM.so
-import SOM.som
-
 def rebin_axis_2D(obj,axis1_out,axis2_out):
     """
     This function rebins two primary axes for a SOM or a SO based on the
@@ -46,12 +42,11 @@ def rebin_axis_2D(obj,axis1_out,axis2_out):
     
     result,res_descr=hlr_utils.empty_result(obj)
 
-    if res_descr == "SO":
-        print "00:",result.dim()
-
     result=hlr_utils.copy_som_attr(result,res_descr,obj,o_descr)
 
     # iterate through the values
+    import axis_manip
+    
     for i in range(hlr_utils.get_length(obj)):
         axis1_in = hlr_utils.get_value(obj,i,o_descr,"x",0)
         axis2_in = hlr_utils.get_value(obj,i,o_descr,"x",1)
@@ -71,8 +66,8 @@ def rebin_axis_2D(obj,axis1_out,axis2_out):
 
 
 if __name__=="__main__":
-    import nessi_list
     import hlr_test
+    import nessi_list
 
     som1=hlr_test.generate_som("histogram",2)
 

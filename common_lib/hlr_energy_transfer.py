@@ -1,7 +1,3 @@
-import axis_manip
-import SOM.so
-import SOM.som
-
 def energy_transfer(left,right,units="meV"):
     """
     This function takes a tuple and a SOM, a tuple and a SO or two tuples and
@@ -47,6 +43,8 @@ def energy_transfer(left,right,units="meV"):
         result = hlr_utils.hlr_force_units(result, "THz", index)
 
     # iterate through the values
+    import axis_manip
+    
     for i in range(hlr_utils.get_length(left,right)):
         val1 = hlr_utils.get_value(left,i,l_descr,"x")
         err2_1 = hlr_utils.get_err2(left,i,l_descr,"x")

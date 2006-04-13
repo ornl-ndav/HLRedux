@@ -1,7 +1,3 @@
-import array_manip
-import SOM.so
-import SOM.som
-
 def add_ncerr(left,right):
     """
     This function adds two objects (SOM, SO or tuple[val,val_err2]) and
@@ -26,6 +22,7 @@ def add_ncerr(left,right):
     <- RunTimeError is raised if the y-axis units of the SOMs do not match
     <- RunTimeError is raised if the x-axes of the two SOs are not equal
     """
+    
     # import the helper functions
     import hlr_utils
 
@@ -46,6 +43,8 @@ def add_ncerr(left,right):
     result=hlr_utils.copy_som_attr(result,res_descr,left,l_descr,right,r_descr)
 
     # iterate through the values
+    import array_manip
+    
     for i in range(hlr_utils.get_length(left,right)):
         val1 = hlr_utils.get_value(left,i,l_descr)
         val2 = hlr_utils.get_value(right,i,r_descr)

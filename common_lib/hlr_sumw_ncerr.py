@@ -1,6 +1,3 @@
-import array_manip
-import SOM.so
-import SOM.som
 def sumw_ncerr(obj1,obj2):
     """
     This function sums by weighting errors of two objects (SOM or SO) and
@@ -25,6 +22,7 @@ def sumw_ncerr(obj1,obj2):
     <- RunTimeError is raised if the y-axis units of the SOMs do not match
     <- RunTimeError is raised if the x-axes of the two SOs are not equal
     """
+    
     # import the helper functions
     import hlr_utils
 
@@ -45,6 +43,8 @@ def sumw_ncerr(obj1,obj2):
                                    obj2,o2_descr)
 
     # iterate through the values
+    import array_manip
+    
     for i in range(hlr_utils.get_length(obj1,obj2)):
         val1 = hlr_utils.get_value(obj1,i,o1_descr)
         val2 = hlr_utils.get_value(obj2,i,o2_descr)

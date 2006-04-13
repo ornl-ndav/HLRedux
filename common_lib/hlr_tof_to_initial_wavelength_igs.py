@@ -1,7 +1,3 @@
-import axis_manip
-import SOM.so
-import SOM.som
-
 def tof_to_initial_wavelength_igs(obj,lambda_f=None,t_0=None,L_s=None,
                                   L_d=None,units="microseconds"):
     """
@@ -56,6 +52,8 @@ def tof_to_initial_wavelength_igs(obj,lambda_f=None,t_0=None,L_s=None,
         L_d = [1.0, 0.05]
 
     # iterate through the values
+    import axis_manip
+    
     for i in range(hlr_utils.get_length(obj)):
         val = hlr_utils.get_value(obj,i,o_descr,"x",axis)
         err2 = hlr_utils.get_err2(obj,i,o_descr,"x",axis)

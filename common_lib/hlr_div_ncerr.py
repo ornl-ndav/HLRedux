@@ -1,7 +1,3 @@
-import array_manip
-import SOM.so
-import SOM.som
-
 def div_ncerr(left,right):
     """
     This function divides two objects (SOM, SO or tuple[val,val_err2]) and
@@ -43,6 +39,8 @@ def div_ncerr(left,right):
     result=hlr_utils.copy_som_attr(result,res_descr,left,l_descr,right,r_descr)
 
     # iterate through the values
+    import array_manip
+    
     for i in range(hlr_utils.get_length(left,right)):
         val1 = hlr_utils.get_value(left,i,l_descr)
         val2 = hlr_utils.get_value(right,i,r_descr)

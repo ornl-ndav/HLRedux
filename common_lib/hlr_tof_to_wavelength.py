@@ -1,7 +1,3 @@
-import axis_manip
-import SOM.so
-import SOM.som
-
 def tof_to_wavelength(obj,pathlength=None,units="microseconds"):
     """
     This function converts a primary axis of a SOM or SO from time-of-flight
@@ -48,6 +44,8 @@ def tof_to_wavelength(obj,pathlength=None,units="microseconds"):
         pathlength=[20.0, 0.1]
 
     # iterate through the values
+    import axis_manip
+    
     for i in range(hlr_utils.get_length(obj)):
         val = hlr_utils.get_value(obj,i,o_descr,"x",axis)
         err2 = hlr_utils.get_err2(obj,i,o_descr,"x",axis)

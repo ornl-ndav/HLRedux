@@ -1,7 +1,3 @@
-import axis_manip
-import SOM.so
-import SOM.som
-
 def reverse_array_cp(obj):
     """
     This function reverses the y and var_y tuples of all the SOs in a SOM or
@@ -32,6 +28,8 @@ def reverse_array_cp(obj):
     result=hlr_utils.copy_som_attr(result,res_descr,obj,o_descr)
 
     # iterate through the values
+    import axis_manip
+    
     for i in range(hlr_utils.get_length(obj)):
         val = hlr_utils.get_value(obj,i,o_descr)
         err2 = hlr_utils.get_err2(obj,i,o_descr)

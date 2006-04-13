@@ -1,7 +1,3 @@
-import utils
-import SOM.so
-import SOM.som
-
 def weighted_average(obj,**kwargs):
     """
     This function takes a SOM or SO and calculates the weighted average for
@@ -49,6 +45,8 @@ def weighted_average(obj,**kwargs):
     result=hlr_utils.copy_som_attr(result,res_descr,obj,o_descr)
 
     # iterate through the values
+    import utils
+    
     for i in range(hlr_utils.get_length(obj)):
         val = hlr_utils.get_value(obj,i,o_descr,"y")
         err2 = hlr_utils.get_err2(obj,i,o_descr,"y")

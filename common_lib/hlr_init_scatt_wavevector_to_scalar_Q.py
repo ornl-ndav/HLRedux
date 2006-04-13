@@ -1,7 +1,3 @@
-import axis_manip
-import SOM.so
-import SOM.som
-
 def init_scatt_wavevector_to_scalar_Q(initk,scattk,polar=None,
                                       units="1/Angstroms"):
     """
@@ -56,6 +52,8 @@ def init_scatt_wavevector_to_scalar_Q(initk,scattk,polar=None,
         polar = [0.785398163, 0.01]
 
     # iterate through the values
+    import axis_manip
+    
     for i in range(hlr_utils.get_length(initk,scattk)):
         val1 = hlr_utils.get_value(initk,i,i_descr,"x")
         err2_1 = hlr_utils.get_err2(initk,i,i_descr,"x")
