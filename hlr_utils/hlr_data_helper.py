@@ -91,20 +91,24 @@ def result_insert(result,descr,value,map_so,axis="y",pap=0,xvals=None):
 
             result.append(so)
         elif axis.lower() == "all":
-            so = SOM.SO(map_so.dim())
-            so.id = map_so.id
-            so.y = value[0]
-            so.var_y = value[1]
-            for i in range(len(xvals)):
-                if i % 2 == 0:
-                    so.axis[i].val = xvals[i]
-                elif i % 2 != 0:
-                    if map_so.axis[i-1].var == None:
+            if map_so != None:
+                so = SOM.SO(map_so.dim())
+                so.id = map_so.id
+                so.y = value[0]
+                so.var_y = value[1]
+                for i in range(len(xvals)):
+                    if i % 2 == 0:
                         so.axis[i].val = xvals[i]
-                    else:
-                        so.axis[i-1].var = xvals[i]
-
-            result.append(so)
+                    elif i % 2 != 0:
+                        if map_so.axis[i-1].var == None:
+                            so.axis[i].val = xvals[i]
+                        else:
+                            so.axis[i-1].var = xvals[i]
+                            
+                result.append(so)
+            else:
+                result.append(value)
+                
     elif (result_type == SO_type):
         if axis.lower() == "y":
             result.y = value[0]
@@ -127,17 +131,24 @@ def result_insert(result,descr,value,map_so,axis="y",pap=0,xvals=None):
                         result.axis[i].var = map_so.axis[i].var
 
         elif axis.lower() == "all":
-            result.id = map_so.id
-            result.y = value[0]
-            result.var_y = value[1]
-            for i in range(len(xvals)):
-                if i % 2 == 0:
-                    result.axis[i].val = xvals[i]
-                elif i % 2 != 0:
-                    if map_so.axis[i-1].var == None:
+            if map_so != None:
+                result.id = map_so.id
+                result.y = value[0]
+                result.var_y = value[1]
+                for i in range(len(xvals)):
+                    if i % 2 == 0:
                         result.axis[i].val = xvals[i]
-                    else:
-                        result.axis[i-1].var = xvals[i]
+                    elif i % 2 != 0:
+                        if map_so.axis[i-1].var == None:
+                            result.axis[i].val = xvals[i]
+                        else:
+                            result.axis[i-1].var = xvals[i]
+
+            else:
+                result.id = value.id
+                result.y = value.y
+                result.var_y = value.var_y
+                result.axis = value.axis
 
     elif (result_type == num_type):
         if axis.lower() == "all":
@@ -237,13 +248,23 @@ def get_value(obj,index=0,descr=None,axis="y",pap=0):
             return obj[index].y
         elif axis.lower() == "x":
             return obj[index].axis[pap].val
+        elif axis.lower() == "all":
+            return obj[index]
     elif (obj_type == SO_type):
         if axis.lower() == "y":
             return obj.y
         elif axis.lower() == "x":
             return obj.axis[pap].val
+        elif axis.lower() == "all":
+            return obj
     elif (obj_type == num_type):
-        return obj[0]
+        if axis.lower() == "all":
+            return obj[index]
+        else:
+            try:
+                return obj[index][0]
+            except TypeError:
+                return obj[0]
     else:
         raise TypeError, "Object type not recognized by get_value function."
 
@@ -294,7 +315,10 @@ def get_err2(obj,index,descr=None,axis="y",pap=0):
             else:
                 return obj.axis[pap].var
     elif (obj_type == num_type):
-        return obj[1]
+        try:
+            return obj[index][1]
+        except TypeError:
+            return obj[1]
     else:
         raise TypeError, "Object type not recognized by get_err2 function."
 
