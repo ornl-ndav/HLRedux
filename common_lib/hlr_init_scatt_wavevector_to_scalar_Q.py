@@ -47,6 +47,7 @@ def init_scatt_wavevector_to_scalar_Q(initk,scattk,polar=None,
     if res_descr == "SOM":
         index = hlr_utils.hlr_1D_units(result, units)
         result = hlr_utils.hlr_force_units(result, units, index)
+        result.setAxisLabel(index, "scalar_Q_transfer")
 
     if polar == None:
         polar = [0.785398163, 0.01]

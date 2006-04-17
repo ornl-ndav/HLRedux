@@ -41,6 +41,7 @@ def tof_to_initial_wavelength_igs(obj,lambda_f=None,t_0=None,L_s=None,
     result=hlr_utils.copy_som_attr(result,res_descr,obj,o_descr)
     if res_descr == "SOM":
         result = hlr_utils.hlr_force_units(result, "Angstroms", axis)
+        result.setAxisLabel(axis, "wavelength")
 
     if lambda_f == None:
         lambda_f = [7.0, 0.1]
