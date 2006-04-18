@@ -203,9 +203,7 @@ def sum_all_spectra(config, data_som):
     return dr_lib.sum_all_spectra(data_som)
 
 def run(config):
-    import gc
-    #gc.set_debug(gc.DEBUG_STATS)
-    print "0:",gc.get_threshold()
+    import sys
     
     if config.data==None:
         raise RuntimeError, "Need to pass a data filename to the driver "\
@@ -238,6 +236,9 @@ def run(config):
         d_som2 = dead_time_correction(config, d_som1)
     else:
         d_som2 = d_som1
+
+    print "1:", sys.getrefcount(d_som1)
+    print "1:", sys.getrefcount(d_som2)
 
     del d_som1
 
@@ -280,12 +281,11 @@ def run(config):
         
     d_som3 = subtract_dark_count_from_data(config, d_som2, dc_som1)
 
+
+    print "2:", sys.getrefcount(d_som2)
+
     del d_som2
     del dc_som1
-
-    print "*************** GARBAGE COLLECT FIRING ****************"
-    gc.collect()
-    print "*************** GARBAGE COLLECT DONE ****************"
     
     if not config.no_tib:
         if config.verbose:
@@ -300,13 +300,17 @@ def run(config):
         
     d_som4 = subtract_time_indep_bkg(config, d_som3, B)
 
+    print "3:", sys.getrefcount(d_som3)
+    print "4:", sys.getrefcount(B)
+    
+    if d_som3 != None:
+        d_som3 = None
+
+    if B != None:
+        B = None
+
     del d_som3
     del B
-
-    print "*************** GARBAGE COLLECT FIRING ****************"
-    gc.collect()
-    print "*************** GARBAGE COLLECT DONE ****************"
-    
 
     if not config.data_bkg==None:
         if config.verbose:
@@ -323,13 +327,17 @@ def run(config):
         
     d_som5 = subtract_bkg_from_data(config, d_som4, bkg_som1)
 
+    print "5:", sys.getrefcount(d_som4)
+
+    if d_som4 != None:
+        d_som4 = None
+
+    if bkg_som1 != None:
+        bkg_som4 = None
+        
     del d_som4
     del bkg_som1
 
-    print "*************** GARBAGE COLLECT FIRING ****************"
-    gc.collect()
-    print "*************** GARBAGE COLLECT DONE ****************"
-    
     if n_som2 != None:
         if config.verbose:
             print "Normalizing data by normalization data"
@@ -337,13 +345,18 @@ def run(config):
     else:
         d_som6 = d_som5
 
+
+    print "6:", sys.getrefcount(d_som5)
+
+    if d_som5 != None:
+        d_som5 = None
+
+    if n_som2 != None:
+        n_som2 = None
+        
     del d_som5
     del n_som2
 
-    print "*************** GARBAGE COLLECT FIRING ****************"
-    gc.collect()
-    print "*************** GARBAGE COLLECT DONE ****************"
-    
     if config.no_mon_norm:
         m_som1 = None
     else:
@@ -377,20 +390,24 @@ def run(config):
         det_geom_dst = DST.getInstance("text/xml", config.det_geom)
         det_geom = det_geom_dst.getGeometry()
         det_geom_dst.release_resource()
-        d_som5.setGeometry(det_geom)
+        d_som6.setGeometry(det_geom)
 
     if config.verbose:
         print "Converting TOF to wavelength"
         
     d_som7, m_som2 = convert_data_and_mon_to_wavelength(config, d_som6, m_som1)
 
+    if d_som6 != None:
+        d_som6 = None
+
+    if m_som1 != None:
+        m_som1 = None
+
+    print "7:", sys.getrefcount(d_som6)
+
     del d_som6
     del m_som1
 
-    print "*************** GARBAGE COLLECT FIRING ****************"
-    gc.collect()
-    print "*************** GARBAGE COLLECT DONE ****************"
-    
 
     if config.mon_eff==None:
         m_eff2 = None
@@ -428,10 +445,24 @@ def run(config):
 
     d_som8 = eff_correct_data(config, d_som7, det_eff2)
 
+    print "8:", sys.getrefcount(d_som7)
+
+    if d_som7 != None:
+        d_som7 = None
+
+    del d_som7
+
     if config.verbose and m_som3 != None:
         print "Normalizing data by monitor"
         
     d_som9 = norm_data_by_mon(config, d_som8, m_som3)
+
+    print "9:", sys.getrefcount(d_som8)
+
+    if d_som8 != None:
+        d_som8 = None
+
+    del d_som8
 
     if config.verbose:
         print "Converting initial wavelength to k_initial"
@@ -443,11 +474,12 @@ def run(config):
         
     d_som11 = calc_E_initial(config, d_som9)
 
+    print "10:", sys.getrefcount(d_som9)
+    
+    if d_som9 != None:
+        d_som9 = None
+        
     del d_som9
-
-    print "*************** GARBAGE COLLECT FIRING ****************"
-    gc.collect()
-    print "*************** GARBAGE COLLECT DONE ****************"
 
     if config.verbose:
         print "Converting final wavelength to k_final"
@@ -467,19 +499,21 @@ def run(config):
     if config.verbose:
         print "Calculating scalar momentum transfer"
 
+    print "11:", sys.getrefcount(d_som11)
+
+    if d_som11 != None:
+        d_som11 = None
+        
     del d_som11
 
-    print "*************** GARBAGE COLLECT FIRING ****************"
-    gc.collect()
-    print "*************** GARBAGE COLLECT DONE ****************"
-        
     d_som13 = calc_scalar_Q(config, d_som10, k_final)
 
-    del d_som10
+    print "12:", sys.getrefcount(d_som10)
 
-    print "*************** GARBAGE COLLECT FIRING ****************"
-    gc.collect()
-    print "*************** GARBAGE COLLECT DONE ****************"
+    if d_som10 != None:
+        d_som10 = None
+        
+    del d_som10
 
     if config.Q_bins==None or config.E_bins==None:
         config.banks_separate=True
@@ -496,7 +530,14 @@ def run(config):
     # Writing 3 column ASCII file
     resource = open(config.output, "w")
     a3c = DST.getInstance("text/Spec", resource)
+    if config.verbose:
+        print "Writing scalar Q transfer"
+        
     a3c.writeSOM(d_som13)
+
+    if config.verbose:
+        print "Writing energy transfer"
+        
     a3c.writeSOM(d_som15)
     a3c.release_resource()
 
