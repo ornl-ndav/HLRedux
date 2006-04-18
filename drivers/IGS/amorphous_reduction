@@ -29,6 +29,8 @@ class Configure:
                                  # combine banks
         self.TOF_start=None
         self.TOF_end=None
+        self.mon_start=None
+        self.mon_end=None
         self.wavelength_final=None
 
 def dead_time_correction(config, data_som):
@@ -157,7 +159,17 @@ def norm_data_by_mon(config, data_som, mon_som):
     if mon_som==None:
         return data_som
 
-    return common_lib.div_ncerr(data_som, mon_som)
+    kwargs = {}
+
+    if not config.mon_start==None:
+        kwargs["start"]=mon_start
+
+    if not config.mon_end==None:
+        kwargs["end"]=mon_end
+
+    int_mon_int = list(common_lib.sumw_ncerr(mon_som, **kwargs))
+
+    return common_lib.div_ncerr(data_som, int_mon_int)
 
 def calc_k_initial(config, data_som):
     """Step 14. Calculate initial wavevector using function 3.24."""
@@ -575,10 +587,14 @@ if __name__=="__main__":
     parser.add_option("","--tof-end",default=None,dest="TOF_end",
                       help="Specify the ending TOF bin for time-independent"\
                       +"background estimation")
-    parser.add_option("","--no_mon_norm",action="store_true",
+    parser.add_option("","--no-mon-norm",action="store_true",
                       dest="no_mon_norm",
                       help="Flag for turning off monitor normalization")
-    parser.add_option("","--no_tib",action="store_true",
+    parser.add_option("","--mon-start",default=None,dest="mon_start",
+                      help="Specify the starting bin for monitor integration")
+    parser.add_option("","--mon-end",default=None,dest="mon_end",
+                      help="Specify the ending bin for monitor")
+    parser.add_option("","--no-tib",action="store_true",
                       dest="no_tib",
                       help="Flag for turning off time-independent background"\
                       +"subtraction")
@@ -586,13 +602,13 @@ if __name__=="__main__":
                       dest="wavelength_final",
                       help="Specify the final wavelength"\
                       +" [lambda, err^2 lambda] in Angstroms")
-    parser.add_option("","--mon_eff",default=None, dest="mon_eff",
+    parser.add_option("","--mon-eff",default=None, dest="mon_eff",
                       help="Specify the monitor efficiency file")
-    parser.add_option("","--det_eff",default=None, dest="det_eff",
+    parser.add_option("","--det-eff",default=None, dest="det_eff",
                       help="Specify the detector efficiency file")
-    parser.add_option("","--mon_geom",default=None, dest="mon_geom",
+    parser.add_option("","--mon-geom",default=None, dest="mon_geom",
                       help="Specify the monitor geometry file")
-    parser.add_option("","--det_geom",default=None, dest="det_geom",
+    parser.add_option("","--det-geom",default=None, dest="det_geom",
                       help="Specify the detector geometry file")
     
 
@@ -632,6 +648,10 @@ if __name__=="__main__":
     config.TOF_start=options.TOF_start
     # set the TOF end bin
     config.TOF_end=options.TOF_end
+    # set the monitor start bin
+    config.mon_start=options.mon_start
+    # set the monitor end bin
+    config.mon_end=options.mon_end
     # set no_mon_norm flag
     config.no_mon_norm=options.no_mon_norm
     # set no_tib flag
