@@ -231,8 +231,8 @@ def run(config):
         data_dst = DST.getInstance("application/x-NeXus", config.data)
     except SystemError:
         print "ERROR: Failed to data read file %s" % config.data
-        import sys
         sys.exit(-1)
+
     som_id = ("/entry/data", 1)
     so_axis = "time_of_flight"
 
@@ -248,11 +248,16 @@ def run(config):
         d_som2 = dead_time_correction(config, d_som1)
     else:
         d_som2 = d_som1
+        
 
     print "1:", sys.getrefcount(d_som1)
     print "1:", sys.getrefcount(d_som2)
 
+    if d_som1 != None:
+        d_som1 = None
+        
     del d_som1
+
 
     if not config.norm==None:
         if config.verbose:
@@ -277,6 +282,16 @@ def run(config):
         print "Subtracting background for normalization"
         
     n_som2 = subtract_norm_bkg_from_norm(config, n_som1, n_bkg_som1)
+
+
+    if n_bkg_som1 != None:
+        n_bkg_som1 = None
+
+    if n_som1 != None:
+        n_som1 = None
+
+    del n_bkg_som1
+    del n_som1
 
     if not config.dark_count==None:
         if option.verbose:
@@ -434,10 +449,20 @@ def run(config):
             print "Rebinning monitor efficiency"
         m_eff2 = rebin_mon_eff(config, m_som2, m_eff1)
 
+        if m_eff1 != None:
+            m_eff1 = None
+
+        del m_eff1
+
     if config.verbose and m_eff2 != None:
         print "Correcting monitor data for efficiency"
         
     m_som3 = eff_correct_mon(config, m_som2, m_eff2)
+
+    if m_som2 != None:
+        m_som2 = None
+
+    del m_som2
 
     if config.det_eff==None:
         det_eff2 = None
@@ -452,10 +477,20 @@ def run(config):
             print "Rebinning detector efficiency"
         det_eff2 = rebin_det_eff(config, d_som7, det_eff1)
 
+        if det_eff1 != None:
+            det_eff1 = None
+
+        del det_eff1
+
     if config.verbose and det_eff2 != None:
         print "Correcting data for detector efficiency"
 
     d_som8 = eff_correct_data(config, d_som7, det_eff2)
+
+    if det_eff2 != None:
+        det_eff2 = None
+
+    del det_eff2
 
     print "8:", sys.getrefcount(d_som7)
 
@@ -553,23 +588,6 @@ def run(config):
     a3c.writeSOM(d_som15)
     a3c.release_resource()
 
-def file_exists(filename):
-    import os.path
-    return os.path.isfile(filename)
-
-def split_physical(thing):
-    if thing==None:
-        return (None,None)
-    import re
-    start_re=re.compile(r'\d+\.?\d*')
-    number=start_re.findall(thing)
-    if len(number)!=1:
-        raise RuntimeError,"Discovered multiple numbers while parsing [%s]"\
-              % thing
-    number=number[0]
-    units=start_re.sub("",thing)
-    return (number,units)
-
 if __name__=="__main__":
     import common_lib
     import dr_lib
@@ -601,7 +619,7 @@ if __name__=="__main__":
     parser.add_option("","--final-wavelength",default=None,
                       dest="wavelength_final",
                       help="Specify the final wavelength"\
-                      +" [lambda, err^2 lambda] in Angstroms")
+                      +" lambda, err^2 in Angstroms")
     parser.add_option("","--mon-eff",default=None, dest="mon_eff",
                       help="Specify the monitor efficiency file")
     parser.add_option("","--det-eff",default=None, dest="det_eff",
@@ -619,7 +637,7 @@ if __name__=="__main__":
     # get the datafile name and check it
     if len(args)==1:
         config.data=args[0]
-        if not file_exists(config.data):
+        if not hlr_utils.file_exists(config.data):
             parser.error("Data file [%s] does not exist" % config.data)
     else:
         parser.error("Did not specify a datafile")
@@ -627,9 +645,8 @@ if __name__=="__main__":
     if options.output:
         config.output=options.output
     else:
-        import re
-        nxs=re.compile(r'\.nxs')
-        config.output=nxs.sub("",config.data)+".srf"
+        config.output=hlr_utils.ext_replace(config.data, "nxs", "srf")
+
     # set the verbosity
     config.verbose=options.verbose
     config.output=options.output
@@ -643,7 +660,8 @@ if __name__=="__main__":
     config.det_geom=options.det_geom
     
     # set the dead time
-    (config.dead_time,config.dead_time_units)=split_physical(options.dead_time)
+    (config.dead_time,
+     config.dead_time_units)=hlr_utils.split_physical(options.dead_time)
     # set the TOF start bin
     config.TOF_start=options.TOF_start
     # set the TOF end bin
@@ -656,6 +674,6 @@ if __name__=="__main__":
     config.no_mon_norm=options.no_mon_norm
     # set no_tib flag
     config.no_tib=options.no_tib
-    config.wavelength_final=options.wavelength_final
+    config.wavelength_final=hlr_utils.split_val_err2(options.wavelength_final)
     # run the program
     run(config)
