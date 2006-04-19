@@ -39,7 +39,9 @@ def frequency_to_energy(obj,units="THz"):
     result=hlr_utils.copy_som_attr(result,res_descr,obj,o_descr)
     if o_descr == "SOM":
         result = hlr_utils.hlr_force_units(result, "meV", axis)
-        result.setAxisLabel(axis, "energy")
+        result.setAxisLabel(axis, "energy transfer")
+        result.setYUnits("Counts/meV")
+        result.setYLabel("Intensity")
 
     # iterate through the values
     import axis_manip

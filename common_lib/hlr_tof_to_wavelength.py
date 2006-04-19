@@ -40,6 +40,8 @@ def tof_to_wavelength(obj,pathlength=None,units="microseconds"):
     if res_descr == "SOM":
         result = hlr_utils.hlr_force_units(result, "Angstroms", axis)
         result.setAxisLabel(axis, "wavelength")
+        result.setYUnits("Counts/A")
+        result.setYLabel("Intensity")
 
     if pathlength == None:
         pathlength=[20.0, 0.1]

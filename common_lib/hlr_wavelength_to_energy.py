@@ -39,6 +39,8 @@ def wavelength_to_energy(obj,units="Angstroms"):
     if res_descr == "SOM":
         result = hlr_utils.hlr_force_units(result, "meV", axis)
         result.setAxisLabel(axis, "energy")
+        result.setYUnits("Counts/meV")
+        result.setYLabel("Intensity")
 
     # iterate through the values
     import axis_manip

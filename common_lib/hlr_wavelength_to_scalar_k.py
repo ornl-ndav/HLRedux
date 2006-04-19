@@ -39,7 +39,9 @@ def wavelength_to_scalar_k(obj,units="Angstroms"):
     result=hlr_utils.copy_som_attr(result,res_descr,obj,o_descr)
     if res_descr == "SOM":
         result = hlr_utils.hlr_force_units(result, "1/Angstroms", axis)
-        result.setAxisLabel(axis, "scalar_k")
+        result.setAxisLabel(axis, "scalar wavevector")
+        result.setYUnits("Counts/A-1")
+        result.setYLabel("Intensity")
 
     # iterate through the values
     import axis_manip

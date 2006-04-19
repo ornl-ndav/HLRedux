@@ -41,7 +41,9 @@ def energy_transfer(left,right,units="meV"):
     if res_descr == "SOM":
         index = hlr_utils.hlr_1D_units(result, units)
         result = hlr_utils.hlr_force_units(result, "THz", index)
-        result.setAxisLabel(index, "energy_transfer")
+        result.setAxisLabel(index, "energy transfer")
+        result.setYUnits("Counts/THz")
+        result.setYLabel("Intensity")
 
     if l_descr == "number":
         size = len(left)
