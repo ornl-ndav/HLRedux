@@ -32,6 +32,7 @@ class Configure:
         self.mon_start=None
         self.mon_end=None
         self.wavelength_final=None
+        self.time_zero=None
 
 def dead_time_correction(config, data_som):
     """Step 1. Apply dead time correction to each I(TOF) using
@@ -113,7 +114,8 @@ def convert_data_and_mon_to_wavelength(config, data_som, mon2_som):
 
     data_som1=common_lib.tof_to_initial_wavelength_igs(data_som,
                                                        config.wavelength_final,
-                                                       None,None,None,
+                                                       config.time_zero,
+                                                       None,None,
                                                        "microsecond")
 
     return data_som1, mon2_som1
@@ -196,7 +198,19 @@ def calc_energy_transfer(config, data_som, energy_final):
 
     data_som1 = common_lib.energy_transfer(data_som, energy_final)
 
-    return common_lib.frequency_to_energy(data_som1)
+    if data_som != None:
+        data_som = None
+
+    del data_som
+
+    data_som2 = common_lib.frequency_to_energy(data_som1)
+
+    if data_som1 != None:
+        data_som1 = None
+
+    del data_som1
+
+    return common_lib.mult_ncerr(data_som2, [1000.0,0.0])
 
 def calc_scalar_Q(config, data_som, k_final):
     """Step 19. Calculate momentum transfer using function 3.33."""
@@ -398,6 +412,11 @@ def run(config):
         #config.wavlength_final = data_dst.getParam("wavelength_final")
 
     d_som6.attr_list["Wavelength_final"]=config.wavelength_final
+
+    if config.time_zero==None:
+        config.time_zero = (0.0, 0.0)
+
+    d_som6.attr_list["Time_zero"]=config.time_zero
 
     data_dst.release_resource()
 
@@ -620,6 +639,10 @@ if __name__=="__main__":
                       dest="wavelength_final",
                       help="Specify the final wavelength"\
                       +" lambda, err^2 in Angstroms")
+    parser.add_option("","--time-zero",default=None,
+                      dest="time_zero",
+                      help="Specify the time zero offset"\
+                      +" t_0, err^2 in microseconds")
     parser.add_option("","--mon-eff",default=None, dest="mon_eff",
                       help="Specify the monitor efficiency file")
     parser.add_option("","--det-eff",default=None, dest="det_eff",
@@ -628,7 +651,15 @@ if __name__=="__main__":
                       help="Specify the monitor geometry file")
     parser.add_option("","--det-geom",default=None, dest="det_geom",
                       help="Specify the detector geometry file")
-    
+    parser.add_option("","--energy-bins",default=None,
+                      dest="E_bins",
+                      help="Specify the minimum and maximum energy values and"\
+                      +" the energy bin width in ueV")
+    parser.add_option("","--mom-trans-bins",default=None,
+                      dest="Q_bins",
+                      help="Specify the minimum and maximum momentum transfer"\
+                      +" values and the momentum transfer bin width in"\
+                      +" Angstroms^-1")
 
     (options,args)=parser.parse_args()
 
@@ -674,6 +705,23 @@ if __name__=="__main__":
     config.no_mon_norm=options.no_mon_norm
     # set no_tib flag
     config.no_tib=options.no_tib
-    config.wavelength_final=hlr_utils.split_val_err2(options.wavelength_final)
+
+    if options.wavelength_final != None:
+        config.wavelength_final=hlr_utils.split_val_err2(options.wavelength_final)
+    if options.time_zero != None:
+        config.time_zero=hlr_utils.split_val_err2(options.time_zero)
+
+    # set the E bins
+    if options.E_bins != None:
+        efacts = options.E_bins.split(',')
+        config.E_bins = hlr_utils.make_axis(float(efacts[0]), float(efacts[1]),
+                                            float(efacts[2]))
+
+    # set the Q bins
+    if options.Q_bins != None:
+        qfacts = options.Q_bins.split(',')
+        config.Q_bins = hlr_utils.make_axis(float(qfacts[0]), float(qfacts[1]),
+                                            float(qfacts[2]))
+
     # run the program
     run(config)
