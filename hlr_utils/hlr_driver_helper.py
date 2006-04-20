@@ -85,4 +85,33 @@ def split_val_err2(thing):
     return [float(mylist[0]), float(mylist[1])]
 
 
-    
+def make_axis(min, max, delta):
+    """
+    This function takes a minimum, maximum and a delta value and converts
+    those numbers into an axis.
+
+    Parameters:
+    ----------
+    -> min is the minimum value of the axis
+    -> max is the maximum value of the axis
+    -> delta is the bin width for the axis
+
+    Returns:
+    -------
+    <- A NessiList that contains the axis
+    """
+
+    import math
+    import nessi_list
+
+    n_bins = int(math.fabs(max - min) / delta)
+
+    axis = nessi_list.NessiList()
+
+    for i in range(n_bins):
+        axis.append(min + i * delta)
+
+    axis.append(max)
+
+    return axis
+
