@@ -31,7 +31,7 @@ def subtract_time_indep_bkg(obj, B_list):
 
     o_descr,l_descr=hlr_utils.get_descr(obj,B_list)
 
-    if o_descr == "number":
+    if o_descr == "number" or o_descr == "list":
         raise TypeError, "First argument must be a SOM or a SO!"
 
     result,res_descr=hlr_utils.empty_result(obj)
@@ -40,22 +40,10 @@ def subtract_time_indep_bkg(obj, B_list):
 
     import common_lib
 
-    # test B_list for size
-    B_size = len(B_list)
-    if B_size > 1:
-        multi = True
-    else:
-        multi = False
-
     # iterate through the values
     for i in range(hlr_utils.get_length(obj)):
-
         val1 = hlr_utils.get_value(obj,i,o_descr,"all")
-        if multi:
-            val2 = hlr_utils.get_value(B_list,i,l_descr,"all")
-        else:
-            val2 = hlr_utils.get_value(B_list,0,l_descr,"all")
-            
+        val2 = hlr_utils.get_value(B_list,i,l_descr,"all")
         value = common_lib.sub_ncerr(val1, val2)
 
         hlr_utils.result_insert(result,res_descr,value,None,"all")
@@ -72,8 +60,8 @@ if __name__=="__main__":
     print "* ",som1[1]
 
     print "********** subtract_time_indep_bkg"
-    print "* som -scal   :",subtract_time_indep_bkg(som1,[(3,1)])
+    print "* som -scal   :",subtract_time_indep_bkg(som1,(3,1))
     print "* som -l(scal):",subtract_time_indep_bkg(som1,[(1,1), (2,1)])
-    print "* so  -scal   :",subtract_time_indep_bkg(som1[0],[(1,1)])
+    print "* so  -scal   :",subtract_time_indep_bkg(som1[0],(1,1))
 
 

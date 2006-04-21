@@ -76,6 +76,7 @@ if __name__=="__main__":
     print "* som -so  :",sub_ncerr(som1,som1[0])
     print "* so  -som :",sub_ncerr(som1[0],som1)
     print "* som -scal:",sub_ncerr(som1,(1,1))
+    print "* som -slis:",sub_ncerr(som1,[(1,1), (2,1)])
     print "* scal-som :",sub_ncerr((1,1),som1)
     print "* so  -so  :",sub_ncerr(som1[0],som1[1])
     print "* so  -scal:",sub_ncerr(som1[0],(1,1))

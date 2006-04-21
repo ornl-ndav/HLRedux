@@ -54,41 +54,16 @@ def init_scatt_wavevector_to_scalar_Q(initk,scattk,polar=None,
     if polar == None:
         polar = [0.785398163, 0.01]
 
-    if i_descr == "number":
-        size = len(initk)
-        if size > 2:
-            i_multi = True
-        else:
-            i_multi = False
-    else:
-        i_multi = False
-
-    if s_descr == "number":
-        size = len(scattk)
-        if size > 2:
-            s_multi = True
-        else:
-            s_multi = False
-    else:
-        s_multi = False
-
     # iterate through the values
     import axis_manip
     
     for i in range(hlr_utils.get_length(initk,scattk)):
-        if i_multi:
-            val1 = hlr_utils.get_value(initk,i,i_descr,"x")
-            err2_1 = hlr_utils.get_err2(initk,i,i_descr,"x")
-        else:
-            val1 = hlr_utils.get_value(initk,0,i_descr,"x")
-            err2_1 = hlr_utils.get_err2(initk,0,i_descr,"x")
-        if s_multi:
-            val2 = hlr_utils.get_value(scattk,i,s_descr,"x")
-            err2_2 = hlr_utils.get_err2(scattk,i,s_descr,"x")
-        else:
-            val2 = hlr_utils.get_value(scattk,0,s_descr,"x")
-            err2_2 = hlr_utils.get_err2(scattk,0,s_descr,"x")
-            
+        val1 = hlr_utils.get_value(initk,i,i_descr,"x")
+        err2_1 = hlr_utils.get_err2(initk,i,i_descr,"x")
+        
+        val2 = hlr_utils.get_value(scattk,i,s_descr,"x")
+        err2_2 = hlr_utils.get_err2(scattk,i,s_descr,"x")
+        
         value=axis_manip.init_scatt_wavevector_to_scalar_Q(val1, err2_1,
                                                            val2, err2_2,
                                                            polar[0], polar[1])
