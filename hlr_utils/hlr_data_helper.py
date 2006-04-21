@@ -4,6 +4,7 @@ import SOM
 # this should be replaced with an enum
 SOM_type="SOM"
 SO_type="SO"
+list_type="list"
 num_type="number"
 empty_type=""
 
@@ -31,6 +32,8 @@ def empty_result(obj1,obj2=None):
             return (SOM.SOM(), SOM_type)
         elif obj1_type == SO_type:
             return (SOM.SO(obj1.dim()), SO_type)
+        elif obj1_type == list_type:
+            return ([], list_type)
         else:
             return ([], num_type)
     
@@ -42,11 +45,17 @@ def empty_result(obj1,obj2=None):
         return (SOM.SOM(), SOM_type)
     elif (obj1_type == SO_type and obj2_type == SO_type) or \
              (obj1_type == num_type and obj2_type == SO_type) or \
-             (obj1_type == SO_type and obj2_type == num_type):
+             (obj1_type == SO_type and obj2_type == num_type) or \
+             (obj1_type == list_type and obj2_type == SO_type) or \
+             (obj1_type == SO_type and obj2_type == list_type):
         if obj1_type == SO_type:
             return (SOM.SO(obj1.dim()), SO_type)
         elif obj2_type == SO_type:
             return (SOM.SO(obj2.dim()), SO_type)
+    elif (obj1_type == list_type and obj2 == list_type) or \
+         (obj1_type == list_type and obj2 == num_type) or \
+         (obj1_type == num_type and obj2 == num_type):
+        return ([], list_type)
     else:
         return ([], num_type)
 
@@ -150,12 +159,14 @@ def result_insert(result,descr,value,map_so,axis="y",pap=0,xvals=None):
                 result.var_y = value.var_y
                 result.axis = value.axis
 
-    elif (result_type == num_type):
+    elif (result_type == num_type or result_type == list_type):
         if axis.lower() == "all":
-            result.append([value])
+            result.append(tuple(value))
         else:
             result.append(value[0])
             result.append(value[1])
+
+        tuple(result)
     else:
         raise TypeError, "Object type not recognized by result_insert"\
               +" function."
@@ -257,14 +268,16 @@ def get_value(obj,index=0,descr=None,axis="y",pap=0):
             return obj.axis[pap].val
         elif axis.lower() == "all":
             return obj
-    elif (obj_type == num_type):
+    elif (obj_type == list_type):
         if axis.lower() == "all":
             return obj[index]
         else:
-            try:
-                return obj[index][0]
-            except TypeError:
-                return obj[0]
+            return obj[index][0]
+    elif (obj_type == num_type):
+        if axis.lower() == "all":
+            return obj
+        else:
+            return obj[0]
     else:
         raise TypeError, "Object type not recognized by get_value function."
 
@@ -314,11 +327,10 @@ def get_err2(obj,index,descr=None,axis="y",pap=0):
                 return nessi_list.NessiList(len(obj.axis[pap].val))
             else:
                 return obj.axis[pap].var
+    elif (obj_type == list_type):
+        return obj[index][1] 
     elif (obj_type == num_type):
-        try:
-            return obj[index][1]
-        except TypeError:
-            return obj[1]
+        return obj[1]
     else:
         raise TypeError, "Object type not recognized by get_err2 function."
 
@@ -344,11 +356,19 @@ def get_type(obj):
         obj.attr_list
         return SOM_type
     except AttributeError:
-        try:
-            obj.id
-            return  SO_type
-        except AttributeError:
-            return num_type
+        pass
+    
+    try:
+        obj.id
+        return  SO_type
+    except AttributeError:
+        pass
+
+    try:
+        obj[0][0]
+        return list_type
+    except TypeError:
+        return num_type
 
 
 def swap_args(left,right):
@@ -400,9 +420,11 @@ def get_map_so(obj1,obj2,index):
 
     if obj1_type == SO_type and obj2_type == SO_type:
         return obj1
-    elif obj1_type == SO_type and obj2_type == num_type:
+    elif obj1_type == SO_type and obj2_type == num_type or \
+             obj1_type == SO_type and obj2_type == list_type:
         return obj1
-    elif obj1_type == num_type and obj2_type == SO_type:
+    elif obj1_type == num_type and obj2_type == SO_type or \
+             obj1_type == list_type and obj2_type == SO_type:
         return obj2
     elif obj1_type == SOM_type and obj2_type == SOM_type:
         return obj1[index]
