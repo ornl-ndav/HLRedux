@@ -45,7 +45,7 @@ def generate_so(type,start,stop=0,dim=1,extra=0):
     return so
 
 
-def generate_som(type="histogram",dim=1):
+def generate_som(type="histogram",dim=1,number=2):
     """
     This function generates a SOM for testing purposes.
 
@@ -60,7 +60,7 @@ def generate_som(type="histogram",dim=1):
 
     som = SOM.SOM()
     count=0
-    for i in range(2):
+    for i in range(number):
         so=generate_so(type,count,count+5,dim)
         so.id=i+1
         som.append(so)
