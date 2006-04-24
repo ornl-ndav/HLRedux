@@ -9,6 +9,8 @@ def tof_to_wavelength(obj,pathlength=None,units="microseconds"):
     Parameters:
     ----------
     -> obj is the SOM, SO or tuple to be converted
+    -> pathlength (OPTIONAL) is a tuple or list of tuples containing the
+       pathlength information
 
     Return:
     ------
@@ -20,6 +22,8 @@ def tof_to_wavelength(obj,pathlength=None,units="microseconds"):
     <- TypeError is raised if the incoming object is not a type the function
        recognizes
     <- RuntimeError is raised if the SOM x-axis units are not microseconds
+    <- RuntimeError is raised if a SOM does not contain an instrument and
+       no pathlength was provided
     """
 
     # import the helper functions
@@ -43,8 +47,15 @@ def tof_to_wavelength(obj,pathlength=None,units="microseconds"):
         result.setYUnits("Counts/A")
         result.setYLabel("Intensity")
 
-    if pathlength == None:
-        pathlength=[20.0, 0.1]
+    if pathlength != None:
+        p_descr,e_descr = hlr_utils.get_descr(pathlength)
+    else:
+        if o_descr == "SOM":
+            try:
+                obj.attr_list.instrument.get_primary()
+                inst = obj.attr_list.instrument
+            except RuntimeError:
+                raise RuntimeError, "A detector was not provided"
 
     # iterate through the values
     import axis_manip
@@ -53,10 +64,16 @@ def tof_to_wavelength(obj,pathlength=None,units="microseconds"):
         val = hlr_utils.get_value(obj,i,o_descr,"x",axis)
         err2 = hlr_utils.get_err2(obj,i,o_descr,"x",axis)
 
-        value=axis_manip.tof_to_wavelength(val, err2,
-                                           pathlength[0], pathlength[1])
-
         map_so = hlr_utils.get_map_so(obj,None,i)
+
+        if pathlength == None:
+            pl,pl_err2 = hlr_utils.get_parameter("primary",map_so,inst)
+        else:
+            pl = hlr_utils.get_value(pathlength,i,p_descr)
+            pl_err2 = hlr_utils.get_err2(pathlength,i,p_descr)
+
+        value=axis_manip.tof_to_wavelength(val, err2, pl, pl_err2)
+
         hlr_utils.result_insert(result,res_descr,value,map_so,"x",axis)
 
     return result
@@ -64,9 +81,13 @@ def tof_to_wavelength(obj,pathlength=None,units="microseconds"):
 
 if __name__=="__main__":
     import hlr_test
+    import SOM
+
+    pathlength = (20.0, 0.1)
 
     som1=hlr_test.generate_som()
     som1.setAllAxisUnits(["microseconds"])
+    som1.attr_list.instrument = SOM.ASG_Instrument()
 
     print "********** SOM1"
     print "* ",som1[0]
@@ -74,5 +95,5 @@ if __name__=="__main__":
 
     print "********** tof_to_wavelength"
     print "* tof_to_wavelength som :",tof_to_wavelength(som1)
-    print "* tof_to_wavelength so  :",tof_to_wavelength(som1[0])
-    print "* tof_to_wavelength scal:",tof_to_wavelength([1,1])
+    print "* tof_to_wavelength so  :",tof_to_wavelength(som1[0], pathlength)
+    print "* tof_to_wavelength scal:",tof_to_wavelength([1,1], pathlength)

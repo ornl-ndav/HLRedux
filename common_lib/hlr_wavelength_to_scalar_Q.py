@@ -1,4 +1,4 @@
-def wavelength_to_scalar_Q(obj,pathlength=None,units="Angstroms"):
+def wavelength_to_scalar_Q(obj,polar=None,units="Angstroms"):
     """
     This function converts a primary axis of a SOM or SO from wavelength
     to scalar_Q. The wavelength axis for a SOM must be in units of
@@ -9,7 +9,9 @@ def wavelength_to_scalar_Q(obj,pathlength=None,units="Angstroms"):
     Parameters:
     ----------
     -> obj is the SOM, SO or tuple to be converted
-
+     -> polar (OPTIONAL) is a tuple or list of tuples providing the polar angle
+       information
+ 
     Return:
     ------
     <- A SOM or SO with a primary axis in wavelength or a tuple converted to
@@ -43,8 +45,15 @@ def wavelength_to_scalar_Q(obj,pathlength=None,units="Angstroms"):
         result.setYUnits("Counts/A-1")
         result.setYLabel("Intensity")
 
-    if pathlength == None:
-        pathlength=[20.0, 0.1]
+    if polar == None:
+        if o_descr == "SOM":
+            try:
+                obj.attr_list.instrument.get_primary()
+                inst = obj.attr_list.instrument
+            except RuntimeError:
+                raise RuntimeError, "A detector was not provided!"
+    else:
+        p_descr,e_descr = hlr_utils.get_descr(polar)
 
     # iterate through the values
     import axis_manip
@@ -53,16 +62,23 @@ def wavelength_to_scalar_Q(obj,pathlength=None,units="Angstroms"):
         val = hlr_utils.get_value(obj,i,o_descr,"x",axis)
         err2 = hlr_utils.get_err2(obj,i,o_descr,"x",axis)
 
-        value=axis_manip.wavelength_to_scalar_Q(val, err2,
-                                                pathlength[0], pathlength[1])
+        map_so = hlr_utils.get_map_so(obj,None,i)
+
+        if polar == None:
+            angle,angle_err2 = hlr_utils.get_parameter("polar",map_so,inst)
+        else:
+            angle = hlr_utils.get_value(polar,i,p_descr)
+            angle_err2 = hlr_utils.get_err2(polar,i,p_descr) 
+
+        value=axis_manip.wavelength_to_scalar_Q(val, err2, angle, angle_err2)
+
         if o_descr != "number":
             rev_value = []
             rev_value.append(axis_manip.reverse_array_cp(value[0]))
             rev_value.append(axis_manip.reverse_array_cp(value[1]))
         else:
             rev_value = value
-            
-        map_so = hlr_utils.get_map_so(obj,None,i)
+
         if map_so != None:
             map_so.y=axis_manip.reverse_array_cp(map_so.y)
             map_so.var_y=axis_manip.reverse_array_cp(map_so.var_y)
@@ -74,12 +90,17 @@ def wavelength_to_scalar_Q(obj,pathlength=None,units="Angstroms"):
 
 if __name__=="__main__":
     import hlr_test
+    import SOM
+
+    polar=(0.785, 0.005)
 
     som1=hlr_test.generate_som()
     som1.setAllAxisUnits(["Angstroms"])
+    som1.attr_list.instrument = SOM.ASG_Instrument()
 
     som2=hlr_test.generate_som()
     som2.setAllAxisUnits(["Angstroms"])
+    som2.attr_list.instrument = SOM.ASG_Instrument()
 
     print "********** SOM1"
     print "* ",som1[0]
@@ -91,7 +112,7 @@ if __name__=="__main__":
 
     print "********** wavelength_to_scalar_Q"
     print "* som  :",wavelength_to_scalar_Q(som1)
-    print "* so   :",wavelength_to_scalar_Q(som2[0])
-    print "* scal :",wavelength_to_scalar_Q([1,1])
+    print "* so   :",wavelength_to_scalar_Q(som2[0], polar)
+    print "* scal :",wavelength_to_scalar_Q([1,1], polar)
 
 
