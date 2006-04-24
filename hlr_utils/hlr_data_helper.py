@@ -473,3 +473,45 @@ def copy_som_attr(result, res_descr, obj1, obj1_descr,
             result.copyAttributes(obj2)
 
     return result
+
+
+def get_parameter(param,so,inst):
+    """
+    This function takes a parameter string, a SO and an Instrument and returns
+    the appropriate parameter based on the parameter string. The SO is used
+    to obtain the spectrum ID for the Instrument object.
+
+    Parameters:
+    ----------
+    -> param is the string containing the requested parameter
+    -> so is the required SO for the id
+    -> inst is the instrument object from which to fetch the parameter
+       information
+
+    Returns:
+    -------
+    <- The result parameter and its associated error in a tuple
+
+    Exceptions:
+    ----------
+    <- RuntimeError is raised is a SO is not passed
+    """
+
+    try:
+        so.id
+    except AttributeError:
+        raise RuntimeError, "Wrong object for function call. Please pass a "\
+              +"SO."
+
+    if param == "az" or param == "azimuthal":
+        return inst.get_azimuthal(so.id)
+    elif param == "polar":
+        return inst.get_polar(so.id)
+    elif param == "primary":
+        return inst.get_primary(so.id)
+    elif param == "secondary":
+        return inst.get_secondary(so.id)
+    else:
+        raise RuntimeError, "Parameter %s is not an understood type." % \
+              param
+         
