@@ -113,8 +113,7 @@ def convert_data_and_mon_to_wavelength(config, data_som, mon2_som):
         mon2_som1 = None
 
     data_som1=common_lib.tof_to_initial_wavelength_igs(data_som,
-                                                       config.wavelength_final,
-                                                       config.time_zero,
+                                                       None,None,
                                                        None,None,
                                                        "microsecond")
 
@@ -210,7 +209,7 @@ def calc_energy_transfer(config, data_som, energy_final):
 
     del data_som1
 
-    return common_lib.mult_ncerr(data_som2, [1000.0,0.0])
+    return common_lib.mult_ncerr(data_som2, (1000.0,0.0))
 
 def calc_scalar_Q(config, data_som, k_final):
     """Step 19. Calculate momentum transfer using function 3.33."""
@@ -221,7 +220,14 @@ def rebin_final(config, data_som):
     """Step 20. Rebin onto user defined two dimensional grid using
     function 3.13."""
 
-    return common_lib.rebin_axis_2D(data_som, config.Q_bins, config.E_bins)
+    return dr_lib.create_2D_dist(data_som,config.E_bins,config.Q_bins,
+                                 so_id="Full Detector",
+                                 y_label="Counts / (ueV * rad)",
+                                 y_units="counts",
+                                 x_labels=["angle","energy transfer"],
+                                 x_units=["rad","ueV"])
+
+    #return common_lib.rebin_axis_2D(data_som, config.Q_bins, config.E_bins)
 
 def sum_all_spectra(config, data_som):
     """Step 21. Sum all spectrum together using function 3.10."""
@@ -234,10 +240,6 @@ def run(config):
     if config.data==None:
         raise RuntimeError, "Need to pass a data filename to the driver "\
         +"script."
-
-    if config.output==None:
-        print "No output file name specified. Using temp.a3c"
-        config.output="temp.a3c"
 
     import DST
 
@@ -533,10 +535,10 @@ def run(config):
 
     del d_som8
 
-    if config.verbose:
-        print "Converting initial wavelength to k_initial"
+    #if config.verbose:
+    #    print "Converting initial wavelength to k_initial"
         
-    d_som10 = calc_k_initial(config, d_som9)
+    #d_som10 = calc_k_initial(config, d_som9)
 
     if config.verbose:
         print "Converting initial wavelength to E_initial"
@@ -550,10 +552,10 @@ def run(config):
         
     del d_som9
 
-    if config.verbose:
-        print "Converting final wavelength to k_final"
+    #if config.verbose:
+    #    print "Converting final wavelength to k_final"
         
-    k_final = calc_k_final(config)
+    #k_final = calc_k_final(config)
 
     if config.verbose:
         print "Converting final wavelength to E_final"
@@ -565,8 +567,8 @@ def run(config):
         
     d_som12 = calc_energy_transfer(config, d_som11, E_final)
 
-    if config.verbose:
-        print "Calculating scalar momentum transfer"
+    #if config.verbose:
+    #    print "Calculating scalar momentum transfer"
 
     print "11:", sys.getrefcount(d_som11)
 
@@ -575,40 +577,52 @@ def run(config):
         
     del d_som11
 
-    d_som13 = calc_scalar_Q(config, d_som10, k_final)
+    #d_som13 = calc_scalar_Q(config, d_som10, k_final)
 
-    print "12:", sys.getrefcount(d_som10)
+    #print "12:", sys.getrefcount(d_som10)
 
-    if d_som10 != None:
-        d_som10 = None
+    #if d_som10 != None:
+    #    d_som10 = None
         
-    del d_som10
+    #del d_som10
 
-    if config.Q_bins==None or config.E_bins==None:
-        config.banks_separate=True
-        d_som14 = d_som12
-    else:
-        config.banks_separate=False
-        d_som14 = rebin_final(config, d_som12)
+    #if config.Q_bins==None or config.E_bins==None:
+    #    config.banks_separate=True
+    #    d_som14 = d_som12
+    #else:
+    #    config.banks_separate=False
+    #    d_som14 = rebin_final(config, d_som12)
 
-    if not config.banks_separate:
-        d_som15 = sum_all_spectra(config, d_som14)
-    else:
-        d_som15 = d_som14
+    #if not config.banks_separate:
+    #    d_som15 = sum_all_spectra(config, d_som14)
+    #else:
+    #    d_som15 = d_som14
 
-    # Writing 3 column ASCII file
+    if config.verbose:
+        print "Creating 2D spectrum"
+        
+    d_som13 = rebin_final(config,d_som12)
+
+    if d_som12 != None:
+        d_som12 = None
+        
+    del d_som12
+
+    # Writing 2D DAVE file
+
     resource = open(config.output, "w")
-    a3c = DST.getInstance("text/Spec", resource)
+    d2d = DST.getInstance("text/Dave2d", resource)
     if config.verbose:
-        print "Writing scalar Q transfer"
+        print "Writing data"
+#        print "Writing scalar Q transfer"
         
-    a3c.writeSOM(d_som13)
+    d2d.writeSOM(d_som13)
 
-    if config.verbose:
-        print "Writing energy transfer"
+#    if config.verbose:
+#        print "Writing energy transfer"
         
-    a3c.writeSOM(d_som15)
-    a3c.release_resource()
+#    d2d.writeSOM(d_som15)
+    d2d.release_resource()
 
 if __name__=="__main__":
     import common_lib
@@ -679,11 +693,12 @@ if __name__=="__main__":
     if options.output:
         config.output=options.output
     else:
-        config.output=hlr_utils.ext_replace(config.data, "nxs", "srf")
+        config.output=hlr_utils.ext_replace(config.data, "nxs", "txt")
+        print "Using %s as output file" % config.output
 
     # set the verbosity
     config.verbose=options.verbose
-    config.output=options.output
+
     config.norm=options.norm
     config.norm_bkg=options.norm_bkg
     config.data_bkg=options.data_bkg
