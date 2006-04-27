@@ -1,6 +1,23 @@
 def create_2D_dist(som,*args,**kwargs):
     """
+    This function takes a SOM of single spectrum with energy transfer axes and
+    rebins those axes to a given axis and converts the spectra into a single
+    I(Q,E) spectrum.
 
+    Parameters:
+    ----------
+    -> som is the input SOM with energy transfer axis SOs
+    -> *args is a list of axes for rebinning.  There is a particulare order
+       to them. They should be present in the following order:
+       1. Energy transfer
+       2. Momentum transfer
+    -> **kwargs is a dictionary of keywords that pass information to the
+       function. Here are the currently accepted keywords:
+       - withXVar=True or False
+
+    Returns:
+    -------
+    <- A SOM with a single 2D SO with E and Q axes
     """
 
     import common_lib
@@ -37,31 +54,41 @@ def create_2D_dist(som,*args,**kwargs):
     del som
 
     inst = som1.attr_list.instrument
+    lambda_final = som1.attr_list["Wavelength_final"]
 
+    import axis_manip
+    
     for i in range(hlr_utils.get_length(som1)):
         so = hlr_utils.get_value(som1,i,"SOM","all")
         angle,angle_err2 = hlr_utils.get_parameter("polar",so,inst)
 
+        Q,Q_err2 = axis_manip.wavelength_to_scalar_Q(lambda_final[0],
+                                                     lambda_final[1],
+                                                     angle/2.0,
+                                                     angle_err2/2.0)
+
+        index = -1
         for j in range(N_y[0]):
-            if angle >= args[1][j] and angle < args[1][j+1]:
+            if Q >= args[1][j] and Q < args[1][j+1]:
                 index = j
                 break
 
-        start = index * N_y[1]
-        finish = (index + 1) * N_y[1]
-
-        so_temp = SOM.SO()
-        so_temp.y.extend(so_dim.y[index*N_y[1]:(index+1)*N_y[1]])
-        so_temp.var_y.extend(so_dim.var_y[index*N_y[1]:(index+1)*N_y[1]])
-
-        so_temp = common_lib.add_ncerr(so, so_temp)
-
-        q = 0
-        for k in range(start,finish):
-            so_dim.y[k] = so_temp.y[q]
-            so_dim.var_y[k] = so_temp.var_y[q]
-            q += 1
-
+        if index != -1:
+            start = index * N_y[1]
+            finish = (index + 1) * N_y[1]
+            
+            so_temp = SOM.SO()
+            so_temp.y.extend(so_dim.y[index*N_y[1]:(index+1)*N_y[1]])
+            so_temp.var_y.extend(so_dim.var_y[index*N_y[1]:(index+1)*N_y[1]])
+            
+            so_temp = common_lib.add_ncerr(so, so_temp)
+            
+            q = 0
+            for k in range(start,finish):
+                so_dim.y[k] = so_temp.y[q]
+                so_dim.var_y[k] = so_temp.var_y[q]
+                q += 1
+                
 
     if kwargs.has_key("so_id"):
         so_dim.id = kwargs["so_id"]
@@ -102,9 +129,10 @@ if __name__=="__main__":
     import SOM
 
     som1 = hlr_test.generate_som("histogram",1,3)
+    som1.attr_list["Wavelength_final"] = (1,1)
     som1.attr_list.instrument = SOM.ASG_Instrument()
 
-    axis = hlr_utils.make_axis(0,1,0.25)
+    axis = hlr_utils.make_axis(4,5,0.25)
 
     print "********** SOM1"
     print "* ",som1[0]
