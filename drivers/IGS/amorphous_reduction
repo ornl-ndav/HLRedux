@@ -74,10 +74,10 @@ def determine_time_indep_bkg(config, data_som):
     kwargs = {}
 
     if not config.TOF_start==None:
-        kwargs["start"]=TOF_start
+        kwargs["start"]=config.TOF_start
 
     if not config.TOF_end==None:
-        kwargs["end"]=TOF_end
+        kwargs["end"]=config.TOF_end
 
     return common_lib.weighted_average(data_som, **kwargs)
 
@@ -176,10 +176,10 @@ def norm_data_by_mon(config, data_som, mon_som):
     kwargs = {}
 
     if not config.mon_start==None:
-        kwargs["start"]=mon_start
+        kwargs["start"]=config.mon_start
 
     if not config.mon_end==None:
-        kwargs["end"]=mon_end
+        kwargs["end"]=config.mon_end
 
     int_mon_int = list(common_lib.sumw_ncerr(mon_som, **kwargs))
 
