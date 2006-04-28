@@ -33,12 +33,12 @@ def weighted_average(obj,**kwargs):
     o_descr,d_descr=hlr_utils.get_descr(obj)
 
     if(kwargs.has_key("start")):
-        start=kwargs["start"]
+        start=int(kwargs["start"])
     else:
         start=0
 
     if(kwargs.has_key("end")):
-        end=kwargs["end"]
+        end=int(kwargs["end"])
     else:
         end=hlr_utils.get_length(obj)-1
             
@@ -55,7 +55,8 @@ def weighted_average(obj,**kwargs):
 
         hlr_utils.result_insert(result,res_descr,value,None,"all")
 
-    return result
+    import copy
+    return copy.deepcopy(result)
 
 
 if __name__=="__main__":
