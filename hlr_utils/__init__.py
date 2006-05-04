@@ -5,4 +5,4 @@ from hlr_data_helper import *
 from hlr_driver_helper import *
 
 #version
-__id__ = "$Id"
+__id__ = "$Id$"
