@@ -455,7 +455,9 @@ def run(config):
         print "7:", sys.getrefcount(d_som6)
 
     if config.dump_wave:
-        pixel_file=hlr_utils.ext_replace(config.data, "nxs", "pxl")
+        file = os.path.basename(config.data)
+        path = os.path.join(os.getcwd(), file)
+        pixel_file=hlr_utils.ext_replace(path, "nxs", "pxl")
         resource = open(pixel_file, "w") 
         a3c = DST.getInstance("text/Spec", resource)
         if config.verbose:
@@ -592,6 +594,7 @@ if __name__=="__main__":
     import common_lib
     import dr_lib
     import hlr_utils
+    import os
     
     # set up the options available
     parser=hlr_utils.SNSOptions("usage: %prog [options] <datafile>")
@@ -661,7 +664,9 @@ if __name__=="__main__":
     if options.output:
         config.output=options.output
     else:
-        config.output=hlr_utils.ext_replace(config.data, "nxs", "txt")
+        file = os.path.basename(config.data)
+        path = os.path.join(os.getcwd(), file)
+        config.output=hlr_utils.ext_replace(path, "nxs", "txt")
         print "Using %s as output file" % config.output
 
     # set the verbosity
