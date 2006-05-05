@@ -13,6 +13,12 @@ def file_exists(filename):
     """
     
     import os.path
+
+    if filename.startswith("~"):
+        filename = os.path.expanduser(filename)
+    elif filename.startswith("$"):
+        filename = os.path.expandvars(filename)
+
     return os.path.isfile(filename)
 
 
