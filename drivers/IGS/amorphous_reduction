@@ -472,20 +472,25 @@ def run(config):
     if config.mon_eff==None:
         m_eff2 = None
     else:
-        if config.verbose:
-            print "Reading monitor efficiency file"
-            
-        mon_eff_dst = DST.getInstance("text/xml", config.mon_eff)
-        m_eff1 = mon_eff_dst.getSOM("/entry/monitor2")
-        mon_eff_dst.release_resource()
-        if config.verbose:
-            print "Rebinning monitor efficiency"
-        m_eff2 = rebin_mon_eff(config, m_som2, m_eff1)
+        try:
+            config.mon_eff.title()
+            if config.verbose:
+                print "Reading monitor efficiency file"
+                
+                mon_eff_dst = DST.getInstance("text/xml", config.mon_eff)
+                m_eff1 = mon_eff_dst.getSOM("/entry/monitor2")
+                mon_eff_dst.release_resource()
+                if config.verbose:
+                    print "Rebinning monitor efficiency"
+                    m_eff2 = rebin_mon_eff(config, m_som2, m_eff1)
 
-        if m_eff1 != None:
-            m_eff1 = None
-
-        del m_eff1
+                    if m_eff1 != None:
+                        m_eff1 = None
+                        
+                    del m_eff1
+                    
+        except AttributeError:
+            m_eff2 = config.mon_eff
 
     if config.verbose and m_eff2 != None:
         print "Correcting monitor data for efficiency"
@@ -500,20 +505,25 @@ def run(config):
     if config.det_eff==None:
         det_eff2 = None
     else:
-        if config.verbose:
-            print "Reading detector efficiency file"
-            
-        det_eff_dst = DST.getInstance("text/xml", config.det_eff)
-        det_eff1 = det_eff_dst.getSOM("/entry/dectector")
-        det_eff_dst.release_resource()
-        if config.verbose:
-            print "Rebinning detector efficiency"
-        det_eff2 = rebin_det_eff(config, d_som7, det_eff1)
+        try:
+            config.det_eff.title()
+            if config.verbose:
+                print "Reading detector efficiency file"
+                
+                det_eff_dst = DST.getInstance("text/xml", config.det_eff)
+                det_eff1 = det_eff_dst.getSOM("/entry/dectector")
+                det_eff_dst.release_resource()
+                if config.verbose:
+                    print "Rebinning detector efficiency"
+                    det_eff2 = rebin_det_eff(config, d_som7, det_eff1)
 
-        if det_eff1 != None:
-            det_eff1 = None
+                if det_eff1 != None:
+                    det_eff1 = None
+                    
+                del det_eff1
 
-        del det_eff1
+        except AttributeError:
+            det_eff2 = config.det_eff
 
     if config.verbose and det_eff2 != None:
         print "Correcting data for detector efficiency"
@@ -628,9 +638,11 @@ if __name__=="__main__":
                       help="Specify the time zero offset"\
                       +" t_0, err^2 in microseconds")
     parser.add_option("","--mon-eff",default=None, dest="mon_eff",
-                      help="Specify the monitor efficiency file")
+                      help="Specify the monitor efficiency file or an "\
+                      +"efficiency tuple (efficiency,error2)")
     parser.add_option("","--det-eff",default=None, dest="det_eff",
-                      help="Specify the detector efficiency file")
+                      help="Specify the detector efficiency file or an "\
+                      +"efficiency tuple (efficiency,error2)")
     parser.add_option("","--mon-geom",default=None, dest="mon_geom",
                       help="Specify the monitor geometry file")
     parser.add_option("","--det-geom",default=None, dest="det_geom",
@@ -696,17 +708,23 @@ if __name__=="__main__":
             parser.error("Dark-count file [%s] does not exist" \
                          % config.dark_count)
 
-    config.mon_eff=options.mon_eff
-    if config.mon_eff != None:
-        if not hlr_utils.file_exists(config.mon_eff):
-            parser.error("Monitor efficiency file [%s] does not exist" \
-                         % config.mon_eff)
+    if options.mon_eff != None:
+        try:
+            config.mon_eff=hlr_utils.split_val_err2(options.mon_eff)
+        except ValueError:
+            config.mon_eff=options.mon_eff
+            if not hlr_utils.file_exists(config.mon_eff):
+                parser.error("Monitor efficiency file [%s] does not exist" \
+                             % config.mon_eff)
 
-    config.det_eff=options.det_eff
-    if config.det_eff != None:
-        if not hlr_utils.file_exists(config.det_eff):
-            parser.error("Detector efficiency file [%s] does not exist" \
-                         % config.det_eff)
+    if options.det_eff != None:
+        try:
+            config.det_eff=hlr_utils.split_val_err2(options.det_eff)
+        except ValueError:
+            config.det_eff=options.det_eff
+            if not hlr_utils.file_exists(config.det_eff):
+                parser.error("Detector efficiency file [%s] does not exist" \
+                             % config.det_eff)
             
     config.mon_geom=options.mon_geom
     if config.mon_geom != None:
