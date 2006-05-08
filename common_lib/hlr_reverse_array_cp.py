@@ -15,7 +15,8 @@ def reverse_array_cp(obj):
 
     Exceptions:
     ----------
-    <- TypeError is raised if a tuple is presented to the function
+    <- TypeError is raised if a tuple or list of tuples is presented to the
+       function
     """
 
     # import the helper functions
@@ -24,6 +25,10 @@ def reverse_array_cp(obj):
     # set up for working through data
     result,res_descr=hlr_utils.empty_result(obj)
     o_descr,d_descr=hlr_utils.get_descr(obj)
+
+    if o_descr == "number" or o_descr == "list":
+        raise TypeError, "Do not know how to handle given type: %s" %\
+              +o_descr
 
     result=hlr_utils.copy_som_attr(result,res_descr,obj,o_descr)
 
@@ -34,12 +39,11 @@ def reverse_array_cp(obj):
         val = hlr_utils.get_value(obj,i,o_descr)
         err2 = hlr_utils.get_err2(obj,i,o_descr)
 
-        value = []
-        value.append(axis_manip.reverse_array_cp(val))
-        value.append(axis_manip.reverse_array_cp(err2))
+        value1 = axis_manip.reverse_array_cp(val)
+        value2 = axis_manip.reverse_array_cp(err2)
 
         map_so = hlr_utils.get_map_so(obj,None,i)
-        hlr_utils.result_insert(result,res_descr,value,map_so)
+        hlr_utils.result_insert(result,res_descr,(value1,value2),map_so)
 
     return result
 
@@ -55,4 +59,3 @@ if __name__=="__main__":
     print "********** reverse_array_cp"
     print "* rev som:",reverse_array_cp(som1)
     print "* rev so :",reverse_array_cp(som1[0])
-
