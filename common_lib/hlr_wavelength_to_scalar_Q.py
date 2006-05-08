@@ -21,6 +21,8 @@ def wavelength_to_scalar_Q(obj,polar=None,units="Angstroms"):
     ----------
     <- TypeError is raised if the incoming object is not a type the function
        recognizes
+    <- RuntimeError is raised if a SOM is not passed and no polar angle is
+       provided
     <- RuntimeError is raised if the SOM x-axis units are not Angstroms
     """
     
@@ -44,6 +46,8 @@ def wavelength_to_scalar_Q(obj,polar=None,units="Angstroms"):
         result.setAxisLabel(axis, "scalar wavevector transfer")
         result.setYUnits("Counts/A-1")
         result.setYLabel("Intensity")
+    else:
+        pass
 
     if polar == None:
         if o_descr == "SOM":
@@ -52,6 +56,9 @@ def wavelength_to_scalar_Q(obj,polar=None,units="Angstroms"):
                 inst = obj.attr_list.instrument
             except RuntimeError:
                 raise RuntimeError, "A detector was not provided!"
+        else:
+            raise RuntimeError, "If no SOM is provided, then polar "\
+                  +"information must be given."
     else:
         (p_descr,e_descr) = hlr_utils.get_descr(polar)
 
@@ -82,6 +89,8 @@ def wavelength_to_scalar_Q(obj,polar=None,units="Angstroms"):
         if map_so != None:
             map_so.y=axis_manip.reverse_array_cp(map_so.y)
             map_so.var_y=axis_manip.reverse_array_cp(map_so.var_y)
+        else:
+            pass
         
         hlr_utils.result_insert(result,res_descr,rev_value,map_so,"x",axis)
 

@@ -42,6 +42,8 @@ def frequency_to_energy(obj,units="THz"):
         result.setAxisLabel(axis, "energy transfer")
         result.setYUnits("Counts/meV")
         result.setYLabel("Intensity")
+    else:
+        pass
 
     # iterate through the values
     import axis_manip

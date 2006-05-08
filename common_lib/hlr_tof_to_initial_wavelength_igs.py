@@ -54,6 +54,8 @@ def tof_to_initial_wavelength_igs(obj,lambda_f=None,time_zero=None,
         result.setAxisLabel(axis, "wavelength")
         result.setYUnits("Counts/A")
         result.setYLabel("Intensity")
+    else:
+        pass
 
     # Where to get instrument information
     if dist_source_sample == None or dist_sample_detector == None:
@@ -139,10 +141,14 @@ def tof_to_initial_wavelength_igs(obj,lambda_f=None,time_zero=None,
         if lambda_f != None:
             l_f = hlr_utils.get_value(lambda_f,i,t_descr)
             l_f_err2 = hlr_utils.get_err2(lambda_f,i,t_descr)
+        else:
+            pass
             
         if time_zero != None:
             t_0 = hlr_utils.get_value(time_zero,i,t_descr)
             t_0_err2 = hlr_utils.get_err2(time_zero,i,t_descr)
+        else:
+            pass
 
         value=axis_manip.tof_to_initial_wavelength_igs(val, err2,
                                                        l_f, l_f_err2,

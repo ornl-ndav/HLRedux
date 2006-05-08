@@ -28,7 +28,9 @@ def reverse_array_cp(obj):
 
     if o_descr == "number" or o_descr == "list":
         raise TypeError, "Do not know how to handle given type: %s" %\
-              +o_descr
+              o_descr
+    else:
+        pass
 
     result=hlr_utils.copy_som_attr(result,res_descr,obj,o_descr)
 

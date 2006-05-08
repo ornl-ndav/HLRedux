@@ -36,6 +36,8 @@ def energy_transfer(left,right,units="meV"):
         raise TypeError, "SO-SOM operation not supported"
     elif l_descr == "SO" and r_descr == "SO":
         raise TypeError, "SO-SO operation not supported"
+    else:
+        pass
     
     result=hlr_utils.copy_som_attr(result,res_descr,left,l_descr,right,r_descr)
     if res_descr == "SOM":
@@ -44,6 +46,8 @@ def energy_transfer(left,right,units="meV"):
         result.setAxisLabel(index, "energy transfer")
         result.setYUnits("Counts/THz")
         result.setYLabel("Intensity")
+    else:
+        pass
 
     # iterate through the values
     import axis_manip

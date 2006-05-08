@@ -24,6 +24,7 @@ def tof_to_wavelength(obj,pathlength=None,units="microseconds"):
     <- RuntimeError is raised if the SOM x-axis units are not microseconds
     <- RuntimeError is raised if a SOM does not contain an instrument and
        no pathlength was provided
+    <- RuntimeError is raised is no SOM is provided and no pathlength given
     """
 
     # import the helper functions
@@ -46,6 +47,8 @@ def tof_to_wavelength(obj,pathlength=None,units="microseconds"):
         result.setAxisLabel(axis, "wavelength")
         result.setYUnits("Counts/A")
         result.setYLabel("Intensity")
+    else:
+        pass
 
     if pathlength != None:
         (p_descr,e_descr) = hlr_utils.get_descr(pathlength)
@@ -56,6 +59,9 @@ def tof_to_wavelength(obj,pathlength=None,units="microseconds"):
                 inst = obj.attr_list.instrument
             except RuntimeError:
                 raise RuntimeError, "A detector was not provided"
+        else:
+            raise RuntimeError, "If no SOM is provided, then pathlength "\
+                  +"information must be provided"
 
     # iterate through the values
     import axis_manip

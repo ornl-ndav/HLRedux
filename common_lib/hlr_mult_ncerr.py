@@ -39,6 +39,8 @@ def mult_ncerr(left,right):
         hlr_utils.hlr_math_compatible(left,l_descr,right,r_descr)
     elif l_descr=="number" and r_descr=="number":
         raise RuntimeError, "tuple, tuple operation is not supported!"
+    else:
+        pass
 
     result=hlr_utils.copy_som_attr(result,res_descr,left,l_descr,right,r_descr)
 

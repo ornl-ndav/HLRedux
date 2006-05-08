@@ -41,6 +41,8 @@ def wavelength_to_energy(obj,units="Angstroms"):
         result.setAxisLabel(axis, "energy")
         result.setYUnits("Counts/meV")
         result.setYLabel("Intensity")
+    else:
+        pass
 
     # iterate through the values
     import axis_manip
@@ -61,6 +63,8 @@ def wavelength_to_energy(obj,units="Angstroms"):
         if map_so != None:
             map_so.y=axis_manip.reverse_array_cp(map_so.y)
             map_so.var_y=axis_manip.reverse_array_cp(map_so.var_y)
+        else:
+            pass
         
         hlr_utils.result_insert(result,res_descr,rev_value,map_so,"x",axis)
 

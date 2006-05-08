@@ -38,6 +38,8 @@ def sumw_ncerr(obj1,obj2):
         o1_descr,o2_descr = hlr_utils.swap_args(o1_descr,o2_descr)
     elif o2_descr=="SOM" and o1_descr=="SOM":
         hlr_utils.hlr_math_compatible(obj1,o1_descr,obj2,o2_descr)
+    else:
+        pass
 
     result=hlr_utils.copy_som_attr(result,res_descr,obj1,o1_descr,
                                    obj2,o2_descr)

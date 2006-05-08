@@ -32,6 +32,8 @@ def rebin_axis_1D(obj,axis_out):
     if o_descr == "number" or o_descr == "list":
         raise TypeError, "Do not know how to handle given type: %s" %\
               o_descr
+    else:
+        pass
     
     (result,res_descr)=hlr_utils.empty_result(obj)
 

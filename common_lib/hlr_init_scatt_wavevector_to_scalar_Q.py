@@ -49,6 +49,8 @@ def init_scatt_wavevector_to_scalar_Q(initk,scattk,polar=None,
         raise TypeError, "SO-SOM operation not supported"
     elif i_descr == "SO" and s_descr == "SO":
         raise TypeError, "SO-SO operation not supported"
+    else:
+        pass
 
     result=hlr_utils.copy_som_attr(result,res_descr,initk,i_descr,
                                    scattk,s_descr)
@@ -58,6 +60,8 @@ def init_scatt_wavevector_to_scalar_Q(initk,scattk,polar=None,
         result.setAxisLabel(index, "scalar wavevector transfer")
         result.setYUnits("Counts/A-1")
         result.setYLabel("Intensity")
+    else:
+        pass
 
     if polar == None:
         if i_descr == "SOM":

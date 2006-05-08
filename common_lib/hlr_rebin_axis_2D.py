@@ -40,6 +40,8 @@ def rebin_axis_2D(obj,axis1_out,axis2_out):
     if o_descr == "number" or o_descr == "list":
         raise TypeError, "Do not know how to handle given type %s" %\
               o_descr
+    else:
+        pass
     
     (result,res_descr)=hlr_utils.empty_result(obj)
 
