@@ -56,13 +56,27 @@ def tof_to_initial_wavelength_igs(obj,lambda_f=None,time_zero=None,
         result.setYLabel("Intensity")
 
     # Where to get instrument information
-    if o_descr == "SOM":
-        try:
-            obj.attr_list.instrument.get_primary()
-            inst = obj.attr_list.instrument
-        except RuntimeError:
-            raise RuntimeError, "A detector was not provided!"
-
+    if dist_source_sample == None or dist_sample_detector == None:
+        if o_descr == "SOM":
+            try:
+                obj.attr_list.instrument.get_primary()
+                inst = obj.attr_list.instrument
+            except RuntimeError:
+                raise RuntimeError, "A detector was not provided!"
+        else:
+            if dist_source_sample == None and dist_sample_detector == None:
+                raise RuntimeError, "If a SOM is not passed, the "\
+                      +"source-sample and sample-detector distances must be "\
+                      +"provided."
+            elif dist_source_sample == None:
+                raise RuntimeError, "If a SOM is not passed, the "\
+                      +"source-sample distance must be provided."
+            elif dist_sample_detector == None:
+                raise RuntimeError, "If a SOM is not passed, the "\
+                  +"sample-detector distance must be provided."
+    else:
+        pass
+        
     if lambda_f != None:
         l_descr,e_descr = hlr_utils.get_descr(lambda_f)
     else:
@@ -87,7 +101,7 @@ def tof_to_initial_wavelength_igs(obj,lambda_f=None,time_zero=None,
                 t_0 = obj.attr_list["Time_zero"][0]
                 t_0_err2 = obj.attr_list["Time_zero"][1]
             except KeyError:
-                raise RuntimeError, "Please provide a final wavelength "\
+                raise RuntimeError, "Please provide a time-zero "\
                       +"parameter either via the function call or the SOM"
         else:
             t_0 = 0.0
