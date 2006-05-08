@@ -28,7 +28,8 @@ def init_scatt_wavevector_to_scalar_Q(initk,scattk,polar=None,
     <- TypeError is raised if the SO-SOM operation is attempted
     <- TypeError is raised if the SO-SO operation is attempted
     <- RuntimeError is raised if the SOM x-axis units are not 1/Angstroms
-    <- RuntimeError is raised if a SO is passed and no polar angle is provided
+    <- RuntimeError is raised if a SOM is not passed and no polar angle is
+       provided
     <- RuntimeError is raised if no instrument is provided in a SOM
     """
 
@@ -73,6 +74,9 @@ def init_scatt_wavevector_to_scalar_Q(initk,scattk,polar=None,
             except RuntimeError:
                 raise RuntimeError, "A detector was not provided!"
 
+        else:
+            raise RuntimeError, "If no SOM is provided, then polar "\
+                  +"information must be given."
     else:
         p_descr,e_descr = hlr_utils.get_descr(polar)
 
@@ -125,7 +129,6 @@ if __name__=="__main__":
                                                            polar)
     print "* scal-scal:",init_scatt_wavevector_to_scalar_Q((2,1),(1,1),
                                                            polar)
-
 
 
 
