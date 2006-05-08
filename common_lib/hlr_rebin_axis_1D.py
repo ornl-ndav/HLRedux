@@ -29,8 +29,9 @@ def rebin_axis_1D(obj,axis_out):
         
     o_descr,d_descr=hlr_utils.get_descr(obj)
 
-    if o_descr == "number":
-        raise TypeError, "Do not know how to handle given type"
+    if o_descr == "number" or o_descr == "list":
+        raise TypeError, "Do not know how to handle given type: %s" %\
+              o_descr
     
     result,res_descr=hlr_utils.empty_result(obj)
 
@@ -70,4 +71,3 @@ if __name__=="__main__":
     print "********** rebin_axis_1D"
     print "* rebin som:",rebin_axis_1D(som1,axis)
     print "* rebin so :",rebin_axis_1D(som1[0],axis)
-
