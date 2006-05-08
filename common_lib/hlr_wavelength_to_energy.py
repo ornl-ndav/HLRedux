@@ -28,6 +28,12 @@ def wavelength_to_energy(obj,units="Angstroms"):
     (result,res_descr)=hlr_utils.empty_result(obj)
     (o_descr,d_descr)=hlr_utils.get_descr(obj)
 
+    if o_descr == "list":
+        raise TypeError, "Do not know how to handle given type: %s" %\
+              o_descr
+    else:
+        pass
+
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
     if o_descr == "SOM":
@@ -52,10 +58,11 @@ def wavelength_to_energy(obj,units="Angstroms"):
         err2 = hlr_utils.get_err2(obj,i,o_descr,"x",axis)
 
         value=axis_manip.wavelength_to_energy(val, err2)
+
         if o_descr != "number":
-            rev_value = []
-            rev_value.append(axis_manip.reverse_array_cp(value[0]))
-            rev_value.append(axis_manip.reverse_array_cp(value[1]))
+            value1 = axis_manip.reverse_array_cp(value[0])
+            value2 = axis_manip.reverse_array_cp(value[1])
+            rev_value = (value1,value2)
         else:
             rev_value = value
             
@@ -91,6 +98,4 @@ if __name__=="__main__":
     print "********** wavelength_to_energy"
     print "* som  :",wavelength_to_energy(som1)
     print "* so   :",wavelength_to_energy(som1[1])
-    print "* scal :",wavelength_to_energy([1,1])
-
-
+    print "* scal :",wavelength_to_energy((1,1))
