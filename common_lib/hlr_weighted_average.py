@@ -30,7 +30,7 @@ def weighted_average(obj,**kwargs):
     # This time highest object in the hierarchy is NOT what we need
     result = []
     res_descr = "number"
-    o_descr,d_descr=hlr_utils.get_descr(obj)
+    (o_descr,d_descr)=hlr_utils.get_descr(obj)
 
     if(kwargs.has_key("start")):
         start=int(kwargs["start"])

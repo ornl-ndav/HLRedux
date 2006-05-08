@@ -38,8 +38,8 @@ def tof_to_initial_wavelength_igs(obj,lambda_f=None,time_zero=None,
     import hlr_utils
 
     # set up for working through data
-    result,res_descr=hlr_utils.empty_result(obj)
-    o_descr,d_descr=hlr_utils.get_descr(obj)
+    (result,res_descr)=hlr_utils.empty_result(obj)
+    (o_descr,d_descr)=hlr_utils.get_descr(obj)
 
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
@@ -78,7 +78,7 @@ def tof_to_initial_wavelength_igs(obj,lambda_f=None,time_zero=None,
         pass
         
     if lambda_f != None:
-        l_descr,e_descr = hlr_utils.get_descr(lambda_f)
+        (l_descr,e_descr) = hlr_utils.get_descr(lambda_f)
     else:
         if o_descr == "SOM":
             try:
@@ -93,7 +93,7 @@ def tof_to_initial_wavelength_igs(obj,lambda_f=None,time_zero=None,
             
 
     if time_zero != None:
-        t_descr,e_descr = hlr_utils.get_descr(time_zero)
+        (t_descr,e_descr) = hlr_utils.get_descr(time_zero)
     else:
         if o_descr == "SOM":
             try:
@@ -109,10 +109,10 @@ def tof_to_initial_wavelength_igs(obj,lambda_f=None,time_zero=None,
 
 
     if dist_source_sample != None:
-        ls_descr,e_descr = hlr_utils.get_descr(dist_source_sample)
+        (ls_descr,e_descr) = hlr_utils.get_descr(dist_source_sample)
 
     if dist_sample_detector != None:
-        ld_descr,e_descr = hlr_utils.get_descr(dist_sample_detector)
+        (ld_descr,e_descr) = hlr_utils.get_descr(dist_sample_detector)
 
 
     # iterate through the values
@@ -125,13 +125,13 @@ def tof_to_initial_wavelength_igs(obj,lambda_f=None,time_zero=None,
         map_so = hlr_utils.get_map_so(obj,None,i)
 
         if dist_source_sample == None:
-            L_s,L_s_err2 = hlr_utils.get_parameter("primary",map_so,inst)
+            (L_s,L_s_err2) = hlr_utils.get_parameter("primary",map_so,inst)
         else:
             L_s = hlr_utils.get_value(dist_source_sample,i,ls_descr)
             L_s_err2 = hlr_utils.get_err2(dist_source_sample,i,ls_descr)
 
         if dist_sample_detector == None:
-            L_d,L_d_err2 = hlr_utils.get_parameter("secondary",map_so,inst)
+            (L_d,L_d_err2) = hlr_utils.get_parameter("secondary",map_so,inst)
         else:
             L_d = hlr_utils.get_value(dist_sample_detector,i,ld_descr)
             L_d_err2 = hlr_utils.get_err2(dist_sample_detector,i,ld_descr)

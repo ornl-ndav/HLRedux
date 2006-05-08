@@ -30,8 +30,8 @@ def tof_to_wavelength(obj,pathlength=None,units="microseconds"):
     import hlr_utils
 
     # set up for working through data
-    result,res_descr=hlr_utils.empty_result(obj)
-    o_descr,d_descr=hlr_utils.get_descr(obj)
+    (result,res_descr)=hlr_utils.empty_result(obj)
+    (o_descr,d_descr)=hlr_utils.get_descr(obj)
 
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
@@ -48,7 +48,7 @@ def tof_to_wavelength(obj,pathlength=None,units="microseconds"):
         result.setYLabel("Intensity")
 
     if pathlength != None:
-        p_descr,e_descr = hlr_utils.get_descr(pathlength)
+        (p_descr,e_descr) = hlr_utils.get_descr(pathlength)
     else:
         if o_descr == "SOM":
             try:
@@ -67,7 +67,7 @@ def tof_to_wavelength(obj,pathlength=None,units="microseconds"):
         map_so = hlr_utils.get_map_so(obj,None,i)
 
         if pathlength == None:
-            pl,pl_err2 = hlr_utils.get_parameter("primary",map_so,inst)
+            (pl,pl_err2) = hlr_utils.get_parameter("primary",map_so,inst)
         else:
             pl = hlr_utils.get_value(pathlength,i,p_descr)
             pl_err2 = hlr_utils.get_err2(pathlength,i,p_descr)

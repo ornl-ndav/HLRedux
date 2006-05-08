@@ -24,8 +24,8 @@ def energy_transfer(left,right,units="meV"):
     import hlr_utils
 
     # set up for working through data
-    result,res_descr=hlr_utils.empty_result(left,right)
-    l_descr,r_descr=hlr_utils.get_descr(left,right)
+    (result,res_descr)=hlr_utils.empty_result(left,right)
+    (l_descr,r_descr)=hlr_utils.get_descr(left,right)
 
     # error checking for types
     if l_descr == "SOM" and r_descr == "SOM":

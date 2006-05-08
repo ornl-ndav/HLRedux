@@ -27,7 +27,7 @@ def sumw_ncerr(obj1,obj2):
     import hlr_utils
 
     # set up for working through data
-    result,res_descr=hlr_utils.empty_result(obj1,obj2)
+    (result,res_descr)=hlr_utils.empty_result(obj1,obj2)
     (o1_descr,o2_descr)=hlr_utils.get_descr(obj1,obj2)
 
     # error check information

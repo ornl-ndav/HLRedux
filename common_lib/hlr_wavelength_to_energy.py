@@ -25,8 +25,8 @@ def wavelength_to_energy(obj,units="Angstroms"):
     import hlr_utils
 
     # set up for working through data
-    result,res_descr=hlr_utils.empty_result(obj)
-    o_descr,d_descr=hlr_utils.get_descr(obj)
+    (result,res_descr)=hlr_utils.empty_result(obj)
+    (o_descr,d_descr)=hlr_utils.get_descr(obj)
 
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position

@@ -28,8 +28,8 @@ def wavelength_to_scalar_Q(obj,polar=None,units="Angstroms"):
     import hlr_utils
 
     # set up for working through data
-    result,res_descr=hlr_utils.empty_result(obj)
-    o_descr,d_descr=hlr_utils.get_descr(obj)
+    (result,res_descr)=hlr_utils.empty_result(obj)
+    (o_descr,d_descr)=hlr_utils.get_descr(obj)
 
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
@@ -53,7 +53,7 @@ def wavelength_to_scalar_Q(obj,polar=None,units="Angstroms"):
             except RuntimeError:
                 raise RuntimeError, "A detector was not provided!"
     else:
-        p_descr,e_descr = hlr_utils.get_descr(polar)
+        (p_descr,e_descr) = hlr_utils.get_descr(polar)
 
     # iterate through the values
     import axis_manip
@@ -65,7 +65,7 @@ def wavelength_to_scalar_Q(obj,polar=None,units="Angstroms"):
         map_so = hlr_utils.get_map_so(obj,None,i)
 
         if polar == None:
-            angle,angle_err2 = hlr_utils.get_parameter("polar",map_so,inst)
+            (angle,angle_err2) = hlr_utils.get_parameter("polar",map_so,inst)
         else:
             angle = hlr_utils.get_value(polar,i,p_descr)
             angle_err2 = hlr_utils.get_err2(polar,i,p_descr) 

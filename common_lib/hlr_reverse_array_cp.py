@@ -23,8 +23,8 @@ def reverse_array_cp(obj):
     import hlr_utils
 
     # set up for working through data
-    result,res_descr=hlr_utils.empty_result(obj)
-    o_descr,d_descr=hlr_utils.get_descr(obj)
+    (result,res_descr)=hlr_utils.empty_result(obj)
+    (o_descr,d_descr)=hlr_utils.get_descr(obj)
 
     if o_descr == "number" or o_descr == "list":
         raise TypeError, "Do not know how to handle given type: %s" %\

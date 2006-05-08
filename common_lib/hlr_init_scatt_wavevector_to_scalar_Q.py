@@ -37,8 +37,8 @@ def init_scatt_wavevector_to_scalar_Q(initk,scattk,polar=None,
     import hlr_utils
 
     # set up for working through data
-    result,res_descr=hlr_utils.empty_result(initk,scattk)
-    i_descr,s_descr=hlr_utils.get_descr(initk,scattk)
+    (result,res_descr)=hlr_utils.empty_result(initk,scattk)
+    (i_descr,s_descr)=hlr_utils.get_descr(initk,scattk)
 
     # error checking for types
     if i_descr == "SOM" and s_descr == "SOM":
@@ -78,7 +78,7 @@ def init_scatt_wavevector_to_scalar_Q(initk,scattk,polar=None,
             raise RuntimeError, "If no SOM is provided, then polar "\
                   +"information must be given."
     else:
-        p_descr,e_descr = hlr_utils.get_descr(polar)
+        (p_descr,e_descr) = hlr_utils.get_descr(polar)
 
     # iterate through the values
     import axis_manip
@@ -93,7 +93,7 @@ def init_scatt_wavevector_to_scalar_Q(initk,scattk,polar=None,
         map_so = hlr_utils.get_map_so(initk,scattk,i)
 
         if polar == None:
-            angle,angle_err2 = hlr_utils.get_parameter("polar",map_so,inst)
+            (angle,angle_err2) = hlr_utils.get_parameter("polar",map_so,inst)
         else:
             angle = hlr_utils.get_value(polar,i,p_descr)
             angle_err2 = hlr_utils.get_err2(polar,i,p_descr)
