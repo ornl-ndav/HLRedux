@@ -91,8 +91,23 @@ def result_insert(result,descr,value,map_so,axis="y",pap=0,xvals=None):
 
     Parameters:
     ----------
-    
+    -> result is a SOM, SO, list or tuple
+    -> descr is the object descriptor
+    -> value is a tuple containing information to be place in result directly
+       or an object that will be placed into result
+    -> map_so is a SO that has information that will be mapped to a SO if
+       result is either a SOM or a SO
+    -> axis (OPTIONAL) is the axis to grab the value from
+    -> pap (OPTIONAL) is the primary axis position. This is used to pull the
+       value from the correct primary axis position.
+    -> xvals (OPTIONAL) is a list of x-axes that are not provided by either
+       value or map_so      
+
+    Returns:
+    -------
+    <- A SOM, SO, list or tuple with the provided information inserted
     """
+    
     if descr == None:
         result_type = get_type(result)
     else:
