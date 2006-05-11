@@ -115,7 +115,7 @@ def split_val_err2(thing):
     return [float(mylist[0]), float(mylist[1])]
 
 
-def make_axis(min, max, delta):
+def make_axis(min, max, delta, **kwargs):
     """
     This function takes a minimum, maximum and a delta value and converts
     those numbers into an axis.
@@ -125,10 +125,19 @@ def make_axis(min, max, delta):
     -> min is the minimum value of the axis
     -> max is the maximum value of the axis
     -> delta is the bin width for the axis
+    -> kwargs is a list of key word arguments that the function accepts:
+          type= a string containing the type of axis desired. Type can be
+                histogram, coordinate or density. If type is not provided the
+                default is histogram
 
     Returns:
     -------
     <- A NessiList that contains the axis
+
+    Exceptions:
+    ----------
+    <- RuntimeError is raised if the type provided via kwarg type is not
+       histogram or density or coordinate
     """
 
     import math
@@ -141,7 +150,16 @@ def make_axis(min, max, delta):
     for i in range(n_bins):
         axis.append(min + i * delta)
 
-    axis.append(max)
+    try:
+        if(kwargs["type"] == "histogram"):
+            axis.append(max)
+        elif(kwargs["type"] == "density" or kwargs["type"] == "coordinate"):
+            pass
+        else:
+            raise RuntimeError, "Do not understand type: %s" % kwargs["type"]
+        
+    except KeyError:
+        axis.append(max)
 
     return axis
 
