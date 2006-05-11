@@ -60,6 +60,8 @@ def empty_result(obj1,obj2=None):
             return ([], list_type)
         else:
             return ([], num_type)
+    else:
+        pass
     
     obj2_type = get_type(obj2)
 
