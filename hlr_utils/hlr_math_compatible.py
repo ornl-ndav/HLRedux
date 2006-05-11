@@ -84,3 +84,5 @@ def hlr_math_compatible(obj1, obj1_descr, obj2, obj2_descr):
             raise RuntimeError, "X axes at %s do not match" \
                   % str(count)
 
+    else:
+        pass
