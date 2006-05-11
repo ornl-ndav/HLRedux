@@ -91,7 +91,7 @@ def ext_replace(name, ext_out, ext_in):
     """
 
     import re
-    expression = r'\.'+ext_out
+    expression = r'\.'+ext_out+'$'
     myre=re.compile(expression)
     return myre.sub("", name)+'.'+ext_in
 
