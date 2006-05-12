@@ -224,9 +224,10 @@ def get_length(obj1,obj2=None):
     ----------
     <- IndexError is raised if the two incoming objects are SOMs and the number
        of SOs in them are not equal
+    <- RuntimeError is raised if one or both objects are None
     """
     
-    obj1_type,obj2_type = get_descr(obj1,obj2)
+    (obj1_type,obj2_type) = get_descr(obj1,obj2)
     if (obj1_type == SOM_type and obj2_type == SOM_type):
         if len(obj1) != len(obj2):
             raise IndexError,"Can only add SOMs with same number of spectra"
@@ -237,7 +238,16 @@ def get_length(obj1,obj2=None):
         return len(obj2)
     elif (obj1_type == empty_type and obj2_type == empty_type):
         raise RuntimeError, "One or two objects need to be defined."
+    elif (obj1_type == list_type or obj2_type == list_type):
+        if(obj1_type == list_type):
+            return len(obj1)
+        elif(obj2_type == list_type):
+            return len(obj2)
+        else:
+            raise RuntimeError, "hlr_utils.get_length: Should never get here!"
     elif (obj1_type != SOM_type and obj2_type != SOM_type):
+        return 1
+    else:
         return 1
 
 
