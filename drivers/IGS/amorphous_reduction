@@ -735,7 +735,7 @@ if __name__=="__main__":
 
     if options.mon_eff != None:
         try:
-            config.mon_eff=hlr_utils.split_val_err2(options.mon_eff)
+            config.mon_eff=hlr_utils.split_values(options.mon_eff)
         except ValueError:
             config.mon_eff=options.mon_eff
             if not hlr_utils.file_exists(config.mon_eff):
@@ -744,7 +744,7 @@ if __name__=="__main__":
 
     if options.det_eff != None:
         try:
-            config.det_eff=hlr_utils.split_val_err2(options.det_eff)
+            config.det_eff=hlr_utils.split_values(options.det_eff)
         except ValueError:
             config.det_eff=options.det_eff
             if not hlr_utils.file_exists(config.det_eff):
@@ -765,8 +765,8 @@ if __name__=="__main__":
 
     
     # set the dead time
-    (config.dead_time,
-     config.dead_time_units)=hlr_utils.split_physical(options.dead_time)
+    if options.dead_time != None:
+        config.dead_time=hlr_utils.split_values(options.dead_time)
     # set the TOF start bin
     config.TOF_start=options.TOF_start
     # set the TOF end bin
@@ -781,9 +781,9 @@ if __name__=="__main__":
     config.no_tib=options.no_tib
 
     if options.wavelength_final != None:
-        config.wavelength_final=hlr_utils.split_val_err2(options.wavelength_final)
+        config.wavelength_final=hlr_utils.split_values(options.wavelength_final)
     if options.time_zero != None:
-        config.time_zero=hlr_utils.split_val_err2(options.time_zero)
+        config.time_zero=hlr_utils.split_values(options.time_zero)
 
     # set the E bins
     if options.E_bins != None:
