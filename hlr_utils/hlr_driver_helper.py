@@ -46,34 +46,6 @@ def file_exists(filename):
     return os.path.isfile(filename)
 
 
-def split_physical(thing):
-    """
-    This function takes in a string object containing a number and a string
-    of the unit name and splits the two items into unique objects. An incoming
-    string may look like: 0.1microseconds.
-
-    Parameters:
-    ----------
-    -> thing is a string containing a number and units
-
-    Returns:
-    -------
-    <- a tuple of the number and units
-    """
-    
-    if thing==None:
-        return (None,None)
-    import re
-    start_re=re.compile(r'\d+\.?\d*')
-    number=start_re.findall(thing)
-    if len(number)!=1:
-        raise RuntimeError,"Discovered multiple numbers while parsing [%s]"\
-              % thing
-    number=number[0]
-    units=start_re.sub("",thing)
-    return (number,units)
-
-
 def ext_replace(name, ext_out, ext_in):
     """
     This function takes a filename and an extension (without the dot) and
@@ -96,24 +68,33 @@ def ext_replace(name, ext_out, ext_in):
     return myre.sub("", name)+'.'+ext_in
 
 
-def split_val_err2(thing):
+def split_values(thing):
     """
-    This function takes a string object that has the form value,err2 (a
-    comma-separated value list and splits that string into its constituent
-    parts.
+    This function takes a string object that has the form value,err^2,units or
+    value,err^2 or value,units. If the latter version is given, a default
+    value of 0.0 will be given for err^2.
 
     Parameters:
     ----------
-    -> thing is a string object of the form [value,err2]
+    -> thing is a string object of the form value,err^2 or value,err^2,units
+       or value,units
 
     Returns:
     -------
-    <- A list containing the value and error
+    <- A tuple of (value,err^2) or (value,err^2,units)
     """
 
     mylist = thing.split(',')
-    return [float(mylist[0]), float(mylist[1])]
-
+    try:
+        return (float(mylist[0]), float(mylist[1]), mylist[2])
+    except IndexError:
+        pass
+    
+    try:
+        return (float(mylist[0]), float(mylist[1]))
+    except ValueError:
+        return (float(mylist[0]), 0.0, mylist[1])
+    
 
 def make_axis(min, max, delta, **kwargs):
     """
