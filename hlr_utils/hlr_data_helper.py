@@ -109,45 +109,18 @@ def result_insert(result,descr,value,map_so,axis="y",pap=0,xvals=None):
         result_type = descr
 
     if (result_type == SOM_type):
-        if axis.lower() == "y":
+        if map_so != None:
             so = SOM.SO(map_so.dim())
-            so.y = value[0]
-            so.var_y = value[1]
-            so.id = map_so.id
-            so.axis = map_so.axis
-
+            
+        if axis.lower() == "y":
+            result_insert(so,None,value,map_so,axis,pap,xvals)
             result.append(so)
         elif axis.lower() == "x":
-            so = SOM.SO(map_so.dim())
-            so.id = map_so.id
-            so.y = map_so.y
-            so.var_y = map_so.var_y
-            for i in range(map_so.dim()):
-                if i == pap:
-                    so.axis[pap].val = value[0]
-                    if map_so.axis[pap].var != None:
-                        so.axis[pap].var = value[1]
-                else:
-                    so.axis[i].val = map_so.axis[i].val
-                    if map_so.axis[i].var != None:
-                        so.axis[i].var = map_so.axis[i].var
-
+            result_insert(so,None,value,map_so,axis,pap,xvals)
             result.append(so)
         elif axis.lower() == "all":
             if map_so != None:
-                so = SOM.SO(map_so.dim())
-                so.id = map_so.id
-                so.y = value[0]
-                so.var_y = value[1]
-                for i in range(len(xvals)):
-                    if i % 2 == 0:
-                        so.axis[i].val = xvals[i]
-                    elif i % 2 != 0:
-                        if map_so.axis[i-1].var == None:
-                            so.axis[i].val = xvals[i]
-                        else:
-                            so.axis[i-1].var = xvals[i]
-                            
+                result_insert(so,None,value,map_so,axis,pap,xvals)
                 result.append(so)
             else:
                 result.append(value)
