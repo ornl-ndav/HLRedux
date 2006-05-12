@@ -84,5 +84,9 @@ def hlr_math_compatible(obj1, obj1_descr, obj2, obj2_descr):
             raise RuntimeError, "X axes at %s do not match" \
                   % str(count)
 
+    # If the above two criteria are not met, the function should just do
+    # nothing. That is what the following statement does. This allows
+    # operations like SO+Num, which is a legal operation, to complete without
+    # throwing an exception.
     else:
         pass

@@ -60,6 +60,7 @@ def empty_result(obj1,obj2=None):
             return ([], list_type)
         else:
             return ([], num_type)
+    # If obj2 != None, go on.
     else:
         pass
     
