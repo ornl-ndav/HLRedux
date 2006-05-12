@@ -299,12 +299,7 @@ def get_value(obj,index=0,descr=None,axis="y",pap=0):
         obj_type = descr
 
     if (obj_type == SOM_type):
-        if axis.lower() == "y":
-            return obj[index].y
-        elif axis.lower() == "x":
-            return obj[index].axis[pap].val
-        elif axis.lower() == "all":
-            return obj[index]
+        return get_value(obj[index],index,"SO",axis,pap)
     elif (obj_type == SO_type):
         if axis.lower() == "y":
             return obj.y
@@ -313,10 +308,7 @@ def get_value(obj,index=0,descr=None,axis="y",pap=0):
         elif axis.lower() == "all":
             return obj
     elif (obj_type == list_type):
-        if axis.lower() == "all":
-            return obj[index]
-        else:
-            return obj[index][0]
+        return get_value(obj[index],index,"number",axis,pap)
     elif (obj_type == num_type):
         if axis.lower() == "all":
             return obj
@@ -356,13 +348,7 @@ def get_err2(obj,index,descr=None,axis="y",pap=0):
         obj_type = descr
 
     if (obj_type == SOM_type):
-        if axis.lower() == "y":
-            return obj[index].var_y
-        elif axis.lower() == "x":
-            if obj[index].axis[pap].var == None:
-                return nessi_list.NessiList(len(obj[index].axis[pap].val))
-            else:
-                return obj[index].axis[pap].var
+        return get_err2(obj[index],index,"SO",axis,pap)
     elif (obj_type == SO_type):
         if axis.lower() == "y":
             return obj.var_y
@@ -372,7 +358,7 @@ def get_err2(obj,index,descr=None,axis="y",pap=0):
             else:
                 return obj.axis[pap].var
     elif (obj_type == list_type):
-        return obj[index][1] 
+        return get_err2(obj[index],index,"number",axis,pap)
     elif (obj_type == num_type):
         return obj[1]
     else:
