@@ -66,22 +66,14 @@ def empty_result(obj1,obj2=None):
     
     obj2_type = get_type(obj2)
 
-    if (obj1_type == SOM_type and obj2_type == SOM_type) or \
-           (obj1_type == SOM_type and obj2_type != SOM_type) or \
-           (obj1_type != SOM_type and obj2_type == SOM_type):
+    if (obj1_type == SOM_type or obj2_type == SOM_type):
         return (SOM.SOM(), SOM_type)
-    elif (obj1_type == SO_type and obj2_type == SO_type) or \
-             (obj1_type == num_type and obj2_type == SO_type) or \
-             (obj1_type == SO_type and obj2_type == num_type) or \
-             (obj1_type == list_type and obj2_type == SO_type) or \
-             (obj1_type == SO_type and obj2_type == list_type):
+    elif (obj1_type == SO_type or obj2_type == SO_type):
         if obj1_type == SO_type:
             return (SOM.SO(obj1.dim()), SO_type)
         elif obj2_type == SO_type:
             return (SOM.SO(obj2.dim()), SO_type)
-    elif (obj1_type == list_type and obj2 == list_type) or \
-         (obj1_type == list_type and obj2 == num_type) or \
-         (obj1_type == num_type and obj2 == num_type):
+    elif (obj1_type == list_type or obj2_type == list_type):
         return ([], list_type)
     else:
         return ([], num_type)
