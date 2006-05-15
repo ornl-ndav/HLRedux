@@ -83,7 +83,7 @@ def energy_transfer(left,right,units="meV"):
         
         val2 = hlr_utils.get_value(right,i,r_descr,"x")
         err2_2 = hlr_utils.get_err2(right,i,r_descr,"x")
-            
+
         value=axis_manip.energy_transfer(val1, err2_1, val2, err2_2)
 
         map_so = hlr_utils.get_map_so(left,right,i)
@@ -109,11 +109,12 @@ if __name__=="__main__":
 
     print "********** energy_transfer"
     print "* som -scal:",energy_transfer(som1,(1,1))
+    print "* som -slist:",energy_transfer(som1,[(1,1),(4,1)])
     print "* scal-som :",energy_transfer((1,1),som1)
     print "* so  -scal:",energy_transfer(som1[0],(1,1))
     print "* scal-so  :",energy_transfer((1,1),som1[0])
     print "* scal-scal:",energy_transfer((2,1),(1,1))
-
+    print "* slist-slist:",energy_transfer([(2,1),(1,1)], [(5,1),(2,1)])
 
 
 

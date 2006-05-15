@@ -106,3 +106,4 @@ if __name__=="__main__":
     print "* som+scal:",add_ncerr(som1,(1,1))
     print "* som+so  :",add_ncerr(som1,som1[0])
     print "* som+som :",add_ncerr(som1,som2)
+    print "* som+slist :",add_ncerr(som1,[(1,1),(2,1)])
