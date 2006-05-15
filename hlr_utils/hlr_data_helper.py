@@ -166,14 +166,16 @@ def result_insert(result,descr,value,map_so,axis="y",pap=0,xvals=None):
                 result.var_y = value.var_y
                 result.axis = value.axis
 
-    elif (result_type == num_type or result_type == list_type):
+    elif (result_type == num_type):
+        result.append(value[0])
+        result.append(value[1])
+        result = tuple(result)
+
+    elif (result_type == list_type):
         if axis.lower() == "all":
             result.append(tuple(value))
         else:
-            result.append(value[0])
-            result.append(value[1])
-
-        tuple(result)
+            result.append((value[0],value[1]))
     else:
         raise TypeError, "Object type not recognized by result_insert"\
               +" function."
