@@ -151,14 +151,20 @@ def result_insert(result,descr,value,map_so,axis="y",pap=0,xvals=None):
                 result.id = map_so.id
                 result.y = value[0]
                 result.var_y = value[1]
+                axis_number = 0
                 for i in range(len(xvals)):
                     if i % 2 == 0:
-                        result.axis[i].val = xvals[i]
-                    elif i % 2 != 0:
-                        if map_so.axis[i-1].var == None:
-                            result.axis[i].val = xvals[i]
+                        result.axis[axis_number].val = xvals[i]
+                    else:
+                        # Assumes x data given as (x1, x2, x3, ...)
+                        if map_so.axis[axis_number].var == None:
+                            axis_number += 1
+                            result.axis[axis_number].val = xvals[i]
+                            axis_number += 1
+                        # Assumes x data given as (x1, ex1, x2, ex2, ...)
                         else:
-                            result.axis[i-1].var = xvals[i]
+                            result.axis[axis_number].var = xvals[i]
+                            axis_number += 1
 
             else:
                 result.id = value.id
