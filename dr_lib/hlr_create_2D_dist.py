@@ -39,8 +39,8 @@ def create_2D_dist(som,*args,**kwargs):
        function. Here are the currently accepted keywords:
        - withXVar=True or False. If the keyword is not present, the default
                   value will be False
-       - dataType=histogram or density or coordinate. If the keyword is not
-                  present, the default value will be histogram
+       - data_type=histogram or density or coordinate. If the keyword is not
+                   present, the default value will be histogram
 
     Returns:
     -------
@@ -50,6 +50,8 @@ def create_2D_dist(som,*args,**kwargs):
     ----------
     <- RuntimeError is raised if the parameter given to the keyword argument
        withXVar is not True or False
+    <- RuntimeError is raised if the parameter given to the keyword argument
+       data_type is not histogram or density or coordinate
     """
 
     import common_lib
@@ -75,11 +77,26 @@ def create_2D_dist(som,*args,**kwargs):
     except KeyError:
         xvar = False
 
+    # Check dataType keyword argument. An offset will be set to 1 for the
+    # histogram type and 0 for either density or coordinate
+    try:
+        type = kwargs["data_type"]
+        if type.lower() == "histogram":
+            offset = 1
+        elif type.lower() == "density" or type.lower() == "coordinate":
+            offset = 0
+        else:
+            raise RuntimeError, "Do not understand data type given: %s" % \
+                  type
+    # Default is offset for histogram
+    except KeyError:
+        offset = 1
+
     so_dim = SOM.SO(dim)
     if not xvar:
         for i in range(dim):
             so_dim.axis[i].val = args[dim-i-1]
-            N_y.append(len(args[dim-i-1]) - 1)
+            N_y.append(len(args[dim-i-1]) - offset)
             N_tot = N_tot * N_y[-1]
 
     so_dim.y = nessi_list.NessiList(N_tot)
