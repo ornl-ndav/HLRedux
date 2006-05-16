@@ -24,14 +24,14 @@
 
 def rebin_efficiency(obj1, obj2, units="Angstroms"):
     """
-    This function takes two SOMs or two SOs and rebins the data for obj2 onto
-    the axis provided by obj1. The units on the x-axes needs to be Angstroms,
+    This function takes two SOMs or two SOs and rebins the data for obj1 onto
+    the axis provided by obj2. The units on the x-axes needs to be Angstroms,
     since this is what the efficiencies will be present as.
 
     Parameters:
     ----------
-    -> obj1 is a SOM or SO that will provide the axis for rebinning
-    -> obj2 is a SOM or SO that will be rebinned
+    -> obj1 is a SOM or SO that will be rebinned
+    -> obj2 is a SOM or SO that will provide the axis for rebinning
 
     Returns:
     -------
@@ -73,10 +73,10 @@ def rebin_efficiency(obj1, obj2, units="Angstroms"):
     import common_lib
 
     for i in range(hlr_utils.get_length(obj1,obj2)):
-        val1 = hlr_utils.get_value(obj1,i,o1_descr,"x")
-        val2 = hlr_utils.get_value(obj2,i,o2_descr,"all")
+        val1 = hlr_utils.get_value(obj1,i,o1_descr,"all")
+        val2 = hlr_utils.get_value(obj2,i,o2_descr,"x")
         
-        value=common_lib.rebin_axis_1D(val2, val1)
+        value=common_lib.rebin_axis_1D(val1, val2)
         
         hlr_utils.result_insert(result,res_descr,value,None,"all")
 
@@ -86,24 +86,25 @@ def rebin_efficiency(obj1, obj2, units="Angstroms"):
 if __name__=="__main__":
     import hlr_test
     import SOM
-        
-    som1=hlr_test.generate_som()
-    som1.setAllAxisUnits(["Angstroms"])
 
-    som2=SOM.SOM()
-    som2.setAllAxisUnits(["Angstroms"])
+    som1=SOM.SOM()
+    som1.setAllAxisUnits(["Angstroms"])
     so1=SOM.SO()    
     so1.id=1
     so1.axis[0].val.extend(range(0,7,2))
     so1.y.extend(0.994,0.943,0.932)
     so1.var_y.extend(0.010,0.012,0.013)
-    som2.append(so1)
+    som1.append(so1)
     so2=SOM.SO()    
     so2.id=2
     so2.axis[0].val.extend(range(0,7,2))
     so2.y.extend(0.934,0.986,0.957)
     so2.var_y.extend(0.011,0.010,0.015)
-    som2.append(so2)
+    som1.append(so2)
+
+    som2=hlr_test.generate_som()
+    som2.setAllAxisUnits(["Angstroms"])
+
     
     print "********** SOM1"
     print "* ",som1[0]
