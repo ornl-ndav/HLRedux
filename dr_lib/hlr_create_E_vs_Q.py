@@ -47,8 +47,8 @@ def create_E_vs_Q(obj,E,k,px_separate=True,*args,**kwargs):
     import hlr_utils
 
     # set up for working through data
-    result,res_descr=hlr_utils.empty_result(obj)
-    o_descr,d_descr=hlr_utils.get_descr(obj)
+    (result,res_descr)=hlr_utils.empty_result(obj)
+    (o_descr,d_descr)=hlr_utils.get_descr(obj)
 
     if o_descr != "SOM":
         raise RuntimeError, "This function only accepts SOMs"
@@ -92,7 +92,7 @@ def create_E_vs_Q(obj,E,k,px_separate=True,*args,**kwargs):
         yerr2 = axis_manip.reverse_array_cp(yerr2)
 
         so = hlr_utils.get_value(obj,j,o_descr,"all")
-        angle,angle_err2 = hlr_utils.get_parameter("polar",so,inst)
+        (angle,angle_err2) = hlr_utils.get_parameter("polar",so,inst)
 
         E_t=axis_manip.energy_transfer(E_j[0], E_j[1], E[0], E[1])
         E_t=axis_manip.frequency_to_energy(E_t[0], E_t[1])

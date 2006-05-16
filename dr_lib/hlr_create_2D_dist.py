@@ -84,12 +84,12 @@ def create_2D_dist(som,*args,**kwargs):
     
     for i in range(hlr_utils.get_length(som1)):
         so = hlr_utils.get_value(som1,i,"SOM","all")
-        angle,angle_err2 = hlr_utils.get_parameter("polar",so,inst)
-
-        Q,Q_err2 = axis_manip.wavelength_to_scalar_Q(lambda_final[0],
-                                                     lambda_final[1],
-                                                     angle/2.0,
-                                                     angle_err2/2.0)
+        (angle,angle_err2) = hlr_utils.get_parameter("polar",so,inst)
+        
+        (Q,Q_err2) = axis_manip.wavelength_to_scalar_Q(lambda_final[0],
+                                                       lambda_final[1],
+                                                       angle/2.0,
+                                                       angle_err2/2.0)
 
         index = -1
         for j in range(N_y[0]):

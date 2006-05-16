@@ -52,8 +52,8 @@ def rebin_efficiency(obj1, obj2, units="Angstroms"):
     import hlr_utils
     
     # set up for working through data
-    result,res_descr=hlr_utils.empty_result(obj1,obj2)
-    o1_descr,o2_descr=hlr_utils.get_descr(obj1,obj2)
+    (result,res_descr)=hlr_utils.empty_result(obj1,obj2)
+    (o1_descr,o2_descr)=hlr_utils.get_descr(obj1,obj2)
     
     # error checking for types
     if o1_descr == "SOM" and o2_descr == "SO":

@@ -53,12 +53,12 @@ def subtract_time_indep_bkg(obj, B_list):
     # import the helper functions
     import hlr_utils
 
-    o_descr,l_descr=hlr_utils.get_descr(obj,B_list)
+    (o_descr,l_descr)=hlr_utils.get_descr(obj,B_list)
 
     if o_descr == "number" or o_descr == "list":
         raise TypeError, "First argument must be a SOM or a SO!"
 
-    result,res_descr=hlr_utils.empty_result(obj)
+    (result,res_descr)=hlr_utils.empty_result(obj)
 
     result=hlr_utils.copy_som_attr(result,res_descr,obj,o_descr)
 
