@@ -37,11 +37,17 @@ def create_2D_dist(som,*args,**kwargs):
        2. Momentum transfer
     -> **kwargs is a dictionary of keywords that pass information to the
        function. Here are the currently accepted keywords:
-       - withXVar=True or False
+       - withXVar=True or False. If the keyword is not present, the default
+                  value will be False
 
     Returns:
     -------
     <- A SOM with a single 2D SO with E and Q axes
+
+    Exceptions:
+    ----------
+    <- RuntimeError is raised if the parameter given to the keyword argument
+       withXVar is not True or False
     """
 
     import common_lib
@@ -54,9 +60,16 @@ def create_2D_dist(som,*args,**kwargs):
     N_tot = 1
     N_args = len(args)
 
+    # Check withXVar keyword argument
     try:
-        kwargs["withXVar"]
-        xvar = True
+        value = kwargs["withXVar"]
+        if value.lower() == "true":
+            xvar = True
+        elif value.lower() == "false":
+            xvar = False
+        else:
+            raise RuntimeError, "Do not understand given parameter %s" % \
+                  value
     except KeyError:
         xvar = False
 
