@@ -39,6 +39,8 @@ def create_2D_dist(som,*args,**kwargs):
        function. Here are the currently accepted keywords:
        - withXVar=True or False. If the keyword is not present, the default
                   value will be False
+       - dataType=histogram or density or coordinate. If the keyword is not
+                  present, the default value will be histogram
 
     Returns:
     -------
@@ -125,7 +127,6 @@ def create_2D_dist(som,*args,**kwargs):
                 so_dim.y[k] = so_temp.y[q]
                 so_dim.var_y[k] = so_temp.var_y[q]
                 q += 1
-                
 
     if kwargs.has_key("so_id"):
         so_dim.id = kwargs["so_id"]
@@ -138,22 +139,22 @@ def create_2D_dist(som,*args,**kwargs):
     if kwargs.has_key("y_label"):
         comb_som.setYLabel(kwargs["y_label"])
     else:
-        comb_som.setYLabel("")
+        comb_som.setYLabel("Counts")
 
     if kwargs.has_key("y_units"):
         comb_som.setYUnits(kwargs["y_units"])
     else:
-        comb_som.setYUnits("")
+        comb_som.setYUnits("Counts / THz A^-1")
 
     if kwargs.has_key("x_labels"):
         comb_som.setAllAxisLabels(kwargs["x_labels"])
     else:
-        comb_som.setAllAxisLabels(["",""])
+        comb_som.setAllAxisLabels(["Momentum transfer","Energy transfer"])
 
     if kwargs.has_key("x_units"):
         comb_som.setAllAxisUnits(kwargs["x_units"])
     else:
-        comb_som.setAllAxisUnits(["",""])
+        comb_som.setAllAxisUnits(["A^-1","THz"])
 
     comb_som.append(so_dim)
 
