@@ -114,6 +114,13 @@ def create_E_vs_Q(obj,E,k,px_separate=True,*args,**kwargs):
         so2.axis[0].val = Q[0]
         so2.axis[1].val = E_t[0]
 
+        if so.axis[0].var != None:
+            so2.axis[0].var = Q[1]
+            so2.axis[1].var = E_t[1]
+        # Do nothing
+        else:
+            pass
+
         hlr_utils.result_insert(result,res_descr,so2,None,"all")
 
     return result
