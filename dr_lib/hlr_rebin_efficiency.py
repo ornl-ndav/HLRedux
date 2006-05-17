@@ -60,14 +60,23 @@ def rebin_efficiency(obj1, obj2, units="Angstroms"):
         raise TypeError, "SOM-SO operation not supported"
     elif o1_descr == "SO" and o2_descr == "SOM":
         raise TypeError, "SO-SOM operation not supported"
+    # Have the right object combination, go on
+    else:
+        pass
 
     if o1_descr == "SOM" and o2_descr == "SOM":
          hlr_utils.hlr_math_compatible(obj1,o1_descr,obj2,o2_descr)
+    # If both objects are not SOMs, do nothing
+    else:
+        pass
 
     result=hlr_utils.copy_som_attr(result,res_descr,obj2,o2_descr)
 
     if res_descr == "SOM":
         result = hlr_utils.hlr_force_units(result, "Angstroms")
+    # Can't force units on anything other than a SOM
+    else:
+        pass
 
     # iterate through the values
     import common_lib

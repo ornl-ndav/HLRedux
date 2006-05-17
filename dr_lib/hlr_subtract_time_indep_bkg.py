@@ -49,6 +49,9 @@ def subtract_time_indep_bkg(obj, B_list):
 
     if len(B_list) <= 0:
         raise IndexError, "List of time-independent background cannot be empty"
+    # List is correct size, go on
+    else:
+        pass
 
     # import the helper functions
     import hlr_utils
@@ -57,6 +60,9 @@ def subtract_time_indep_bkg(obj, B_list):
 
     if o_descr == "number" or o_descr == "list":
         raise TypeError, "First argument must be a SOM or a SO!"
+    # Have a SOM or SO, go on
+    else:
+        pass
 
     (result,res_descr)=hlr_utils.empty_result(obj)
 
