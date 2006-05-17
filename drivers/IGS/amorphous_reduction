@@ -487,15 +487,16 @@ def run(config):
             if config.verbose:
                 print "Reading monitor efficiency file"
                 
-                mon_eff_dst = DST.getInstance("text/xml", config.mon_eff)
-                m_eff1 = mon_eff_dst.getSOM("/entry/monitor2")
-                mon_eff_dst.release_resource()
-                if config.verbose:
-                    print "Rebinning monitor efficiency"
-                    m_eff2 = rebin_mon_eff(config, m_som2, m_eff1)
+            mon_eff_dst = DST.getInstance("text/xml", config.mon_eff)
+            m_eff1 = mon_eff_dst.getSOM("/entry/monitor2")
+            mon_eff_dst.release_resource()
+            if config.verbose:
+                print "Rebinning monitor efficiency"
 
-                    m_eff1 = None
-                    del m_eff1
+            m_eff2 = rebin_mon_eff(config, m_som2, m_eff1)
+                
+            m_eff1 = None
+            del m_eff1
                     
         except AttributeError:
             m_eff2 = config.mon_eff
@@ -516,15 +517,16 @@ def run(config):
             if config.verbose:
                 print "Reading detector efficiency file"
                 
-                det_eff_dst = DST.getInstance("text/xml", config.det_eff)
-                det_eff1 = det_eff_dst.getSOM("/entry/dectector")
-                det_eff_dst.release_resource()
-                if config.verbose:
-                    print "Rebinning detector efficiency"
-                    det_eff2 = rebin_det_eff(config, d_som7, det_eff1)
+            det_eff_dst = DST.getInstance("text/xml", config.det_eff)
+            det_eff1 = det_eff_dst.getSOM("/entry/dectector")
+            det_eff_dst.release_resource()
+            if config.verbose:
+                print "Rebinning detector efficiency"
 
-                det_eff1 = None
-                del det_eff1
+            det_eff2 = rebin_det_eff(config, d_som7, det_eff1)
+
+            det_eff1 = None
+            del det_eff1
 
         except AttributeError:
             det_eff2 = config.det_eff
