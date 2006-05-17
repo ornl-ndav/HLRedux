@@ -240,7 +240,16 @@ def calc_energy_transfer(config, data_som, energy_final):
 
     del data_som1
 
-    return common_lib.mult_ncerr(data_som2, (1000.0,0.0))
+    data_som2.setYLabel("counts")
+    data_som2.setYUnits("counts / ueV")
+    data_som2.setAxisUnits(0, "ueV")
+
+    data_som3 = common_lib.mult_ncerr(data_som2, (1000.0,0.0), axis="x")
+
+    data_som2 = None
+    del data_som2
+
+    return common_lib.mult_ncerr(data_som3, (1.0/1000.0,0.0), axis="y")
 
 
 def create_final(config, data_som):
@@ -269,7 +278,7 @@ def run(config):
         print "ERROR: Failed to data read file %s" % config.data
         sys.exit(-1)
 
-    som_id = ("/entry/data", 1)
+    som_id = ("/entry/bank1", 1)
     so_axis = "time_of_flight"
 
     if config.verbose:
@@ -604,6 +613,19 @@ def run(config):
         
     d_som12 = calc_energy_transfer(config, d_som11, E_final)
 
+    if config.dump_energy:
+        file = os.path.basename(config.data)
+        path = os.path.join(os.getcwd(), file)
+        pixel_file=hlr_utils.ext_replace(path, "nxs", "exl")
+        resource = open(pixel_file, "w") 
+        a3c = DST.getInstance("text/Spec", resource)
+        if config.verbose:
+            print "Writing pixel energy transfer information"
+        
+        a3c.writeSOM(d_som12) 
+        a3c.release_resource() 
+
+
     if config.verbose:
         print "Creating 2D spectrum"
         
@@ -685,7 +707,11 @@ if __name__=="__main__":
                       dest="dump_wave",
                       help="Flag to dump the wavelength information for all"\
                       +" pixels")
-
+    parser.add_option("","--dump-energy",default=False,action="store_true",
+                      dest="dump_energy",
+                      help="Flag to dump the energy transfer information for"\
+                      +" all pixels")
+    
     (options,args)=parser.parse_args()
 
     # set up the configuration
@@ -799,6 +825,9 @@ if __name__=="__main__":
 
     # set the ability to dump the wavelength information
     config.dump_wave = options.dump_wave
+
+    # set the ability to dump the energy transfer information
+    config.dump_energy = options.dump_energy
     
     # run the program
     run(config)
