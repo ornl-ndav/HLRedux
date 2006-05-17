@@ -33,8 +33,15 @@ def create_2D_dist(som,*args,**kwargs):
     -> som is the input SOM with energy transfer axis SOs
     -> *args is a list of axes for rebinning.  There is a particulare order
        to them. They should be present in the following order:
+       Without errors
        1. Energy transfer
        2. Momentum transfer
+       With errors
+       1. Energy transfer
+       2. Energy transfer error^2
+       3. Momentum transfer
+       4. Momentum transfer error ^2
+       
     -> **kwargs is a dictionary of keywords that pass information to the
        function. Here are the currently accepted keywords:
        - withXVar=<string>. The string will either be True or False. If the
@@ -61,6 +68,8 @@ def create_2D_dist(som,*args,**kwargs):
        withXVar is not True or False
     <- RuntimeError is raised if the parameter given to the keyword argument
        data_type is not histogram or density or coordinate
+    <- RuntimeError is raised is the number of given arguments (x-axes) is not
+       either 2 (no errors) or 4 (with errors)
     """
 
     import common_lib
@@ -73,18 +82,35 @@ def create_2D_dist(som,*args,**kwargs):
     N_tot = 1
     N_args = len(args)
 
-    # Check withXVar keyword argument
+    # Check withXVar keyword argument and also check number of given args.
+    # Set xvar and Q_pos (position of the momentum transfer axis in the args
+    # list) to the appropriate values
     try:
         value = kwargs["withXVar"]
         if value.lower() == "true":
-            xvar = True
+            if N_args != 4:
+                raise RuntimeError, "Since you have requested x errors, 4 x "\
+                      +"axes must be provided."
+            else:
+                xvar = True
+                Q_pos = 2
         elif value.lower() == "false":
-            xvar = False
+            if N_args != 2:
+                raise RuntimeError, "Since you did not requested x errors, 2 "\
+                      +"x axes must be provided."
+            else:
+                xvar = False
+                Q_pos = 1
         else:
             raise RuntimeError, "Do not understand given parameter %s" % \
                   value
     except KeyError:
-        xvar = False
+        if N_args != 2:
+            raise RuntimeError, "Since you did not requested x errors, 2 "\
+                  +"x axes must be provided."
+        else:
+            xvar = False
+            Q_pos = 1
 
     # Check dataType keyword argument. An offset will be set to 1 for the
     # histogram type and 0 for either density or coordinate
@@ -102,11 +128,20 @@ def create_2D_dist(som,*args,**kwargs):
         offset = 1
 
     so_dim = SOM.SO(dim)
-    if not xvar:
-        for i in range(dim):
-            so_dim.axis[i].val = args[dim-i-1]
-            N_y.append(len(args[dim-i-1]) - offset)
-            N_tot = N_tot * N_y[-1]
+
+    for i in range(dim):
+        
+        if not xvar:
+            position = dim-i-1
+            so_dim.axis[i].val = args[position]
+        else:
+            position = dim-2*i
+            so_dim.axis[i].val = args[position]
+            so_dim.axis[i].var = args[position+1]
+            
+        N_y.append(len(args[position]) - offset)
+        N_tot = N_tot * N_y[-1]
+
 
     so_dim.y = nessi_list.NessiList(N_tot)
     so_dim.var_y = nessi_list.NessiList(N_tot)
@@ -134,7 +169,7 @@ def create_2D_dist(som,*args,**kwargs):
 
         index = -1
         for j in range(N_y[0]):
-            if Q >= args[1][j] and Q < args[1][j+1]:
+            if Q >= args[Q_pos][j] and Q < args[Q_pos][j+1]:
                 index = j
                 break
 
@@ -200,6 +235,7 @@ if __name__=="__main__":
     som1.attr_list.instrument = SOM.ASG_Instrument()
 
     axis = hlr_utils.make_axis(4,5,0.25)
+    axis_err = hlr_utils.make_axis(0,1,0.25)
 
     print "********** SOM1"
     print "* ",som1[0]
@@ -207,4 +243,4 @@ if __name__=="__main__":
     print "* ",som1[2]
 
     print "********** create_2D"
-    print " som :",create_2D_dist(som1,som1[0].axis[0].val,axis)
+    print " som :",create_2D_dist(som1,som1[0].axis[0].val,axis_err,axis,axis_err,withXVar="True")
