@@ -187,6 +187,11 @@ def create_2D_dist(som,*args,**kwargs):
                 so_dim.y[k] = so_temp.y[k-start]
                 so_dim.var_y[k] = so_temp.var_y[k-start]
 
+        # If the Q value is not found in the given axis, do nothing and
+        # continue
+        else:
+            pass
+
     # Check for so_id keyword argument
     if kwargs.has_key("so_id"):
         so_dim.id = kwargs["so_id"]
