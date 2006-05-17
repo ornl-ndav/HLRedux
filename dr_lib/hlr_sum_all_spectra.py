@@ -48,6 +48,9 @@ def sum_all_spectra(obj):
 
     if o_descr != "SOM":
         raise TypeError, "Function argument must be a SOM"
+    # Have a SOM, go on
+    else:
+        pass
 
     (result,res_descr)=hlr_utils.empty_result(obj)
 
