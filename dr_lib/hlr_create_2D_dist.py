@@ -148,9 +148,7 @@ def create_2D_dist(som,*args,**kwargs):
 
     som1 = common_lib.rebin_axis_1D(som, args[0])
 
-    if som != None:
-        som = None
-
+    som = None
     del som
 
     inst = som1.attr_list.instrument
