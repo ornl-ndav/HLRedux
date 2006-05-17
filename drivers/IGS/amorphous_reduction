@@ -319,6 +319,7 @@ def run(config):
             
         norm_bkg_dst = DST.getInstance("application/x-NeXus", config.norm_bkg)
         n_bkg_som1 = norm_bkg_dst.getSOM(som_id, so_axis)
+        n_bkg_som1.release_resource()
     else:
         n_bkg_som1 = None
 
@@ -354,6 +355,9 @@ def run(config):
 
     if config.verbose:
         print "2:", sys.getrefcount(d_som2)
+
+    d_som2 = None
+    dc_som1 = None
 
     del d_som2
     del dc_som1
