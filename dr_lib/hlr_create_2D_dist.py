@@ -77,6 +77,7 @@ def create_2D_dist(som,*args,**kwargs):
     import nessi_list
     import SOM
 
+    # Setup some variables 
     dim = 2
     N_y = []
     N_tot = 1
@@ -130,22 +131,28 @@ def create_2D_dist(som,*args,**kwargs):
     so_dim = SOM.SO(dim)
 
     for i in range(dim):
-        
+        # Set the x-axis arguments from the *args list into the new SO
         if not xvar:
+            # Axis positions are 1 (Q) and 0 (E)
             position = dim-i-1
             so_dim.axis[i].val = args[position]
         else:
+            # Axis positions are 2 (Q), 3 (eQ), 0 (E), 1 (eE)
             position = dim-2*i
             so_dim.axis[i].val = args[position]
             so_dim.axis[i].var = args[position+1]
-            
+
+        # Set individual value axis sizes (not x-axis size)
         N_y.append(len(args[position]) - offset)
+
+        # Calculate total 2D array size
         N_tot = N_tot * N_y[-1]
 
-
+    # Create y and var_y lists from total 2D size
     so_dim.y = nessi_list.NessiList(N_tot)
     so_dim.var_y = nessi_list.NessiList(N_tot)
 
+    # Rebin data to E axis
     som1 = common_lib.rebin_axis_1D(som, args[0])
 
     som = None
@@ -157,6 +164,7 @@ def create_2D_dist(som,*args,**kwargs):
     import axis_manip
     
     for i in range(hlr_utils.get_length(som1)):
+        # Find Q for pixel
         so = hlr_utils.get_value(som1,i,"SOM","all")
         (angle,angle_err2) = hlr_utils.get_parameter("polar",so,inst)
         
@@ -165,6 +173,7 @@ def create_2D_dist(som,*args,**kwargs):
                                                        angle/2.0,
                                                        angle_err2/2.0)
 
+        # Find Q value in given momentum transfer axis
         index = -1
         for j in range(N_y[0]):
             if Q >= args[Q_pos][j] and Q < args[Q_pos][j+1]:
@@ -174,13 +183,16 @@ def create_2D_dist(som,*args,**kwargs):
         if index != -1:
             start = index * N_y[1]
             finish = (index + 1) * N_y[1]
-            
+
+            # Grab slice of 2D array
             so_temp = SOM.SO()
             so_temp.y.extend(so_dim.y[start:finish])
             so_temp.var_y.extend(so_dim.var_y[start:finish])
-            
+
+            # Add data values into slice
             so_temp = common_lib.add_ncerr(so, so_temp)
-            
+
+            # Put slice back into 2D array
             for k in range(start,finish):
                 so_dim.y[k] = so_temp.y[k-start]
                 so_dim.var_y[k] = so_temp.var_y[k-start]
