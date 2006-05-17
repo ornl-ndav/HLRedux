@@ -139,11 +139,10 @@ def create_2D_dist(som,*args,**kwargs):
             
             so_temp = common_lib.add_ncerr(so, so_temp)
             
-            q = 0
             for k in range(start,finish):
-                so_dim.y[k] = so_temp.y[q]
-                so_dim.var_y[k] = so_temp.var_y[q]
-                q += 1
+                so_dim.y[k] = so_temp.y[k-start]
+                so_dim.var_y[k] = so_temp.var_y[k-start]
+
 
     if kwargs.has_key("so_id"):
         so_dim.id = kwargs["so_id"]
