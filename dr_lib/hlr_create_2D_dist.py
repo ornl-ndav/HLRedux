@@ -134,8 +134,8 @@ def create_2D_dist(som,*args,**kwargs):
             finish = (index + 1) * N_y[1]
             
             so_temp = SOM.SO()
-            so_temp.y.extend(so_dim.y[index*N_y[1]:(index+1)*N_y[1]])
-            so_temp.var_y.extend(so_dim.var_y[index*N_y[1]:(index+1)*N_y[1]])
+            so_temp.y.extend(so_dim.y[start:finish])
+            so_temp.var_y.extend(so_dim.var_y[start:finish])
             
             so_temp = common_lib.add_ncerr(so, so_temp)
             
