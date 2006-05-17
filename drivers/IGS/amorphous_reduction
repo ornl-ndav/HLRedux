@@ -325,8 +325,7 @@ def run(config):
     n_bkg_som1 = None
     n_som1 = None
 
-    del n_bkg_som1
-    del n_som1
+    del n_bkg_som1, n_som1
 
     if not config.dark_count==None:
         if option.verbose:
@@ -349,8 +348,7 @@ def run(config):
     d_som2 = None
     dc_som1 = None
 
-    del d_som2
-    del dc_som1
+    del d_som2, dc_som1
     
     if not config.no_tib:
         if config.verbose:
@@ -372,8 +370,7 @@ def run(config):
     d_som3 = None
     B = None
 
-    del d_som3
-    del B
+    del d_som3, B
 
     if not config.data_bkg==None:
         if config.verbose:
@@ -396,8 +393,7 @@ def run(config):
     d_som4 = None
     bkg_som4 = None
         
-    del d_som4
-    del bkg_som1
+    del d_som4, bkg_som1
 
     if n_som2 != None:
         if config.verbose:
@@ -412,8 +408,7 @@ def run(config):
     d_som5 = None
     n_som2 = None
         
-    del d_som5
-    del n_som2
+    del d_som5, n_som2
 
     if config.no_mon_norm:
         m_som1 = None
@@ -482,8 +477,7 @@ def run(config):
         a3c.writeSOM(d_som7) 
         a3c.release_resource() 
 
-    del d_som6
-    del m_som1
+    del d_som6, m_som1
 
     if config.mon_eff==None:
         m_eff2 = None
