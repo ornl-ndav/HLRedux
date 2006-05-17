@@ -420,14 +420,23 @@ def run(config):
 
     # Note: wavelength_final MUST be a tuple
     if config.wavelength_final==None:
-        config.wavlength_final = data_dst.getParam("wavelength_final")
+        try:
+            config.wavelength_final = d_som6.attr_list["Wavelength_final"]
+        except KeyError:
+            raise RuntimeError, "A final wavelength was not provided on the "\
+                  +"command-line nor in the data file. Please provide one."
+    else:
+        d_som6.attr_list["Wavelength_final"]=config.wavelength_final
 
-    d_som6.attr_list["Wavelength_final"]=config.wavelength_final
-
+    # Note: time_zero MUST be a tuple
     if config.time_zero==None:
-        config.time_zero = (0.0, 0.0)
-
-    d_som6.attr_list["Time_zero"]=config.time_zero
+        try:
+            config.time_zero = d_som6.attr_list["Time_zero"]
+        except KeyError:
+            config.time_zero = (0.0, 0.0)
+            d_som6.attr_list["Time_zero"]=config.time_zero
+    else:
+        d_som6.attr_list["Time_zero"]=config.time_zero
 
     data_dst.release_resource()
 
