@@ -228,16 +228,12 @@ def calc_energy_transfer(config, data_som, energy_final):
 
     data_som1 = common_lib.energy_transfer(data_som, energy_final)
 
-    if data_som != None:
-        data_som = None
-
+    data_som = None
     del data_som
 
     data_som2 = common_lib.frequency_to_energy(data_som1)
 
-    if data_som1 != None:
-        data_som1 = None
-
+    data_som1 = None
     del data_som1
 
     data_som2.setYLabel("counts")
@@ -298,9 +294,7 @@ def run(config):
         print "1:", sys.getrefcount(d_som1)
         print "1:", sys.getrefcount(d_som2)
 
-    if d_som1 != None:
-        d_som1 = None
-        
+    d_som1 = None
     del d_som1
 
     if not config.norm==None:
@@ -328,12 +322,8 @@ def run(config):
         
     n_som2 = subtract_norm_bkg_from_norm(config, n_som1, n_bkg_som1)
 
-
-    if n_bkg_som1 != None:
-        n_bkg_som1 = None
-
-    if n_som1 != None:
-        n_som1 = None
+    n_bkg_som1 = None
+    n_som1 = None
 
     del n_bkg_som1
     del n_som1
@@ -379,11 +369,8 @@ def run(config):
         print "3:", sys.getrefcount(d_som3)
         print "4:", sys.getrefcount(B)
     
-    if d_som3 != None:
-        d_som3 = None
-
-    if B != None:
-        B = None
+    d_som3 = None
+    B = None
 
     del d_som3
     del B
@@ -406,11 +393,8 @@ def run(config):
     if config.verbose:
         print "5:", sys.getrefcount(d_som4)
 
-    if d_som4 != None:
-        d_som4 = None
-
-    if bkg_som1 != None:
-        bkg_som4 = None
+    d_som4 = None
+    bkg_som4 = None
         
     del d_som4
     del bkg_som1
@@ -425,11 +409,8 @@ def run(config):
     if config.verbose:
         print "6:", sys.getrefcount(d_som5)
 
-    if d_som5 != None:
-        d_som5 = None
-
-    if n_som2 != None:
-        n_som2 = None
+    d_som5 = None
+    n_som2 = None
         
     del d_som5
     del n_som2
@@ -483,11 +464,8 @@ def run(config):
         
     d_som7, m_som2 = convert_data_and_mon_to_wavelength(config, d_som6, m_som1)
 
-    if d_som6 != None:
-        d_som6 = None
-
-    if m_som1 != None:
-        m_som1 = None
+    d_som6 = None
+    m_som1 = None
 
     if config.verbose:
         print "7:", sys.getrefcount(d_som6)
@@ -522,9 +500,7 @@ def run(config):
                     print "Rebinning monitor efficiency"
                     m_eff2 = rebin_mon_eff(config, m_som2, m_eff1)
 
-                    if m_eff1 != None:
-                        m_eff1 = None
-                        
+                    m_eff1 = None
                     del m_eff1
                     
         except AttributeError:
@@ -535,9 +511,7 @@ def run(config):
         
     m_som3 = eff_correct_mon(config, m_som2, m_eff2)
 
-    if m_som2 != None:
-        m_som2 = None
-
+    m_som2 = None
     del m_som2
 
     if config.det_eff==None:
@@ -555,9 +529,7 @@ def run(config):
                     print "Rebinning detector efficiency"
                     det_eff2 = rebin_det_eff(config, d_som7, det_eff1)
 
-                if det_eff1 != None:
-                    det_eff1 = None
-                    
+                det_eff1 = None
                 del det_eff1
 
         except AttributeError:
@@ -568,17 +540,13 @@ def run(config):
 
     d_som8 = eff_correct_data(config, d_som7, det_eff2)
 
-    if det_eff2 != None:
-        det_eff2 = None
-
+    det_eff2 = None
     del det_eff2
 
     if config.verbose:
         print "8:", sys.getrefcount(d_som7)
 
-    if d_som7 != None:
-        d_som7 = None
-
+    d_som7 = None
     del d_som7
 
     if config.verbose and m_som3 != None:
@@ -589,9 +557,7 @@ def run(config):
     if config.verbose:
         print "9:", sys.getrefcount(d_som8)
 
-    if d_som8 != None:
-        d_som8 = None
-
+    d_som8 = None
     del d_som8
 
     if config.verbose:
@@ -602,9 +568,7 @@ def run(config):
     if config.verbose:
         print "10:", sys.getrefcount(d_som9)
     
-    if d_som9 != None:
-        d_som9 = None
-        
+    d_som9 = None
     del d_som9
 
     if config.verbose:
@@ -635,9 +599,7 @@ def run(config):
         
     d_som13 = create_final(config,d_som12)
 
-    if d_som12 != None:
-        d_som12 = None
-        
+    d_som12 = None
     del d_som12
 
     # Writing 2D DAVE file
