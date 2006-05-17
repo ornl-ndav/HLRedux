@@ -132,6 +132,9 @@ def norm_data_by_van(config, data_som, norm_som):
     """Step 7. Normalize ItdsbDXY(TOF) by vanadium spectrum,
     ItbNXY(TOF), using function 3.9. The result is ItdsbnDXY(TOF)."""
 
+    if norm_som == None:
+        return data_som
+
     return common_lib.div_ncerr(data_som, norm_som)
 
 
@@ -395,12 +398,10 @@ def run(config):
         
     del d_som4, bkg_som1
 
-    if n_som2 != None:
-        if config.verbose:
-            print "Normalizing data by normalization data"
-        d_som6 = norm_data_by_van(config, d_som5, n_som2)
-    else:
-        d_som6 = d_som5
+    if config.verbose:
+        print "Normalizing data by normalization data"
+
+    d_som6 = norm_data_by_van(config, d_som5, n_som2)
 
     if config.verbose:
         print "6:", sys.getrefcount(d_som5)
