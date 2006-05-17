@@ -693,7 +693,12 @@ if __name__=="__main__":
         if not hlr_utils.file_exists(config.data):
             parser.error("Data file [%s] does not exist" % config.data)
     else:
-        parser.error("Did not specify a datafile")
+        if options.data != None:
+            config.data=os.path.expanduser(options.data)
+            if not hlr_utils.file_exists(config.data):
+                parser.error("Data file [%s] does not exist" % config.data)
+        else:
+            parser.error("Did not specify a datafile")
     # create the output file name if there isn't one supplied
     if options.output:
         config.output=options.output
