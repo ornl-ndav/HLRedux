@@ -206,7 +206,7 @@ def norm_data_by_mon(config, data_som, mon_som):
     if not config.mon_end==None:
         kwargs["end"]=config.mon_end
 
-    int_mon_int = list(common_lib.sumw_ncerr(mon_som, **kwargs))
+    int_mon_int = common_lib.sumw_ncerr(mon_som, **kwargs)
 
     return common_lib.div_ncerr(data_som, int_mon_int)
 
