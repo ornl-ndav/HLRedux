@@ -37,10 +37,19 @@ def create_2D_dist(som,*args,**kwargs):
        2. Momentum transfer
     -> **kwargs is a dictionary of keywords that pass information to the
        function. Here are the currently accepted keywords:
-       - withXVar=True or False. If the keyword is not present, the default
-                  value will be False
-       - data_type=histogram or density or coordinate. If the keyword is not
-                   present, the default value will be histogram
+       - withXVar=<string>. The string will either be True or False. If the
+                  keyword is not present, the default value will be False
+       - data_type=<string> The string can be either histogram, density or
+                   coordinate. If the keyword is not present, the default
+                   value will be histogram
+       - so_id=<identifier> The identifier represents a number, string, tuple
+               or other object that describes the resulting SO
+       - y_label=<string> This is a string that sets the y axis label
+       - y_units=<string> This is a string that sets the y axis units
+       - x_labels=<list of strings> This is a list of strings that sets the
+                  individual x axes labels
+       - x_units=<list of string> This is a list of strings that sets the
+                 individual x axes units
 
     Returns:
     -------
@@ -143,7 +152,7 @@ def create_2D_dist(som,*args,**kwargs):
                 so_dim.y[k] = so_temp.y[k-start]
                 so_dim.var_y[k] = so_temp.var_y[k-start]
 
-
+    # Check for so_id keyword argument
     if kwargs.has_key("so_id"):
         so_dim.id = kwargs["so_id"]
     else:
@@ -152,21 +161,25 @@ def create_2D_dist(som,*args,**kwargs):
     comb_som = SOM.SOM()
     comb_som.copyAttributes(som1)
 
+    # Check for y_label keyword argument
     if kwargs.has_key("y_label"):
         comb_som.setYLabel(kwargs["y_label"])
     else:
         comb_som.setYLabel("Counts")
 
+    # Check for y_units keyword argument
     if kwargs.has_key("y_units"):
         comb_som.setYUnits(kwargs["y_units"])
     else:
         comb_som.setYUnits("Counts / THz A^-1")
 
+    # Check for x_labels keyword argument
     if kwargs.has_key("x_labels"):
         comb_som.setAllAxisLabels(kwargs["x_labels"])
     else:
         comb_som.setAllAxisLabels(["Momentum transfer","Energy transfer"])
 
+    # Check for x_units keyword argument
     if kwargs.has_key("x_units"):
         comb_som.setAllAxisUnits(kwargs["x_units"])
     else:
