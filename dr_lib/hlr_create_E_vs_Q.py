@@ -52,6 +52,9 @@ def create_E_vs_Q(obj,E,k,px_separate=True,*args,**kwargs):
 
     if o_descr != "SOM":
         raise RuntimeError, "This function only accepts SOMs"
+    # Have a SOM, go on
+    else:
+        pass
 
     if o_descr == "SOM":
         try:
@@ -59,6 +62,9 @@ def create_E_vs_Q(obj,E,k,px_separate=True,*args,**kwargs):
             inst = obj.attr_list.instrument
         except RuntimeError:
             raise RuntimeError, "An instrument was not provided!"
+    # Got the instrument, go on
+    else:
+        pass
 
     axis = hlr_utils.hlr_1D_units(obj, "Angstroms")
 
