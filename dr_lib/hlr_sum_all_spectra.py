@@ -58,19 +58,16 @@ def sum_all_spectra(obj):
 
     so_id_list = []
 
-    for i in range(hlr_utils.get_length(obj)):
-        if i == 0:
-            val1 = hlr_utils.get_value(obj,i,o_descr,"all")
-            val2 = hlr_utils.get_value(obj,i+1,o_descr,"all")
-            value = common_lib.sumw_ncerr(val1, val2)
-            so_id_list.append(val1.id)
-            so_id_list.append(val2.id)
-        elif i == 1:
-            pass
-        else:
-            val = hlr_utils.get_value(obj,i,o_descr,"all")
-            value = common_lib.sumw_ncerr(val, value)
-            so_id_list.append(val.id)
+    val1 = hlr_utils.get_value(obj,0,o_descr,"all")
+    val2 = hlr_utils.get_value(obj,1,o_descr,"all")
+    value = common_lib.sumw_ncerr(val1, val2)
+    so_id_list.append(val1.id)
+    so_id_list.append(val2.id)
+
+    for i in range(2,hlr_utils.get_length(obj)):
+        val = hlr_utils.get_value(obj,i,o_descr,"all")
+        value = common_lib.sumw_ncerr(val, value)
+        so_id_list.append(val.id)
 
 
     hlr_utils.result_insert(result,res_descr,value,None,"all")
