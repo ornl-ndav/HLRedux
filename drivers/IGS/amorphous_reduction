@@ -398,7 +398,7 @@ def run(config):
         
     del d_som4, bkg_som1
 
-    if config.verbose:
+    if config.verbose and n_som2 != None:
         print "Normalizing data by normalization data"
 
     d_som6 = norm_data_by_van(config, d_som5, n_som2)
