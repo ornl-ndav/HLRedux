@@ -144,3 +144,39 @@ def make_axis(min, max, delta, **kwargs):
 
     return axis
 
+def fix_filename(filename):
+    """
+    This function takes a filename contaning things like ~/ or $HOME and
+    expands those into a proper filename. If a string contains no such
+    references, nothing is no to the string
+
+    Parameters:
+    ----------
+    -> filename is a string containing the filname to be fixed
+
+    Returns:
+    -------
+    <- The filename with special cases expanded
+    """
+    
+    import os
+
+    if filename != None:
+        try:
+            filename.index('~')
+            filename = os.path.expanduser(filename)
+        except ValueError:
+            pass
+        
+        try:
+            filename.index('$')
+            filename = os.path.expandvars(filename)
+        except ValueError:
+            pass
+
+    # Filename is a None type, just pass it back
+    else:
+        pass
+
+    return filename
+
