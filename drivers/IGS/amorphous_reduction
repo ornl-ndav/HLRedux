@@ -277,13 +277,12 @@ def run(config):
         print "ERROR: Failed to data read file %s" % config.data
         sys.exit(-1)
 
-    som_id = ("/entry/bank1", 1)
     so_axis = "time_of_flight"
 
     if config.verbose:
         print "Reading data file"
-        
-    d_som1 = data_dst.getSOM(som_id, so_axis)
+
+    d_som1 = data_dst.getSOM(config.data_paths)
 
     if config.dead_time!=None:
         if config.verbose:
@@ -683,6 +682,9 @@ if __name__=="__main__":
                       dest="dump_energy",
                       help="Flag to dump the energy transfer information for"\
                       +" all pixels")
+    parser.add_option("","--data-paths",default=None,dest="data_paths",
+                      help="Specify the comma separated list of detector data"\
+                      +"paths and signals: /entry/bank1,1/entry/bank2,1")
     
     (options,args)=parser.parse_args()
 
@@ -766,6 +768,11 @@ if __name__=="__main__":
             parser.error("Detector geometry file [%s] does not exist" \
                          % config.det_geom)
 
+    # set the data paths
+    if options.data_paths != None:
+        config.data_paths = hlr_utils.create_data_paths(options.data_paths)
+    else:
+        config.data_paths = options.data_paths
     
     # set the dead time
     if options.dead_time != None:
