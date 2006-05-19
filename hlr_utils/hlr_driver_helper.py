@@ -180,3 +180,29 @@ def fix_filename(filename):
 
     return filename
 
+
+def create_data_paths(thing):
+    """
+    This function takes in a string that contains NeXus path and signal pairs
+    and turns them into a tuple (for one pair) or a list of tuples.
+
+    Parameters:
+    ----------
+    -> things is a string containing a list of NeXus path and signal pairs
+
+    Returns:
+    -------
+    <- A tuple or list of tuples of the NeXus path,signal pairs
+    """
+    
+    mylist = thing.split(',')
+
+    data_paths = []
+
+    for i in range(0,len(mylist),2):
+        data_paths.extend((mylist[i], int(mylist[i+1])))
+
+    if len(mylist) == 2:
+        return tuple(data_paths)
+    else:
+        return data_paths
