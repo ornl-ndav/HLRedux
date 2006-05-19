@@ -144,7 +144,8 @@ def convert_data_and_mon_to_wavelength(config, data_som, mon2_som):
     for DXY."""
 
     if mon2_som!=None:
-        mon2_som1 = common_lib.tof_to_wavelength(mon2_som)
+        mon2_som1 = common_lib.tof_to_wavelength(mon2_som,None,
+                                                 "microsecond")
     else:
         mon2_som1 = None
 
@@ -209,7 +210,7 @@ def norm_data_by_mon(config, data_som, mon_som):
     if not config.mon_end==None:
         kwargs["end"]=config.mon_end
 
-    int_mon_int = common_lib.sumw_ncerr(mon_som, **kwargs)
+    int_mon_int = dr_lib.integrate_axis(mon_som, **kwargs)
 
     return common_lib.div_ncerr(data_som, int_mon_int)
 
@@ -415,7 +416,7 @@ def run(config):
     else:
         if config.verbose:
             print "Reading in monitor data from data file"
-        som_id = ("/entry/monitor2", 1)
+        som_id = config.mon_path
         m_som1 = data_dst.getSOM(som_id, so_axis)
 
     # Note: wavelength_final MUST be a tuple
@@ -464,6 +465,8 @@ def run(config):
     #BEGIN SNS-FIXME#
     import SOM
     d_som6.attr_list.instrument = SOM.ASG_Instrument()
+    if m_som1 != None:
+        m_som1.attr_list.instrument = SOM.ASG_Instrument()
     #END SNS-FIXME#
         
     d_som7, m_som2 = convert_data_and_mon_to_wavelength(config, d_som6, m_som1)
@@ -685,6 +688,9 @@ if __name__=="__main__":
     parser.add_option("","--data-paths",default=None,dest="data_paths",
                       help="Specify the comma separated list of detector data"\
                       +"paths and signals: /entry/bank1,1/entry/bank2,1")
+    parser.add_option("","--mon-path",default=None,dest="mon_path",
+                      help="Specify the comma separated list of monitor "\
+                      +"path and signal: /entry/monitor,1")
     
     (options,args)=parser.parse_args()
 
@@ -773,7 +779,13 @@ if __name__=="__main__":
         config.data_paths = hlr_utils.create_data_paths(options.data_paths)
     else:
         config.data_paths = options.data_paths
-    
+
+    # set the monitor path
+    if options.mon_path != None:
+        config.mon_path = hlr_utils.create_data_path(options.mon_path)
+    else:
+        config.mon_path = ("/entry/monitor",1)
+
     # set the dead time
     if options.dead_time != None:
         config.dead_time=hlr_utils.split_values(options.dead_time)
