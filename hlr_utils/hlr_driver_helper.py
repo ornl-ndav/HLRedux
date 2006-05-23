@@ -108,8 +108,8 @@ def make_axis(min, max, delta, **kwargs):
     -> delta is the bin width for the axis
     -> kwargs is a list of key word arguments that the function accepts:
           type= a string containing the type of axis desired. Type can be
-                histogram, coordinate or density. If type is not provided the
-                default is histogram
+                histogram, coordinate or density (the last two are synonyms).
+                If type is not provided the default is histogram
 
     Returns:
     -------
