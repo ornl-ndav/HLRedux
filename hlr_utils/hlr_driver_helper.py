@@ -72,7 +72,8 @@ def split_values(thing):
     """
     This function takes a string object that has the form value,err^2,units or
     value,err^2 or value,units. If the latter version is given, a default
-    value of 0.0 will be given for err^2.
+    value of 0.0 will be given for err^2. It produces a tuple of
+    (value,err^2,units)
 
     Parameters:
     ----------
@@ -81,7 +82,7 @@ def split_values(thing):
 
     Returns:
     -------
-    <- A tuple of (value,err^2) or (value,err^2,units)
+    <- A tuple of (value,err^2,units)
     """
 
     mylist = thing.split(',')
@@ -91,7 +92,7 @@ def split_values(thing):
         pass
     
     try:
-        return (float(mylist[0]), float(mylist[1]))
+        return (float(mylist[0]), float(mylist[1]), None)
     except ValueError:
         return (float(mylist[0]), 0.0, mylist[1])
     
