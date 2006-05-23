@@ -462,13 +462,6 @@ def run(config):
     if config.verbose:
         print "Converting TOF to wavelength"
 
-    #BEGIN SNS-FIXME#
-    import SOM
-    d_som6.attr_list.instrument = SOM.ASG_Instrument()
-    if m_som1 != None:
-        m_som1.attr_list.instrument = SOM.ASG_Instrument()
-    #END SNS-FIXME#
-        
     d_som7, m_som2 = convert_data_and_mon_to_wavelength(config, d_som6, m_som1)
 
     d_som6 = None
