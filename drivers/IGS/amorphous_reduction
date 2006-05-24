@@ -301,7 +301,7 @@ def run(config):
             print "Reading normalization file"
             
         norm_dst = DST.getInstance("application/x-NeXus", config.norm)
-        n_som1 = norm_dst.getSOM(som_id, so_axis)
+        n_som1 = norm_dst.getSOM(config.data_paths, so_axis)
         norm_dst.release_resource()
     else:
         n_som1 = None
@@ -311,7 +311,7 @@ def run(config):
             print "Reading normalization background file"
             
         norm_bkg_dst = DST.getInstance("application/x-NeXus", config.norm_bkg)
-        n_bkg_som1 = norm_bkg_dst.getSOM(som_id, so_axis)
+        n_bkg_som1 = norm_bkg_dst.getSOM(config.data_paths, so_axis)
         n_bkg_som1.release_resource()
     else:
         n_bkg_som1 = None
@@ -331,7 +331,7 @@ def run(config):
             print "Reading dark count file"
             
         dc_dst = DST.getInstance("application/x-NeXus", config.dark_count)
-        dc_som1 = dc_dst.getSOM(som_id, so_axis)
+        dc_som1 = dc_dst.getSOM(config.data_paths, so_axis)
         dc_dst.release_resource()
     else:
         dc_som1 = None
@@ -369,7 +369,7 @@ def run(config):
             print "Reading in background data file"
             
         bkg_dst = DST.getInstance("application/x-NeXus", config.data_bkg)
-        bkg_som1 = bkg_dst.getSOM(som_id, so_axis)
+        bkg_som1 = bkg_dst.getSOM(config.data_paths, so_axis)
         bkg_dst.release_resource()
     else:
         bkg_som1 = None
