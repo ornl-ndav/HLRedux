@@ -522,6 +522,8 @@ def get_parameter(param,so,inst):
         return inst.get_primary(so.id)
     elif param == "secondary":
         return inst.get_secondary(so.id)
+    elif param == "total":
+        return inst.get_total_path(so.id)
     else:
         raise RuntimeError, "Parameter %s is not an understood type." % \
               param
