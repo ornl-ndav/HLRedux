@@ -31,8 +31,8 @@ def create_2D_dist(som,*args,**kwargs):
     Parameters:
     ----------
     -> som is the input SOM with energy transfer axis SOs
-    -> *args is a list of axes for rebinning.  There is a particulare order
-       to them. They should be present in the following order:
+    -> *args is a mandatory list of axes for rebinning.  There is a particular
+       order to them. They should be present in the following order:
        Without errors
        1. Energy transfer
        2. Momentum transfer
@@ -42,8 +42,8 @@ def create_2D_dist(som,*args,**kwargs):
        3. Momentum transfer
        4. Momentum transfer error ^2
        
-    -> **kwargs is a dictionary of keywords that pass information to the
-       function. Here are the currently accepted keywords:
+    -> **kwargs is a dictionary of optional keywords that pass information to
+       the function. Here are the currently accepted keywords:
        - withXVar=<string>. The string will either be True or False. If the
                   keyword is not present, the default value will be False
        - data_type=<string> The string can be either histogram, density or
