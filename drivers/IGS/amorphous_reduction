@@ -283,7 +283,7 @@ def run(config):
     if config.verbose:
         print "Reading data file"
 
-    d_som1 = data_dst.getSOM(config.data_paths)
+    d_som1 = data_dst.getSOM(config.data_paths, so_axis)
 
     if config.dead_time!=None:
         if config.verbose:
@@ -293,10 +293,6 @@ def run(config):
     else:
         d_som2 = d_som1
         
-    if config.verbose:
-        print "1:", sys.getrefcount(d_som1)
-        print "1:", sys.getrefcount(d_som2)
-
     d_som1 = None
     del d_som1
 
@@ -345,9 +341,6 @@ def run(config):
         
     d_som3 = subtract_dark_count_from_data(config, d_som2, dc_som1)
 
-    if config.verbose:
-        print "2:", sys.getrefcount(d_som2)
-
     d_som2 = None
     dc_som1 = None
 
@@ -366,10 +359,6 @@ def run(config):
         
     d_som4 = subtract_time_indep_bkg(config, d_som3, B)
 
-    if config.verbose:
-        print "3:", sys.getrefcount(d_som3)
-        print "4:", sys.getrefcount(B)
-    
     d_som3 = None
     B = None
 
@@ -390,9 +379,6 @@ def run(config):
         
     d_som5 = subtract_bkg_from_data(config, d_som4, bkg_som1)
 
-    if config.verbose:
-        print "5:", sys.getrefcount(d_som4)
-
     d_som4 = None
     bkg_som4 = None
         
@@ -402,9 +388,6 @@ def run(config):
         print "Normalizing data by normalization data"
 
     d_som6 = norm_data_by_van(config, d_som5, n_som2)
-
-    if config.verbose:
-        print "6:", sys.getrefcount(d_som5)
 
     d_som5 = None
     n_som2 = None
@@ -466,9 +449,6 @@ def run(config):
 
     d_som6 = None
     m_som1 = None
-
-    if config.verbose:
-        print "7:", sys.getrefcount(d_som6)
 
     if config.dump_wave:
         file = os.path.basename(config.data)
@@ -544,9 +524,6 @@ def run(config):
     det_eff2 = None
     del det_eff2
 
-    if config.verbose:
-        print "8:", sys.getrefcount(d_som7)
-
     d_som7 = None
     del d_som7
 
@@ -554,9 +531,6 @@ def run(config):
         print "Normalizing data by monitor"
         
     d_som9 = norm_data_by_mon(config, d_som8, m_som3)
-
-    if config.verbose:
-        print "9:", sys.getrefcount(d_som8)
 
     d_som8 = None
     del d_som8
@@ -566,9 +540,6 @@ def run(config):
         
     d_som11 = calc_E_initial(config, d_som9)
 
-    if config.verbose:
-        print "10:", sys.getrefcount(d_som9)
-    
     d_som9 = None
     del d_som9
 
