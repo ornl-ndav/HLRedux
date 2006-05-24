@@ -742,7 +742,7 @@ if __name__=="__main__":
     if options.data_paths != None:
         config.data_paths = hlr_utils.create_data_paths(options.data_paths)
     else:
-        config.data_paths = options.data_paths
+        config.data_paths = [("/entry/bank1",1),("/entry/bank2",1)]
 
     # set the monitor path
     if options.mon_path != None:
