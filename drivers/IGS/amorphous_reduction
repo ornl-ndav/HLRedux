@@ -540,6 +540,18 @@ def run(config):
         
     d_som11 = calc_E_initial(config, d_som9)
 
+    if config.dump_initial_energy:
+        file = os.path.basename(config.data)
+        path = os.path.join(os.getcwd(), file)
+        pixel_file=hlr_utils.ext_replace(path, "nxs", "ixl")
+        resource = open(pixel_file, "w") 
+        a3c = DST.getInstance("text/Spec", resource)
+        if config.verbose:
+            print "Writing pixel initial energy information"
+            
+        a3c.writeSOM(d_som11) 
+        a3c.release_resource() 
+
     d_som9 = None
     del d_som9
 
@@ -655,7 +667,14 @@ if __name__=="__main__":
     parser.add_option("","--mon-path",default=None,dest="mon_path",
                       help="Specify the comma separated list of monitor "\
                       +"path and signal: /entry/monitor,1")
-    
+    parser.add_option("","--dump-ei",default=False,action="store_true",
+                      dest="dump_initial_energy",
+                      help="Flag to dump the initial energy information for"\
+                      +" all pixels")
+    parser.add_option("","--dump-all",default=False,action="store_true",
+                      dest="dump_all",
+                      help="Flag to dump information for all pixels")
+
     (options,args)=parser.parse_args()
 
     # set up the configuration
@@ -788,6 +807,15 @@ if __name__=="__main__":
 
     # set the ability to dump the energy transfer information
     config.dump_energy = options.dump_energy
+    
+    # set the ability to dump the initial energy information
+    config.dump_initial_energy = options.dump_initial_energy
+
+    if options.dump_all:
+        config.dump_wave = True
+        config.dump_energy = True
+        config.dump_initial_energy = True
+ 
     
     # run the program
     run(config)
