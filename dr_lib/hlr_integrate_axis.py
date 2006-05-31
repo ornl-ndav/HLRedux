@@ -24,14 +24,16 @@
 
 def integrate_axis(obj, **kwargs):
     """
-    This function takes a SOM or a SO and integrates the given axis.
+    This function takes a SOM or a SO and integrates the given axis. The
+    function assumes that the incoming data is in the histogram form.
 
     Parameters:
     ----------
     -> obj is a SOM or a SO
     -> kwargs is a list of key word arguments that the function accepts:
          start=<index of starting bin>
-         end=<index of ending bin>
+         end=<index of ending bin> This index is made inclusive by the
+             function.
          axis=<y or x> This is the axis one wishes to manipulate. If no
               argument is given the default value is y
          axis_pos=<number> This is position of the axis in the axis array. If
