@@ -175,6 +175,11 @@ def result_insert(result,descr,value,map_so,axis="y",pap=0,xvals=None):
     elif (result_type == num_type):
         result.append(value[0])
         result.append(value[1])
+        # Note: the following call does not do what is expected. The result
+        # object returns from this function as a list and not as the expected
+        # tuple. The way to correct this is to return the result object
+        # directly. This will result in a major feature change for many
+        # functions, so it should go into the ITC2 release.
         result = tuple(result)
 
     elif (result_type == list_type):
