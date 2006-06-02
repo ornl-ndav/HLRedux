@@ -1,0 +1,139 @@
+#!/usr/bin/env python
+
+#                  High-Level Reduction Functions
+#           A part of the SNS Analysis Software Suite.
+#
+#                  Spallation Neutron Source
+#          Oak Ridge National Laboratory, Oak Ridge TN.
+#
+#
+#                             NOTICE
+#
+# For this software and its associated documentation, permission is granted
+# to reproduce, prepare derivative works, and distribute copies to the public
+# for any purpose and without fee.
+#
+# This material was prepared as an account of work sponsored by an agency of
+# the United States Government.  Neither the United States Government nor the
+# United States Department of Energy, nor any of their employees, makes any
+# warranty, express or implied, or assumes any legal liability or
+# responsibility for the accuracy, completeness, or usefulness of any
+# information, apparatus, product, or process disclosed, or represents that
+# its use would not infringe privately owned rights.
+#
+
+# $Id$
+
+class Configure:
+    def __init__(self):
+        self.verbose=None
+        self.data=None
+        self.output=None
+
+
+def convert_data_to_d_spacing(config, data_som):
+
+    return common_lib.tof_to_d_spacing(data_som, None, None, "microsecond")
+
+    
+def run(config):
+    import sys
+    
+    if config.data==None:
+        raise RuntimeError, "Need to pass a data filename to the driver "\
+        +"script."
+
+    import DST
+
+    try:
+        data_dst = DST.getInstance("application/x-NeXus", config.data)
+    except SystemError:
+        print "ERROR: Failed to data read file %s" % config.data
+        sys.exit(-1)
+
+    so_axis = "time_of_flight"
+
+    if config.verbose:
+        print "Reading data file"
+
+    d_som1 = data_dst.getSOM(config.data_paths, so_axis)
+
+    if config.verbose:
+        print "Converting TOF to d-spacing"
+
+    d_som2 = convert_data_to_d_spacing(config, d_som1)
+
+    file = os.path.basename(config.data)
+    path = os.path.join(os.getcwd(), file)
+    pixel_file=hlr_utils.ext_replace(path, "nxs", "dsp")
+    resource = open(pixel_file, "w") 
+    a3c = DST.getInstance("text/Spec", resource)
+    if config.verbose:
+        print "Writing pixel d-spacing information"
+        
+    a3c.writeSOM(d_som2) 
+    a3c.release_resource() 
+        
+
+if __name__=="__main__":
+    import common_lib
+    import dr_lib
+    import hlr_utils
+    import os
+    
+    # set up the options available
+    parser=hlr_utils.SNSOptions("usage: %prog [options] <datafile>")
+
+
+    parser.add_option("","--d-bins",default=None,
+                      dest="d_bins",
+                      help="Specify the minimum and maximum d-spacing values"\
+                      +"and the d-spacing bin width in Angstroms")
+    parser.add_option("","--data-paths",default=None,dest="data_paths",
+                      help="Specify the comma separated list of detector data"\
+                      +"paths and signals: /entry/bank1,1/entry/bank2,1")
+
+    (options,args)=parser.parse_args()
+   
+    # set up the configuration
+    config=Configure()
+    # get the datafile name and check it
+    if len(args)==1:
+        config.data=args[0]
+        if not hlr_utils.file_exists(config.data):
+            parser.error("Data file [%s] does not exist" % config.data)
+    else:
+        if options.data != None:
+            config.data=hlr_utils.fix_filename(options.data)
+            if not hlr_utils.file_exists(config.data):
+                parser.error("Data file [%s] does not exist" % config.data)
+        else:
+            parser.error("Did not specify a datafile")
+    # create the output file name if there isn't one supplied
+    if options.output:
+        config.output=hlr_utils.fix_filename(options.output)
+    else:
+        file = os.path.basename(config.data)
+        path = os.path.join(os.getcwd(), file)
+        config.output=hlr_utils.ext_replace(path, "nxs", "txt")
+        print "Using %s as output file" % config.output
+
+    # set the verbosity
+    config.verbose=options.verbose
+
+
+    # set the data paths
+    if options.data_paths != None:
+        config.data_paths = hlr_utils.create_data_paths(options.data_paths)
+    else:
+        config.data_paths = ("/entry/diff",1)
+
+
+    # set the d bins
+    if options.d_bins != None:
+        dfacts = options.d_bins.split(',')
+        config.d_bins = hlr_utils.make_axis(float(dfacts[0]), float(dfacts[1]),
+                                            float(dfacts[2]))
+
+
+    run(config)

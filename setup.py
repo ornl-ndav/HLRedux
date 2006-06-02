@@ -52,7 +52,8 @@ instrument_scripts = {
     ],
     "IGS" : [
     'amorphous_reduction',
-    'delta_E0'
+    'delta_E0',
+    'igs_diff_reduction'
     ],
     "PD" : [
     ],
