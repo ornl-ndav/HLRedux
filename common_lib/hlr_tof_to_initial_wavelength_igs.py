@@ -100,6 +100,9 @@ def tof_to_initial_wavelength_igs(obj,lambda_f=None,time_zero=None,
             elif dist_sample_detector == None:
                 raise RuntimeError, "If a SOM is not passed, the "\
                   +"sample-detector distance must be provided."
+            else:
+                raise RuntimeError, "If you get here, see Steve Miller for "\
+                      +"your mug."
     else:
         pass
         
@@ -136,10 +139,15 @@ def tof_to_initial_wavelength_igs(obj,lambda_f=None,time_zero=None,
 
     if dist_source_sample != None:
         (ls_descr,e_descr) = hlr_utils.get_descr(dist_source_sample)
+    # Do nothing, go on
+    else:
+        pass
 
     if dist_sample_detector != None:
         (ld_descr,e_descr) = hlr_utils.get_descr(dist_sample_detector)
-
+    # Do nothing, go on
+    else:
+        pass
 
     # iterate through the values
     import axis_manip
