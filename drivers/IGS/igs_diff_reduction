@@ -33,7 +33,7 @@ class Configure:
 
 def convert_data_to_d_spacing(config, data_som):
 
-    return common_lib.tof_to_d_spacing(data_som, None, None, "microsecond")
+    return common_lib.tof_to_d_spacing(data_som, units="microsecond")
 
     
 def run(config):
