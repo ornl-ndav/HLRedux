@@ -22,8 +22,7 @@
 
 # $Id$
 
-def init_scatt_wavevector_to_scalar_Q(initk,scattk,polar=None,
-                                      units="1/Angstroms"):
+def init_scatt_wavevector_to_scalar_Q(initk,scattk,**kwargs):
     """
     This function takes an initial wavevector and a scattered wavevector as a
     tuple and a SOM, a tuple and a SO  or two tuples and calculates the
@@ -38,8 +37,10 @@ def init_scatt_wavevector_to_scalar_Q(initk,scattk,polar=None,
     ----------
     -> initk is a SOM, SO or tuple of the initial wavevector
     -> scattk is a SOM, SO or tuple of the scattered wavevector
-    -> polar (OPTIONAL) is a tuple or list of tuples providing the polar angle
-       information
+          polar= a tuple or list of tuples containing the polar angle and
+                 its associated error^2
+          units= a string containing the expected units for this function.
+                 The default for this function is 1/Angstroms
 
     Return:
     ------
@@ -75,6 +76,17 @@ def init_scatt_wavevector_to_scalar_Q(initk,scattk,polar=None,
         raise TypeError, "SO-SO operation not supported"
     else:
         pass
+
+    # Setup keyword arguments
+    try:
+        polar = kwargs["polar"]
+    except KeyError:
+        polar = None
+
+    try:
+        units = kwargs["units"]
+    except KeyError:
+        units = "1/Angstroms"
 
     result=hlr_utils.copy_som_attr(result,res_descr,initk,i_descr,
                                    scattk,s_descr)
@@ -142,7 +154,7 @@ if __name__=="__main__":
     som1=hlr_test.generate_som()
     som1.setAllAxisUnits(["1/Angstroms"])
     som1.attr_list.instrument = SOM.ASG_Instrument()
-    polar = (0.785,0.005)
+    pa = (0.785,0.005)
 
     print "********** SOM1"
     print "* ",som1[0]
@@ -152,11 +164,11 @@ if __name__=="__main__":
     print "* som -scal:",init_scatt_wavevector_to_scalar_Q(som1,(1,1))
     print "* scal-som :",init_scatt_wavevector_to_scalar_Q((1,1),som1)
     print "* so  -scal:",init_scatt_wavevector_to_scalar_Q(som1[0],(1,1),
-                                                           polar)
+                                                           polar=pa)
     print "* scal-so  :",init_scatt_wavevector_to_scalar_Q((1,1),som1[0],
-                                                           polar)
+                                                           polar=pa)
     print "* scal-scal:",init_scatt_wavevector_to_scalar_Q((2,1),(1,1),
-                                                           polar)
+                                                           polar=pa)
 
 
 

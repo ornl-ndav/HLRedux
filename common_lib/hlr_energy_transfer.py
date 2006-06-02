@@ -22,7 +22,7 @@
 
 # $Id$
 
-def energy_transfer(left,right,units="meV"):
+def energy_transfer(left,right,**kwargs):
     """
     This function takes a tuple and a SOM, a tuple and a SO or two tuples and
     calculates the energy transfer in units of THz. The SOM principle axis
@@ -33,6 +33,10 @@ def energy_transfer(left,right,units="meV"):
     ----------
     -> left is a SOM, SO or tuple on the left side of the subtraction
     -> right is a SOM, SO or tuple on the right side of the subtraction
+    -> kwargs is a list of key word arguments that the function accepts:
+          units= a string containing the expected units for this function.
+                 The default for this function is meV
+
 
     Return:
     ------
@@ -62,6 +66,12 @@ def energy_transfer(left,right,units="meV"):
         raise TypeError, "SO-SO operation not supported"
     else:
         pass
+
+    # Setup keyword arguments
+    try:
+        units = kwargs["units"]
+    except KeyError:
+        units = "meV"
     
     result=hlr_utils.copy_som_attr(result,res_descr,left,l_descr,right,r_descr)
     if res_descr == "SOM":

@@ -22,7 +22,7 @@
 
 # $Id$
 
-def wavelength_to_scalar_Q(obj,polar=None,units="Angstroms"):
+def wavelength_to_scalar_Q(obj,**kwargs):
     """
     This function converts a primary axis of a SOM or SO from wavelength
     to scalar_Q. The wavelength axis for a SOM must be in units of
@@ -33,8 +33,11 @@ def wavelength_to_scalar_Q(obj,polar=None,units="Angstroms"):
     Parameters:
     ----------
     -> obj is the SOM, SO or tuple to be converted
-     -> polar (OPTIONAL) is a tuple or list of tuples providing the polar angle
-       information
+    -> kwargs is a list of key word arguments that the function accepts:
+          polar= a tuple or list of tuples containing the polar angle and
+                 its associated error^2
+          units= a string containing the expected units for this function.
+                 The default for this function is Angstroms
  
     Return:
     ------
@@ -62,6 +65,17 @@ def wavelength_to_scalar_Q(obj,polar=None,units="Angstroms"):
               o_descr
     else:
         pass
+
+    # Setup keyword arguments
+    try:
+        polar = kwargs["polar"]
+    except KeyError:
+        polar = None
+
+    try:
+        units = kwargs["units"]
+    except KeyError:
+        units = "Angstroms"
 
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
@@ -131,7 +145,7 @@ if __name__=="__main__":
     import hlr_test
     import SOM
 
-    polar=(0.785, 0.005)
+    pa=(0.785, 0.005)
 
     som1=hlr_test.generate_som()
     som1.setAllAxisUnits(["Angstroms"])
@@ -151,7 +165,7 @@ if __name__=="__main__":
 
     print "********** wavelength_to_scalar_Q"
     print "* som  :",wavelength_to_scalar_Q(som1)
-    print "* so   :",wavelength_to_scalar_Q(som2[0], polar)
-    print "* scal :",wavelength_to_scalar_Q((1,1), polar)
+    print "* so   :",wavelength_to_scalar_Q(som2[0], polar=pa)
+    print "* scal :",wavelength_to_scalar_Q((1,1), polar=pa)
 
 

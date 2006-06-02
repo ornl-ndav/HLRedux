@@ -22,19 +22,26 @@
 
 # $Id$
 
-def tof_to_wavelength(obj,pathlength=None,units="microseconds"):
+def tof_to_wavelength(obj,**kwargs):
     """
     This function converts a primary axis of a SOM or SO from time-of-flight
     to wavelength. The wavelength axis for a SOM must be in units of
     microseconds. The primary axis of a SO is assumed to be in units of
-    microseconds. A tuple of [wavelength, wavelength_err2] (assumed to be in
-    units of microseconds) can be converted to [wavelength, wavelength_err2].
+    microseconds. A tuple of (tof, tof_err2) (assumed to be in units of
+    microseconds) can be converted to (wavelength, wavelength_err2).
 
     Parameters:
     ----------
     -> obj is the SOM, SO or tuple to be converted
-    -> pathlength (OPTIONAL) is a tuple or list of tuples containing the
-       pathlength information
+    -> kwargs is a list of key word arguments that the function accepts:
+          pathlength= a tuple or list of tuples containing the pathlength and
+                      its associated error^2
+          inst_param= a string containing the type of parameter requested
+                      from an associated instrument. For this function the
+                      acceptable parameters are primary and secondary. Default
+                      is primary.
+          units= a string containing the expected units for this function.
+                 The default for this function is microseconds
 
     Return:
     ------
@@ -57,6 +64,22 @@ def tof_to_wavelength(obj,pathlength=None,units="microseconds"):
     # set up for working through data
     (result,res_descr)=hlr_utils.empty_result(obj)
     (o_descr,d_descr)=hlr_utils.get_descr(obj)
+
+    # Setup keyword arguments
+    try:
+        inst_param = kwargs["inst_param"]
+    except KeyError:
+        inst_param = "primary"
+
+    try:
+        pathlength = kwargs["pathlength"]
+    except KeyError:
+        pathlength = None
+
+    try:
+        units = kwargs["units"]
+    except KeyError:
+        units = "microseconds"
 
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
@@ -97,7 +120,7 @@ def tof_to_wavelength(obj,pathlength=None,units="microseconds"):
         map_so = hlr_utils.get_map_so(obj,None,i)
 
         if pathlength == None:
-            (pl,pl_err2) = hlr_utils.get_parameter("primary",map_so,inst)
+            (pl,pl_err2) = hlr_utils.get_parameter(inst_param,map_so,inst)
         else:
             pl = hlr_utils.get_value(pathlength,i,p_descr)
             pl_err2 = hlr_utils.get_err2(pathlength,i,p_descr)
@@ -113,7 +136,7 @@ if __name__=="__main__":
     import hlr_test
     import SOM
 
-    pathlength = (20.0, 0.1)
+    pl = (20.0, 0.1)
 
     som1=hlr_test.generate_som()
     som1.setAllAxisUnits(["microseconds"])
@@ -125,5 +148,7 @@ if __name__=="__main__":
 
     print "********** tof_to_wavelength"
     print "* tof_to_wavelength som :",tof_to_wavelength(som1)
-    print "* tof_to_wavelength so  :",tof_to_wavelength(som1[0], pathlength)
-    print "* tof_to_wavelength scal:",tof_to_wavelength([1,1], pathlength)
+    print "* tof_to_wavelength so  :",tof_to_wavelength(som1[0],
+                                                        pathlength=pl)
+    print "* tof_to_wavelength scal:",tof_to_wavelength([1,1],
+                                                        pathlength=pl)

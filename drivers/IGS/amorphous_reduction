@@ -150,9 +150,7 @@ def convert_data_and_mon_to_wavelength(config, data_som, mon2_som):
         mon2_som1 = None
 
     data_som1=common_lib.tof_to_initial_wavelength_igs(data_som,
-                                                       None,None,
-                                                       None,None,
-                                                       "microsecond")
+                                                       units="microsecond")
 
     return data_som1, mon2_som1
 
@@ -451,9 +449,7 @@ def run(config):
     m_som1 = None
 
     if config.dump_wave:
-        file = os.path.basename(config.data)
-        path = os.path.join(os.getcwd(), file)
-        pixel_file=hlr_utils.ext_replace(path, "nxs", "pxl")
+        pixel_file=hlr_utils.ext_replace(config.data, "nxs", "pxl")
         resource = open(pixel_file, "w") 
         a3c = DST.getInstance("text/Spec", resource)
         if config.verbose:
@@ -601,7 +597,6 @@ if __name__=="__main__":
     import common_lib
     import dr_lib
     import hlr_utils
-    import os
     
     # set up the options available
     parser=hlr_utils.SNSOptions("usage: %prog [options] <datafile>")
@@ -695,9 +690,7 @@ if __name__=="__main__":
     if options.output:
         config.output=hlr_utils.fix_filename(options.output)
     else:
-        file = os.path.basename(config.data)
-        path = os.path.join(os.getcwd(), file)
-        config.output=hlr_utils.ext_replace(path, "nxs", "txt")
+        config.output=hlr_utils.ext_replace(config.data, "nxs", "txt")
         print "Using %s as output file" % config.output
 
     # set the verbosity

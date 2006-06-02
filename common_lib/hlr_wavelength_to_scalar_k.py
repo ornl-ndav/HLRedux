@@ -22,7 +22,7 @@
 
 # $Id$
 
-def wavelength_to_scalar_k(obj,units="Angstroms"):
+def wavelength_to_scalar_k(obj,**kwargs):
     """
     This function converts a primary axis of a SOM or SO from wavelength
     to scalar_k. The wavelength axis for a SOM must be in units of Angstroms.
@@ -33,6 +33,9 @@ def wavelength_to_scalar_k(obj,units="Angstroms"):
     Parameters:
     ----------
     -> obj is the SOM, SO or tuple to be converted
+    -> kwargs is a list of key word arguments that the function accepts:
+          units= a string containing the expected units for this function.
+                 The default for this function is Angstroms
 
     Return:
     ------
@@ -58,6 +61,12 @@ def wavelength_to_scalar_k(obj,units="Angstroms"):
               o_descr
     else:
         pass
+
+    # Setup keyword arguments
+    try:
+        units = kwargs["units"]
+    except KeyError:
+        units = "Angstroms"
 
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position

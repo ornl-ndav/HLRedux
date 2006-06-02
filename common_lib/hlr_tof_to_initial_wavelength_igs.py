@@ -22,10 +22,7 @@
 
 # $Id$
 
-def tof_to_initial_wavelength_igs(obj,lambda_f=None,time_zero=None,
-                                  dist_source_sample=None,
-                                  dist_sample_detector=None,
-                                  units="microseconds"):
+def tof_to_initial_wavelength_igs(obj,**kwargs):
     """
     This function converts a primary axis of a SOM or SO from time-of-flight
     to initial_wavelength_igs. The time-of-flight axis for a SOM must be in
@@ -37,14 +34,19 @@ def tof_to_initial_wavelength_igs(obj,lambda_f=None,time_zero=None,
     Parameters:
     ----------
     -> obj is the SOM, SO or tuple to be converted
-    -> lambda_f (OPTIONAL) is a tuple or list of tuples that provides the final
-       wavelength information
-    -> time_zero (OPTIONAL) is a tuple or list of tuples that provides the
-       t0 offset information
-    -> dist_source_sample (OPTIONAL) is a tuple or list of tuples that
-       provides the source to sample pathlength
-    -> dist_sample_detector (OPTIONAL) is a tuple or list of tuples that
-       provides the sample to detector pathlength
+    -> kwargs is a list of key word arguments that the function accepts:
+          lambda_f= a tuple containing the final wavelength and its
+                    associated error^2
+          time_zero= a tuple containing the time zero offset and its
+                     associated error^2
+          dist_source_sample= a tuple or list of tuples containing the source
+                              to sample distance information and its
+                              associated error^2
+          dist_sample_detector= a tuple or list of tuples containing the sample
+                                to detector distance information and its
+                                associated error^2
+          units= a string containing the expected units for this function.
+                 The default for this function is microseconds
 
     Return:
     ------
@@ -64,6 +66,32 @@ def tof_to_initial_wavelength_igs(obj,lambda_f=None,time_zero=None,
     # set up for working through data
     (result,res_descr)=hlr_utils.empty_result(obj)
     (o_descr,d_descr)=hlr_utils.get_descr(obj)
+
+    # Setup keyword arguments
+    try:
+        lambda_f = kwargs["lambda_f"]
+    except KeyError:
+        lambda_f = None
+
+    try:
+        time_zero = kwargs["time_zero"]
+    except KeyError:
+        time_zero = None
+
+    try:
+        dist_source_sample = kwargs["dist_source_sample"]
+    except KeyError:
+        dist_source_sample = None
+
+    try:
+        dist_sample_detector = kwargs["dist_sample_detector"]
+    except KeyError:
+        dist_sample_detector = None
+
+    try:
+        units = kwargs["units"]
+    except KeyError:
+        units = "microseconds"
 
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
@@ -197,15 +225,15 @@ if __name__=="__main__":
     import hlr_test
     import SOM
 
-    lambda_f = (7.0, 0.1)    
-    time_zero = (0.1, 0.001)
-    dist_source_sample = (15.0, 0.1)
-    dist_sample_detector = (1.0, 0.05)
+    l_f = (7.0, 0.1)    
+    t_0 = (0.1, 0.001)
+    d_ss = (15.0, 0.1)
+    d_sd = (1.0, 0.05)
 
     som1=hlr_test.generate_som()
     som1.setAllAxisUnits(["microseconds"])
-    som1.attr_list["Wavelength_final"] = lambda_f
-    som1.attr_list["Time_zero"] = time_zero
+    som1.attr_list["Wavelength_final"] = l_f
+    som1.attr_list["Time_zero"] = t_0
     som1.attr_list.instrument = SOM.ASG_Instrument()
     
     print "********** SOM1"
@@ -214,12 +242,14 @@ if __name__=="__main__":
 
     print "********** tof_to_initial_wavelength_igs"
     print "* som  :",tof_to_initial_wavelength_igs(som1)
-    print "* so   :",tof_to_initial_wavelength_igs(som1[0],lambda_f,time_zero,
-                                                   dist_source_sample,
-                                                   dist_sample_detector)
-    print "* scal :",tof_to_initial_wavelength_igs([1,1],lambda_f,time_zero,
-                                                   dist_source_sample,
-                                                   dist_sample_detector)
+    print "* so   :",tof_to_initial_wavelength_igs(som1[0],lambda_f=l_f,
+                                                   time_zero=t_0,
+                                                   dist_source_sample=d_ss,
+                                                   dist_sample_detector=d_sd)
+    print "* scal :",tof_to_initial_wavelength_igs([1,1],lambda_f=l_f,
+                                                   time_zero=t_0,
+                                                   dist_source_sample=d_ss,
+                                                   dist_sample_detector=d_sd)
 
 
 

@@ -22,7 +22,7 @@
 
 # $Id$
 
-def subtract_time_indep_bkg(obj, B_list):
+def subtract_time_indep_bkg(obj,B_list,**kwargs):
     """
     This function takes a SOM or a SO and a list of time-independent background
     tuples and subtracts the numbers from the appropriate SO in the SOM or the

@@ -22,7 +22,7 @@
 
 # $Id$
 
-def frequency_to_energy(obj,units="THz"):
+def frequency_to_energy(obj,**kwargs):
     """
     This function converts a primary axis of a SOM or SO from frequency
     to energy. The frequency axis for a SOM must be in units of THz.
@@ -33,6 +33,9 @@ def frequency_to_energy(obj,units="THz"):
     Parameters:
     ----------
     -> obj is the SOM, SO or tuple to be converted
+    -> kwargs is a list of key word arguments that the function accepts:
+          units= a string containing the expected units for this function.
+                 The default for this function is THz
 
     Return:
     ------
@@ -52,6 +55,12 @@ def frequency_to_energy(obj,units="THz"):
     # set up for working through data
     (result,res_descr)=hlr_utils.empty_result(obj)
     (o_descr,d_descr)=hlr_utils.get_descr(obj)
+
+    # Setup keyword arguments
+    try:
+        units = kwargs["units"]
+    except KeyError:
+        units = "THz"
 
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position

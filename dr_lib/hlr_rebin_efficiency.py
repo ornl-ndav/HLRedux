@@ -22,7 +22,7 @@
 
 # $Id$
 
-def rebin_efficiency(obj1, obj2, units="Angstroms"):
+def rebin_efficiency(obj1,obj2,**kwargs):
     """
     This function takes two SOMs or two SOs and rebins the data for obj1 onto
     the axis provided by obj2. The units on the x-axes needs to be Angstroms,
@@ -32,6 +32,9 @@ def rebin_efficiency(obj1, obj2, units="Angstroms"):
     ----------
     -> obj1 is a SOM or SO that will be rebinned
     -> obj2 is a SOM or SO that will provide the axis for rebinning
+    -> kwargs is a list of key word arguments that the function accepts:
+          units= a string containing the expected units for this function.
+                 The default for this function is Angstroms
 
     Returns:
     -------
@@ -64,6 +67,12 @@ def rebin_efficiency(obj1, obj2, units="Angstroms"):
     else:
         pass
 
+    # Setup keyword arguments
+    try:
+        units = kwargs["units"]
+    except KeyError:
+        units = "Angstroms"
+   
     if o1_descr == "SOM" and o2_descr == "SOM":
          hlr_utils.hlr_math_compatible(obj1,o1_descr,obj2,o2_descr)
     # If both objects are not SOMs, do nothing

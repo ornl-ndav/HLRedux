@@ -22,7 +22,7 @@
 
 # $Id$
 
-def sum_all_spectra(obj):
+def sum_all_spectra(obj,**kwargs):
     """
     This function takes all the SOs in a SOM and sums them together using the
     summing by weights concept. All of the SOs are assumed to have the same
