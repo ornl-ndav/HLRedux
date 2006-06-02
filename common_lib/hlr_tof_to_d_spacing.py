@@ -22,8 +22,7 @@
 
 # $Id$
 
-def tof_to_d_spacing(obj,pathlength=None,polar=None,
-                     units="microseconds"):
+def tof_to_d_spacing(obj,**kwargs):
 
     # import the helper functions
     import hlr_utils
@@ -37,6 +36,22 @@ def tof_to_d_spacing(obj,pathlength=None,polar=None,
     # Go on
     else:
         pass
+
+    # Setup keyword arguments
+    try:
+        polar = kwargs["polar"]
+    except KeyError:
+        polar = None
+    
+    try:
+        pathlength = kwargs["pathlength"]
+    except KeyError:
+        pathlength = None
+
+    try:
+        units = kwargs["units"]
+    except KeyError:
+        units = "microseconds"
 
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
