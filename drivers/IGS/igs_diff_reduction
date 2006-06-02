@@ -126,7 +126,7 @@ if __name__=="__main__":
     if options.data_paths != None:
         config.data_paths = hlr_utils.create_data_paths(options.data_paths)
     else:
-        config.data_paths = ("/entry/diff",1)
+        config.data_paths = ("/entry-diff/bank3",1)
 
 
     # set the d bins
