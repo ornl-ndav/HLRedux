@@ -62,18 +62,35 @@ def run(config):
         print "Converting TOF to d-spacing"
 
     d_som2 = convert_data_to_d_spacing(config, d_som1)
+    
+    if config.dump_pxl:
+        file = os.path.basename(config.data)
+        path = os.path.join(os.getcwd(), file)
+        pixel_file=hlr_utils.ext_replace(path, "nxs", "dsp")
+        resource = open(pixel_file, "w") 
+        a3c = DST.getInstance("text/Spec", resource)
+        if config.verbose:
+            print "Writing pixel d-spacing information"
+        
+        a3c.writeSOM(d_som2) 
+        a3c.release_resource() 
+
+    d_som3 = common_lib.rebin_axis_1D(d_som2, config.d_bins)
+
+    d_som4 = dr_lib.sum_all_spectra(d_som3)
+
+    d_som4[0].id = ("bank3", (0,0))
 
     file = os.path.basename(config.data)
     path = os.path.join(os.getcwd(), file)
-    pixel_file=hlr_utils.ext_replace(path, "nxs", "dsp")
+    pixel_file=hlr_utils.ext_replace(path, "nxs", "ds1")
     resource = open(pixel_file, "w") 
     a3c = DST.getInstance("text/Spec", resource)
     if config.verbose:
-        print "Writing pixel d-spacing information"
+        print "Writing combined d-spacing information"
         
-    a3c.writeSOM(d_som2) 
+    a3c.writeSOM(d_som4) 
     a3c.release_resource() 
-        
 
 if __name__=="__main__":
     import common_lib
@@ -92,6 +109,9 @@ if __name__=="__main__":
     parser.add_option("","--data-paths",default=None,dest="data_paths",
                       help="Specify the comma separated list of detector data"\
                       +"paths and signals: /entry/bank1,1/entry/bank2,1")
+    parser.add_option("","--dump-pxl",default=False,action="store_true",
+                      dest="dump_pxl",
+                      help="Flag to dump the d-spacing for all pixels")
 
     (options,args)=parser.parse_args()
    
@@ -135,5 +155,7 @@ if __name__=="__main__":
         config.d_bins = hlr_utils.make_axis(float(dfacts[0]), float(dfacts[1]),
                                             float(dfacts[2]))
 
+    # set the ability to dump the d-spacing information
+    config.dump_pxl = options.dump_pxl
 
     run(config)
