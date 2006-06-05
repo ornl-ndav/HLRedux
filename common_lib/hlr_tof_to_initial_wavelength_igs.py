@@ -177,6 +177,15 @@ def tof_to_initial_wavelength_igs(obj,**kwargs):
     else:
         pass
 
+    if o_descr == "SOM":
+        length = len(obj[0])
+        filter = True
+    elif o_descr == "SO":
+        length = len(obj)
+        filter = True
+    else:
+        filter = False
+
     # iterate through the values
     import axis_manip
     
@@ -215,6 +224,19 @@ def tof_to_initial_wavelength_igs(obj,**kwargs):
                                                        t_0, t_0_err2,
                                                        L_s, L_s_err2,
                                                        L_d, L_d_err2)
+
+        # Remove all wavelengths < 0
+        if filter:
+            index = 0
+            for val in value[0]:
+                if val > 0:
+                    break
+                index += 1
+
+            value[0].__delslice__(0,index)
+            value[1].__delslice__(0,index)
+            map_so.y.__delslice__(0,index)
+            map_so.var_y.__delslice__(0,index)
 
         hlr_utils.result_insert(result,res_descr,value,map_so,"x",axis)
 
