@@ -121,8 +121,8 @@ def tof_to_d_spacing(obj,**kwargs):
 
         count = 0
         for v,e2 in map(None, value[0], value[1]):
-            term1 = 1.0 / (2.0 * math.sin(angle))
-            term2 = 1.0 / math.tan(angle)
+            term1 = 1.0 / (2.0 * math.sin(angle/2.0))
+            term2 = 1.0 / (2.0 * math.tan(angle/2.0))
             value[0][count] = v * term1
             v2 = value[0][count] * value[0][count]
             value[1][count] = term1*term1*e2 + v2*term2*term2*angle_err2
