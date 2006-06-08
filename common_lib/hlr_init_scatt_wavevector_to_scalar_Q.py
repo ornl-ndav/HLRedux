@@ -37,6 +37,7 @@ def init_scatt_wavevector_to_scalar_Q(initk,scattk,**kwargs):
     ----------
     -> initk is a SOM, SO or tuple of the initial wavevector
     -> scattk is a SOM, SO or tuple of the scattered wavevector
+    -> kwargs is a list of key word arguments that the function accepts:
           polar= a tuple or list of tuples containing the polar angle and
                  its associated error^2
           units= a string containing the expected units for this function.
