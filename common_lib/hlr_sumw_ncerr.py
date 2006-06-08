@@ -22,7 +22,7 @@
 
 # $Id$
 
-def sumw_ncerr(obj1,obj2):
+def sumw_ncerr(obj1, obj2, **kwargs):
     """
     This function sums by weighting errors of two objects (SOM or SO) and
     returns the result of that action in an SOM. The function does not
@@ -32,6 +32,11 @@ def sumw_ncerr(obj1,obj2):
     ----------
     -> obj1  First object in the weighted sum
     -> obj2  Second object in the the weighted sum
+    -> kwargs is a list of key word arguments that the function accepts:
+         axis=<y or x> This is the axis one wishes to manipulate. If no
+               argument is given the default value is y
+         axis_pos=<number> This is position of the axis in the axis array. If
+                  no argument is given, the default value is 0
 
     Returns:
     -------
@@ -65,6 +70,18 @@ def sumw_ncerr(obj1,obj2):
     else:
         pass
 
+    # Check for axis keyword argument
+    try:
+        axis = kwargs["axis"]
+    except KeyError:
+        axis = "y"
+        
+    # Check for axis_pos keyword argument
+    try:
+        axis_pos = kwargs["axis_pos"]
+    except KeyError:
+        axis_pos = 0
+
     result=hlr_utils.copy_som_attr(result,res_descr,obj1,o1_descr,
                                    obj2,o2_descr)
 
@@ -72,18 +89,21 @@ def sumw_ncerr(obj1,obj2):
     import array_manip
     
     for i in range(hlr_utils.get_length(obj1,obj2)):
-        val1 = hlr_utils.get_value(obj1,i,o1_descr)
-        val2 = hlr_utils.get_value(obj2,i,o2_descr)
+        val1 = hlr_utils.get_value(obj1, i, o1_descr, axis, axis_pos)
+        err2_1 = hlr_utils.get_err2(obj1, i, o1_descr, axis, axis_pos)
+
+        val2 = hlr_utils.get_value(obj2, i, o2_descr, axis, axis_pos)
+        err2_2 = hlr_utils.get_err2(obj2, i, o2_descr, axis, axis_pos)
+        
         (descr_1,descr_2)=hlr_utils.get_descr(val1, val2)
+
         hlr_utils.hlr_math_compatible(val1, descr_1, val2, descr_2)
 
-        value=array_manip.sumw_ncerr(val1,
-                                     hlr_utils.get_err2(obj1,i,o1_descr),
-                                     val2,
-                                     hlr_utils.get_err2(obj2,i,o2_descr))
+        value=array_manip.sumw_ncerr(val1, err2_1, val2, err2_2)
         
         map_so = hlr_utils.get_map_so(obj1,None,i)
-        hlr_utils.result_insert(result,res_descr,value,map_so)
+        hlr_utils.result_insert(result, res_descr, value, map_so, axis,
+                                axis_pos)
 
     return result
 
