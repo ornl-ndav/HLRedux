@@ -207,3 +207,79 @@ def create_data_paths(thing):
         return tuple(data_paths)
     else:
         return data_paths
+
+
+def write_file(filename, dst_type, data, **kwargs):
+    """
+    This function performs the steps necessary to write an output file. One
+    can pass a data filename or an output filename. If a data filename is
+    passed, the data file extension, output file extension and the replace
+    keyword must be passed. The expected data object to write to the file is
+    a SOM.
+
+    Parameters:
+    ----------
+    -> filename is a string containing the name of the data file from which
+                the output is generated or the name of an output file
+    -> dst_type is a string containing the MIME type of the output formatter
+    -> data is a SOM that contains the output to be written to file
+    -> kwargs is a list of key word arguments that the function accepts:
+          message=<string> This is part of the message that will be printed
+                  to STDOUT if verbose is switched on. The default message
+                  is \"output file\"
+          data_ext=<string> This is the extension on the data file. This is
+                   used in conjunction with output_ext and replace to convert
+                   the data filename into an output filename. The default
+                   value is \"nxs\".
+          output_ext=<string> This is the extension to be used for the output
+                     file. The default value is \"txt\".
+          verbose=<True or False> This determines whether or not the print
+                  statement is executed. The default value is False.
+          replace=<True or False> This determines whether or not the parameter
+                  filename is modifed to produce the output filename
+    """
+
+    import os
+
+    import DST
+    import hlr_utils
+
+    try:
+        message = kwargs["message"]
+    except KeyError:
+        message = "output file"
+
+    try:
+        data_ext = kwargs["data_ext"]
+    except KeyError:
+        data_ext = "nxs"
+
+    try:
+        output_ext = kwargs["output_ext"]
+    except KeyError:
+        output_ext = "txt"
+
+    try:
+        verbose = kwargs["verbose"]
+    except KeyError:
+        verbose = False
+
+    try:
+        replace = kwargs["replace"]
+    except KeyError:
+        replace = True
+
+    if replace:
+        file = os.path.basename(filename)
+        path = os.path.join(os.getcwd(), file)
+        file = hlr_utils.ext_replace(path, data_ext, output_ext)
+    else:
+        file = filename
+        
+    resource = open(file, "w")
+    output_dst = DST.getInstance(dst_type, resource)
+    if verbose:
+        print "Writing %s" % message
+
+    output_dst.writeSOM(data)
+    output_dst.release_resource()
