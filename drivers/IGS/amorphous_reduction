@@ -246,7 +246,7 @@ def calc_energy_transfer(config, data_som, energy_final):
 
     data_som2 = None
     del data_som2
-
+        
     return common_lib.mult_ncerr(data_som3, (1.0/1000.0,0.0), axis="y")
 
 
@@ -293,7 +293,7 @@ def run(config):
         
     d_som1 = None
     del d_som1
-
+        
     if not config.norm==None:
         if config.verbose:
             print "Reading normalization file"
@@ -449,16 +449,10 @@ def run(config):
     m_som1 = None
 
     if config.dump_wave:
-        file = os.path.basename(config.data)
-        path = os.path.join(os.getcwd(), file)
-        pixel_file=hlr_utils.ext_replace(path, "nxs", "pxl")
-        resource = open(pixel_file, "w") 
-        a3c = DST.getInstance("text/Spec", resource)
-        if config.verbose:
-            print "Writing pixel wavelength information"
-        
-        a3c.writeSOM(d_som7) 
-        a3c.release_resource() 
+        hlr_utils.write_file(config.data, "text/Spec", d_som7,
+                             output_ext="pxl",
+                             verbose=config.verbose,
+                             message="pixel wavelength information")
 
     del d_som6, m_som1
 
@@ -539,16 +533,10 @@ def run(config):
     d_som11 = calc_E_initial(config, d_som9)
 
     if config.dump_initial_energy:
-        file = os.path.basename(config.data)
-        path = os.path.join(os.getcwd(), file)
-        pixel_file=hlr_utils.ext_replace(path, "nxs", "ixl")
-        resource = open(pixel_file, "w") 
-        a3c = DST.getInstance("text/Spec", resource)
-        if config.verbose:
-            print "Writing pixel initial energy information"
-            
-        a3c.writeSOM(d_som11) 
-        a3c.release_resource() 
+        hlr_utils.write_file(config.data, "text/Spec", d_som11,
+                             output_ext="ixl",
+                             verbose=config.verbose,
+                             message="pixel initial energy information")
 
     d_som9 = None
     del d_som9
@@ -564,17 +552,10 @@ def run(config):
     d_som12 = calc_energy_transfer(config, d_som11, E_final)
 
     if config.dump_energy:
-        file = os.path.basename(config.data)
-        path = os.path.join(os.getcwd(), file)
-        pixel_file=hlr_utils.ext_replace(path, "nxs", "exl")
-        resource = open(pixel_file, "w") 
-        a3c = DST.getInstance("text/Spec", resource)
-        if config.verbose:
-            print "Writing pixel energy transfer information"
-        
-        a3c.writeSOM(d_som12) 
-        a3c.release_resource() 
-
+        hlr_utils.write_file(config.data, "text/Spec", d_som12,
+                             output_ext="exl",
+                             verbose=config.verbose,
+                             message="pixel energy transfer information")
 
     if config.verbose:
         print "Creating 2D spectrum"
@@ -586,14 +567,11 @@ def run(config):
 
     # Writing 2D DAVE file
 
-    resource = open(config.output, "w")
-    d2d = DST.getInstance("text/Dave2d", resource)
-    if config.verbose:
-        print "Writing data"
-        
-    d2d.writeSOM(d_som13)
+    hlr_utils.write_file(config.output, "text/Dave2d", d_som13,
+                         verbose=config.verbose,
+                         message="data",
+                         replace=False)
 
-    d2d.release_resource()
 
 if __name__=="__main__":
     import common_lib

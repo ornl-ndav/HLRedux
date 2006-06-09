@@ -64,39 +64,28 @@ def run(config):
     d_som2 = convert_data_to_d_spacing(config, d_som1)
     
     if config.dump_pxl:
-        file = os.path.basename(config.data)
-        path = os.path.join(os.getcwd(), file)
-        pixel_file=hlr_utils.ext_replace(path, "nxs", "dsp")
-        resource = open(pixel_file, "w") 
-        a3c = DST.getInstance("text/Spec", resource)
-        if config.verbose:
-            print "Writing pixel d-spacing information"
+        hlr_utils.write_file(config.data, "text/Spec", d_som4, replace=True,
+                             output_ext="dsp", verbose=config.verbose,
+                             message="pixel d-spacing information")
         
-        a3c.writeSOM(d_som2) 
-        a3c.release_resource() 
-
     d_som3 = common_lib.rebin_axis_1D(d_som2, config.d_bins)
-
+    
     d_som4 = dr_lib.sum_all_spectra(d_som3)
-
+        
     d_som4[0].id = ("bank3", (0,0))
 
-    file = os.path.basename(config.data)
-    path = os.path.join(os.getcwd(), file)
-    pixel_file=hlr_utils.ext_replace(path, "nxs", "ds1")
-    resource = open(pixel_file, "w") 
-    a3c = DST.getInstance("text/Spec", resource)
-    if config.verbose:
-        print "Writing combined d-spacing information"
-        
-    a3c.writeSOM(d_som4) 
-    a3c.release_resource() 
+    hlr_utils.write_file(config.data, "text/Spec", d_som4, replace=True,
+                         output_ext="ds1", verbose=config.verbose,
+                         message="combined d-spacing information")
+
 
 if __name__=="__main__":
+    import os
+    
     import common_lib
     import dr_lib
     import hlr_utils
-    import os
+
     
     # set up the options available
     parser=hlr_utils.SNSOptions("usage: %prog [options] <datafile>")
