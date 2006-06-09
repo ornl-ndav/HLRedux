@@ -45,6 +45,7 @@ package_list = ['', 'common_lib', 'dr_lib', 'hlr_utils', 'hlr_test']
 
 instrument_scripts = {
     "ASG" : [
+    'memory_test',
     'null_int_test',
     'null_int_test2'
     ],

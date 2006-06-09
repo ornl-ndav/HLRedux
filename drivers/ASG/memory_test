@@ -1,0 +1,102 @@
+#!/usr/bin/env python
+
+#                  High-Level Reduction Functions
+#           A part of the SNS Analysis Software Suite.
+#
+#                  Spallation Neutron Source
+#          Oak Ridge National Laboratory, Oak Ridge TN.
+#
+#
+#                             NOTICE
+#
+# For this software and its associated documentation, permission is granted
+# to reproduce, prepare derivative works, and distribute copies to the public
+# for any purpose and without fee.
+#
+# This material was prepared as an account of work sponsored by an agency of
+# the United States Government.  Neither the United States Government nor the
+# United States Department of Energy, nor any of their employees, makes any
+# warranty, express or implied, or assumes any legal liability or
+# responsibility for the accuracy, completeness, or usefulness of any
+# information, apparatus, product, or process disclosed, or represents that
+# its use would not infringe privately owned rights.
+#
+
+###############################################################################
+#
+# This script is designed to aid in profiling the memory associated with 
+# data reduction.
+#
+# This script can be run on the dev box using the following command:
+# ./memory_test /SNS/BSS/2006_1_2_SCI/7/NeXus/BSS_7.nxs
+#
+# $Id$
+#
+###############################################################################
+
+def convert_tof_to_wavelength(data_som):
+    return common_lib.tof_to_initial_wavelength_igs(data_som,
+                                                    units="microsecond")
+
+def convert_wavelength_to_initial_energy(data_som):
+    return common_lib.wavelength_to_energy(data_som)
+
+def run(options, filename):
+    # Create data source translators for reading in two NeXus files
+
+    dst = DST.getInstance("application/x-NeXus", filename)
+
+    # Retrieve the SOMs from the DSTs
+
+    if options.full:
+        som_id = [("/entry/bank1", 1), ("/entry/bank2", 1)]
+        starting_ids = None
+        ending_ids = None
+    else:
+        som_id = ("/entry/bank1", 1)
+        starting_ids = (0, 0)
+        ending_ids = (1, 1)
+        
+    so_axis = "time_of_flight"
+
+    SOM1 = dst.getSOM(som_id, so_axis, start_id=starting_ids,
+                      end_id=ending_ids)
+    SOM1.attr_list["Wavelength_final"] = (6.267, 0.05)
+    SOM1.attr_list["Time_zero"] = (0.0, 0.0)
+
+    print "Converting TOF to wavelength"
+    SOM2 = convert_tof_to_wavelength(SOM1)
+
+    SOM1 = None
+    print "Deleting SOM1"
+    del SOM1
+
+    print "Convert wavelength to initial energy"
+    SOM3 = convert_wavelength_to_initial_energy(SOM2)
+
+    SOM2 = None
+    print "Deleting SOM2"
+    del SOM2
+
+    print "Done"
+
+if __name__=="__main__":
+    import optparse
+
+    import common_lib
+    import DST
+
+    parser=optparse.OptionParser("usage: %prog [options] <datafile>")
+
+    parser.add_option("", "--full", action="store_true", default=False,
+                      help="Read in full data file.")
+
+    (options, args) = parser.parse_args()
+
+    # Confirm the proper number of command line arguments
+    if len(args) != 1:
+        parser.error("incorrect number of arguments")
+    else:
+        pass
+
+    run(options, args[0])
