@@ -149,9 +149,17 @@ def convert_data_and_mon_to_wavelength(config, data_som, mon2_som):
     else:
         mon2_som1 = None
 
-    data_som1=common_lib.tof_to_initial_wavelength_igs(data_som,
-                                                       units="microsecond")
+    if config.no_filter:
+        data_som1 = common_lib.tof_to_initial_wavelength_igs(data_som,
+                                                             units=
+                                                             "microsecond",
+                                                             run_filter=False)
+    else:
+        data_som1 = common_lib.tof_to_initial_wavelength_igs(data_som,
+                                                             units=
+                                                             "microsecond")
 
+        
     return data_som1, mon2_som1
 
 
@@ -650,7 +658,10 @@ if __name__=="__main__":
     parser.add_option("","--dump-all",default=False,action="store_true",
                       dest="dump_all",
                       help="Flag to dump information for all pixels")
-
+    parser.add_option("","--no-filter",default=False,action="store_true",
+                      dest="no_filter",
+                      help="Flag to turn off negative wavelength filtering.")
+    
     (options,args)=parser.parse_args()
 
     # set up the configuration
@@ -791,7 +802,9 @@ if __name__=="__main__":
         config.dump_wave = True
         config.dump_energy = True
         config.dump_initial_energy = True
- 
+
+    # set the no filter option
+    config.no_filter = options.no_filter
     
     # run the program
     run(config)
