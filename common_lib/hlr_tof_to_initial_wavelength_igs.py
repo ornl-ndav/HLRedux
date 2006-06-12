@@ -45,6 +45,8 @@ def tof_to_initial_wavelength_igs(obj,**kwargs):
           dist_sample_detector= a tuple or list of tuples containing the sample
                                 to detector distance information and its
                                 associated error^2
+          run_filter=<True or False> This determines if the filter on the
+                     negative wavelengths is run
           units= a string containing the expected units for this function.
                  The default for this function is microseconds
 
@@ -92,6 +94,11 @@ def tof_to_initial_wavelength_igs(obj,**kwargs):
         units = kwargs["units"]
     except KeyError:
         units = "microseconds"
+
+    try:
+        run_filter = kwargs["run_filter"]
+    except KeyError:
+        run_filter = True
 
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
@@ -177,10 +184,10 @@ def tof_to_initial_wavelength_igs(obj,**kwargs):
     else:
         pass
 
-    if o_descr == "SOM":
+    if o_descr == "SOM" and run_filter:
         length = len(obj[0])
         filter = True
-    elif o_descr == "SO":
+    elif o_descr == "SO" and run_filter:
         length = len(obj)
         filter = True
     else:
