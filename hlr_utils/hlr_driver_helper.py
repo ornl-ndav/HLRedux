@@ -201,7 +201,7 @@ def create_data_paths(thing):
     data_paths = []
 
     for i in range(0,len(mylist),2):
-        data_paths.extend((mylist[i], int(mylist[i+1])))
+        data_paths.append((mylist[i], int(mylist[i+1])))
 
     if len(mylist) == 2:
         return tuple(data_paths)
