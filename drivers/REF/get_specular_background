@@ -29,20 +29,32 @@ This program covers the functionality outlined in 2.4.2 Determination
 of specular and background regions in <CHANGE:DR_Lib_RS.doc>.
 """
 
-def convert_data_tof_to_wavelength(config):
+def convert_data_tof_to_wavelength(config, data_som):
     """Step 1. Convert IDXY(TOF) to wavelength using function 3.15."""
-    pass
 
-def rebin_det_eff(config):
+    if data_som is None:
+        return None
+    else:
+        return common_lib.tof_to_wavelength(data_som)
+
+def rebin_det_eff(config, data_som, det_eff):
     """Step 2. Rebin IDXY(lambda) and epsilonDXY(lambda) with input
     binning strategy by using function 3.12."""
-    pass
 
-def rebin_det_eff(config):
+    if det_eff is None:
+        return data_som
+    else:
+        return dr_lib.rebin_efficiency(data_som, det_eff)
+
+def eff_correct_det(config, data_som, det_eff):
     """Step 3. Correct IDXY(lambda) for detector efficiency by using
     the function in 3.9 using IDXY(lambda) as data1 and
     epsilonDXY(lambda) as data2. The result is IeDXY(lambda)."""
-    pass
+
+    if det_eff is None:
+        return data_som
+    else:
+        return common_lib.div_ncerr(data_som, det_eff)
 
 def fit_background(config):
     """Step 4. Fit pixels in BROI with a predetermined function using
@@ -50,8 +62,127 @@ def fit_background(config):
     pass
 
 def run(config):
-    pass
+    import sys
+    
+    if config.data is None:
+        raise RuntimeError, "Need to pass a data filename to the driver "\
+        +"script."
+
+    import DST
+
+    try:
+        data_dst = DST.getInstance("application/x-NeXus", config.data) 
+    except SystemError:
+        print "ERROR: Failed to data read file %s" % config.data
+        sys.exit(-1)
+
+    so_axis = "time_of_flight"
+
+    d_som1 = data_dst.getSOM(config.data_paths, so_axis)
+
+    d_som2 = convert_data_tof_to_wavelength(config, d_som1)
+
+    d_som1 = None
+    del d_som1
+    
+    if config.det_eff is None:
+        d_eff2 = None
+    else:
+        try:
+            config.det_eff.title()
+            if config.verbose:
+                print "Reading detector efficiency file"
+                
+            det_eff_dst = DST.getInstance("text/xml", config.det_eff)
+            d_eff1 = det_eff_dst.getSOM(config.data_paths)
+            det_eff_dst.release_resource()
+            if config.verbose:
+                print "Rebinning detector efficiency"
+
+            d_eff2 = rebin_det_eff(config, d_som2, d_eff1)
+
+            d_eff1 = None
+            del d_eff1
+                    
+        except AttributeError:
+            d_eff2 = config.det_eff
+
+    if config.verbose and d_eff2 is not None:
+        print "Correcting detector data for efficiency"
+        
+    d_som3 = eff_correct_det(config, d_som2, d_eff2)
+    
+    d_som2 = None
+    del d_som2
 
 if __name__=="__main__":
-    pass
+    import common_lib
+    import dr_lib
+    import hlr_utils
+    
+    # set up the options available
+    parser = hlr_utils.SNSOptions("usage: %prog [options] <datafile>")
+
+    # Add REF specific options
+    parser.add_option("","--det-eff", default=None,  dest="det_eff",
+                      help="Specify the detector efficiency file or an "\
+                      +"efficiency tuple (efficiency,error^2)")
+    parser.add_option("","--data-paths", default=None, dest="data_paths",
+                      help="Specify the comma separated list of detector data"\
+                      +"paths and signals: /entry/bank1,1/entry/bank2,1")
+
+    (options, args)= parser.parse_args()
+    
+    # set up the configuration
+    config = hlr_utils.Configure()
+    # get the datafile name and check it
+    if len(args) == 1:
+        config.data = args[0]
+        if not hlr_utils.file_exists(config.data):
+            parser.error("Data file [%s] does not exist" % config.data)
+    else:
+        parser.error("Did not specify a datafile")
+    # create the output file name if there isn't one supplied
+    if options.output:
+        config.output =options.output
+    else:
+        config.output = hlr_utils.ext_replace(config.data, "nxs", "txt")
+        print "Using %s as output file" % config.output
+
+    # set the verbosity
+    config.verbose = options.verbose
+
+    config.norm = hlr_utils.fix_filename(options.norm)
+    if config.norm is not None:
+        if not hlr_utils.file_exists(config.norm):
+            parser.error("Normalization file [%s] does not exist" \
+                         % config.norm)
+        else:
+            pass
+    else:
+        pass
+
+    if options.det_eff is not None:
+        try:
+            config.det_eff = hlr_utils.split_values(options.det_eff)
+        except ValueError:
+            config.det_eff = options.det_eff
+            if not hlr_utils.file_exists(config.det_eff):
+                parser.error("Detector efficiency file [%s] does not exist" \
+                             % config.det_eff)
+            else:
+                pass
+    else:
+        pass
+
+
+    # set the data paths
+    if options.data_paths is not None:
+        config.data_paths = hlr_utils.create_data_paths(options.data_paths)
+    else:
+        config.data_paths = ("/entry/bank1",1)
+
+    # run the program
+    run(config)
+
 
