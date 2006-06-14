@@ -283,3 +283,59 @@ def write_file(filename, dst_type, data, **kwargs):
 
     output_dst.writeSOM(data)
     output_dst.release_resource()
+
+
+def create_id_pairs(pairs, paths, **kwargs):
+    """
+    This function takes in a string that contains pairs of numbers and turns
+    them into a tuple (for one pair) or a list of tuples. The function checks
+    against the number of data paths requested. If the number of paths is not
+    equal to the number of id pairs given, the last id pair is duplicated
+    until the number of id pairs is the same as the number of data paths
+
+    Parameters:
+    ----------
+    -> pairs is a string containing a list of pixel id pairs
+    -> paths is a string containing a list of NeXus data paths and signal pairs
+
+    Returns:
+    -------
+    <- A tuple or list of tuples of the pixel id pairs
+    """
+
+    mylist = pairs.split(',')
+    length = len(mylist)
+
+    if length == 2:
+        use_extend = True
+    else:
+        use_extend = False
+
+    size = len(paths.split(','))
+
+    id_pairs = []
+
+    index = -1
+    for i in range(0, length, 2):
+        if use_extend:
+            id_pairs.extend((int(mylist[i]), int(mylist[i+1])))
+        else:
+            id_pairs.append((int(mylist[i]), int(mylist[i+1])))
+        index = i
+
+    # The number of data paths and the number of id pairs is equal
+    if length == size:
+        if length == 2:
+            return tuple(id_pairs)
+        else:
+            return id_pairs
+    # They are not equal. Fill in the id pairs with the last one until they
+    # are the same
+    else:
+        last_pair = id_pairs[-1]
+        additions = size / length - 1
+        for j in range(additions):
+            id_pairs.append(last_pair)
+
+        return id_pairs
+
