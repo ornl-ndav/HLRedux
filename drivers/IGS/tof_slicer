@@ -1,0 +1,133 @@
+#!/usr/bin/env python
+
+#                  High-Level Reduction Functions
+#           A part of the SNS Analysis Software Suite.
+#
+#                  Spallation Neutron Source
+#          Oak Ridge National Laboratory, Oak Ridge TN.
+#
+#
+#                             NOTICE
+#
+# For this software and its associated documentation, permission is granted
+# to reproduce, prepare derivative works, and distribute copies to the public
+# for any purpose and without fee.
+#
+# This material was prepared as an account of work sponsored by an agency of
+# the United States Government.  Neither the United States Government nor the
+# United States Department of Energy, nor any of their employees, makes any
+# warranty, express or implied, or assumes any legal liability or
+# responsibility for the accuracy, completeness, or usefulness of any
+# information, apparatus, product, or process disclosed, or represents that
+# its use would not infringe privately owned rights.
+#
+
+# $Id$
+
+class Configure:
+    def __init__(self):
+        self.verbose = None
+        self.data = None
+        self.output = None
+
+def run(config):
+    import DST
+
+    try:
+        data_dst = DST.getInstance("application/x-NeXus", config.data)
+    except SystemError:
+        print "ERROR: Failed to data read file %s" % config.data
+        sys.exit(-1)
+
+    so_axis = "time_of_flight"
+
+    if config.verbose:
+        print "Reading data file"
+
+    print "QQ:", config.data_paths
+
+    d_som1 = data_dst.getSOM(config.data_paths, so_axis,
+                             start_id=config.starting_ids,
+                             end_id=config.ending_ids)
+
+    d_som2 = dr_lib.sum_all_spectra(d_som1)
+    d_som2[0].id = d_som1[0].id
+
+    hlr_utils.write_file(config.output, "text/Spec", d_som2, replace=False,
+                         verbose=config.verbose,
+                         message="combined TOF information")
+
+if __name__=="__main__":
+    import os
+
+    import common_lib
+    import dr_lib
+    import hlr_utils
+
+    # set up the options available
+    parser = hlr_utils.SNSOptions("usage: %prog [options] <datafile>")
+
+    parser.add_option("", "--data-paths", default=None, dest="data_paths",
+                      help="Specify the comma separated list of detector data"\
+                      +" paths and signals: /entry/bank1,1/entry/bank2,1")
+    parser.add_option("", "--starting-ids", default=None, dest="starting_ids",
+                      help="Specify the comma separated list of i and j pixel"\
+                      +" locations on the detector. This is inclusive: "\
+                      +"0,0,4,3 (for two banks)")
+    parser.add_option("", "--ending-ids", default=None, dest="ending_ids",
+                      help="Specify the comma separated list of i and j pixel"\
+                      +" locations on the detector. This is exclusive: "\
+                      +"0,0,4,3 (for two banks)")
+
+    (options, args) = parser.parse_args()
+
+    # set up the configuration
+    config = Configure()
+    # get the datafile name and check it
+    if len(args) == 1:
+        config.data = args[0]
+        if not hlr_utils.file_exists(config.data):
+            parser.error("Data file [%s] does not exist" % config.data)
+    else:
+        if options.data is not None:
+            config.data = hlr_utils.fix_filename(options.data)
+            if not hlr_utils.file_exists(config.data):
+                parser.error("Data file [%s] does not exist" % config.data)
+        else:
+            parser.error("Did not specify a datafile")
+    # create the output file name if there isn't one supplied
+    if options.output:
+        config.output =hlr_utils.fix_filename(options.output)
+    else:
+        file = os.path.basename(config.data)
+        path = os.path.join(os.getcwd(), file)
+        config.output = hlr_utils.ext_replace(path, "nxs", "tof")
+        print "Using %s as output file" % config.output
+
+    # set the verbosity
+    config.verbose=options.verbose
+
+    # set the data paths
+    if options.data_paths is not None:
+        config.data_paths = hlr_utils.create_data_paths(options.data_paths)
+    else:
+        config.data_paths = options.data_paths
+
+    # set the starting ids
+    if options.starting_ids is not None:
+        config.starting_ids = hlr_utils.create_id_pairs(options.starting_ids,
+                                                        options.data_paths)
+
+    else:
+        config.starting_ids = options.starting_ids
+
+    # set the ending ids
+    if options.ending_ids is not None:
+        config.ending_ids = hlr_utils.create_id_pairs(options.ending_ids,
+                                                      options.data_paths)
+                                                     
+    else:
+        config.ending_ids = options.ending_ids
+
+    # run the program
+    run(config)
