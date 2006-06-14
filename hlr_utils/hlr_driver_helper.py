@@ -197,11 +197,20 @@ def create_data_paths(thing):
     """
     
     mylist = thing.split(',')
+    length = len(mylist)
+   
+    if length == 2:
+        use_extend = True
+    else:
+        use_extend = False
 
     data_paths = []
 
     for i in range(0,len(mylist),2):
-        data_paths.append((mylist[i], int(mylist[i+1])))
+        if use_extend:
+            data_paths.extend((mylist[i], int(mylist[i+1])))
+        else:
+            data_paths.append((mylist[i], int(mylist[i+1])))
 
     if len(mylist) == 2:
         return tuple(data_paths)
