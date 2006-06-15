@@ -72,8 +72,6 @@ def run(config):
                           + str(end_id[1]) + " --output=" + file \
                           + " " + config.data
                 
-
-                print "AA:", file, start_id, end_id
                 os.system(command)
 
 if __name__=="__main__":

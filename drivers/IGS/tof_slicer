@@ -44,8 +44,6 @@ def run(config):
     if config.verbose:
         print "Reading data file"
 
-    print "QQ:", config.data_paths
-
     d_som1 = data_dst.getSOM(config.data_paths, so_axis,
                              start_id=config.starting_ids,
                              end_id=config.ending_ids)
@@ -97,7 +95,7 @@ if __name__=="__main__":
             parser.error("Did not specify a datafile")
     # create the output file name if there isn't one supplied
     if options.output:
-        config.output =hlr_utils.fix_filename(options.output)
+        config.output = hlr_utils.fix_filename(options.output)
     else:
         file = os.path.basename(config.data)
         path = os.path.join(os.getcwd(), file)
@@ -105,7 +103,7 @@ if __name__=="__main__":
         print "Using %s as output file" % config.output
 
     # set the verbosity
-    config.verbose=options.verbose
+    config.verbose = options.verbose
 
     # set the data paths
     if options.data_paths is not None:
