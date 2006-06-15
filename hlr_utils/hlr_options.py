@@ -24,35 +24,78 @@
 
 import optparse
 
-class SNSOptions(optparse.OptionParser):
-    def __init__(self,usage=None,option_list=None):
+class BasicOptions(optparse.OptionParser):
+    """
+    This class provides a basic set of options for programs. It provides the
+    ability for communicating information from the program, prodviding data
+    to the program and providing output from the program.
+    """
+    
+    def __init__(self, usage=None, option_list=None):
+        """
+        Constructor for BasicOptions
+
+        Parameters:
+        ----------
+        -> usage (OPTIONAL) is a string that will print the correct usage of
+                 program in which the option class is used
+        -> option_list (OPTIONAL) is a list containing the alternative method
+                       of providing options
+        """
         # parent constructor
-        optparse.OptionParser.__init__(self,usage,option_list)
+        optparse.OptionParser.__init__(self, usage, option_list)
 
         # options for debug printing
-        self.add_option("-v","--verbose",action="store_true",default=False,
+        self.add_option("-v","--verbose", action="store_true",
                         dest="verbose",
                         help="Enable verbose print statements")
-        self.add_option("-q","--quiet",action="store_false",dest="verbose",
+        self.set_defaults(verbose=False)
+        
+        self.add_option("-q","--quiet", action="store_false", dest="verbose",
                         help="Disable verbose print statements")
         
         # output options
-        self.add_option("-o","--output",default=None,
-                        help="Specify the output file name (the '.srf' file)")
+        self.add_option("-o","--output", help="Specify the output file name")
 
         # specifying data sets
-        self.add_option("","--data",default=None,
-                        help="Specify the data file")
-        self.add_option("","--ecan",default=None,
-                        help="Specify the empty container file")
-        self.add_option("","--norm",default=None,
-                        help="Specify the normalization file")
-        self.add_option("","--data-bkg",default=None,
+        self.add_option("","--data", help="Specify the data file")
+
+
+class SNSOptions(BasicOptions):
+    """
+    This class provides options more inline with neutron scattering data.
+    It provides various instrument characterization options that can be
+    tailored to the various instrument classes by using keyword arguments.
+    """
+    
+    def __init__(self, usage=None, option_list=None, **kwargs):
+        """
+        Constructor for SNSOptions
+
+        Parameters:
+        ----------
+        -> usage (OPTIONAL) is a string that will print the correct usage of
+                 program in which the option class is used
+        -> option_list (OPTIONAL) is a list containing the alternative method
+                       of providing options
+        """
+        # parent constructor
+        BasicOptions.__init__(self, usage, option_list)
+
+        # Instrument characterization file options
+        self.add_option("","--data-bkg",
                         help="Specify the data background file")
-        self.add_option("","--ecan-bkg",default=None,
-                        help="Specify the empty container background file")
-        self.add_option("","--norm-bkg",default=None,
+
+        self.add_option("","--norm", help="Specify the normalization file")
+        
+        self.add_option("","--norm-bkg",
                         help="Specify the normalization background file")
-        self.add_option("","--dark-count",default=None,
+        
+        self.add_option("","--ecan", help="Specify the empty container file")
+        
+        self.add_option("","--ecan-bkg",
+                        help="Specify the empty container background file")
+
+        self.add_option("","--dark-count",
                         help="Specify the dark count file")
         
