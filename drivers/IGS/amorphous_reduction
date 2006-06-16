@@ -582,212 +582,242 @@ def run(config):
 
 
 if __name__=="__main__":
+    import os
+    
     import common_lib
     import dr_lib
     import hlr_utils
-    import os
     
     # set up the options available
-    parser=hlr_utils.SNSOptions("usage: %prog [options] <datafile>")
+    parser = hlr_utils.SNSOptions("usage: %prog [options] <datafile>")
 
     # Add BSS specific options
-    parser.add_option("","--dead-time",default=None,dest="dead_time",
+    parser.add_option("", "--dead-time", dest="dead_time",
                       help="Dead time with units (no spaces)")
-    parser.add_option("","--tof-start",default=None,dest="TOF_start",
+    
+    parser.add_option("", "--tof-start", dest="TOF_start",
                       help="Specify the starting TOF bin for time-independent"\
                       +"background estimation")
-    parser.add_option("","--tof-end",default=None,dest="TOF_end",
+    
+    parser.add_option("", "--tof-end",dest="TOF_end",
                       help="Specify the ending TOF bin for time-independent"\
                       +"background estimation")
-    parser.add_option("","--no-mon-norm",action="store_true",
+    
+    parser.add_option("", "--no-mon-norm", action="store_true",
                       dest="no_mon_norm",
                       help="Flag for turning off monitor normalization")
-    parser.add_option("","--mon-start",default=None,dest="mon_start",
+    
+    parser.add_option("", "--mon-start", dest="mon_start",
                       help="Specify the starting bin for monitor integration")
-    parser.add_option("","--mon-end",default=None,dest="mon_end",
+    
+    parser.add_option("", "--mon-end", dest="mon_end",
                       help="Specify the ending bin for monitor")
-    parser.add_option("","--no-tib",action="store_true",
-                      dest="no_tib",
+    
+    parser.add_option("", "--no-tib", action="store_true", dest="no_tib",
                       help="Flag for turning off time-independent background"\
                       +"subtraction")
-    parser.add_option("","--final-wavelength",default=None,
-                      dest="wavelength_final",
-                      help="Specify the final wavelength"\
-                      +" lambda, err^2 in Angstroms")
-    parser.add_option("","--time-zero",default=None,
-                      dest="time_zero",
-                      help="Specify the time zero offset"\
-                      +" t_0, err^2 in microseconds")
-    parser.add_option("","--mon-eff",default=None, dest="mon_eff",
+    
+    parser.add_option("","--final-wavelength",  dest="wavelength_final",
+                      help="Specify the final wavelength lambda, err^2 in "\
+                      +"Angstroms")
+    
+    parser.add_option("", "--time-zero", dest="time_zero",
+                      help="Specify the time zero offset t_0, err^2 in "\
+                      +"microseconds")
+    
+    parser.add_option("", "--mon-eff", dest="mon_eff",
                       help="Specify the monitor efficiency file or an "\
                       +"efficiency tuple (efficiency,error2)")
-    parser.add_option("","--det-eff",default=None, dest="det_eff",
+    
+    parser.add_option("", "--det-eff", dest="det_eff",
                       help="Specify the detector efficiency file or an "\
                       +"efficiency tuple (efficiency,error2)")
-    parser.add_option("","--mon-geom",default=None, dest="mon_geom",
+    
+    parser.add_option("", "--mon-geom", dest="mon_geom",
                       help="Specify the monitor geometry file")
-    parser.add_option("","--det-geom",default=None, dest="det_geom",
+    
+    parser.add_option("","--det-geom", dest="det_geom",
                       help="Specify the detector geometry file")
-    parser.add_option("","--energy-bins",default=None,
-                      dest="E_bins",
+    
+    parser.add_option("", "--energy-bins", dest="E_bins",
                       help="Specify the minimum and maximum energy values and"\
                       +" the energy bin width in ueV")
-    parser.add_option("","--mom-trans-bins",default=None,
-                      dest="Q_bins",
+    
+    parser.add_option("", "--mom-trans-bins", dest="Q_bins",
                       help="Specify the minimum and maximum momentum transfer"\
                       +" values and the momentum transfer bin width in"\
                       +" Angstroms^-1")
-    parser.add_option("","--dump-wave",default=False,action="store_true",
-                      dest="dump_wave",
+    
+    parser.add_option("", "--dump-wave", action="store_true", dest="dump_wave",
                       help="Flag to dump the wavelength information for all"\
                       +" pixels")
-    parser.add_option("","--dump-energy",default=False,action="store_true",
+    parser.set_defaults(dump_wave=False)
+    
+    parser.add_option("", "--dump-energy", action="store_true",
                       dest="dump_energy",
                       help="Flag to dump the energy transfer information for"\
                       +" all pixels")
-    parser.add_option("","--data-paths",default=None,dest="data_paths",
+    parser.set_defaults(dump_energy=False)
+    
+    parser.add_option("", "--data-paths", dest="data_paths",
                       help="Specify the comma separated list of detector data"\
-                      +"paths and signals: /entry/bank1,1/entry/bank2,1")
-    parser.add_option("","--mon-path",default=None,dest="mon_path",
+                      +"paths and signals. Defaults is "\
+                      +"/entry/bank1,1/entry/bank2,1")
+    parser.set_defaults(data_paths="/entry/bank1,1/entry/bank2,1")
+    
+    parser.add_option("", "--mon-path", dest="mon_path",
                       help="Specify the comma separated list of monitor "\
-                      +"path and signal: /entry/monitor,1")
-    parser.add_option("","--dump-ei",default=False,action="store_true",
+                      +"path and signal. Default is /entry/monitor,1")
+    parser.set_defaults(mon_path="/entry/monitor,1")
+    
+    parser.add_option("", "--dump-ei", action="store_true",
                       dest="dump_initial_energy",
                       help="Flag to dump the initial energy information for"\
                       +" all pixels")
-    parser.add_option("","--dump-all",default=False,action="store_true",
-                      dest="dump_all",
-                      help="Flag to dump information for all pixels")
-    parser.add_option("","--no-filter",default=False,action="store_true",
-                      dest="no_filter",
-                      help="Flag to turn off negative wavelength filtering.")
+    parser.set_defaults(dump_ei=False)
     
-    (options,args)=parser.parse_args()
+    parser.add_option("", "--dump-all", action="store_true", dest="dump_all",
+                      help="Flag to dump information for all pixels")
+    parser.set_defaults(dump_all=False)
+    
+    parser.add_option("", "--no-filter", action="store_true", dest="no_filter",
+                      help="Flag to turn off negative wavelength filtering.")
+    parser.set_defaults(no_filter=False)
+    
+    (options, args) = parser.parse_args()
 
     # set up the configuration
     config=Configure()
     # get the datafile name and check it
-    if len(args)==1:
-        config.data=args[0]
+    if len(args) == 1:
+        config.data = args[0]
         if not hlr_utils.file_exists(config.data):
             parser.error("Data file [%s] does not exist" % config.data)
     else:
-        if options.data != None:
-            config.data=hlr_utils.fix_filename(options.data)
+        if options.data is not None:
+            config.data = hlr_utils.fix_filename(options.data)
             if not hlr_utils.file_exists(config.data):
                 parser.error("Data file [%s] does not exist" % config.data)
         else:
             parser.error("Did not specify a datafile")
     # create the output file name if there isn't one supplied
     if options.output:
-        config.output=hlr_utils.fix_filename(options.output)
+        config.output = hlr_utils.fix_filename(options.output)
     else:
         file = os.path.basename(config.data)
         path = os.path.join(os.getcwd(), file)
-        config.output=hlr_utils.ext_replace(path, "nxs", "txt")
+        config.output = hlr_utils.ext_replace(path, "nxs", "txt")
         print "Using %s as output file" % config.output
 
     # set the verbosity
-    config.verbose=options.verbose
+    config.verbose = options.verbose
 
-    config.norm=hlr_utils.fix_filename(options.norm)
-    if config.norm != None:
+    config.norm = hlr_utils.fix_filename(options.norm)
+    if config.norm is not None:
         if not hlr_utils.file_exists(config.norm):
             parser.error("Normalization file [%s] does not exist" \
                          % config.norm)
             
-    config.norm_bkg=hlr_utils.fix_filename(options.norm_bkg)
-    if config.norm_bkg != None:
+    config.norm_bkg = hlr_utils.fix_filename(options.norm_bkg)
+    if config.norm_bkg is not None:
         if not hlr_utils.file_exists(config.norm_bkg):
             parser.error("Normalization background file [%s] does not exist"\
                          % config.norm_bkg)
 
-    config.data_bkg=hlr_utils.fix_filename(options.data_bkg)
-    if config.data_bkg != None:
+    config.data_bkg = hlr_utils.fix_filename(options.data_bkg)
+    if config.data_bkg is not None:
         if not hlr_utils.file_exists(config.data_bkg):
             parser.error("Background file [%s] does not exist" \
                          % config.data_bkg)
             
-    config.dark_count=hlr_utils.fix_filename(options.dark_count)
-    if config.dark_count != None:
+    config.dark_count = hlr_utils.fix_filename(options.dark_count)
+    if config.dark_count is not None:
         if not hlr_utils.file_exists(config.dark_count):
             parser.error("Dark-count file [%s] does not exist" \
                          % config.dark_count)
 
-    if options.mon_eff != None:
+    if options.mon_eff is not None:
         try:
-            config.mon_eff=hlr_utils.split_values(options.mon_eff)
+            config.mon_eff = hlr_utils.split_values(options.mon_eff)
         except ValueError:
-            config.mon_eff=hlr_utils.fix_filename(options.mon_eff)
+            config.mon_eff = hlr_utils.fix_filename(options.mon_eff)
             if not hlr_utils.file_exists(config.mon_eff):
                 parser.error("Monitor efficiency file [%s] does not exist" \
                              % config.mon_eff)
 
-    if options.det_eff != None:
+    if options.det_eff is not None:
         try:
-            config.det_eff=hlr_utils.split_values(options.det_eff)
+            config.det_eff = hlr_utils.split_values(options.det_eff)
         except ValueError:
-            config.det_eff=hlr_utils.fix_filename(options.det_eff)
+            config.det_eff = hlr_utils.fix_filename(options.det_eff)
             if not hlr_utils.file_exists(config.det_eff):
                 parser.error("Detector efficiency file [%s] does not exist" \
                              % config.det_eff)
             
-    config.mon_geom=hlr_utils.fix_filename(options.mon_geom)
-    if config.mon_geom != None:
+    config.mon_geom = hlr_utils.fix_filename(options.mon_geom)
+    if config.mon_geom is not None:
         if not hlr_utils.file_exists(config.mon_geom):
             parser.error("Monitor geometry file [%s] does not exist" \
                          % config.mon_geom)
 
-    config.det_geom=hlr_utils.fix_filename(options.det_geom)
-    if config.det_geom != None:
+    config.det_geom = hlr_utils.fix_filename(options.det_geom)
+    if config.det_geom is not None:
         if not hlr_utils.file_exists(config.det_geom):
             parser.error("Detector geometry file [%s] does not exist" \
                          % config.det_geom)
 
     # set the data paths
-    if options.data_paths != None:
-        config.data_paths = hlr_utils.create_data_paths(options.data_paths)
-    else:
-        config.data_paths = [("/entry/bank1",1),("/entry/bank2",1)]
+    config.data_paths = hlr_utils.create_data_paths(options.data_paths)
 
     # set the monitor path
-    if options.mon_path != None:
-        config.mon_path = hlr_utils.create_data_path(options.mon_path)
-    else:
-        config.mon_path = ("/entry/monitor",1)
+    config.mon_path = hlr_utils.create_data_path(options.mon_path)
 
     # set the dead time
-    if options.dead_time != None:
-        config.dead_time=hlr_utils.split_values(options.dead_time)
+    if options.dead_time is not None:
+        config.dead_time = hlr_utils.split_values(options.dead_time)
+    else:
+        config.dead_time = options.dead_time
+        
     # set the TOF start bin
-    config.TOF_start=options.TOF_start
+    config.TOF_start = options.TOF_start
     # set the TOF end bin
-    config.TOF_end=options.TOF_end
+    config.TOF_end = options.TOF_end
     # set the monitor start bin
-    config.mon_start=options.mon_start
+    config.mon_start = options.mon_start
     # set the monitor end bin
-    config.mon_end=options.mon_end
+    config.mon_end = options.mon_end
     # set no_mon_norm flag
-    config.no_mon_norm=options.no_mon_norm
+    config.no_mon_norm = options.no_mon_norm
     # set no_tib flag
-    config.no_tib=options.no_tib
+    config.no_tib = options.no_tib
 
-    if options.wavelength_final != None:
+    # set the final wavelength
+    if options.wavelength_final is not None:
         config.wavelength_final=hlr_utils.split_values(options.wavelength_final)
-    if options.time_zero != None:
+    else:
+        config.wavelength_final = options.wavelength_final
+
+    # set the time-zero offset
+    if options.time_zero is not None:
         config.time_zero=hlr_utils.split_values(options.time_zero)
+    else:
+        config.time_zero = options.time_zero
 
     # set the E bins
-    if options.E_bins != None:
+    if options.E_bins is not None:
         efacts = options.E_bins.split(',')
         config.E_bins = hlr_utils.make_axis(float(efacts[0]), float(efacts[1]),
                                             float(efacts[2]))
+    else:
+        config.E_bins = options.E_bins
 
     # set the Q bins
-    if options.Q_bins != None:
+    if options.Q_bins is not None:
         qfacts = options.Q_bins.split(',')
         config.Q_bins = hlr_utils.make_axis(float(qfacts[0]), float(qfacts[1]),
                                             float(qfacts[2]))
+    else:
+        config.Q_bins = options.Q_bins
 
     # set the ability to dump the wavelength information
     config.dump_wave = options.dump_wave

@@ -86,63 +86,61 @@ if __name__=="__main__":
     import dr_lib
     import hlr_utils
 
-    
     # set up the options available
-    parser=hlr_utils.SNSOptions("usage: %prog [options] <datafile>")
+    parser = hlr_utils.BasicOptions("usage: %prog [options] <datafile>")
 
 
-    parser.add_option("","--d-bins",default=None,
-                      dest="d_bins",
+    parser.add_option("", "--d-bins", dest="d_bins",
                       help="Specify the minimum and maximum d-spacing values"\
                       +"and the d-spacing bin width in Angstroms")
-    parser.add_option("","--data-paths",default=None,dest="data_paths",
+    
+    parser.add_option("", "--data-paths", dest="data_paths",
                       help="Specify the comma separated list of detector data"\
                       +"paths and signals: /entry/bank1,1/entry/bank2,1")
-    parser.add_option("","--dump-pxl",default=False,action="store_true",
-                      dest="dump_pxl",
+    parser.set_defaults(data_paths="/entry/bank3,1")
+    
+    parser.add_option("", "--dump-pxl", action="store_true", dest="dump_pxl",
                       help="Flag to dump the d-spacing for all pixels")
+    parser.set_defaults(dump_pxl=False)
 
-    (options,args)=parser.parse_args()
+    (options, args) = parser.parse_args()
    
     # set up the configuration
     config=Configure()
     # get the datafile name and check it
-    if len(args)==1:
-        config.data=args[0]
+    if len(args) == 1:
+        config.data = args[0]
         if not hlr_utils.file_exists(config.data):
             parser.error("Data file [%s] does not exist" % config.data)
     else:
-        if options.data != None:
-            config.data=hlr_utils.fix_filename(options.data)
+        if options.data is not None:
+            config.data = hlr_utils.fix_filename(options.data)
             if not hlr_utils.file_exists(config.data):
                 parser.error("Data file [%s] does not exist" % config.data)
         else:
             parser.error("Did not specify a datafile")
     # create the output file name if there isn't one supplied
     if options.output:
-        config.output=hlr_utils.fix_filename(options.output)
+        config.output = hlr_utils.fix_filename(options.output)
     else:
         file = os.path.basename(config.data)
         path = os.path.join(os.getcwd(), file)
-        config.output=hlr_utils.ext_replace(path, "nxs", "txt")
+        config.output = hlr_utils.ext_replace(path, "nxs", "txt")
         print "Using %s as output file" % config.output
 
     # set the verbosity
-    config.verbose=options.verbose
-
+    config.verbose = options.verbose
 
     # set the data paths
-    if options.data_paths != None:
-        config.data_paths = hlr_utils.create_data_paths(options.data_paths)
-    else:
-        config.data_paths = ("/entry-diff/bank3",1)
-
+    config.data_paths = hlr_utils.create_data_paths(options.data_paths)
 
     # set the d bins
-    if options.d_bins != None:
+    if options.d_bins is not None:
         dfacts = options.d_bins.split(',')
         config.d_bins = hlr_utils.make_axis(float(dfacts[0]), float(dfacts[1]),
                                             float(dfacts[2]))
+    else:
+        config.d_bins = options.d_bins
 
     # set the ability to dump the d-spacing information
     config.dump_pxl = options.dump_pxl

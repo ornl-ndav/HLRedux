@@ -63,16 +63,19 @@ if __name__=="__main__":
     import hlr_utils
 
     # set up the options available
-    parser = hlr_utils.SNSOptions("usage: %prog [options] <datafile>")
+    parser = hlr_utils.BasicOptions("usage: %prog [options] <datafile>")
 
-    parser.add_option("", "--data-paths", default=None, dest="data_paths",
+    parser.add_option("", "--data-paths", dest="data_paths",
                       help="Specify the comma separated list of detector data"\
-                      +" paths and signals: /entry/bank1,1/entry/bank2,1")
-    parser.add_option("", "--starting-ids", default=None, dest="starting_ids",
+                      +" paths and signals. Default is /entry/bank1,1")
+    parser.set_defaults(data_paths="/entry/bank1,1")
+    
+    parser.add_option("", "--starting-ids", dest="starting_ids",
                       help="Specify the comma separated list of i and j pixel"\
                       +" locations on the detector. This is inclusive: "\
                       +"0,0,4,3 (for two banks)")
-    parser.add_option("", "--ending-ids", default=None, dest="ending_ids",
+    
+    parser.add_option("", "--ending-ids", dest="ending_ids",
                       help="Specify the comma separated list of i and j pixel"\
                       +" locations on the detector. This is exclusive: "\
                       +"0,0,4,3 (for two banks)")
@@ -106,16 +109,12 @@ if __name__=="__main__":
     config.verbose = options.verbose
 
     # set the data paths
-    if options.data_paths is not None:
-        config.data_paths = hlr_utils.create_data_paths(options.data_paths)
-    else:
-        config.data_paths = options.data_paths
+    config.data_paths = hlr_utils.create_data_paths(options.data_paths)
 
     # set the starting ids
     if options.starting_ids is not None:
         config.starting_ids = hlr_utils.create_id_pairs(options.starting_ids,
                                                         options.data_paths)
-
     else:
         config.starting_ids = options.starting_ids
 
@@ -123,7 +122,6 @@ if __name__=="__main__":
     if options.ending_ids is not None:
         config.ending_ids = hlr_utils.create_id_pairs(options.ending_ids,
                                                       options.data_paths)
-                                                     
     else:
         config.ending_ids = options.ending_ids
 

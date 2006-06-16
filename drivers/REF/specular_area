@@ -236,25 +236,29 @@ if __name__=="__main__":
     import hlr_utils
     
     # set up the options available
-    parser = hlr_utils.SNSOptions("usage: %prog [options] <datafile>")
+    parser = hlr_utils.SNSOptions("usage: %prog [options] <datafile>",
+                                  inst="REF")
 
     # Add REF specific options
-    parser.add_option("", "--geom-factor", default=None,
-                      dest="geom_factor",
+    parser.add_option("", "--geom-factor", dest="geom_factor",
                       help="Specify the geometry factor G, err^2")
-    parser.add_option("","--det-angle", default=None,
-                      dest="det_angle",
+    
+    parser.add_option("","--det-angle", dest="det_angle",
                       help="Specify the detector inclination angle, err^2")
-    parser.add_option("","--mon-eff", default=None, dest="mon_eff",
+    
+    parser.add_option("","--mon-eff", dest="mon_eff",
                       help="Specify the monitor efficiency file or an "\
                       +"efficiency tuple (efficiency,error^2)")
-    parser.add_option("","--data-paths", default=None, dest="data_paths",
+    
+    parser.add_option("","--data-paths", dest="data_paths",
                       help="Specify the comma separated list of detector data"\
-                      +"paths and signals: /entry/bank1,1/entry/bank2,1")
-    parser.add_option("","--mon-path", default=None, dest="mon_path",
+                      +"paths and signals. Default is /entry/bank1,1")
+    parser.set_defaults(data_paths="/entry/bank1,1")
+    
+    parser.add_option("","--mon-path", dest="mon_path",
                       help="Specify the comma separated list of monitor "\
-                      +"path and signal: /entry/monitor,1")
-
+                      +"path and signal. Default is /entry/monitor,1")
+    parser.set_defaults(mon_path="/entry/monitor,1")
 
     (options, args) = parser.parse_args()
     
@@ -298,30 +302,23 @@ if __name__=="__main__":
             else:
                 pass
     else:
-        pass
-
+        config.mon_eff = options.mon_eff 
 
     # set the data paths
-    if options.data_paths is not None:
-        config.data_paths = hlr_utils.create_data_paths(options.data_paths)
-    else:
-        config.data_paths = ("/entry/bank1",1)
+    config.data_paths = hlr_utils.create_data_paths(options.data_paths)
 
     # set the monitor path
-    if options.mon_path is not None:
-        config.mon_path = hlr_utils.create_data_path(options.mon_path)
-    else:
-        config.mon_path = ("/entry/monitor",1)
+    config.mon_path = hlr_utils.create_data_path(options.mon_path)
 
     if options.geom_factor is not None:
-        config.geom_factor=hlr_utils.split_values(options.geom_factor)
+        config.geom_factor = hlr_utils.split_values(options.geom_factor)
     else:
-        pass
+        config.geom_factor = options.geom_factor
 
     if options.det_angle is not None:
-        config.det_angle=hlr_utils.split_values(options.det_angle)
+        config.det_angle = hlr_utils.split_values(options.det_angle)
     else:
-        pass
+        config.det_angle = options.det_angle
 
     # run the program
     run(config)

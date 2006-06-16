@@ -121,17 +121,19 @@ if __name__=="__main__":
     import hlr_utils
     
     # set up the options available
-    parser = hlr_utils.SNSOptions("usage: %prog [options] <datafile>")
+    parser = hlr_utils.BasicOptions("usage: %prog [options] <datafile>")
 
     # Add REF specific options
-    parser.add_option("","--det-eff", default=None,  dest="det_eff",
+    parser.add_option("", "--det-eff", dest="det_eff",
                       help="Specify the detector efficiency file or an "\
                       +"efficiency tuple (efficiency,error^2)")
-    parser.add_option("","--data-paths", default=None, dest="data_paths",
+    
+    parser.add_option("", "--data-paths", dest="data_paths",
                       help="Specify the comma separated list of detector data"\
-                      +"paths and signals: /entry/bank1,1/entry/bank2,1")
+                      +"paths and signals. Default is /entry/bank1,1")
+    parser.set_defaults(data_paths="/entry/bank1,1")
 
-    (options, args)= parser.parse_args()
+    (options, args) = parser.parse_args()
     
     # set up the configuration
     config = hlr_utils.Configure()
@@ -144,23 +146,13 @@ if __name__=="__main__":
         parser.error("Did not specify a datafile")
     # create the output file name if there isn't one supplied
     if options.output:
-        config.output =options.output
+        config.output = options.output
     else:
         config.output = hlr_utils.ext_replace(config.data, "nxs", "txt")
         print "Using %s as output file" % config.output
 
     # set the verbosity
     config.verbose = options.verbose
-
-    config.norm = hlr_utils.fix_filename(options.norm)
-    if config.norm is not None:
-        if not hlr_utils.file_exists(config.norm):
-            parser.error("Normalization file [%s] does not exist" \
-                         % config.norm)
-        else:
-            pass
-    else:
-        pass
 
     if options.det_eff is not None:
         try:
@@ -173,14 +165,10 @@ if __name__=="__main__":
             else:
                 pass
     else:
-        pass
-
+        config.det_eff = options.det_eff
 
     # set the data paths
-    if options.data_paths is not None:
-        config.data_paths = hlr_utils.create_data_paths(options.data_paths)
-    else:
-        config.data_paths = ("/entry/bank1",1)
+    config.data_paths = hlr_utils.create_data_paths(options.data_paths)
 
     # run the program
     run(config)

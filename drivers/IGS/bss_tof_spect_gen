@@ -80,19 +80,24 @@ if __name__=="__main__":
     import hlr_utils
 
     # set up the options available
-    parser = hlr_utils.SNSOptions("usage: %prog [options] <datafile>")
+    parser = hlr_utils.BasicOptions("usage: %prog [options] <datafile>")
 
-    parser.add_option("-u","--vertical", default=False, action="store_true",
+    parser.add_option("-u", "--vertical", default=False, action="store_true",
                       dest="vertical",
                       help="Flag to slice and sum pixels in the vertical "\
                       +"direction")
-    parser.add_option("-a","--horizontal", action="store_false",
+    parser.set_defaults(vertical=False)
+    
+    parser.add_option("-a", "--horizontal", action="store_false",
                       dest="vertical",
                       help="Flag to slice and sum pixels in the horizontal "\
-                      +"direction")
-    parser.add_option("","--pixel-group", default=None, dest="pixel_group",
+                      +"direction. (Default behavior)")
+    
+    parser.add_option("", "--pixel-group", dest="pixel_group", type="int",
+                      metavar="INT",
                       help="Number of pixels in a grouping. The default "\
                       +"value is 4.")
+    parser.set_defaults(pixel_group=4)
 
 
     (options, args) = parser.parse_args()
@@ -119,9 +124,6 @@ if __name__=="__main__":
     config.vertical = options.vertical
 
     # set pixel grouping
-    if options.pixel_group is not None:
-        config.pixel_group = options.pixel_group
-    else:
-        config.pixel_group = 4
+    config.pixel_group = options.pixel_group
 
     run(config)

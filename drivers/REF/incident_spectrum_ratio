@@ -188,7 +188,7 @@ def run(config):
 
     # BEGIN SNS-FIXME
     # try/except should be removed when real histogram monitor data is
-    #available
+    # available
     try:
         m2_som4 = rebin_mon2_to_mon1(config, m1_som3, m2_som3)
     except IndexError:
@@ -209,21 +209,26 @@ if __name__=="__main__":
     import hlr_utils
     
     # set up the options available
-    parser = hlr_utils.SNSOptions("usage: %prog [options] <datafile>")
+    parser = hlr_utils.BasicOptions("usage: %prog [options] <datafile>")
 
     # Add REF specific options
-    parser.add_option("","--mon1-eff", default=None, dest="mon1_eff",
+    parser.add_option("", "--mon1-eff", dest="mon1_eff",
                       help="Specify monitor 1 efficiency file or an "\
                       +"efficiency tuple (efficiency,error^2)")
-    parser.add_option("","--mon2-eff", default=None, dest="mon2_eff",
+    
+    parser.add_option("", "--mon2-eff", dest="mon2_eff",
                       help="Specify monitor 2 efficiency file or an "\
                       +"efficiency tuple (efficiency,error^2)")
-    parser.add_option("","--mon1-path", default=None, dest="mon1_path",
-                      help="Specify the comma separated list of monitor 1"\
-                      +"path and signal: /entry/monitor,1")
-    parser.add_option("","--mon2-path", default=None, dest="mon2_path",
-                      help="Specify the comma separated list of monitor 2"\
-                      +"path and signal: /entry/monitor,1")
+    
+    parser.add_option("", "--mon1-path", dest="mon1_path",
+                      help="Specify the comma separated list of monitor 1 "\
+                      +"path and signal. Default is /entry/monitor,1")
+    parser.set_defaults(mon1_path="/entry/monitor,1")
+        
+    parser.add_option("", "--mon2-path", dest="mon2_path",
+                      help="Specify the comma separated list of monitor 2 "\
+                      +"path and signal. Default is /entry/monitor,1")
+    parser.set_defaults(mon2_path="/entry/monitor,1")
 
     (options, args) = parser.parse_args()
     
@@ -257,7 +262,7 @@ if __name__=="__main__":
             else:
                 pass
     else:
-        config.mon1_eff = None
+        config.mon1_eff = options.mon1_eff
 
     if options.mon2_eff is not None:
         try:
@@ -270,19 +275,13 @@ if __name__=="__main__":
             else:
                 pass
     else:
-        config.mon2_eff = None
+        config.mon2_eff = options.mon2_eff
 
     # set the monitor 1 path
-    if options.mon1_path is not None:
-        config.mon1_path = hlr_utils.create_data_path(options.mon1_path)
-    else:
-        config.mon1_path = ("/entry/monitor",1)
+    config.mon1_path = hlr_utils.create_data_path(options.mon1_path)
 
     # set the monitor 2 path
-    if options.mon2_path is not None:
-        config.mon2_path = hlr_utils.create_data_path(options.mon2_path)
-    else:
-        config.mon2_path = ("/entry/monitor",1)
+    config.mon2_path = hlr_utils.create_data_path(options.mon2_path)
 
     # run the program
     run(config)
