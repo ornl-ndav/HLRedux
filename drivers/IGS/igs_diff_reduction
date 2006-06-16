@@ -89,8 +89,8 @@ if __name__=="__main__":
     
     parser.add_option("", "--data-paths", dest="data_paths",
                       help="Specify the comma separated list of detector data"\
-                      +"paths and signals: /entry/bank1,1/entry/bank2,1")
-    parser.set_defaults(data_paths="/entry/bank3,1")
+                      +"paths and signals. Default is /entry-diff/bank1,1")
+    parser.set_defaults(data_paths="/entry-diff/bank3,1")
     
     parser.add_option("", "--dump-pxl", action="store_true", dest="dump_pxl",
                       help="Flag to dump the d-spacing for all pixels")
