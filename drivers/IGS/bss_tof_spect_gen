@@ -24,12 +24,6 @@
 
 # $Id$
 
-class Configure:
-    def __init__(self):
-        self.verbose = None
-        self.data = None
-        self.output = None
-
 def run(config):
 
     runner = "./tof_slicer"
@@ -103,7 +97,8 @@ if __name__=="__main__":
     (options, args) = parser.parse_args()
 
     # set up the configuration
-    config = Configure()
+    config = hlr_utils.Configure()
+    
     # get the datafile name and check it
     if len(args) == 1:
         config.data = args[0]

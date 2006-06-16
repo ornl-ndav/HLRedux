@@ -29,37 +29,6 @@ This program covers the functionality outlined in 2.2.1 Powder or
 amorphous material reduction in <CHANGE:DR_Lib_RS.doc>.
 """
 
-class Configure:
-    def __init__(self):
-        self.verbose=None
-        self.data=None
-        self.output=None
-        self.dead_time=None
-        self.dead_time_units=None
-        self.norm=None
-        self.norm_bkg=None
-        self.dark_count=None
-        self.no_tib=None # don't perform time-independent background
-        self.bkg=None
-        self.no_norm=None # this should be implicit from whether the
-                          # normalization data is specified
-        self.no_mon_norm=None
-        self.mon_geom=None
-        self.det_geom=None
-        self.mon_eff=None
-        self.det_eff=None
-        self.Q_bins=None
-        self.E_bins=None
-        self.banks_separate=None # should be a description of how to
-                                 # combine banks
-        self.TOF_start=None
-        self.TOF_end=None
-        self.mon_start=None
-        self.mon_end=None
-        self.wavelength_final=None
-        self.time_zero=None
-
-
 def dead_time_correction(config, data_som):
     """Step 1. Apply dead time correction to each I(TOF) using
     function 3.38. The result is ItiXY(TOF)."""
@@ -687,7 +656,8 @@ if __name__=="__main__":
     (options, args) = parser.parse_args()
 
     # set up the configuration
-    config=Configure()
+    config = hlr_utils.Configure()
+    
     # get the datafile name and check it
     if len(args) == 1:
         config.data = args[0]
