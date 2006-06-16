@@ -46,19 +46,18 @@ class BasicOptions(optparse.OptionParser):
         optparse.OptionParser.__init__(self, usage, option_list)
 
         # options for debug printing
-        self.add_option("-v","--verbose", action="store_true",
-                        dest="verbose",
+        self.add_option("-v", "--verbose", action="store_true", dest="verbose",
                         help="Enable verbose print statements")
         self.set_defaults(verbose=False)
         
-        self.add_option("-q","--quiet", action="store_false", dest="verbose",
+        self.add_option("-q", "--quiet", action="store_false", dest="verbose",
                         help="Disable verbose print statements")
         
         # output options
-        self.add_option("-o","--output", help="Specify the output file name")
+        self.add_option("-o", "--output", help="Specify the output file name")
 
         # specifying data sets
-        self.add_option("","--data", help="Specify the data file")
+        self.add_option("", "--data", help="Specify the data file")
 
 
 class SNSOptions(BasicOptions):
@@ -82,20 +81,29 @@ class SNSOptions(BasicOptions):
         # parent constructor
         BasicOptions.__init__(self, usage, option_list)
 
+        # check for keywords
+        try:
+            instrument = kwargs["inst"]
+        except KeyError:
+            instrument = ""
+
         # Instrument characterization file options
-        self.add_option("","--data-bkg",
+        self.add_option("", "--data-bkg",
                         help="Specify the data background file")
 
-        self.add_option("","--norm", help="Specify the normalization file")
+        self.add_option("", "--norm", help="Specify the normalization file")
         
-        self.add_option("","--norm-bkg",
+        self.add_option("", "--norm-bkg",
                         help="Specify the normalization background file")
-        
-        self.add_option("","--ecan", help="Specify the empty container file")
-        
-        self.add_option("","--ecan-bkg",
-                        help="Specify the empty container background file")
 
-        self.add_option("","--dark-count",
-                        help="Specify the dark count file")
+        if instrument != "REF":
+            self.add_option("", "--ecan",
+                            help="Specify the empty container file")
         
+            self.add_option("", "--ecan-bkg",
+                            help="Specify the empty container background file")
+
+            self.add_option("", "--dark-count",
+                            help="Specify the dark count file")
+        else:
+            pass
