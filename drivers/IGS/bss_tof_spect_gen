@@ -26,7 +26,7 @@
 
 def run(config):
 
-    runner = "./tof_slicer"
+    runner = "tof_slicer"
     banks = [("/entry/bank1", 1), ("/entry/bank2", 1)]
 
     max_ids = (64, 64)
@@ -59,12 +59,17 @@ def run(config):
                 file = bank + "_" + tag + "_" + tag1 + "_" \
                        + tag2 + ".tof"
 
+                if config.verbose:
+                    print "Creating %s" % file
+
                 command = runner + " --data-paths=\"" + path[0] \
                           + "\",1 --starting-ids=" \
                           + str(start_id[0]) + "," + str(start_id[1]) \
                           + " --ending-ids=" + str(end_id[0]) + "," \
                           + str(end_id[1]) + " --output=" + file \
                           + " " + config.data
+                if config.ts_verbose:
+                    command += " -v"
                 
                 os.system(command)
 
@@ -76,8 +81,7 @@ if __name__=="__main__":
     # set up the options available
     parser = hlr_utils.BasicOptions("usage: %prog [options] <datafile>")
 
-    parser.add_option("-u", "--vertical", default=False, action="store_true",
-                      dest="vertical",
+    parser.add_option("-u", "--vertical", action="store_true", dest="vertical",
                       help="Flag to slice and sum pixels in the vertical "\
                       +"direction")
     parser.set_defaults(vertical=False)
@@ -93,6 +97,10 @@ if __name__=="__main__":
                       +"value is 4.")
     parser.set_defaults(pixel_group=4)
 
+    parser.add_option("-t", "--ts-verbose", action="store_true",
+                      dest="ts_verbose", help="Flag to set verbose on "\
+                      +"tof_slicer")
+    parser.set_defaults(ts_verbose=False)
 
     (options, args) = parser.parse_args()
 
@@ -114,6 +122,9 @@ if __name__=="__main__":
 
     # set the verbosity
     config.verbose = options.verbose
+
+    # set the verbosity on tof_slicer
+    config.ts_verbose = options.ts_verbose
 
     # set vertical
     config.vertical = options.vertical
