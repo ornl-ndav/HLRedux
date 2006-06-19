@@ -51,6 +51,9 @@ instrument_scripts = {
     ],
     "DGS" : [
     ],
+    "GEN" : [
+    'tof_slicer'
+    ],
     "IGS" : [
     'amorphous_reduction',
     'bss_tof_spect_gen',
@@ -83,7 +86,7 @@ def pythonVersionCheck():
         sys.exit(-3)
 
 
-def parseOptions( argv, keywords ):
+def parseOptions(argv, keywords):
     """get values for input keywords
 
     inputs like:
@@ -117,6 +120,10 @@ def parseCommandLine():
     instruments = None
     if options.get('--inst'):
         instruments = options['--inst'].split(',')
+        try:
+            index = instruments.index("GEN")
+        except ValueError:
+            instruments.append("GEN")
     else:
         instruments = ["All"]
 
