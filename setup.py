@@ -53,6 +53,7 @@ instrument_scripts = {
     ],
     "IGS" : [
     'amorphous_reduction',
+    'bss_tof_spect_gen',
     'delta_E0',
     'igs_diff_reduction'
     ],
