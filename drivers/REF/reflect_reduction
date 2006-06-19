@@ -1,0 +1,355 @@
+#!/usr/bin/env python
+
+#                  High-Level Reduction Functions
+#           A part of the SNS Analysis Software Suite.
+#
+#                  Spallation Neutron Source
+#          Oak Ridge National Laboratory, Oak Ridge TN.
+#
+#
+#                             NOTICE
+#
+# For this software and its associated documentation, permission is granted
+# to reproduce, prepare derivative works, and distribute copies to the public
+# for any purpose and without fee.
+#
+# This material was prepared as an account of work sponsored by an agency of
+# the United States Government.  Neither the United States Government nor the
+# United States Department of Energy, nor any of their employees, makes any
+# warranty, express or implied, or assumes any legal liability or
+# responsibility for the accuracy, completeness, or usefulness of any
+# information, apparatus, product, or process disclosed, or represents that
+# its use would not infringe privately owned rights.
+#
+
+# $Id$
+
+"""
+This program covers the functionality outlined in 2.4 Area detector
+measurement of specular reflectivity in <CHANGE:DR_Lib_RS.doc>.
+"""
+
+def convert_data_tof_to_wavelength(config, data_som):
+    """Step 1. Convert IDXY(TOF) to wavelength using function 3.15."""
+
+    if data_som is None:
+        return None
+    else:
+        return common_lib.tof_to_wavelength(data_som, units="microsecond")
+
+def rebin_det_eff(config, data_som, det_eff):
+    """Step 2. Rebin IDXY(lambda) and epsilonDXY(lambda) with input
+    binning strategy by using function 3.12."""
+
+    if det_eff is None:
+        return data_som
+    else:
+        return dr_lib.rebin_efficiency(data_som, det_eff)
+
+def eff_correct_det(config, data_som, det_eff):
+    """Step 3. Correct IDXY(lambda) for detector efficiency by using
+    the function in 3.9 using IDXY(lambda) as data1 and
+    epsilonDXY(lambda) as data2. The result is IeDXY(lambda)."""
+
+    if det_eff is None:
+        return data_som
+    else:
+        return common_lib.div_ncerr(data_som, det_eff)
+
+def filter_pixels(config, data_som):
+
+    return dr_lib.filter_pixels(data_som, config.data_paths,
+                                config.starting_ids, config.ending_ids)
+
+def determine_background(config, bkg_som):
+
+    return (0,0)
+
+def subtract_bkg_from_data(config, data_som, bkg_som):
+    """Step 4. Subtract the background using function 3.7 with
+    IeDXY(lambda) as data1 and IeBXY(lambda) as data2. The result is
+    IebDXY(lambda)."""
+
+    return data_som
+
+def scale_inc_spec_factor(config, isf_som):
+    """Step 6. Scale the incident spectrum by the geometry factor
+    using function 3.1 with 1/IeM2(lambda) as data1 and G as a. The
+    result is the effective incident spectrum factor,
+    Iinc(lambda). Note: Iinc(lambda) in not a raw spectrum as noted by
+    section 0."""
+
+    if isf_som is None:
+        return None
+    elif config.geom_factor is None:
+        return isf_som
+    else:
+        return common_lib.div_ncerr(isf_som, config.geom_factor)
+
+def norm_data_by_inc_spec_factor(config, data_som, isf_som):
+    """Step 8. Normalize using the incident spectrum factor using
+    function 3.9 with IebDXY(lambda) as data1 and Iinc(lambda) as
+    data2. The result is the reflectivity, R(lambda)."""
+    
+    if isf_som is None:
+        return data_som
+    else:
+        return common_lib.div_ncerr(data_som, isf_som)
+
+def combine_spectra(config, data_som):
+
+    data_som1 = common_lib.rebin_axis_1D(data_som, config.l_bins)
+    data_som2 = dr_lib.sum_all_spectra(data_som1)
+    data_som2[0].id = ("bank1", (0,0))
+
+    return data_som2
+
+def run(config):
+    import sys
+    
+    if config.data is None:
+        raise RuntimeError, "Need to pass a data filename to the driver "\
+        +"script."
+
+    import DST
+
+    try:
+        data_dst = DST.getInstance("application/x-NeXus", config.data,
+                                   noinst=True) 
+    except SystemError:
+        print "ERROR: Failed to data read file %s" % config.data
+        sys.exit(-1)
+
+    so_axis = "time_of_flight"
+
+    if config.verbose:
+        print "Reading data file"
+
+    d_som1 = data_dst.getSOM(config.data_paths, so_axis)
+    
+    if config.verbose:
+        print "Filtering specular and background pixels"
+        
+    (d_som2_D, d_som2_B) = filter_pixels(config, d_som1)
+
+    if config.verbose:
+        print "Determining background"
+        
+    B = determine_background(config, d_som2_B)
+
+    if config.verbose:
+        print "Subtracting background"
+
+    d_som3 = subtract_bkg_from_data(config, d_som2_D, B)
+
+    d_som2_D = None
+    d_som2_B = None
+    del d_som2_D, d_som2_B
+
+    if config.norm is not None:
+        if config.verbose:
+            print "Reading normalization file"
+
+        norm_dst = DST.getInstance("application/x-NeXus", config.norm)
+        n_som1 = norm_dst.getSOM(config.data_paths, so_axis,
+                                 start_id=config.starting_ids,
+                                 end_id=config.ending_ids)
+        norm_dst.release_resource()
+    else:
+        n_som1 = None
+
+    if config.verbose:
+        print "Scale normalization spectra"
+
+    n_som2 = scale_inc_spec_factor(config, n_som1)
+
+    n_som1 = None
+    del n_som1
+
+    if config.verbose:
+        print "Scale data by normalization"
+
+    d_som4 = norm_data_by_inc_spec_factor(config, d_som3, n_som2)
+
+    d_som3 = None
+    del d_som3
+
+    if config.verbose:
+        print "Converting TOF to wavelength"
+
+    d_som5 = convert_data_tof_to_wavelength(config, d_som4)
+
+    d_som4 = None
+    del d_som4
+    
+    if config.det_eff is None:
+        d_eff2 = None
+    else:
+        try:
+            config.det_eff.title()
+            if config.verbose:
+                print "Reading detector efficiency file"
+                
+            det_eff_dst = DST.getInstance("text/xml", config.det_eff)
+            d_eff1 = det_eff_dst.getSOM(config.data_paths)
+            det_eff_dst.release_resource()
+            if config.verbose:
+                print "Rebinning detector efficiency"
+
+            d_eff2 = rebin_det_eff(config, d_som5, d_eff1)
+
+            d_eff1 = None
+            del d_eff1
+                    
+        except AttributeError:
+            d_eff2 = config.det_eff
+
+    if config.verbose and d_eff2 is not None:
+        print "Correcting detector data for efficiency"
+        
+    d_som6 = eff_correct_det(config, d_som5, d_eff2)
+    
+    d_som5 = None
+    del d_som5
+
+    if config.verbose:
+        print "Combining spectra"
+
+    d_som7 = combine_spectra(config, d_som6)
+
+    d_som6 = None
+    del d_som6
+
+    if config.det_angle is None:
+        d_som7.attr_list["Detector_angle"] = (0.0, "degree")
+    else:
+        d_som7.attr_list["Detector_angle"] = det_angle
+
+    hlr_utils.write_file(config.output, "text/Spec", d_som7, replace=False,
+                         verbose=config.verbose,
+                         message="combined Reflectivity information")
+    
+
+if __name__=="__main__":
+    import os
+    
+    import common_lib
+    import dr_lib
+    import hlr_utils
+    
+    # set up the options available
+    parser = hlr_utils.SNSOptions("usage: %prog [options] <datafile>",
+                                  inst="REF")
+
+    # Add REF specific options
+    parser.add_option("", "--det-eff", dest="det_eff",
+                      help="Specify the detector efficiency file or an "\
+                      +"efficiency tuple (efficiency,error^2)")
+    
+    parser.add_option("", "--data-paths", dest="data_paths",
+                      help="Specify the comma separated list of detector data"\
+                      +"paths and signals. Default is /entry/bank1,1")
+    parser.set_defaults(data_paths="/entry/bank1,1")
+
+    parser.add_option("", "--geom-factor", dest="geom_factor",
+                      help="Specify the geometry factor G, err^2")
+    
+    parser.add_option("","--det-angle", dest="det_angle",
+                      help="Specify the detector inclination angle, err^2, "\
+                      +"and units")
+
+    parser.add_option("", "--starting-ids", dest="starting_ids",
+                      help="Specify the comma separated list of i and j pixel"\
+                      +" locations on the detector. This is inclusive.")
+
+    parser.add_option("", "--ending-ids", dest="ending_ids",
+                      help="Specify the comma separated list of i and j pixel"\
+                      +" locations on the detector. This is inclusive.")
+
+    parser.add_option("", "--l-bins", dest="l_bins",
+                      help="Specify the minimum and maximum wavelength values"\
+                      +"and the wavelength bin width in Angstroms")
+
+    (options, args) = parser.parse_args()
+    
+    # set up the configuration
+    config = hlr_utils.Configure()
+    
+    # get the datafile name and check it
+    if len(args) == 1:
+        config.data = args[0]
+        if not hlr_utils.file_exists(config.data):
+            parser.error("Data file [%s] does not exist" % config.data)
+    else:
+        parser.error("Did not specify a datafile")
+
+    # create the output file name if there isn't one supplied
+    if options.output is not None:
+        config.output = options.output
+    else:
+        file = os.path.basename(config.data)
+        path = os.path.join(os.getcwd(), file)
+        config.output = hlr_utils.ext_replace(path, "nxs", "txt")
+        print "Using %s as output file" % config.output
+
+    # set the verbosity
+    config.verbose = options.verbose
+
+    config.norm = hlr_utils.fix_filename(options.norm)
+    if config.norm is not None:
+        if not hlr_utils.file_exists(config.norm):
+            parser.error("Normalization file [%s] does not exist" \
+                         % config.norm)
+        else:
+            pass
+    else:
+        pass
+
+    if options.det_eff is not None:
+        try:
+            config.det_eff = hlr_utils.split_values(options.det_eff)
+        except ValueError:
+            config.det_eff = options.det_eff
+            if not hlr_utils.file_exists(config.det_eff):
+                parser.error("Detector efficiency file [%s] does not exist" \
+                             % config.det_eff)
+            else:
+                pass
+    else:
+        config.det_eff = options.det_eff
+
+    # set the data paths
+    config.data_paths = hlr_utils.create_data_paths(options.data_paths)
+
+    if options.geom_factor is not None:
+        config.geom_factor = hlr_utils.split_values(options.geom_factor)
+    else:
+        config.geom_factor = options.geom_factor
+
+    if options.det_angle is not None:
+        config.det_angle = hlr_utils.split_values(options.det_angle)
+    else:
+        config.det_angle = options.det_angle
+
+    # set the starting ids
+    if options.starting_ids is not None:
+        config.starting_ids = hlr_utils.create_id_pairs(options.starting_ids,
+                                                        options.data_paths)
+    else:
+        config.starting_ids = options.starting_ids
+
+    # set the ending ids
+    if options.ending_ids is not None:
+        config.ending_ids = hlr_utils.create_id_pairs(options.ending_ids,
+                                                      options.data_paths)
+
+    # set the wavelength bins
+    if options.l_bins is not None:
+        lfacts = options.l_bins.split(',')
+        config.l_bins = hlr_utils.make_axis(float(lfacts[0]), float(lfacts[1]),
+                                            float(lfacts[2]))
+    else:
+        config.l_bins = options.l_bins
+
+    # run the program
+    run(config)

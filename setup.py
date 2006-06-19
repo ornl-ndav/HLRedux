@@ -61,6 +61,7 @@ instrument_scripts = {
     "REF" : [
     'get_specular_background',
     'incident_spectrum_ratio',
+    'reflect_reduction',
     'specular_area',
     'specular_point'
     ],
