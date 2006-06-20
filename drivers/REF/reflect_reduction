@@ -237,9 +237,9 @@ def run(config):
     del d_som6
 
     if config.det_angle is None:
-        d_som7.attr_list["Detector_angle"] = (0.0, "degree")
+        d_som7.attr_list["detector_angle"] = (0.0, "degree")
     else:
-        d_som7.attr_list["Detector_angle"] = det_angle
+        d_som7.attr_list["detector_angle"] = det_angle
 
     hlr_utils.write_file(config.output, "text/Spec", d_som7, replace=False,
                          verbose=config.verbose,
