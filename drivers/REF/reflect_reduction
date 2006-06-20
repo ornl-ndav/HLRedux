@@ -132,6 +132,14 @@ def run(config):
         
     (d_som2_D, d_som2_B) = filter_pixels(config, d_som1)
 
+    if config.dump_specular:
+        d_som2_D1 = dr_lib.sum_all_spectra(d_som2_D)
+        hlr_utils.write_file(config.data, "text/Spec", d_som2_D1,
+                             output_ext="sdc", verbose=config.verbose,
+                             message="specular TOF information")
+        d_som2_D1 = None
+        del d_som2_D1
+
     if config.verbose:
         print "Determining background"
         
@@ -165,6 +173,14 @@ def run(config):
 
     n_som1 = None
     del n_som1
+
+    if config.dump_norm and n_som2 is not None:
+        n_som2_1 = dr_lib.sum_all_spectra(n_som2)
+        hlr_utils.write_file(config.data, "text/Spec", n_som2_1,
+                             output_ext="ndc", verbose=config.verbose,
+                             message="normalization TOF information")
+        n_som2_1 = None
+        del n_som2_1
 
     if config.verbose:
         print "Scale data by normalization"
@@ -270,6 +286,23 @@ if __name__=="__main__":
                       help="Specify the minimum and maximum wavelength values"\
                       +"and the wavelength bin width in Angstroms")
 
+    parser.add_option("", "--dump-specular", action="store_true",
+                      dest="dump_specular",
+                      help="Flag to dump the combined specular TOF "\
+                      +"information")
+    parser.set_defaults(dump_specular=False)
+
+    parser.add_option("", "--dump-norm", action="store_true",
+                      dest="dump_norm",
+                      help="Flag to dump the combined normalization TOF "\
+                      +"information")
+    parser.set_defaults(dump_norm=False)
+
+    parser.add_option("", "--dump-all", action="store_true", dest="dump_all",
+                      help="Flag to dump combined information")
+    parser.set_defaults(dump_all=False)
+                    
+
     (options, args) = parser.parse_args()
     
     # set up the configuration
@@ -351,5 +384,15 @@ if __name__=="__main__":
     else:
         config.l_bins = options.l_bins
 
+    # set the ability to dump the combined specular TOF information
+    config.dump_specular = options.dump_specular
+
+    # set the ability to dump the combined normalization TOF information
+    config.dump_norm = options.dump_norm
+    
+    if options.dump_all:
+        config.dump_specular = True
+        config.dump_norm = True
+        
     # run the program
     run(config)
