@@ -25,7 +25,61 @@
 # $Id$
 
 def run(config):
-    pass
+    import DST
+    import SOM
+
+    rSOM = SOM.SOM()
+    rSO = SOM.SO()
+
+    counter = 0
+    for file in config.data:
+
+        try:
+            data_dst = DST.getInstance("application/x-NeXus", file)
+        except SystemError:
+            print "ERROR: Failed to data read file %s" % file
+            sys.exit(-1)
+
+        so_axis = "time_of_flight"
+            
+        if config.verbose:
+            print "Reading data file"
+            
+        d_som1 = data_dst.getSOM(config.data_paths, so_axis)
+
+        d_som2 = dr_lib.sum_all_spectra(d_som1)
+        d_som2[0].id = d_som1[0].id
+
+        d_som1 = None
+        del d_som1
+
+        if counter == 0:
+            rSOM.copyAttributes(d_som2)
+        
+        value = dr_lib.integrate_axis(d_som2)
+
+        rSO.axis[0].val.append(counter)
+        rSO.y.append(value[0])
+        rSO.var_y.append(value[1])
+
+        counter += 1
+
+        data_dst.release_resource()
+
+    # Add information to SOM
+    rSOM.attr_list["filename"] = config.data
+    rSOM.setTitle("Rocking Curve")
+    rSOM.setDataSetType("density")
+    rSOM.setYLabel("Detector Sum")
+    rSOM.setYUnits("microsecond")
+    rSOM.setAxisLabel(0, "Motor Position")
+    rSOM.setAxisUnits(0, "a.u.")
+    rSOM.append(rSO)
+
+    hlr_utils.write_file(config.output, "text/Spec", rSOM, replace=False,
+                         verbose=config.verbose,
+                         message="rocking curve information")
+
 
 if __name__=="__main__":
     import os
@@ -48,25 +102,32 @@ if __name__=="__main__":
     # set up the configuration
     config = hlr_utils.Configure()
 
-    # get the datafile name and check it
-    if len(args) == 1:
-        config.data = args[0]
-        if not hlr_utils.file_exists(config.data):
-            parser.error("Data file [%s] does not exist" % config.data)
-        else:
-            parser.error("Did not specify a datafile")
-            
+    # get the datafile names and check them
+    if len(args) >= 1:
+        for file in args:
+            if not hlr_utils.file_exists(file):
+                print "Data file [%s] does not exist, removing from list" % \
+                      file
+                args.remove(file)
+            else:
+                pass
+
+        config.data = args
+    else:
+        parser.error("Did not specify a datafile")
+        
     # create the output file name if there isn't one supplied
     if options.output is not None:
         config.output = options.output
     else:
-        file = os.path.basename(config.data)
-        path = os.path.join(os.getcwd(), file)
-        config.output = hlr_utils.ext_replace(path, "nxs", "txt")
+        config.output = os.path.join(os.getcwd(), "rocking_curve.txt")
         print "Using %s as output file" % config.output
 
     # set the verbosity
     config.verbose = options.verbose
+
+    # set the data paths
+    config.data_paths = hlr_utils.create_data_paths(options.data_paths)
 
     # run the program
     run(config)
