@@ -63,13 +63,13 @@ def sum_all_spectra(obj,**kwargs):
 
     val1 = hlr_utils.get_value(obj,0,o_descr,"all")
     val2 = hlr_utils.get_value(obj,1,o_descr,"all")
-    value = common_lib.sumw_ncerr(val1, val2)
+    value = common_lib.add_ncerr(val1, val2)
     so_id_list.append(val1.id)
     so_id_list.append(val2.id)
 
     for i in range(2,hlr_utils.get_length(obj)):
         val = hlr_utils.get_value(obj,i,o_descr,"all")
-        value = common_lib.sumw_ncerr(val, value)
+        value = common_lib.add_ncerr(val, value)
         so_id_list.append(val.id)
 
 
