@@ -61,16 +61,24 @@ def filter_pixels(config, data_som):
     return dr_lib.filter_pixels(data_som, config.data_paths,
                                 config.starting_ids, config.ending_ids)
 
-def determine_background(config, bkg_som):
+def determine_background(config, bkg_som, num_data_pixels):
 
-    return (0,0)
+    if bkg_som is None:
+        return (0, 0)
+    else:
+        bkg_som1 = dr_lib.sum_all_spectra(bkg_som)
+        ratio = (float(len(bkg_som)) / float(num_data_pixels), 0.0)
+        return common_lib.mult_ncerr(bkg_som1, ratio)
 
 def subtract_bkg_from_data(config, data_som, bkg_som):
     """Step 4. Subtract the background using function 3.7 with
     IeDXY(lambda) as data1 and IeBXY(lambda) as data2. The result is
     IebDXY(lambda)."""
 
-    return data_som
+    if bkg_som is None:
+        return data_som
+    else:
+        return common_lib.sub_ncerr(data_som, bkg_som[0])
 
 def scale_inc_spec_factor(config, isf_som):
     """Step 6. Scale the incident spectrum by the geometry factor
@@ -134,16 +142,17 @@ def run(config):
 
     if config.dump_specular:
         d_som2_D1 = dr_lib.sum_all_spectra(d_som2_D)
+        d_som2_D1[0].id = ("bank1", (0,0))
         hlr_utils.write_file(config.data, "text/Spec", d_som2_D1,
                              output_ext="sdc", verbose=config.verbose,
-                             message="specular TOF information")
+                             message="combined specular TOF information")
         d_som2_D1 = None
         del d_som2_D1
 
     if config.verbose:
         print "Determining background"
         
-    B = determine_background(config, d_som2_B)
+    B = determine_background(config, d_som2_B, len(d_som2_D))
 
     if config.verbose:
         print "Subtracting background"
@@ -176,9 +185,10 @@ def run(config):
 
     if config.dump_norm and n_som2 is not None:
         n_som2_1 = dr_lib.sum_all_spectra(n_som2)
+        n_som2_1[0].id = ("bank1", (0,0))
         hlr_utils.write_file(config.data, "text/Spec", n_som2_1,
                              output_ext="ndc", verbose=config.verbose,
-                             message="normalization TOF information")
+                             message="combined normalization TOF information")
         n_som2_1 = None
         del n_som2_1
 
@@ -190,6 +200,15 @@ def run(config):
     d_som3 = None
     del d_som3
 
+    if config.dump_div:
+        d_som4_1 = dr_lib.sum_all_spectra(d_som4)
+        d_som4_1[0].id = ("bank1", (0,0))
+        hlr_utils.write_file(config.data, "text/Spec", d_som4_1,
+                             output_ext="div", verbose=config.verbose,
+                             message="combined divided TOF information")
+        d_som4_1 = None
+        del d_som4_1
+        
     if config.verbose:
         print "Converting TOF to wavelength"
 
@@ -239,7 +258,7 @@ def run(config):
     if config.det_angle is None:
         d_som7.attr_list["detector_angle"] = (0.0, "degree")
     else:
-        d_som7.attr_list["detector_angle"] = det_angle
+        d_som7.attr_list["detector_angle"] = config.det_angle
 
     hlr_utils.write_file(config.output, "text/Spec", d_som7, replace=False,
                          verbose=config.verbose,
@@ -297,6 +316,12 @@ if __name__=="__main__":
                       help="Flag to dump the combined normalization TOF "\
                       +"information")
     parser.set_defaults(dump_norm=False)
+
+    parser.add_option("", "--dump-div", action="store_true",
+                      dest="dump_div",
+                      help="Flag to dump the combined divided TOF "\
+                      +"information")
+    parser.set_defaults(dump_div=False)
 
     parser.add_option("", "--dump-all", action="store_true", dest="dump_all",
                       help="Flag to dump combined information")
@@ -389,10 +414,14 @@ if __name__=="__main__":
 
     # set the ability to dump the combined normalization TOF information
     config.dump_norm = options.dump_norm
+
+    # set the ability to dump the combined divided TOF information
+    config.dump_div = options.dump_div    
     
     if options.dump_all:
         config.dump_specular = True
         config.dump_norm = True
+        config.dump_div = True
         
     # run the program
     run(config)
