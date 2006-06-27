@@ -58,7 +58,12 @@ def run(config):
         
         value = dr_lib.integrate_axis(d_som2)
 
-        rSO.axis[0].val.append(counter)
+        if config.info is not None:
+            xval = config.info[counter]
+        else:
+            xval = counter
+
+        rSO.axis[0].val.append(xval)
         rSO.y.append(value[0])
         rSO.var_y.append(value[1])
 
@@ -71,7 +76,7 @@ def run(config):
     rSOM.setTitle("Rocking Curve")
     rSOM.setDataSetType("density")
     rSOM.setYLabel("Detector Sum")
-    rSOM.setYUnits("microsecond")
+    rSOM.setYUnits("counts")
     rSOM.setAxisLabel(0, "Motor Position")
     rSOM.setAxisUnits(0, "a.u.")
     rSOM.append(rSO)
@@ -96,6 +101,12 @@ if __name__=="__main__":
                       help="Specify the comma separated list of detector data"\
                       +"paths and signals. Default is /entry/bank1,1")
     parser.set_defaults(data_paths="/entry/bank1,1")
+
+    parser.add_option("-i", "--info", dest="info", action="append",
+                      type="float",
+                      help="Specify an entry for the x-axis of the rocking "\
+                      +"curve. Each entry must be given with an individual "\
+                      +"flag usage: -i1 -i2 -i3 etc.")
     
     (options, args) = parser.parse_args()
 
@@ -103,7 +114,7 @@ if __name__=="__main__":
     config = hlr_utils.Configure()
 
     # get the datafile names and check them
-    if len(args) >= 1:
+    if args:
         for file in args:
             if not hlr_utils.file_exists(file):
                 print "Data file [%s] does not exist, removing from list" % \
@@ -128,6 +139,20 @@ if __name__=="__main__":
 
     # set the data paths
     config.data_paths = hlr_utils.create_data_paths(options.data_paths)
+
+    # set the x-axis information list
+    config.info = options.info
+
+    # If x-axis information given, the number of entries and the number of
+    # given data files MUST match
+    if config.info is not None:
+        if len(args) != len(config.info):
+            raise RuntimeError("The number of files and x-axis entries "\
+                               +"must be the same")
+        else:
+            pass
+    else:
+        pass
 
     # run the program
     run(config)
