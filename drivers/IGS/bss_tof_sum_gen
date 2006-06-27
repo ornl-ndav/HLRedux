@@ -1,0 +1,172 @@
+#!/usr/bin/env python
+
+#                  High-Level Reduction Functions
+#           A part of the SNS Analysis Software Suite.
+#
+#                  Spallation Neutron Source
+#          Oak Ridge National Laboratory, Oak Ridge TN.
+#
+#
+#                             NOTICE
+#
+# For this software and its associated documentation, permission is granted
+# to reproduce, prepare derivative works, and distribute copies to the public
+# for any purpose and without fee.
+#
+# This material was prepared as an account of work sponsored by an agency of
+# the United States Government.  Neither the United States Government nor the
+# United States Department of Energy, nor any of their employees, makes any
+# warranty, express or implied, or assumes any legal liability or
+# responsibility for the accuracy, completeness, or usefulness of any
+# information, apparatus, product, or process disclosed, or represents that
+# its use would not infringe privately owned rights.
+#
+
+# $Id$
+
+def run(config):
+
+    import dr_lib
+    import DST
+    import SOM
+
+    banks = [("/entry/bank1", 1), ("/entry/bank2", 1)]
+
+    max_ids = (64, 64)
+
+    if config.vertical:
+        tag = "v"
+        size = max_ids[1]
+        reps = max_ids[0] / config.pixel_group
+        label = "Integrated pixel"
+    else:
+        tag = "h"
+        size = max_ids[1] / config.pixel_group
+        reps = max_ids[0]
+        label = "Tube Number"
+
+    for path in banks:
+        bank = path[0].split('/')[-1]
+
+        for i in range(size):
+
+            tSOM = SOM.SOM()
+            tSO = SOM.SO()
+            
+            counter = 1
+            for j in range(reps):
+
+                if config.vertical:
+                    starting_id = (i, config.pixel_group * j)
+                    ending_id = (i + 1, config.pixel_group * (j + 1))
+                else:
+                    starting_id = (j, config.pixel_group * i)
+                    ending_id = (j + 1, config.pixel_group * (i + 1))
+
+                try:
+                    data_dst = DST.getInstance("application/x-NeXus",
+                                               config.data)
+                except SystemError:
+                    print "ERROR: Failed to data read file %s" % config.data
+                    sys.exit(-1)
+
+                so_axis = "time_of_flight"
+
+                d_som1 = data_dst.getSOM(path, so_axis,
+                                         start_id=starting_id,
+                                         end_id=ending_id)
+
+                d_som2 = dr_lib.sum_all_spectra(d_som1)
+                d_som2[0].id = d_som1[0].id
+
+                d_som1 = None
+                del d_som1
+
+                value = dr_lib.integrate_axis(d_som2)
+
+                if config.verbose:
+                    print "Sum", d_som2[0].id, ":", value[0], value[1]
+
+                tSO.axis[0].val.append(counter)
+                tSO.y.append(value[0])
+                tSO.var_y.append(value[1])
+                if counter == 1:
+                    tSO.id = d_som2[0].id
+
+                counter += 1
+
+                data_dst.release_resource()
+
+
+            tSOM.attr_list["filename"] = config.data
+            tSOM.setTitle("TOF Pixel Summation")
+            tSOM.setDataSetType("density")
+            tSOM.setYLabel("Intensity Sum")
+            tSOM.setYUnits("counts")
+            tSOM.setAxisLabel(0, label)
+            tSOM.setAxisUnits(0, "")
+            tSOM.append(tSO)
+
+            tag1 = str(i + 1)
+                    
+            file = bank + "_" + tag + "_" + tag1 + ".tof"
+
+            hlr_utils.write_file(file, "text/Spec", tSOM,
+                                 verbose=config.verbose,
+                                 message="intensity sum file", replace=False)
+                    
+
+
+
+if __name__=="__main__":
+    import os
+
+    import hlr_utils
+
+    # set up the options available
+    parser = hlr_utils.BasicOptions("usage: %prog [options] <datafile>")
+
+    parser.add_option("-u", "--vertical", action="store_true", dest="vertical",
+                      help="Flag to slice and sum pixels in the vertical "\
+                      +"direction")
+    parser.set_defaults(vertical=False)
+    
+    parser.add_option("-a", "--horizontal", action="store_false",
+                      dest="vertical",
+                      help="Flag to slice and sum pixels in the horizontal "\
+                      +"direction. (Default behavior)")
+    
+    parser.add_option("", "--pixel-group", dest="pixel_group", type="int",
+                      metavar="INT",
+                      help="Number of pixels in a grouping. The default "\
+                      +"value is 4.")
+    parser.set_defaults(pixel_group=4)
+
+    (options, args) = parser.parse_args()
+
+    # set up the configuration
+    config = hlr_utils.Configure()
+    
+    # get the datafile name and check it
+    if len(args) == 1:
+        config.data = args[0]
+        if not hlr_utils.file_exists(config.data):
+            parser.error("Data file [%s] does not exist" % config.data)
+    else:
+        if options.data is not None:
+            config.data = hlr_utils.fix_filename(options.data)
+            if not hlr_utils.file_exists(config.data):
+                parser.error("Data file [%s] does not exist" % config.data)
+        else:
+            parser.error("Did not specify a datafile")
+
+    # set the verbosity
+    config.verbose = options.verbose
+
+    # set vertical
+    config.vertical = options.vertical
+
+    # set pixel grouping
+    config.pixel_group = options.pixel_group
+
+    run(config)
