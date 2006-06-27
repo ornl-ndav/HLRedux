@@ -161,6 +161,7 @@ def create_2D_dist(som,*args,**kwargs):
     inst = som1.attr_list.instrument
     lambda_final = som1.attr_list["Wavelength_final"]
 
+    import array_manip
     import axis_manip
     
     for i in range(hlr_utils.get_length(som1)):
@@ -184,18 +185,17 @@ def create_2D_dist(som,*args,**kwargs):
             start = index * N_y[1]
             finish = (index + 1) * N_y[1]
 
-            # Grab slice of 2D array
-            so_temp = SOM.SO()
-            so_temp.y.extend(so_dim.y[start:finish])
-            so_temp.var_y.extend(so_dim.var_y[start:finish])
+            length = finish - start + 1
 
-            # Add data values into slice
-            so_temp = common_lib.add_ncerr(so, so_temp)
+            val = hlr_utils.get_value(som1, i, "SOM")
+            err2 = hlr_utils.get_err2(som1, i, "SOM")
 
-            # Put slice back into 2D array
-            for k in range(start,finish):
-                so_dim.y[k] = so_temp.y[k-start]
-                so_dim.var_y[k] = so_temp.var_y[k-start]
+            (so_dim.y, so_dim.var_y) = array_manip.add_ncerr(so_dim.y,
+                                                             so_dim.var_y,
+                                                             val,
+                                                             err2,
+                                                             a_start=start,
+                                                             b_size=length)
 
         # If the Q value is not found in the given axis, do nothing and
         # continue
