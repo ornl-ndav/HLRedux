@@ -42,6 +42,13 @@ def run(config):
                              start_id=config.starting_ids,
                              end_id=config.ending_ids)
 
+    if config.dump_pxl:
+        hlr_utils.write_file(config.data, "text/Spec", d_som1, replace=True,
+                             output_ext="tfp", verbose=config.verbose,
+                             message="pixel TOF information")
+    else:
+        pass
+
     d_som2 = dr_lib.sum_all_spectra(d_som1)
     d_som2[0].id = d_som1[0].id
 
@@ -73,6 +80,10 @@ if __name__=="__main__":
                       help="Specify the comma separated list of i and j pixel"\
                       +" locations on the detector. This is exclusive: "\
                       +"0,0,4,3 (for two banks)")
+
+    parser.add_option("", "--dump-pxl", action="store_true", dest="dump_pxl",
+                      help="Flag to dump the TOF for all pixels")
+    parser.set_defaults(dump_pxl=False)
 
     (options, args) = parser.parse_args()
 
@@ -119,6 +130,9 @@ if __name__=="__main__":
                                                       options.data_paths)
     else:
         config.ending_ids = options.ending_ids
+
+    # set the dump all TOF pixel information
+    config.dump_pxl = options.dump_pxl
 
     # run the program
     run(config)
