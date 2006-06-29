@@ -28,6 +28,13 @@ def convert_data_to_d_spacing(config, data_som):
 
     return common_lib.tof_to_d_spacing(data_som, units="microsecond")
 
+def convert_data_to_scalar_Q(config, data_som):
+
+    data_som1 = common_lib.tof_to_wavelength(data_som, inst_param="total",
+                                             units="microsecond")
+
+    return common_lib.wavelength_to_scalar_Q(data_som1, half_angle=True)
+
     
 def run(config):
     import sys
@@ -51,26 +58,54 @@ def run(config):
 
     d_som1 = data_dst.getSOM(config.data_paths, so_axis)
 
-    if config.verbose:
-        print "Converting TOF to d-spacing"
+    if config.d_bins is not None:
 
-    d_som2 = convert_data_to_d_spacing(config, d_som1)
+        if config.verbose:
+            print "Converting TOF to d-spacing"
+
+        d_som2 = convert_data_to_d_spacing(config, d_som1)
     
-    if config.dump_pxl:
-        hlr_utils.write_file(config.data, "text/Spec", d_som4, replace=True,
-                             output_ext="dsp", verbose=config.verbose,
-                             message="pixel d-spacing information")
+        if config.dump_pxl:
+            hlr_utils.write_file(config.data, "text/Spec", d_som2,
+                                 replace=True,
+                                 output_ext="dsp", verbose=config.verbose,
+                                 message="pixel d-spacing information")
         
-    d_som3 = common_lib.rebin_axis_1D(d_som2, config.d_bins)
+        d_som3 = common_lib.rebin_axis_1D(d_som2, config.d_bins)
     
-    d_som4 = dr_lib.sum_all_spectra(d_som3)
+        d_som4 = dr_lib.sum_all_spectra(d_som3)
         
-    d_som4[0].id = ("bank3", (0,0))
+        d_som4[0].id = ("bank3", (0,0))
 
-    hlr_utils.write_file(config.data, "text/Spec", d_som4, replace=True,
-                         output_ext="ds1", verbose=config.verbose,
-                         message="combined d-spacing information")
+        hlr_utils.write_file(config.output_dp, "text/Spec", d_som4,
+                             replace=False, verbose=config.verbose,
+                             message="combined d-spacing information")
+    else:
+        pass
 
+    if config.Q_bins is not None:
+        if config.verbose:
+            print "Converting TOF to Q"
+
+        d_som2 = convert_data_to_scalar_Q(config, d_som1)
+    
+        if config.dump_pxl:
+            hlr_utils.write_file(config.data, "text/Spec", d_som2,
+                                 replace=True,
+                                 output_ext="qtp", verbose=config.verbose,
+                                 message="pixel Q information")
+        
+        d_som3 = common_lib.rebin_axis_1D(d_som2, config.Q_bins)
+    
+        d_som4 = dr_lib.sum_all_spectra(d_som3)
+        
+        d_som4[0].id = ("bank3", (0,0))
+
+        hlr_utils.write_file(config.output_qt, "text/Spec", d_som4,
+                             replace=False, verbose=config.verbose,
+                             message="combined Q information")
+    else:
+        pass
 
 if __name__=="__main__":
     import os
@@ -85,16 +120,21 @@ if __name__=="__main__":
 
     parser.add_option("", "--d-bins", dest="d_bins",
                       help="Specify the minimum and maximum d-spacing values"\
-                      +"and the d-spacing bin width in Angstroms")
+                      +" and the d-spacing bin width in Angstroms")
     
     parser.add_option("", "--data-paths", dest="data_paths",
                       help="Specify the comma separated list of detector data"\
-                      +"paths and signals. Default is /entry-diff/bank1,1")
+                      +" paths and signals. Default is /entry-diff/bank3,1")
     parser.set_defaults(data_paths="/entry-diff/bank3,1")
     
     parser.add_option("", "--dump-pxl", action="store_true", dest="dump_pxl",
                       help="Flag to dump the d-spacing for all pixels")
     parser.set_defaults(dump_pxl=False)
+
+    parser.add_option("", "--mom-trans-bins", dest="Q_bins",
+                      help="Specify the minimum and maximum momentum transfer"\
+                      +" values and the momentum transfer bin width in"\
+                      +" Angstroms^-1")
 
     (options, args) = parser.parse_args()
    
@@ -116,11 +156,27 @@ if __name__=="__main__":
     # create the output file name if there isn't one supplied
     if options.output:
         config.output = hlr_utils.fix_filename(options.output)
+        print "Using %s as output file" % config.output
     else:
+        config.output = None
         file = os.path.basename(config.data)
         path = os.path.join(os.getcwd(), file)
-        config.output = hlr_utils.ext_replace(path, "nxs", "txt")
-        print "Using %s as output file" % config.output
+        if options.d_bins is not None:
+            config.output_ds = hlr_utils.ext_replace(path, "nxs", "ds1")
+            print "Using %s as output file" % config.output_ds
+        else:
+            config.output_ds = None
+            
+        if options.Q_bins is not None:
+            config.output_qt = hlr_utils.ext_replace(path, "nxs", "qt1")
+            print "Using %s as output file" % config.output_qt
+        else:
+            config.output_qt = None
+            
+    if options.d_bins is None and options.Q_bins is None:
+        parser.error("Must specify at least one type of binning")
+    else:
+        pass
 
     # set the verbosity
     config.verbose = options.verbose
@@ -135,6 +191,14 @@ if __name__=="__main__":
                                             float(dfacts[2]))
     else:
         config.d_bins = options.d_bins
+
+    # set the Q bins
+    if options.Q_bins is not None:
+        qfacts = options.Q_bins.split(',')
+        config.Q_bins = hlr_utils.make_axis(float(qfacts[0]), float(qfacts[1]),
+                                            float(qfacts[2]))
+    else:
+        config.Q_bins = options.Q_bins
 
     # set the ability to dump the d-spacing information
     config.dump_pxl = options.dump_pxl
