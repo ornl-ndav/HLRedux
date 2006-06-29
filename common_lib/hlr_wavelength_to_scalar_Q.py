@@ -38,6 +38,9 @@ def wavelength_to_scalar_Q(obj,**kwargs):
                  its associated error^2
           units= a string containing the expected units for this function.
                  The default for this function is Angstroms
+          half_angle=<boolean> This keyword, if set to True, will take the
+                               given polar angle and divide it by 2. The
+                               default behavior is division by 1.
  
     Return:
     ------
@@ -76,6 +79,15 @@ def wavelength_to_scalar_Q(obj,**kwargs):
         units = kwargs["units"]
     except KeyError:
         units = "Angstroms"
+
+    try:
+        value = kwargs["half_angle"]
+        if value:
+            divisor = 2.0
+        else:
+            divisor = 1.0
+    except KeyError:
+        divisor = 1.0
 
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
@@ -121,7 +133,8 @@ def wavelength_to_scalar_Q(obj,**kwargs):
             angle = hlr_utils.get_value(polar,i,p_descr)
             angle_err2 = hlr_utils.get_err2(polar,i,p_descr) 
 
-        value=axis_manip.wavelength_to_scalar_Q(val, err2, angle, angle_err2)
+        value=axis_manip.wavelength_to_scalar_Q(val, err2, angle/divisor,
+                                                angle_err2/divisor)
 
         if o_descr != "number":
             value1 = axis_manip.reverse_array_cp(value[0])
