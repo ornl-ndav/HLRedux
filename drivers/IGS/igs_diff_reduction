@@ -28,6 +28,13 @@ def convert_data_to_d_spacing(config, data_som):
 
     return common_lib.tof_to_d_spacing(data_som, units="microsecond")
 
+def convert_data_to_tof_focused_det(config, data_som):
+
+    return common_lib.d_spacing_to_tof_focused_det(data_som,
+                                                   pixel_id=config.pixel_id,
+                                                   verbose=True)
+
+
 def convert_data_to_scalar_Q(config, data_som):
 
     data_som1 = common_lib.tof_to_wavelength(data_som, inst_param="total",
@@ -64,22 +71,50 @@ def run(config):
             print "Converting TOF to d-spacing"
 
         d_som2 = convert_data_to_d_spacing(config, d_som1)
-    
+
         if config.dump_pxl:
             hlr_utils.write_file(config.data, "text/Spec", d_som2,
                                  replace=True,
                                  output_ext="dsp", verbose=config.verbose,
                                  message="pixel d-spacing information")
-        
+
         d_som3 = common_lib.rebin_axis_1D(d_som2, config.d_bins)
     
         d_som4 = dr_lib.sum_all_spectra(d_som3)
         
         d_som4[0].id = ("bank3", (0,0))
 
-        hlr_utils.write_file(config.output_dp, "text/Spec", d_som4,
+        hlr_utils.write_file(config.output_ds, "text/Spec", d_som4,
                              replace=False, verbose=config.verbose,
                              message="combined d-spacing information")
+
+        if config.verbose:
+            print "Converting d-spacing to TOF focused detector"
+
+        d_som5 = convert_data_to_tof_focused_det(config, d_som2)
+
+        if config.dump_pxl:
+            hlr_utils.write_file(config.data, "text/Spec", d_som5,
+                                 replace=True,
+                                 output_ext="tfp", verbose=config.verbose,
+                                 message="pixel TOF focused information")
+
+        d_som6 = common_lib.rebin_axis_1D(d_som5, config.tof_bins)
+
+        d_som7 = dr_lib.sum_all_spectra(d_som6)
+
+        d_som7[0].id = config.pixel_id
+
+        hlr_utils.write_file(config.output_tof, "text/GSAS", d_som7,
+                             replace=False, verbose=config.verbose,
+                             message="combined TOF focused information")
+
+        hlr_utils.write_file(config.data, "text/Spec", d_som7,
+                             replace=True, output_ext="toff",
+                             verbose=config.verbose,
+                             message="combined TOF focused information")
+        
+        
     else:
         pass
 
@@ -121,6 +156,7 @@ if __name__=="__main__":
     parser.add_option("", "--d-bins", dest="d_bins",
                       help="Specify the minimum and maximum d-spacing values"\
                       +" and the d-spacing bin width in Angstroms")
+    parser.set_defaults(d_bins="0,6,0.01")
     
     parser.add_option("", "--data-paths", dest="data_paths",
                       help="Specify the comma separated list of detector data"\
@@ -135,6 +171,17 @@ if __name__=="__main__":
                       help="Specify the minimum and maximum momentum transfer"\
                       +" values and the momentum transfer bin width in"\
                       +" Angstroms^-1")
+
+    parser.add_option("", "--tof-bins", dest="tof_bins",
+                      help="Specify the minimum and maximum TOF values"\
+                      +" and the TOF bin width in Angstroms. Default is 0,"\
+                      +"200000,10")
+    parser.set_defaults(tof_bins="0,200000,10")
+
+    parser.add_option("", "--pixel-id", dest="pixel_id",
+                      help="Specify the pixel ID for time focussing in a "\
+                      +"comma-delimited list. Default is bank3,3,63")
+    parser.set_defaults(pixel_id="bank3,3,63")
 
     (options, args) = parser.parse_args()
    
@@ -166,6 +213,12 @@ if __name__=="__main__":
             print "Using %s as output file" % config.output_ds
         else:
             config.output_ds = None
+
+        if options.tof_bins is not None:
+            config.output_tof = hlr_utils.ext_replace(path, "nxs", "gs")
+            print "Using %s as output file" % config.output_tof
+        else:
+            config.output_tof = None            
             
         if options.Q_bins is not None:
             config.output_qt = hlr_utils.ext_replace(path, "nxs", "qt1")
@@ -199,6 +252,17 @@ if __name__=="__main__":
                                             float(qfacts[2]))
     else:
         config.Q_bins = options.Q_bins
+
+    # set the tof bins
+    if options.tof_bins is not None:
+        tfacts = options.tof_bins.split(',')
+        config.tof_bins = hlr_utils.make_axis(float(tfacts[0]),
+                                              float(tfacts[1]),
+                                              float(tfacts[2]))
+    else:
+        config.tof_bins = options.tof_bins
+
+    config.pixel_id = hlr_utils.create_pixel_id(options.pixel_id)
 
     # set the ability to dump the d-spacing information
     config.dump_pxl = options.dump_pxl
