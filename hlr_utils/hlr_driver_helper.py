@@ -348,3 +348,32 @@ def create_id_pairs(pairs, paths, **kwargs):
 
         return id_pairs
 
+def create_pixel_id(thing):
+    """
+    This function creates a pixel ID out of a comma-delimited list of three
+    values, i.e.: bank3,3,63.
+
+    Parameters:
+    ----------
+    -> thing is a string containing three pieces of information to create a
+             pixel ID
+
+    Returns:
+    -------
+    <- A tuple containing the pixel ID
+
+    Exceptions:
+    ----------
+    <- RuntimeError is raised if 3 pieces of information are not provided to
+                    the function
+    """
+
+    mylist = thing.split(',')
+
+    if len(mylist) != 3:
+        raise RuntimeError("Must provide three pieces of information to the "\
+                           +"function")
+    else:
+        pass
+
+    return (mylist[0], (int(mylist[1]), int(mylist[2])))
