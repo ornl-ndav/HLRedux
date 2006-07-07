@@ -174,9 +174,9 @@ if __name__=="__main__":
 
     parser.add_option("", "--tof-bins", dest="tof_bins",
                       help="Specify the minimum and maximum TOF values"\
-                      +" and the TOF bin width in Angstroms. Default is 0,"\
-                      +"200000,10")
-    parser.set_defaults(tof_bins="0,200000,10")
+                      +" and the TOF bin width in microseconds. Default is 0,"\
+                      +"200000,100")
+    parser.set_defaults(tof_bins="0,200000,100")
 
     parser.add_option("", "--pixel-id", dest="pixel_id",
                       help="Specify the pixel ID for time focussing in a "\
