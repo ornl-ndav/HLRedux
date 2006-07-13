@@ -193,14 +193,15 @@ def norm_data_by_mon(config, data_som, mon_som):
 def calc_E_initial(config, data_som):
     """Step 15. Calculate incident energy using function 3.22."""
 
-    return common_lib.wavelength_to_energy(data_som)
-
+    return common_lib.wavelength_to_energy(data_som,
+                                           offset=config.\
+                                           initial_energy_offset)
 
 def calc_E_final(config):
     """Step 17. Calculate final energy using function 3.22."""
 
-    return common_lib.wavelength_to_energy(config.wavelength_final)
-
+    return common_lib.wavelength_to_energy(config.wavelength_final,
+                                           offset=config.final_energy_offset)
 
 def calc_energy_transfer(config, data_som, energy_final):
     """Step 18. Calculate energy transfer using function 3.30."""
@@ -378,14 +379,20 @@ def run(config):
         m_som1 = data_dst.getSOM(som_id, so_axis)
 
     # Note: wavelength_final MUST be a tuple
-    if config.wavelength_final==None:
+    if config.wavelength_final is None:
         try:
             config.wavelength_final = d_som6.attr_list["Wavelength_final"]
+            if config.wavelength_final is None:
+                raise RuntimeError("A final wavelength was not provided on "\
+                                   +"the command-line nor in the data file. "\
+                                   +"Please provide one.")
+            else:
+                pass
         except KeyError:
             raise RuntimeError, "A final wavelength was not provided on the "\
                   +"command-line nor in the data file. Please provide one."
     else:
-        d_som6.attr_list["Wavelength_final"]=config.wavelength_final
+        d_som6.attr_list["Wavelength_final"] = config.wavelength_final
 
     # Note: time_zero MUST be a tuple
     if config.time_zero==None:
@@ -504,6 +511,21 @@ def run(config):
     d_som8 = None
     del d_som8
 
+    # Note: initial_energy_offset MUST be a tuple
+    if config.initial_energy_offset is None:
+        try:
+            config.initial_energy_offset = \
+                                       d_som9.attr_list\
+                                       ["Initial_energy_offset"]
+        except KeyError:
+            config.initial_energy_offset = None
+            d_som9.attr_list["Initial_energy_offset"] = \
+                                                    config.\
+                                                    initial_energy_offset
+    else:
+        d_som9.attr_list["Initial_energy_offset"] = \
+                                                  config.initial_energy_offset
+
     if config.verbose:
         print "Converting initial wavelength to E_initial"
         
@@ -517,6 +539,18 @@ def run(config):
 
     d_som9 = None
     del d_som9
+
+    # Note: final_energy_offset MUST be a tuple
+    if config.final_energy_offset is None:
+        try:
+            config.final_energy_offset = \
+                                       d_som11.attr_list["Final_energy_offset"]
+        except KeyError:
+            config.final_energy_offset = None
+            d_som11.attr_list["Final_energy_offset"] = \
+                                                    config.final_energy_offset
+    else:
+        d_som11.attr_list["Final_energy_offset"] = config.final_energy_offset
 
     if config.verbose:
         print "Converting final wavelength to E_final"
@@ -586,7 +620,7 @@ if __name__=="__main__":
                       help="Flag for turning off time-independent background"\
                       +"subtraction")
     
-    parser.add_option("","--final-wavelength",  dest="wavelength_final",
+    parser.add_option("","--final-wavelength", dest="wavelength_final",
                       help="Specify the final wavelength lambda, err^2 in "\
                       +"Angstroms")
     
@@ -652,6 +686,13 @@ if __name__=="__main__":
     parser.add_option("", "--no-filter", action="store_true", dest="no_filter",
                       help="Flag to turn off negative wavelength filtering.")
     parser.set_defaults(no_filter=False)
+
+    parser.add_option("","--final-energy-offset", dest="final_energy_offset",
+                      help="Specify the final energy offset, err^2 in ueV")
+
+    parser.add_option("","--initial-energy-offset",
+                      dest="initial_energy_offset",
+                      help="Specify the initial energy offset, err^2 in ueV")
     
     (options, args) = parser.parse_args()
 
@@ -770,6 +811,23 @@ if __name__=="__main__":
         config.wavelength_final=hlr_utils.split_values(options.wavelength_final)
     else:
         config.wavelength_final = options.wavelength_final
+
+    # set the final energy offset
+    if options.final_energy_offset is not None:
+        config.final_energy_offset = \
+                                   hlr_utils.split_values(options.\
+                                                          final_energy_offset)
+    else:
+        config.final_energy_offset = options.final_energy_offset
+
+    # set the initial energy offset
+    if options.initial_energy_offset is not None:
+        config.\
+                 initial_energy_offset = \
+                 hlr_utils.split_values(options.\
+                                        initial_energy_offset)
+    else:
+        config.initial_energy_offset = options.initial_energy_offset
 
     # set the time-zero offset
     if options.time_zero is not None:
