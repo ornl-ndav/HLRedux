@@ -22,7 +22,7 @@
 
 # $Id$
 
-def tof_to_wavelength(obj,**kwargs):
+def tof_to_wavelength(obj, **kwargs):
     """
     This function converts a primary axis of a SOM or SO from time-of-flight
     to wavelength. The wavelength axis for a SOM must be in units of
@@ -62,8 +62,8 @@ def tof_to_wavelength(obj,**kwargs):
     import hlr_utils
 
     # set up for working through data
-    (result,res_descr)=hlr_utils.empty_result(obj)
-    (o_descr,d_descr)=hlr_utils.get_descr(obj)
+    (result, res_descr) = hlr_utils.empty_result(obj)
+    o_descr = hlr_utils.get_descr(obj)
 
     # Setup keyword arguments
     try:
@@ -88,7 +88,7 @@ def tof_to_wavelength(obj,**kwargs):
     else:
         axis = 0
 
-    result=hlr_utils.copy_som_attr(result,res_descr,obj,o_descr)
+    result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
     if res_descr == "SOM":
         result = hlr_utils.hlr_force_units(result, "Angstroms", axis)
         result.setAxisLabel(axis, "wavelength")
@@ -97,58 +97,58 @@ def tof_to_wavelength(obj,**kwargs):
     else:
         pass
 
-    if pathlength != None:
-        (p_descr,e_descr) = hlr_utils.get_descr(pathlength)
+    if pathlength is not None:
+        p_descr = hlr_utils.get_descr(pathlength)
     else:
         if o_descr == "SOM":
             try:
                 obj.attr_list.instrument.get_primary()
                 inst = obj.attr_list.instrument
             except RuntimeError:
-                raise RuntimeError, "A detector was not provided"
+                raise RuntimeError("A detector was not provided")
         else:
-            raise RuntimeError, "If no SOM is provided, then pathlength "\
-                  +"information must be provided"
+            raise RuntimeError("If no SOM is provided, then pathlength "\
+                               +"information must be provided")
 
     # iterate through the values
     import axis_manip
     
     for i in range(hlr_utils.get_length(obj)):
-        val = hlr_utils.get_value(obj,i,o_descr,"x",axis)
-        err2 = hlr_utils.get_err2(obj,i,o_descr,"x",axis)
+        val = hlr_utils.get_value(obj, i, o_descr, "x", axis)
+        err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
 
-        map_so = hlr_utils.get_map_so(obj,None,i)
+        map_so = hlr_utils.get_map_so(obj, None, i)
 
-        if pathlength == None:
-            (pl,pl_err2) = hlr_utils.get_parameter(inst_param,map_so,inst)
+        if pathlength is None:
+            (pl, pl_err2) = hlr_utils.get_parameter(inst_param, map_so, inst)
         else:
-            pl = hlr_utils.get_value(pathlength,i,p_descr)
-            pl_err2 = hlr_utils.get_err2(pathlength,i,p_descr)
+            pl = hlr_utils.get_value(pathlength, i, p_descr)
+            pl_err2 = hlr_utils.get_err2(pathlength, i, p_descr)
 
-        value=axis_manip.tof_to_wavelength(val, err2, pl, pl_err2)
+        value = axis_manip.tof_to_wavelength(val, err2, pl, pl_err2)
 
-        hlr_utils.result_insert(result,res_descr,value,map_so,"x",axis)
+        hlr_utils.result_insert(result, res_descr, value, map_so, "x", axis)
 
     return result
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import hlr_test
     import SOM
 
-    pl = (20.0, 0.1)
+    pli = (20.0, 0.1)
 
-    som1=hlr_test.generate_som()
+    som1 = hlr_test.generate_som()
     som1.setAllAxisUnits(["microseconds"])
     som1.attr_list.instrument = SOM.ASG_Instrument()
 
     print "********** SOM1"
-    print "* ",som1[0]
-    print "* ",som1[1]
+    print "* ", som1[0]
+    print "* ", som1[1]
 
     print "********** tof_to_wavelength"
-    print "* tof_to_wavelength som :",tof_to_wavelength(som1)
-    print "* tof_to_wavelength so  :",tof_to_wavelength(som1[0],
-                                                        pathlength=pl)
-    print "* tof_to_wavelength scal:",tof_to_wavelength([1,1],
-                                                        pathlength=pl)
+    print "* tof_to_wavelength som :", tof_to_wavelength(som1)
+    print "* tof_to_wavelength so  :", tof_to_wavelength(som1[0],
+                                                         pathlength=pli)
+    print "* tof_to_wavelength scal:", tof_to_wavelength([1,1],
+                                                         pathlength=pli)
