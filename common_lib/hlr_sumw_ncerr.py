@@ -56,17 +56,17 @@ def sumw_ncerr(obj1, obj2, **kwargs):
     import hlr_utils
 
     # set up for working through data
-    (result,res_descr)=hlr_utils.empty_result(obj1,obj2)
-    (o1_descr,o2_descr)=hlr_utils.get_descr(obj1,obj2)
+    (result, res_descr) = hlr_utils.empty_result(obj1, obj2)
+    (o1_descr, o2_descr) = hlr_utils.get_descr(obj1, obj2)
 
     # error check information
-    if o1_descr=="number" or o2_descr=="number":
-        raise RuntimeError, "Operations with tuples are not supported!"
-    elif (o2_descr=="SOM" and o1_descr=="SO"):
-        obj1,obj2 = hlr_utils.swap_args(obj1,obj2)
-        o1_descr,o2_descr = hlr_utils.swap_args(o1_descr,o2_descr)
-    elif o2_descr=="SOM" and o1_descr=="SOM":
-        hlr_utils.hlr_math_compatible(obj1,o1_descr,obj2,o2_descr)
+    if o1_descr == "number" or o2_descr == "number":
+        raise RuntimeError("Operations with tuples are not supported!")
+    elif o2_descr == "SOM" and o1_descr == "SO":
+        (obj1, obj2) = hlr_utils.swap_args(obj1, obj2)
+        (o1_descr, o2_descr) = hlr_utils.swap_args(o1_descr, o2_descr)
+    elif o2_descr == "SOM" and o1_descr == "SOM":
+        hlr_utils.hlr_math_compatible(obj1, o1_descr, obj2, o2_descr)
     else:
         pass
 
@@ -82,26 +82,26 @@ def sumw_ncerr(obj1, obj2, **kwargs):
     except KeyError:
         axis_pos = 0
 
-    result=hlr_utils.copy_som_attr(result,res_descr,obj1,o1_descr,
-                                   obj2,o2_descr)
-
+    result = hlr_utils.copy_som_attr(result, res_descr, obj1, o1_descr,
+                                     obj2, o2_descr)
+    
     # iterate through the values
     import array_manip
     
-    for i in range(hlr_utils.get_length(obj1,obj2)):
+    for i in range(hlr_utils.get_length(obj1, obj2)):
         val1 = hlr_utils.get_value(obj1, i, o1_descr, axis, axis_pos)
         err2_1 = hlr_utils.get_err2(obj1, i, o1_descr, axis, axis_pos)
 
         val2 = hlr_utils.get_value(obj2, i, o2_descr, axis, axis_pos)
         err2_2 = hlr_utils.get_err2(obj2, i, o2_descr, axis, axis_pos)
         
-        (descr_1,descr_2)=hlr_utils.get_descr(val1, val2)
+        (descr_1, descr_2) = hlr_utils.get_descr(val1, val2)
 
         hlr_utils.hlr_math_compatible(val1, descr_1, val2, descr_2)
 
-        value=array_manip.sumw_ncerr(val1, err2_1, val2, err2_2)
+        value = array_manip.sumw_ncerr(val1, err2_1, val2, err2_2)
         
-        map_so = hlr_utils.get_map_so(obj1,None,i)
+        map_so = hlr_utils.get_map_so(obj1, None, i)
         hlr_utils.result_insert(result, res_descr, value, map_so, axis,
                                 axis_pos)
 
@@ -111,20 +111,20 @@ def sumw_ncerr(obj1, obj2, **kwargs):
 if __name__=="__main__":
     import hlr_test
 
-    som1=hlr_test.generate_som()
-    som2=hlr_test.generate_som()
+    som1 = hlr_test.generate_som()
+    som2 = hlr_test.generate_som()
 
     print "********** SOM1"
-    print "* ",som1[0]
-    print "* ",som1[1]
+    print "* ", som1[0]
+    print "* ", som1[1]
     print "********** SOM2"
-    print "* ",som2[0]
-    print "* ",som2[1]
+    print "* ", som2[0]
+    print "* ", som2[1]
 
     print "********** sumw_ncerr"
-    print "* som+som :",sumw_ncerr(som1,som2)
-    print "* som+so  :",sumw_ncerr(som1,som2[0])
-    print "* so +so  :",sumw_ncerr(som1[0],som2[1])
+    print "* som+som :", sumw_ncerr(som1, som2)
+    print "* som+so  :", sumw_ncerr(som1, som2[0])
+    print "* so +so  :", sumw_ncerr(som1[0], som2[1])
 
 
 
