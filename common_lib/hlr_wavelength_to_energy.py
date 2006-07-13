@@ -22,7 +22,7 @@
 
 # $Id$
 
-def wavelength_to_energy(obj,**kwargs):
+def wavelength_to_energy(obj, **kwargs):
     """
     This function converts a primary axis of a SOM or SO from wavelength
     to energy. The wavelength axis for a SOM must be in units of Angstroms.
@@ -34,6 +34,7 @@ def wavelength_to_energy(obj,**kwargs):
     ----------
     -> obj is the SOM, SO or tuple to be converted
     -> kwargs is a list of key word arguments that the function accepts:
+          offset=an information object containing energy offset information
           units= a string containing the expected units for this function.
                  The default for this function is Angstroms
 
@@ -67,6 +68,11 @@ def wavelength_to_energy(obj,**kwargs):
     except KeyError:
         units = "Angstroms"
 
+    try:
+        offset = kwargs["offset"]
+    except KeyError:
+        offset = None
+
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
     if o_descr == "SOM":
@@ -84,6 +90,7 @@ def wavelength_to_energy(obj,**kwargs):
         pass
 
     # iterate through the values
+    import array_manip
     import axis_manip
     
     for i in range(hlr_utils.get_length(obj)):
@@ -105,7 +112,21 @@ def wavelength_to_energy(obj,**kwargs):
             map_so.var_y=axis_manip.reverse_array_cp(map_so.var_y)
         else:
             pass
-        
+
+        if offset is not None:
+            info = hlr_utils.get_special(offset, map_so)
+            try:
+                rev_value = array_manip.add_ncerr(rev_value[0], rev_value[1],
+                                                  info[0], info[1])
+            except TypeError:
+                # Have to do this since add_ncerr does not support
+                # scalar-scalar operations
+                value1 = rev_value[0] + info[0]
+                value2 = rev_value[1] + info[1]
+                rev_value = (value1, value2)
+        else:
+            pass
+
         hlr_utils.result_insert(result,res_descr,rev_value,map_so,"x",axis)
 
     return result
