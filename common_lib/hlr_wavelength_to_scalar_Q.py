@@ -22,7 +22,7 @@
 
 # $Id$
 
-def wavelength_to_scalar_Q(obj,**kwargs):
+def wavelength_to_scalar_Q(obj, **kwargs):
     """
     This function converts a primary axis of a SOM or SO from wavelength
     to scalar_Q. The wavelength axis for a SOM must be in units of
@@ -60,12 +60,12 @@ def wavelength_to_scalar_Q(obj,**kwargs):
     import hlr_utils
 
     # set up for working through data
-    (result,res_descr)=hlr_utils.empty_result(obj)
-    (o_descr,d_descr)=hlr_utils.get_descr(obj)
+    (result, res_descr) = hlr_utils.empty_result(obj)
+    o_descr = hlr_utils.get_descr(obj)
 
     if o_descr == "list":
-        raise TypeError, "Do not know how to handle given type: %s" %\
-              o_descr
+        raise TypeError("Do not know how to handle given type: %s" % \
+                        o_descr)
     else:
         pass
 
@@ -105,80 +105,82 @@ def wavelength_to_scalar_Q(obj,**kwargs):
     else:
         pass
 
-    if polar == None:
+    if polar is None:
         if o_descr == "SOM":
             try:
                 obj.attr_list.instrument.get_primary()
                 inst = obj.attr_list.instrument
             except RuntimeError:
-                raise RuntimeError, "A detector was not provided!"
+                raise RuntimeError("A detector was not provided!")
         else:
-            raise RuntimeError, "If no SOM is provided, then polar "\
-                  +"information must be given."
+            raise RuntimeError("If no SOM is provided, then polar "\
+                               +"information must be given.")
     else:
-        (p_descr,e_descr) = hlr_utils.get_descr(polar)
+        p_descr = hlr_utils.get_descr(polar)
 
     # iterate through the values
     import axis_manip
     
     for i in range(hlr_utils.get_length(obj)):
-        val = hlr_utils.get_value(obj,i,o_descr,"x",axis)
-        err2 = hlr_utils.get_err2(obj,i,o_descr,"x",axis)
+        val = hlr_utils.get_value(obj, i, o_descr, "x", axis)
+        err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
 
         map_so = hlr_utils.get_map_so(obj,None,i)
 
-        if polar == None:
-            (angle,angle_err2) = hlr_utils.get_parameter("polar",map_so,inst)
+        if polar is None:
+            (angle, angle_err2) = hlr_utils.get_parameter("polar", map_so,
+                                                          inst)
         else:
-            angle = hlr_utils.get_value(polar,i,p_descr)
-            angle_err2 = hlr_utils.get_err2(polar,i,p_descr) 
+            angle = hlr_utils.get_value(polar, i, p_descr)
+            angle_err2 = hlr_utils.get_err2(polar, i, p_descr) 
 
-        value=axis_manip.wavelength_to_scalar_Q(val, err2, angle/divisor,
-                                                angle_err2/divisor)
+        value = axis_manip.wavelength_to_scalar_Q(val, err2, angle / divisor,
+                                                  angle_err2 / divisor)
 
         if o_descr != "number":
             value1 = axis_manip.reverse_array_cp(value[0])
             value2 = axis_manip.reverse_array_cp(value[1])
-            rev_value = (value1,value2)
+            rev_value = (value1, value2)
         else:
             rev_value = value
 
-        if map_so != None:
-            map_so.y=axis_manip.reverse_array_cp(map_so.y)
-            map_so.var_y=axis_manip.reverse_array_cp(map_so.var_y)
+        if map_so is not None:
+            map_so.y = axis_manip.reverse_array_cp(map_so.y)
+            map_so.var_y = axis_manip.reverse_array_cp(map_so.var_y)
         else:
             pass
         
-        hlr_utils.result_insert(result,res_descr,rev_value,map_so,"x",axis)
+        hlr_utils.result_insert(result, res_descr, rev_value, map_so, "x",
+                                axis)
 
     return result
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import hlr_test
     import SOM
 
-    pa=(0.785, 0.005)
+    pa = (0.785, 0.005)
 
-    som1=hlr_test.generate_som()
+    som1 = hlr_test.generate_som()
     som1.setAllAxisUnits(["Angstroms"])
     som1.attr_list.instrument = SOM.ASG_Instrument()
 
-    som2=hlr_test.generate_som()
+    som2 = hlr_test.generate_som()
     som2.setAllAxisUnits(["Angstroms"])
     som2.attr_list.instrument = SOM.ASG_Instrument()
 
     print "********** SOM1"
-    print "* ",som1[0]
-    print "* ",som1[1]
+    print "* ", som1[0]
+    print "* ", som1[1]
 
     print "********** SOM2"
-    print "* ",som2[0]
-    print "* ",som2[1]
+    print "* ", som2[0]
+    print "* ", som2[1]
 
     print "********** wavelength_to_scalar_Q"
-    print "* som  :",wavelength_to_scalar_Q(som1)
-    print "* so   :",wavelength_to_scalar_Q(som2[0], polar=pa)
-    print "* scal :",wavelength_to_scalar_Q((1,1), polar=pa)
+    print "* som  :", wavelength_to_scalar_Q(som1)
+    print "* so   :", wavelength_to_scalar_Q(som2[0], polar=pa)
+    print "* scal :", wavelength_to_scalar_Q((1, 1), polar=pa)
 
 
