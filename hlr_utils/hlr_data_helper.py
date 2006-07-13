@@ -249,11 +249,13 @@ def get_descr(obj1,obj2=None):
 
     Returns:
     -------
-    <- A tuple containing the descriptors obj1 and obj2
+    <- An obj1 descriptor or a tuple of the descriptors for obj1 and obj2
     """
-    
-    return (get_type(obj1), get_type(obj2))
 
+    if obj2 is None:
+        return get_type(obj1)
+    else:
+        return (get_type(obj1), get_type(obj2))
 
 def get_value(obj,index=0,descr=None,axis="y",pap=0):
     """
