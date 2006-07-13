@@ -532,4 +532,28 @@ def get_parameter(param,so,inst):
     else:
         raise RuntimeError, "Parameter %s is not an understood type." % \
               param
-         
+
+
+def get_special(info, so):
+    """
+    This function takes an Information or CompositeInformation object and a SO
+    and returns the appropriate tuple (value,err2) for the pixel ID contained
+    in the SO. If the object in not an Information object, but a tuple, the
+    function handles that case by just returning the tuple.
+
+    Parameters:
+    ----------
+    -> info is an Information, CompositeInformation object or a tuple
+       containing values and errors associated with the particular information
+    -> so is a SO that contains the spectrum ID to interrogate the info object
+       for its information
+
+    Return:
+    ------
+    <- A tuple containing the value and error^2 of the information
+    """
+
+    try:
+        return info.get_value(so.id)
+    except AttributeError:
+        return info
