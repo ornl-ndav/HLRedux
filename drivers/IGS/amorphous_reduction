@@ -197,16 +197,13 @@ def calc_E_initial(config, data_som):
                                            offset=config.\
                                            initial_energy_offset)
 
-def calc_E_final(config):
-    """Step 17. Calculate final energy using function 3.22."""
+def calc_energy_transfer(config, data_som):
+    """Combines Steps 17 and 18 to calculate energy transfer using function
+    3.30."""
 
-    return common_lib.wavelength_to_energy(config.wavelength_final,
+    data_som1 = dr_lib.igs_energy_transfer(data_som,
+                                           lambda_f=config.wavelength_final,
                                            offset=config.final_energy_offset)
-
-def calc_energy_transfer(config, data_som, energy_final):
-    """Step 18. Calculate energy transfer using function 3.30."""
-
-    data_som1 = common_lib.energy_transfer(data_som, energy_final)
 
     data_som = None
     del data_som
@@ -553,14 +550,9 @@ def run(config):
         d_som11.attr_list["Final_energy_offset"] = config.final_energy_offset
 
     if config.verbose:
-        print "Converting final wavelength to E_final"
-        
-    E_final = calc_E_final(config)
-
-    if config.verbose:
         print "Calculating energy transfer"
         
-    d_som12 = calc_energy_transfer(config, d_som11, E_final)
+    d_som12 = calc_energy_transfer(config, d_som11)
 
     if config.dump_energy:
         hlr_utils.write_file(config.data, "text/Spec", d_som12,
