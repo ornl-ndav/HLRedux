@@ -212,8 +212,13 @@ def get_length(obj1,obj2=None):
        of SOs in them are not equal
     <- RuntimeError is raised if one or both objects are None
     """
-    
-    (obj1_type,obj2_type) = get_descr(obj1,obj2)
+
+    if obj2 is None:
+        obj1_type = get_descr(obj1)
+        obj2_type = empty_type
+    else:
+        (obj1_type,obj2_type) = get_descr(obj1,obj2)
+        
     if (obj1_type == SOM_type and obj2_type == SOM_type):
         if len(obj1) != len(obj2):
             raise IndexError,"Can only add SOMs with same number of spectra"
