@@ -146,9 +146,7 @@ def tof_to_initial_wavelength_igs(obj,**kwargs):
     else:
         if o_descr == "SOM":
             try:
-                obj.attr_list["Wavelength_final"]
-                l_f = obj.attr_list["Wavelength_final"][0]
-                l_f_err2 = obj.attr_list["Wavelength_final"][1]
+                som_l_f = obj.attr_list["Wavelength_final"]
             except KeyError:
                 raise RuntimeError, "Please provide a final wavelength "\
                       +"parameter either via the function call or the SOM"
@@ -218,7 +216,9 @@ def tof_to_initial_wavelength_igs(obj,**kwargs):
             l_f = hlr_utils.get_value(lambda_f,i,t_descr)
             l_f_err2 = hlr_utils.get_err2(lambda_f,i,t_descr)
         else:
-            pass
+            l_f_tuple = hlr_utils.get_special(som_l_f, map_so)
+            l_f = l_f_tuple[0]
+            l_f_err2 = l_f_tuple[1]
             
         if time_zero != None:
             t_0 = hlr_utils.get_value(time_zero,i,t_descr)
@@ -270,11 +270,12 @@ if __name__=="__main__":
     print "* ",som1[1]
 
     print "********** tof_to_initial_wavelength_igs"
-    print "* som  :",tof_to_initial_wavelength_igs(som1)
+    print "* som  :",tof_to_initial_wavelength_igs(som1,run_filter=False)
     print "* so   :",tof_to_initial_wavelength_igs(som1[0],lambda_f=l_f,
                                                    time_zero=t_0,
                                                    dist_source_sample=d_ss,
-                                                   dist_sample_detector=d_sd)
+                                                   dist_sample_detector=d_sd,
+                                                   run_filter=False)
     print "* scal :",tof_to_initial_wavelength_igs([1,1],lambda_f=l_f,
                                                    time_zero=t_0,
                                                    dist_source_sample=d_ss,
