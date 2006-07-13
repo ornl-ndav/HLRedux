@@ -22,7 +22,7 @@
 
 # $Id$
 
-def frequency_to_energy(obj,**kwargs):
+def frequency_to_energy(obj, **kwargs):
     """
     This function converts a primary axis of a SOM or SO from frequency
     to energy. The frequency axis for a SOM must be in units of THz.
@@ -53,8 +53,8 @@ def frequency_to_energy(obj,**kwargs):
     import hlr_utils
 
     # set up for working through data
-    (result,res_descr)=hlr_utils.empty_result(obj)
-    (o_descr,d_descr)=hlr_utils.get_descr(obj)
+    (result, res_descr) = hlr_utils.empty_result(obj)
+    o_descr = hlr_utils.get_descr(obj)
 
     # Setup keyword arguments
     try:
@@ -69,7 +69,7 @@ def frequency_to_energy(obj,**kwargs):
     else:
         axis = 0
 
-    result=hlr_utils.copy_som_attr(result,res_descr,obj,o_descr)
+    result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
     if o_descr == "SOM":
         result = hlr_utils.hlr_force_units(result, "meV", axis)
         result.setAxisLabel(axis, "energy transfer")
@@ -82,31 +82,31 @@ def frequency_to_energy(obj,**kwargs):
     import axis_manip
     
     for i in range(hlr_utils.get_length(obj)):
-        val = hlr_utils.get_value(obj,i,o_descr,"x",axis)
-        err2 = hlr_utils.get_err2(obj,i,o_descr,"x",axis)
+        val = hlr_utils.get_value(obj, i, o_descr, "x", axis)
+        err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
 
-        value=axis_manip.frequency_to_energy(val, err2)
+        value = axis_manip.frequency_to_energy(val, err2)
 
-        map_so = hlr_utils.get_map_so(obj,None,i)
-        hlr_utils.result_insert(result,res_descr,value,map_so,"x",axis)
+        map_so = hlr_utils.get_map_so(obj, None, i)
+        hlr_utils.result_insert(result, res_descr, value, map_so, "x", axis)
 
     return result
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import hlr_test
 
-    som1=hlr_test.generate_som()
+    som1 = hlr_test.generate_som()
     som1.setAllAxisUnits(["THz"])
 
     print "********** SOM1"
-    print "* ",som1[0]
-    print "* ",som1[1]
+    print "* ", som1[0]
+    print "* ", som1[1]
 
     print "********** frequency_to_energy"
-    print "* frequency_to_energy som  :",frequency_to_energy(som1)
-    print "* frequency_to_energy so   :",frequency_to_energy(som1[0])
-    print "* frequency_to_energy scal :",frequency_to_energy([1,1])
+    print "* frequency_to_energy som  :", frequency_to_energy(som1)
+    print "* frequency_to_energy so   :", frequency_to_energy(som1[0])
+    print "* frequency_to_energy scal :", frequency_to_energy([1, 1])
 
 
 
