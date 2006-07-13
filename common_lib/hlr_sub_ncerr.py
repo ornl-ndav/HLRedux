@@ -56,14 +56,14 @@ def sub_ncerr(left, right, **kwargs):
     import hlr_utils
 
     # set up for working through data
-    (result,res_descr)=hlr_utils.empty_result(left,right)
-    (l_descr,r_descr)=hlr_utils.get_descr(left,right)
+    (result, res_descr) = hlr_utils.empty_result(left, right)
+    (l_descr, r_descr) = hlr_utils.get_descr(left, right)
 
     # error check information
-    if r_descr=="SOM" and l_descr=="SOM":
-        hlr_utils.hlr_math_compatible(left,l_descr,right,r_descr)
-    elif l_descr=="number" and r_descr=="number":
-        raise RuntimeError, "tuple, tuple operation is not supported!"
+    if r_descr == "SOM" and l_descr == "SOM":
+        hlr_utils.hlr_math_compatible(left, l_descr, right, r_descr)
+    elif l_descr == "number" and r_descr == "number":
+        raise RuntimeError("tuple, tuple operation is not supported!")
     else:
         pass
 
@@ -79,54 +79,55 @@ def sub_ncerr(left, right, **kwargs):
     except KeyError:
         axis_pos = 0
 
-    result=hlr_utils.copy_som_attr(result,res_descr,left,l_descr,right,r_descr)
+    result = hlr_utils.copy_som_attr(result, res_descr, left, l_descr,
+                                     right, r_descr)
 
     # iterate through the values
     import array_manip
     
-    for i in range(hlr_utils.get_length(left,right)):
+    for i in range(hlr_utils.get_length(left, right)):
         val1 = hlr_utils.get_value(left, i, l_descr, axis, axis_pos)
         err2_1 = hlr_utils.get_err2(left, i, l_descr, axis, axis_pos)
 
         val2 = hlr_utils.get_value(right, i, r_descr, axis, axis_pos)
         err2_2 = hlr_utils.get_err2(right, i, r_descr, axis, axis_pos)
 
-        (descr_1,descr_2)=hlr_utils.get_descr(val1, val2)
+        (descr_1, descr_2) = hlr_utils.get_descr(val1, val2)
 
         hlr_utils.hlr_math_compatible(val1, descr_1, val2, descr_2)
 
-        value=array_manip.sub_ncerr(val1, err2_1, val2, err2_2)
+        value = array_manip.sub_ncerr(val1, err2_1, val2, err2_2)
 
-        map_so = hlr_utils.get_map_so(left,right,i)
+        map_so = hlr_utils.get_map_so(left, right, i)
         hlr_utils.result_insert(result, res_descr, value, map_so, axis,
                                 axis_pos)
 
     return result
     
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import hlr_test
 
-    som1=hlr_test.generate_som()
-    som2=hlr_test.generate_som()
+    som1 = hlr_test.generate_som()
+    som2 = hlr_test.generate_som()
 
     print "********** SOM1"
-    print "* ",som1[0]
-    print "* ",som1[1]
+    print "* ", som1[0]
+    print "* ", som1[1]
     print "********** SOM2"
-    print "* ",som2[0]
-    print "* ",som2[1]
+    print "* ", som2[0]
+    print "* ", som2[1]
 
     print "********** sub_ncerr"
-    print "* som -som :",sub_ncerr(som1,som2)
-    print "* som -so  :",sub_ncerr(som1,som1[0])
-    print "* so  -som :",sub_ncerr(som1[0],som1)
-    print "* som -scal:",sub_ncerr(som1,(1,1))
-    print "* som -slis:",sub_ncerr(som1,[(1,1), (2,1)])
-    print "* scal-som :",sub_ncerr((1,1),som1)
-    print "* so  -so  :",sub_ncerr(som1[0],som1[1])
-    print "* so  -scal:",sub_ncerr(som1[0],(1,1))
-    print "* scal-so  :",sub_ncerr((1,1),som1[0])
+    print "* som -som :", sub_ncerr(som1, som2)
+    print "* som -so  :", sub_ncerr(som1, som1[0])
+    print "* so  -som :", sub_ncerr(som1[0], som1)
+    print "* som -scal:", sub_ncerr(som1, (1, 1))
+    print "* som -slis:", sub_ncerr(som1, [(1, 1), (2, 1)])
+    print "* scal-som :", sub_ncerr((1, 1), som1)
+    print "* so  -so  :", sub_ncerr(som1[0], som1[1])
+    print "* so  -scal:", sub_ncerr(som1[0], (1, 1))
+    print "* scal-so  :", sub_ncerr((1, 1), som1[0])
 
     
 
