@@ -48,7 +48,7 @@ def create_E_vs_Q(obj,E,k,px_separate=True,*args,**kwargs):
 
     # set up for working through data
     (result,res_descr)=hlr_utils.empty_result(obj)
-    (o_descr,d_descr)=hlr_utils.get_descr(obj)
+    o_descr=hlr_utils.get_descr(obj)
 
     if o_descr != "SOM":
         raise RuntimeError, "This function only accepts SOMs"

@@ -53,7 +53,7 @@ def filter_pixels(obj, paths, start_ids, end_ids, **kwargs):
 
     # set up for working through data
     (result, res_descr) = hlr_utils.empty_result(obj)
-    (o_descr, e_descr) = hlr_utils.get_descr(obj)
+    o_descr = hlr_utils.get_descr(obj)
 
     if o_descr != "SOM":
         raise TypeError, "Only SOM operations supported"

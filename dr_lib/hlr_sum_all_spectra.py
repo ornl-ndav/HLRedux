@@ -44,7 +44,7 @@ def sum_all_spectra(obj,**kwargs):
     # import the helper functions
     import hlr_utils
 
-    (o_descr,d_descr)=hlr_utils.get_descr(obj)
+    o_descr=hlr_utils.get_descr(obj)
 
     if o_descr != "SOM":
         raise TypeError, "Function argument must be a SOM"

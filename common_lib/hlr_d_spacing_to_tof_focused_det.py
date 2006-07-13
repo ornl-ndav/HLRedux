@@ -70,7 +70,7 @@ def d_spacing_to_tof_focused_det(obj, **kwargs):
 
     # set up for working through data
     (result, res_descr) = hlr_utils.empty_result(obj)
-    (o_descr, d_descr) = hlr_utils.get_descr(obj)
+    o_descr = hlr_utils.get_descr(obj)
 
     if o_descr == "number" or o_descr == "list":
         raise RuntimeError("Must provide a SOM of a SO to the function.")
@@ -144,10 +144,10 @@ def d_spacing_to_tof_focused_det(obj, **kwargs):
         pass
 
     if pathlength is not None:
-        (p_descr, e_descr) = hlr_utils.get_descr(pathlength)
+        p_descr = hlr_utils.get_descr(pathlength)
 
     if polar is not None:
-        (a_descr, e_descr) = hlr_utils.get_descr(polar)
+        a_descr = hlr_utils.get_descr(polar)
 
     # iterate through the values
     import axis_manip

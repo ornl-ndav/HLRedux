@@ -59,7 +59,7 @@ def igs_energy_transfer(obj, **kwargs):
 
     # set up for working through data
     (result, res_descr) = hlr_utils.empty_result(obj)
-    (o_descr, e_descr) = hlr_utils.get_descr(obj)
+    o_descr = hlr_utils.get_descr(obj)
 
     if o_descr == "number" or o_descr == "list":
         raise RuntimeError, "Must provide a SOM of a SO to the function."
