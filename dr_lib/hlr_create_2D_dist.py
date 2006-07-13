@@ -168,9 +168,11 @@ def create_2D_dist(som,*args,**kwargs):
         # Find Q for pixel
         so = hlr_utils.get_value(som1,i,"SOM","all")
         (angle,angle_err2) = hlr_utils.get_parameter("polar",so,inst)
+
+        l_f = hlr_utils.get_special(lambda_final, so)
         
-        (Q,Q_err2) = axis_manip.wavelength_to_scalar_Q(lambda_final[0],
-                                                       lambda_final[1],
+        (Q,Q_err2) = axis_manip.wavelength_to_scalar_Q(l_f[0],
+                                                       l_f[1],
                                                        angle/2.0,
                                                        angle_err2/2.0)
 
