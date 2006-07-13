@@ -22,7 +22,7 @@
 
 # $Id$
 
-def weighted_average(obj,**kwargs):
+def weighted_average(obj, **kwargs):
     """
     This function takes a SOM or SO and calculates the weighted average for
     the primary axis.
@@ -57,49 +57,50 @@ def weighted_average(obj,**kwargs):
         res_descr = "list"
     else:
         res_descr = "number"
-    (o_descr,d_descr)=hlr_utils.get_descr(obj)
+
+    o_descr = hlr_utils.get_descr(obj)
 
     if(kwargs.has_key("start")):
-        start=int(kwargs["start"])
+        start = int(kwargs["start"])
     else:
-        start=0
+        start = 0
 
     if(kwargs.has_key("end")):
-        end=int(kwargs["end"])
+        end = int(kwargs["end"])
     else:
-        end=hlr_utils.get_length(obj)-1
+        end = hlr_utils.get_length(obj) - 1
             
-    result=hlr_utils.copy_som_attr(result,res_descr,obj,o_descr)
+    result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
 
     # iterate through the values
     import utils
     
     for i in range(hlr_utils.get_length(obj)):
-        val = hlr_utils.get_value(obj,i,o_descr,"y")
-        err2 = hlr_utils.get_err2(obj,i,o_descr,"y")
+        val = hlr_utils.get_value(obj, i, o_descr, "y")
+        err2 = hlr_utils.get_err2(obj, i, o_descr, "y")
 
-        value=utils.weighted_average(val, err2, start, end)
+        value = utils.weighted_average(val, err2, start, end)
 
-        hlr_utils.result_insert(result,res_descr,value,None,"all")
+        hlr_utils.result_insert(result, res_descr, value, None, "all")
 
     import copy
     return copy.deepcopy(result)
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import hlr_test
 
-    som1=hlr_test.generate_som()
+    som1 = hlr_test.generate_som()
 
     print "********** SOM1"
-    print "* ",som1[0]
-    print "* ",som1[1]
+    print "* ", som1[0]
+    print "* ", som1[1]
 
     print "********** weighted_average"
-    print "* som      :",weighted_average(som1)
-    print "* som [0,2]:",weighted_average(som1,start=0,end=2)
-    print "* so       :",weighted_average(som1[0])
-    print "* so  [1,3]:",weighted_average(som1[0],start=1,end=3)
+    print "* som      :", weighted_average(som1)
+    print "* som [0,2]:", weighted_average(som1, start=0, end=2)
+    print "* so       :", weighted_average(som1[0])
+    print "* so  [1,3]:", weighted_average(som1[0], start=1, end=3)
 
 
 
