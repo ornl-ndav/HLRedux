@@ -26,13 +26,13 @@ import nessi_list
 import SOM
 
 # this should be replaced with an enum
-SOM_type="SOM"
-SO_type="SO"
-list_type="list"
-num_type="number"
-empty_type=""
+SOM_type = "SOM"
+SO_type = "SO"
+list_type = "list"
+num_type = "number"
+empty_type = ""
 
-def empty_result(obj1,obj2=None):
+def empty_result(obj1, obj2=None):
     """
     This function inspects the arguments and returns an appropriate
     return type for an operation using the arguments. The object can
@@ -51,7 +51,7 @@ def empty_result(obj1,obj2=None):
 
     obj1_type = get_type(obj1)
 
-    if obj2 == None:
+    if obj2 is None:
         if obj1_type == SOM_type:
             return (SOM.SOM(), SOM_type)
         elif obj1_type == SO_type:
@@ -60,26 +60,25 @@ def empty_result(obj1,obj2=None):
             return ([], list_type)
         else:
             return ([], num_type)
-    # If obj2 != None, go on.
+    # If obj2 is not None, go on.
     else:
         pass
     
     obj2_type = get_type(obj2)
 
-    if (obj1_type == SOM_type or obj2_type == SOM_type):
+    if obj1_type == SOM_type or obj2_type == SOM_type:
         return (SOM.SOM(), SOM_type)
-    elif (obj1_type == SO_type or obj2_type == SO_type):
+    elif obj1_type == SO_type or obj2_type == SO_type:
         if obj1_type == SO_type:
             return (SOM.SO(obj1.dim()), SO_type)
         elif obj2_type == SO_type:
             return (SOM.SO(obj2.dim()), SO_type)
-    elif (obj1_type == list_type or obj2_type == list_type):
+    elif obj1_type == list_type or obj2_type == list_type:
         return ([], list_type)
     else:
         return ([], num_type)
 
-
-def result_insert(result,descr,value,map_so,axis="y",pap=0,xvals=None):
+def result_insert(result, descr, value, map_so, axis="y", pap=0, xvals=None):
     """
     This function takes value and puts it into the result in an
     appropriate fashion. The description is used for decision making.
@@ -103,29 +102,29 @@ def result_insert(result,descr,value,map_so,axis="y",pap=0,xvals=None):
     <- A SOM, SO, list or tuple with the provided information inserted
     """
     
-    if descr == None:
+    if descr is None:
         result_type = get_type(result)
     else:
         result_type = descr
 
-    if (result_type == SOM_type):
-        if map_so != None:
+    if result_type == SOM_type:
+        if map_so is not None:
             so = SOM.SO(map_so.dim())
             
         if axis.lower() == "y":
-            result_insert(so,None,value,map_so,axis,pap,xvals)
+            result_insert(so, None, value, map_so, axis, pap, xvals)
             result.append(so)
         elif axis.lower() == "x":
-            result_insert(so,None,value,map_so,axis,pap,xvals)
+            result_insert(so, None, value, map_so, axis, pap, xvals)
             result.append(so)
         elif axis.lower() == "all":
-            if map_so != None:
-                result_insert(so,None,value,map_so,axis,pap,xvals)
+            if map_so is not None:
+                result_insert(so, None, value, map_so, axis, pap, xvals)
                 result.append(so)
             else:
                 result.append(value)
                 
-    elif (result_type == SO_type):
+    elif result_type == SO_type:
         if axis.lower() == "y":
             result.y = value[0]
             result.var_y = value[1]
@@ -139,15 +138,15 @@ def result_insert(result,descr,value,map_so,axis="y",pap=0,xvals=None):
             for i in range(map_so.dim()):
                 if i == pap:
                     result.axis[pap].val = value[0]
-                    if map_so.axis[pap].var != None:
+                    if map_so.axis[pap].var is not None:
                         result.axis[pap].var = value[1]
                 else:
                     result.axis[i].val = map_so.axis[i].val
-                    if map_so.axis[i].var != None:
+                    if map_so.axis[i].var is not None:
                         result.axis[i].var = map_so.axis[i].var
 
         elif axis.lower() == "all":
-            if map_so != None:
+            if map_so is not None:
                 result.id = map_so.id
                 result.y = value[0]
                 result.var_y = value[1]
@@ -157,7 +156,7 @@ def result_insert(result,descr,value,map_so,axis="y",pap=0,xvals=None):
                         result.axis[axis_number].val = xvals[i]
                     else:
                         # Assumes x data given as (x1, x2, x3, ...)
-                        if map_so.axis[axis_number].var == None:
+                        if map_so.axis[axis_number].var is None:
                             axis_number += 1
                             result.axis[axis_number].val = xvals[i]
                             axis_number += 1
@@ -172,7 +171,7 @@ def result_insert(result,descr,value,map_so,axis="y",pap=0,xvals=None):
                 result.var_y = value.var_y
                 result.axis = value.axis
 
-    elif (result_type == num_type):
+    elif result_type == num_type:
         result.append(value[0])
         result.append(value[1])
         # Note: the following call does not do what is expected. The result
@@ -182,17 +181,16 @@ def result_insert(result,descr,value,map_so,axis="y",pap=0,xvals=None):
         # functions, so it should go into the ITC2 release.
         result = tuple(result)
 
-    elif (result_type == list_type):
+    elif result_type == list_type:
         if axis.lower() == "all":
             result.append(tuple(value))
         else:
-            result.append((value[0],value[1]))
+            result.append((value[0], value[1]))
     else:
-        raise TypeError, "Object type not recognized by result_insert"\
-              +" function."
+        raise TypeError("Object type not recognized by result_insert "\
+                        +"function.")
 
-
-def get_length(obj1,obj2=None):
+def get_length(obj1, obj2=None):
     """
     This function returns the length appropriate for iterating
     through the objects.
@@ -217,32 +215,31 @@ def get_length(obj1,obj2=None):
         obj1_type = get_descr(obj1)
         obj2_type = empty_type
     else:
-        (obj1_type,obj2_type) = get_descr(obj1,obj2)
+        (obj1_type, obj2_type) = get_descr(obj1,obj2)
         
-    if (obj1_type == SOM_type and obj2_type == SOM_type):
+    if obj1_type == SOM_type and obj2_type == SOM_type:
         if len(obj1) != len(obj2):
-            raise IndexError,"Can only add SOMs with same number of spectra"
+            raise IndexError("Can only add SOMs with same number of spectra")
         return len(obj1)
-    elif (obj1_type == SOM_type and obj2_type != SOM_type):
+    elif obj1_type == SOM_type and obj2_type != SOM_type:
         return len(obj1)
-    elif (obj1_type != SOM_type and obj2_type == SOM_type):
+    elif obj1_type != SOM_type and obj2_type == SOM_type:
         return len(obj2)
-    elif (obj1_type == empty_type and obj2_type == empty_type):
-        raise RuntimeError, "One or two objects need to be defined."
-    elif (obj1_type == list_type or obj2_type == list_type):
-        if(obj1_type == list_type):
+    elif obj1_type == empty_type and obj2_type == empty_type:
+        raise RuntimeError("One or two objects need to be defined.")
+    elif obj1_type == list_type or obj2_type == list_type:
+        if obj1_type == list_type:
             return len(obj1)
-        elif(obj2_type == list_type):
+        elif obj2_type == list_type:
             return len(obj2)
         else:
-            raise RuntimeError, "hlr_utils.get_length: Should never get here!"
-    elif (obj1_type != SOM_type and obj2_type != SOM_type):
+            raise RuntimeError("hlr_utils.get_length: Should never get here!")
+    elif obj1_type != SOM_type and obj2_type != SOM_type:
         return 1
     else:
         return 1
 
-
-def get_descr(obj1,obj2=None):
+def get_descr(obj1, obj2=None):
     """
     This function takes one or two arbitrary objects and returns the descriptor
     for those objects.
@@ -262,7 +259,7 @@ def get_descr(obj1,obj2=None):
     else:
         return (get_type(obj1), get_type(obj2))
 
-def get_value(obj,index=0,descr=None,axis="y",pap=0):
+def get_value(obj, index=0, descr=None, axis="y", pap=0):
     """
     This function takes an arbitrary object and returns the value for
     the given index. If the object is not a collection the index is
@@ -286,32 +283,31 @@ def get_value(obj,index=0,descr=None,axis="y",pap=0):
     <- TypeError is raised if obj is not a recognized type
     """
     
-    if descr == None:
+    if descr is None:
         obj_type = get_type(obj)
     else:
         obj_type = descr
 
-    if (obj_type == SOM_type):
-        return get_value(obj[index],index,"SO",axis,pap)
-    elif (obj_type == SO_type):
+    if obj_type == SOM_type:
+        return get_value(obj[index], index, "SO", axis, pap)
+    elif obj_type == SO_type:
         if axis.lower() == "y":
             return obj.y
         elif axis.lower() == "x":
             return obj.axis[pap].val
         elif axis.lower() == "all":
             return obj
-    elif (obj_type == list_type):
-        return get_value(obj[index],index,"number",axis,pap)
-    elif (obj_type == num_type):
+    elif obj_type == list_type:
+        return get_value(obj[index], index, "number", axis, pap)
+    elif obj_type == num_type:
         if axis.lower() == "all":
             return obj
         else:
             return obj[0]
     else:
-        raise TypeError, "Object type not recognized by get_value function."
+        raise TypeError("Object type not recognized by get_value function.")
 
-
-def get_err2(obj,index,descr=None,axis="y",pap=0):
+def get_err2(obj, index, descr=None, axis="y", pap=0):
     """
     This function takes an arbitrary object and returns the
     uncertainty squared for the given index. If the object is not a
@@ -335,28 +331,27 @@ def get_err2(obj,index,descr=None,axis="y",pap=0):
     <- TypeError is raised if obj is not a recognized type
     """
 
-    if descr == None:
+    if descr is None:
         obj_type = get_type(obj)
     else:
         obj_type = descr
 
-    if (obj_type == SOM_type):
-        return get_err2(obj[index],index,"SO",axis,pap)
-    elif (obj_type == SO_type):
+    if obj_type == SOM_type:
+        return get_err2(obj[index], index, "SO", axis, pap)
+    elif obj_type == SO_type:
         if axis.lower() == "y":
             return obj.var_y
         elif axis.lower() == "x":
-            if obj.axis[pap].var == None:
+            if obj.axis[pap].var is None:
                 return nessi_list.NessiList(len(obj.axis[pap].val))
             else:
                 return obj.axis[pap].var
-    elif (obj_type == list_type):
-        return get_err2(obj[index],index,"number",axis,pap)
-    elif (obj_type == num_type):
+    elif obj_type == list_type:
+        return get_err2(obj[index], index, "number", axis, pap)
+    elif obj_type == num_type:
         return obj[1]
     else:
-        raise TypeError, "Object type not recognized by get_err2 function."
-
+        raise TypeError("Object type not recognized by get_err2 function.")
 
 def get_type(obj):
     """
@@ -372,7 +367,7 @@ def get_type(obj):
     <- The descriptor for the corresponding object
     """
     
-    if obj == None:
+    if obj is None:
         return empty_type
 
     try:
@@ -393,8 +388,7 @@ def get_type(obj):
     except TypeError:
         return num_type
 
-
-def swap_args(left,right):
+def swap_args(left, right):
     """
     This function takes two arguments and returns the objects in the reversed
     positions.
@@ -413,9 +407,9 @@ def swap_args(left,right):
     left = right
     right = temp
 
-    return left,right
+    return (left, right)
 
-def get_map_so(obj1,obj2,index):
+def get_map_so(obj1, obj2, index):
     """
     This function takes a SOM and returns the first SO for use in mapping. If
     the object is a SO, it is immediately returned.
@@ -431,7 +425,7 @@ def get_map_so(obj1,obj2,index):
     """
 
     obj1_type = get_type(obj1)
-    if obj2 == None:
+    if obj2 is None:
         if obj1_type == SO_type:
             return obj1
         elif obj1_type == SOM_type:
@@ -457,7 +451,6 @@ def get_map_so(obj1,obj2,index):
         return obj2[index]
     else:
         return None
-
 
 def copy_som_attr(result, res_descr, obj1, obj1_descr,
                   obj2=None, obj2_descr=None, force=1):
@@ -485,20 +478,19 @@ def copy_som_attr(result, res_descr, obj1, obj1_descr,
         return result
 
     if force == 1:
-        if obj2 != None and obj2_descr == SOM_type:
+        if obj2 is not None and obj2_descr == SOM_type:
             result.copyAttributes(obj2)
         if obj1_descr == SOM_type:
             result.copyAttributes(obj1)
     else:
         if obj1_descr == SOM_type:
             result.copyAttributes(obj1)
-        if obj2 != None and obj2_descr == SOM_type:
+        if obj2 is not None and obj2_descr == SOM_type:
             result.copyAttributes(obj2)
 
     return result
 
-
-def get_parameter(param,so,inst):
+def get_parameter(param, so, inst):
     """
     This function takes a parameter string, a SO and an Instrument and returns
     the appropriate parameter based on the parameter string. The SO is used
@@ -523,8 +515,8 @@ def get_parameter(param,so,inst):
     try:
         so.id
     except AttributeError:
-        raise RuntimeError, "Wrong object for function call. Please pass a "\
-              +"SO."
+        raise RuntimeError("Wrong object for function call. Please pass a "\
+                           +"SO.")
 
     if param == "az" or param == "azimuthal":
         return inst.get_azimuthal(so.id)
@@ -537,9 +529,8 @@ def get_parameter(param,so,inst):
     elif param == "total":
         return inst.get_total_path(so.id)
     else:
-        raise RuntimeError, "Parameter %s is not an understood type." % \
-              param
-
+        raise RuntimeError("Parameter %s is not an understood type." % \
+                           param)
 
 def get_special(info, so):
     """
