@@ -400,6 +400,8 @@ if __name__=="__main__":
     if options.ending_ids is not None:
         config.ending_ids = hlr_utils.create_id_pairs(options.ending_ids,
                                                       options.data_paths)
+    else:
+        config.ending_ids = options.ending_ids
 
     # set the wavelength bins
     if options.l_bins is not None:
