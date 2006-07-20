@@ -52,10 +52,10 @@ def integrate_axis(obj, **kwargs):
     import hlr_utils
 
     # set up for working through data
-    o_descr=hlr_utils.get_descr(obj)
+    o_descr = hlr_utils.get_descr(obj)
 
     if o_descr == "number" or o_descr == "list":
-        raise RuntimeError, "Must provide a SOM of a SO to the function."
+        raise RuntimeError("Must provide a SOM of a SO to the function.")
     # Go on
     else:
         pass
@@ -68,7 +68,7 @@ def integrate_axis(obj, **kwargs):
 
     # Check for ending bin
     try: 
-        end = kwargs["end"]+1
+        end = kwargs["end"] + 1
     except KeyError:
         end = -1
 
@@ -89,8 +89,8 @@ def integrate_axis(obj, **kwargs):
 
     for i in range(hlr_utils.get_length(obj)):
     
-        value = hlr_utils.get_value(obj,i,o_descr,axis,axis_pos)
-        error = hlr_utils.get_err2(obj,i,o_descr,axis,axis_pos)
+        value = hlr_utils.get_value(obj, i, o_descr, axis, axis_pos)
+        error = hlr_utils.get_err2(obj, i, o_descr, axis, axis_pos)
 
         if end == -1:
             value = value[start:]
@@ -99,30 +99,32 @@ def integrate_axis(obj, **kwargs):
             value = value[start:end]
             error = error[start:end]
 
-        for (val,err) in map(None, value, error):
-            integration += val
-            integration_error2 += err
+        value_len = len(value)
+
+        for i in range(value_len):
+            integration += value[i]
+            integration_error2 += error[i]
             
-    return (integration,integration_error2)
+    return (integration, integration_error2)
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import hlr_test
 
-    som1=hlr_test.generate_som()
-    som2=hlr_test.generate_som("histogram",1,1)
+    som1 = hlr_test.generate_som()
+    som2 = hlr_test.generate_som("histogram", 1, 1)
 
     print "********** SOM1"
-    print "* ",som1[0]
-    print "* ",som1[1]
+    print "* ", som1[0]
+    print "* ", som1[1]
 
     print "********** SOM2"
-    print "* ",som2[0]
+    print "* ", som2[0]
 
     print "********** integrate_axis"
-    print "* som      :",integrate_axis(som1)
-    print "* som      :",integrate_axis(som2)
-    print "* som [2,4]:",integrate_axis(som2,start=2,end=4)
-    print "* som  (x) :",integrate_axis(som2,axis="x")
-    print "* so       :",integrate_axis(som1[0])
-    print "* so  [0,3]:",integrate_axis(som1[0],start=0,end=3)
+    print "* som      :", integrate_axis(som1)
+    print "* som      :", integrate_axis(som2)
+    print "* som [2,4]:", integrate_axis(som2, start=2, end=4)
+    print "* som  (x) :", integrate_axis(som2, axis="x")
+    print "* so       :", integrate_axis(som1[0])
+    print "* so  [0,3]:", integrate_axis(som1[0], start=0, end=3)
