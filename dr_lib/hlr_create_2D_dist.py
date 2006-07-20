@@ -22,7 +22,7 @@
 
 # $Id$
 
-def create_2D_dist(som,*args,**kwargs):
+def create_2D_dist(som, *args, **kwargs):
     """
     This function takes a SOM of single spectrum with energy transfer axes and
     rebins those axes to a given axis and converts the spectra into a single
@@ -116,14 +116,15 @@ def create_2D_dist(som,*args,**kwargs):
     # Check dataType keyword argument. An offset will be set to 1 for the
     # histogram type and 0 for either density or coordinate
     try:
-        type = kwargs["data_type"]
-        if type.lower() == "histogram":
+        data_type = kwargs["data_type"]
+        if data_type.lower() == "histogram":
             offset = 1
-        elif type.lower() == "density" or type.lower() == "coordinate":
+        elif data_type.lower() == "density" or \
+                 data_type.lower() == "coordinate":
             offset = 0
         else:
             raise RuntimeError, "Do not understand data type given: %s" % \
-                  type
+                  data_type
     # Default is offset for histogram
     except KeyError:
         offset = 1
@@ -134,13 +135,13 @@ def create_2D_dist(som,*args,**kwargs):
         # Set the x-axis arguments from the *args list into the new SO
         if not xvar:
             # Axis positions are 1 (Q) and 0 (E)
-            position = dim-i-1
+            position = dim - i - 1
             so_dim.axis[i].val = args[position]
         else:
             # Axis positions are 2 (Q), 3 (eQ), 0 (E), 1 (eE)
-            position = dim-2*i
+            position = dim - 2 * i
             so_dim.axis[i].val = args[position]
-            so_dim.axis[i].var = args[position+1]
+            so_dim.axis[i].var = args[position + 1]
 
         # Set individual value axis sizes (not x-axis size)
         N_y.append(len(args[position]) - offset)
@@ -153,33 +154,32 @@ def create_2D_dist(som,*args,**kwargs):
     so_dim.var_y = nessi_list.NessiList(N_tot)
 
     # Rebin data to E axis
-    som1 = common_lib.rebin_axis_1D(som, args[0])
+    som_1 = common_lib.rebin_axis_1D(som, args[0])
 
     som = None
     del som
 
-    inst = som1.attr_list.instrument
-    lambda_final = som1.attr_list["Wavelength_final"]
+    inst = som_1.attr_list.instrument
+    lambda_final = som_1.attr_list["Wavelength_final"]
 
     import array_manip
     import axis_manip
     
-    for i in range(hlr_utils.get_length(som1)):
+    for i in range(hlr_utils.get_length(som_1)):
         # Find Q for pixel
-        so = hlr_utils.get_value(som1,i,"SOM","all")
-        (angle,angle_err2) = hlr_utils.get_parameter("polar",so,inst)
+        so = hlr_utils.get_value(som_1, i, "SOM", "all")
+        (angle, angle_err2) = hlr_utils.get_parameter("polar", so, inst)
 
         l_f = hlr_utils.get_special(lambda_final, so)
         
-        (Q,Q_err2) = axis_manip.wavelength_to_scalar_Q(l_f[0],
-                                                       l_f[1],
-                                                       angle/2.0,
-                                                       angle_err2/2.0)
+        Q = axis_manip.wavelength_to_scalar_Q(l_f[0], l_f[1],
+                                              angle / 2.0,
+                                              angle_err2 / 2.0)
 
         # Find Q value in given momentum transfer axis
         index = -1
         for j in range(N_y[0]):
-            if Q >= args[Q_pos][j] and Q < args[Q_pos][j+1]:
+            if Q[0] >= args[Q_pos][j] and Q[0] < args[Q_pos][j + 1]:
                 index = j
                 break
 
@@ -189,8 +189,8 @@ def create_2D_dist(som,*args,**kwargs):
 
             length = finish - start + 1
 
-            val = hlr_utils.get_value(som1, i, "SOM")
-            err2 = hlr_utils.get_err2(som1, i, "SOM")
+            val = hlr_utils.get_value(som_1, i, "SOM")
+            err2 = hlr_utils.get_err2(som_1, i, "SOM")
 
             (so_dim.y, so_dim.var_y) = array_manip.add_ncerr(so_dim.y,
                                                              so_dim.var_y,
@@ -211,7 +211,7 @@ def create_2D_dist(som,*args,**kwargs):
         so_dim.id = 0
 
     comb_som = SOM.SOM()
-    comb_som.copyAttributes(som1)
+    comb_som.copyAttributes(som_1)
 
     # Check for y_label keyword argument
     if kwargs.has_key("y_label"):
@@ -229,35 +229,36 @@ def create_2D_dist(som,*args,**kwargs):
     if kwargs.has_key("x_labels"):
         comb_som.setAllAxisLabels(kwargs["x_labels"])
     else:
-        comb_som.setAllAxisLabels(["Momentum transfer","Energy transfer"])
+        comb_som.setAllAxisLabels(["Momentum transfer", "Energy transfer"])
 
     # Check for x_units keyword argument
     if kwargs.has_key("x_units"):
         comb_som.setAllAxisUnits(kwargs["x_units"])
     else:
-        comb_som.setAllAxisUnits(["A^-1","THz"])
+        comb_som.setAllAxisUnits(["A^-1", "THz"])
 
     comb_som.append(so_dim)
 
     return comb_som
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import hlr_test
     import hlr_utils
     import SOM
 
-    som1 = hlr_test.generate_som("histogram",1,3)
-    som1.attr_list["Wavelength_final"] = (1,1)
+    som1 = hlr_test.generate_som("histogram", 1, 3)
+    som1.attr_list["Wavelength_final"] = (1, 1)
     som1.attr_list.instrument = SOM.ASG_Instrument()
 
-    axis = hlr_utils.make_axis(4,5,0.25)
-    axis_err = hlr_utils.make_axis(0,1,0.25)
+    Q_axis = hlr_utils.make_axis(4, 5, 0.25)
+    x_axis_err = hlr_utils.make_axis(0, 1, 0.25)
 
     print "********** SOM1"
-    print "* ",som1[0]
-    print "* ",som1[1]
-    print "* ",som1[2]
+    print "* ", som1[0]
+    print "* ", som1[1]
+    print "* ", som1[2]
 
     print "********** create_2D"
-    print " som :",create_2D_dist(som1,som1[0].axis[0].val,axis_err,axis,axis_err,withXVar="True")
+    print " som :", create_2D_dist(som1, som1[0].axis[0].val, x_axis_err,
+                                   Q_axis, x_axis_err, withXVar="True")
