@@ -121,8 +121,8 @@ def tof_to_d_spacing(obj, **kwargs):
             (angle, angle_err2) = hlr_utils.get_parameter("polar", map_so,
                                                           inst)
         else:
-            angle = hlr_utils.get_value(polar, i, p_descr)
-            angle_err2 = hlr_utils.get_err2(polar, i, p_descr)
+            angle = hlr_utils.get_value(polar, i, a_descr)
+            angle_err2 = hlr_utils.get_err2(polar, i, a_descr)
 
         len_v0 = len(value[0])
         len_v1 = len(value[1])
@@ -152,7 +152,7 @@ if __name__ == "__main__":
     import hlr_test
     import SOM
 
-    pl = (20.0, 0.1)
+    ple = (20.0, 0.1)
     pa = (0.785, 0.005)   
     
     som1 = hlr_test.generate_som()
@@ -166,6 +166,6 @@ if __name__ == "__main__":
     print "********** tof_to_d_spacing"
     print "* tof_to_d_spacing som :", tof_to_d_spacing(som1)
     print "* tof_to_d_spacing so  :", tof_to_d_spacing(som1[0],
-                                                       pathlength=pl,
+                                                       pathlength=ple,
                                                        polar=pa)
 
