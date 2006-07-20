@@ -107,7 +107,7 @@ def tof_to_initial_wavelength_igs(obj, **kwargs):
     else:
         axis = 0
 
-    result = hlr_utils.copy_som_attr(result,res_descr,obj,o_descr)
+    result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
     if res_descr == "SOM":
         result = hlr_utils.hlr_force_units(result, "Angstroms", axis)
         result.setAxisLabel(axis, "wavelength")
@@ -208,8 +208,8 @@ def tof_to_initial_wavelength_igs(obj, **kwargs):
             L_d_err2 = hlr_utils.get_err2(dist_sample_detector, i, ld_descr)
 
         if lambda_f is not None:
-            l_f = hlr_utils.get_value(lambda_f, i, t_descr)
-            l_f_err2 = hlr_utils.get_err2(lambda_f, i, t_descr)
+            l_f = hlr_utils.get_value(lambda_f, i, l_descr)
+            l_f_err2 = hlr_utils.get_err2(lambda_f, i, l_descr)
         else:
             l_f_tuple = hlr_utils.get_special(som_l_f, map_so)
             l_f = l_f_tuple[0]
