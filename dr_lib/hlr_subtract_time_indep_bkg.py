@@ -22,7 +22,7 @@
 
 # $Id$
 
-def subtract_time_indep_bkg(obj,B_list,**kwargs):
+def subtract_time_indep_bkg(obj, B_list):
     """
     This function takes a SOM or a SO and a list of time-independent background
     tuples and subtracts the numbers from the appropriate SO in the SOM or the
@@ -48,7 +48,7 @@ def subtract_time_indep_bkg(obj,B_list,**kwargs):
     """
 
     if len(B_list) <= 0:
-        raise IndexError, "List of time-independent background cannot be empty"
+        raise IndexError("List of time-independent background cannot be empty")
     # List is correct size, go on
     else:
         pass
@@ -56,42 +56,42 @@ def subtract_time_indep_bkg(obj,B_list,**kwargs):
     # import the helper functions
     import hlr_utils
 
-    (o_descr,l_descr)=hlr_utils.get_descr(obj,B_list)
+    (o_descr, l_descr) = hlr_utils.get_descr(obj, B_list)
 
     if o_descr == "number" or o_descr == "list":
-        raise TypeError, "First argument must be a SOM or a SO!"
+        raise TypeError("First argument must be a SOM or a SO!")
     # Have a SOM or SO, go on
     else:
         pass
 
-    (result,res_descr)=hlr_utils.empty_result(obj)
+    (result, res_descr) = hlr_utils.empty_result(obj)
 
-    result=hlr_utils.copy_som_attr(result,res_descr,obj,o_descr)
+    result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
 
     import common_lib
 
     # iterate through the values
     for i in range(hlr_utils.get_length(obj)):
-        val1 = hlr_utils.get_value(obj,i,o_descr,"all")
-        val2 = hlr_utils.get_value(B_list,i,l_descr,"all")
+        val1 = hlr_utils.get_value(obj, i, o_descr, "all")
+        val2 = hlr_utils.get_value(B_list, i, l_descr, "all")
         value = common_lib.sub_ncerr(val1, val2)
 
-        hlr_utils.result_insert(result,res_descr,value,None,"all")
+        hlr_utils.result_insert(result, res_descr, value, None, "all")
 
     return result
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import hlr_test
     
-    som1=hlr_test.generate_som()
+    som1 = hlr_test.generate_som()
         
     print "********** SOM1"
-    print "* ",som1[0]
-    print "* ",som1[1]
+    print "* ", som1[0]
+    print "* ", som1[1]
 
     print "********** subtract_time_indep_bkg"
-    print "* som -scal   :",subtract_time_indep_bkg(som1,(3,1))
-    print "* som -l(scal):",subtract_time_indep_bkg(som1,[(1,1), (2,1)])
-    print "* so  -scal   :",subtract_time_indep_bkg(som1[0],(1,1))
+    print "* som -scal   :", subtract_time_indep_bkg(som1, (3, 1))
+    print "* som -l(scal):", subtract_time_indep_bkg(som1, [(1, 1), (2, 1)])
+    print "* so  -scal   :", subtract_time_indep_bkg(som1[0], (1, 1))
 
 
