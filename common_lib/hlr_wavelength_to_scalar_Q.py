@@ -96,7 +96,7 @@ def wavelength_to_scalar_Q(obj, **kwargs):
     else:
         axis = 0
 
-    result=hlr_utils.copy_som_attr(result,res_descr,obj,o_descr)
+    result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
     if res_descr == "SOM":
         result = hlr_utils.hlr_force_units(result, "1/Angstroms", axis)
         result.setAxisLabel(axis, "scalar wavevector transfer")
@@ -125,7 +125,7 @@ def wavelength_to_scalar_Q(obj, **kwargs):
         val = hlr_utils.get_value(obj, i, o_descr, "x", axis)
         err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
 
-        map_so = hlr_utils.get_map_so(obj,None,i)
+        map_so = hlr_utils.get_map_so(obj, None, i)
 
         if polar is None:
             (angle, angle_err2) = hlr_utils.get_parameter("polar", map_so,
