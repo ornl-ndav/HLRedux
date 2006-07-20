@@ -64,8 +64,9 @@ def ext_replace(name, ext_out, ext_in):
 
     import re
     expression = r'\.'+ext_out+'$'
-    myre=re.compile(expression)
-    return myre.sub("", name)+'.'+ext_in
+    myre = re.compile(expression)
+
+    return myre.sub("", name) + '.' + ext_in
 
 
 def split_values(thing):
@@ -89,23 +90,21 @@ def split_values(thing):
     try:
         return (float(mylist[0]), float(mylist[1]), mylist[2])
     except IndexError:
-        pass
-    
-    try:
-        return (float(mylist[0]), float(mylist[1]), None)
-    except ValueError:
-        return (float(mylist[0]), 0.0, mylist[1])
+        try:
+            return (float(mylist[0]), float(mylist[1]), None)
+        except ValueError:
+            return (float(mylist[0]), 0.0, mylist[1])
     
 
-def make_axis(min, max, delta, **kwargs):
+def make_axis(axis_min, axis_max, delta, **kwargs):
     """
     This function takes a minimum, maximum and a delta value and converts
     those numbers into an axis.
 
     Parameters:
     ----------
-    -> min is the minimum value of the axis
-    -> max is the maximum value of the axis
+    -> axis_min is the minimum value of the axis
+    -> axis_max is the maximum value of the axis
     -> delta is the bin width for the axis
     -> kwargs is a list of key word arguments that the function accepts:
           type= a string containing the type of axis desired. Type can be
@@ -125,23 +124,23 @@ def make_axis(min, max, delta, **kwargs):
     import math
     import nessi_list
 
-    n_bins = int(math.fabs(max - min) / delta)
+    n_bins = int(math.fabs(axis_max - axis_min) / delta)
 
     axis = nessi_list.NessiList()
 
     for i in range(n_bins):
-        axis.append(min + i * delta)
+        axis.append(axis_min + i * delta)
 
     try:
         if(kwargs["type"] == "histogram"):
-            axis.append(max)
+            axis.append(axis_max)
         elif(kwargs["type"] == "density" or kwargs["type"] == "coordinate"):
             pass
         else:
-            raise RuntimeError, "Do not understand type: %s" % kwargs["type"]
+            raise RuntimeError("Do not understand type: %s" % kwargs["type"])
         
     except KeyError:
-        axis.append(max)
+        axis.append(axis_max)
 
     return axis
 
@@ -206,11 +205,11 @@ def create_data_paths(thing):
 
     data_paths = []
 
-    for i in range(0,len(mylist),2):
+    for i in range(0, len(mylist), 2):
         if use_extend:
-            data_paths.extend((mylist[i], int(mylist[i+1])))
+            data_paths.extend((mylist[i], int(mylist[i + 1])))
         else:
-            data_paths.append((mylist[i], int(mylist[i+1])))
+            data_paths.append((mylist[i], int(mylist[i + 1])))
 
     if len(mylist) == 2:
         return tuple(data_paths)
@@ -279,13 +278,13 @@ def write_file(filename, dst_type, data, **kwargs):
         replace = True
 
     if replace:
-        file = os.path.basename(filename)
-        path = os.path.join(os.getcwd(), file)
-        file = hlr_utils.ext_replace(path, data_ext, output_ext)
+        fixed_filename = os.path.basename(filename)
+        path = os.path.join(os.getcwd(), fixed_filename)
+        fixed_filename = hlr_utils.ext_replace(path, data_ext, output_ext)
     else:
-        file = filename
+        fixed_filename = filename
         
-    resource = open(file, "w")
+    resource = open(fixed_filename, "w")
     output_dst = DST.getInstance(dst_type, resource)
     if verbose:
         print "Writing %s" % message
@@ -324,13 +323,11 @@ def create_id_pairs(pairs, paths, **kwargs):
 
     id_pairs = []
 
-    index = -1
     for i in range(0, length, 2):
         if use_extend:
-            id_pairs.extend((int(mylist[i]), int(mylist[i+1])))
+            id_pairs.extend((int(mylist[i]), int(mylist[i + 1])))
         else:
-            id_pairs.append((int(mylist[i]), int(mylist[i+1])))
-        index = i
+            id_pairs.append((int(mylist[i]), int(mylist[i + 1])))
 
     # The number of data paths and the number of id pairs is equal
     if length == size:
