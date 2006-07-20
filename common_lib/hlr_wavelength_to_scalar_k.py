@@ -95,11 +95,11 @@ def wavelength_to_scalar_k(obj, **kwargs):
         if o_descr != "number":
             value1 = axis_manip.reverse_array_cp(value[0])
             value2 = axis_manip.reverse_array_cp(value[1])
-            rev_value = (value1,value2)
+            rev_value = (value1, value2)
         else:
             rev_value = value
             
-        map_so = hlr_utils.get_map_so(obj,None,i)
+        map_so = hlr_utils.get_map_so(obj, None, i)
         if map_so is not None:
             map_so.y = axis_manip.reverse_array_cp(map_so.y)
             map_so.var_y = axis_manip.reverse_array_cp(map_so.var_y)
