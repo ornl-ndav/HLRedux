@@ -22,7 +22,7 @@
 
 # $Id$
 
-def sum_all_spectra(obj,**kwargs):
+def sum_all_spectra(obj):
     """
     This function takes all the SOs in a SOM and sums them together using the
     summing by weights concept. All of the SOs are assumed to have the same
@@ -44,61 +44,61 @@ def sum_all_spectra(obj,**kwargs):
     # import the helper functions
     import hlr_utils
 
-    o_descr=hlr_utils.get_descr(obj)
+    o_descr = hlr_utils.get_descr(obj)
 
     if o_descr != "SOM":
-        raise TypeError, "Function argument must be a SOM"
+        raise TypeError("Function argument must be a SOM")
     # Have a SOM, go on
     else:
         pass
 
-    (result,res_descr)=hlr_utils.empty_result(obj)
+    (result, res_descr) = hlr_utils.empty_result(obj)
 
-    result=hlr_utils.copy_som_attr(result,res_descr,obj,o_descr)
+    result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
 
     # iterate through the values
     import common_lib
 
     so_id_list = []
 
-    val1 = hlr_utils.get_value(obj,0,o_descr,"all")
-    val2 = hlr_utils.get_value(obj,1,o_descr,"all")
+    val1 = hlr_utils.get_value(obj, 0, o_descr, "all")
+    val2 = hlr_utils.get_value(obj, 1, o_descr, "all")
     value = common_lib.add_ncerr(val1, val2)
     so_id_list.append(val1.id)
     so_id_list.append(val2.id)
 
-    for i in range(2,hlr_utils.get_length(obj)):
-        val = hlr_utils.get_value(obj,i,o_descr,"all")
+    for i in range(2, hlr_utils.get_length(obj)):
+        val = hlr_utils.get_value(obj, i, o_descr, "all")
         value = common_lib.add_ncerr(val, value)
         so_id_list.append(val.id)
 
 
-    hlr_utils.result_insert(result,res_descr,value,None,"all")
+    hlr_utils.result_insert( result, res_descr, value, None, "all")
     result.attr_list["Summed IDs"] = so_id_list
     result[0].id = 0
             
     return result
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import hlr_test
     import SOM
     
-    som1=SOM.SOM()
-    so1=hlr_test.generate_so("histogram",0,5,1,1)
-    so1.id=1
+    som1 = SOM.SOM()
+    so1 = hlr_test.generate_so("histogram", 0, 5, 1, 1)
+    so1.id = 1
     som1.append(so1)
-    so2=hlr_test.generate_so("histogram",0,5,1,3)
-    so2.id=2
+    so2 = hlr_test.generate_so("histogram", 0, 5, 1, 3)
+    so2.id = 2
     som1.append(so2)
-    so3=hlr_test.generate_so("histogram",0,5,1,2)
-    so3.id=3
+    so3 = hlr_test.generate_so("histogram", 0, 5, 1, 2)
+    so3.id = 3
     som1.append(so3)
 
     print "********** SOM1"
-    print "* ",som1[0]
-    print "* ",som1[1]
-    print "* ",som1[2]
+    print "* ", som1[0]
+    print "* ", som1[1]
+    print "* ", som1[2]
 
     print "********** sum_all_spectra"
-    print "* som:",sum_all_spectra(som1)
+    print "* som:", sum_all_spectra(som1)
 
