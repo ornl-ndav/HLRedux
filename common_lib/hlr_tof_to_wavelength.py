@@ -150,5 +150,5 @@ if __name__ == "__main__":
     print "* tof_to_wavelength som :", tof_to_wavelength(som1)
     print "* tof_to_wavelength so  :", tof_to_wavelength(som1[0],
                                                          pathlength=pli)
-    print "* tof_to_wavelength scal:", tof_to_wavelength([1,1],
+    print "* tof_to_wavelength scal:", tof_to_wavelength([1, 1],
                                                          pathlength=pli)
