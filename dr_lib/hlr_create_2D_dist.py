@@ -90,25 +90,25 @@ def create_2D_dist(som, *args, **kwargs):
         value = kwargs["withXVar"]
         if value.lower() == "true":
             if N_args != 4:
-                raise RuntimeError, "Since you have requested x errors, 4 x "\
-                      +"axes must be provided."
+                raise RuntimeError("Since you have requested x errors, 4 x "\
+                                   +"axes must be provided.")
             else:
                 xvar = True
                 Q_pos = 2
         elif value.lower() == "false":
             if N_args != 2:
-                raise RuntimeError, "Since you did not requested x errors, 2 "\
-                      +"x axes must be provided."
+                raise RuntimeError("Since you did not requested x errors, 2 "\
+                                   +"x axes must be provided.")
             else:
                 xvar = False
                 Q_pos = 1
         else:
-            raise RuntimeError, "Do not understand given parameter %s" % \
-                  value
+            raise RuntimeError("Do not understand given parameter %s" % \
+                               value)
     except KeyError:
         if N_args != 2:
-            raise RuntimeError, "Since you did not requested x errors, 2 "\
-                  +"x axes must be provided."
+            raise RuntimeError("Since you did not requested x errors, 2 "\
+                               +"x axes must be provided.")
         else:
             xvar = False
             Q_pos = 1
@@ -123,8 +123,8 @@ def create_2D_dist(som, *args, **kwargs):
                  data_type.lower() == "coordinate":
             offset = 0
         else:
-            raise RuntimeError, "Do not understand data type given: %s" % \
-                  data_type
+            raise RuntimeError("Do not understand data type given: %s" % \
+                               data_type)
     # Default is offset for histogram
     except KeyError:
         offset = 1
