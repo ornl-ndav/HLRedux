@@ -52,37 +52,64 @@ def hlr_math_compatible(obj1, obj1_descr, obj2, obj2_descr):
         value = True
         count = []
         index = 1
-        for (unit1, unit2) in map(None, obj1_axis_units, obj2_axis_units):
+
+        obj1_au_len = len(obj1_axis_units)
+        obj2_au_len = len(obj2_axis_units)
+
+        if obj1_au_len != obj2_au_len:
+            raise RuntimeError("SOM1 and SOM2 do not have the same number of "\
+                               +"units")
+        else:
+            pass
+
+        for i in range(obj1_au_len):
+            unit1 = obj1_axis_units[i]
+            unit2 = obj2_axis_units[i]
+
             if unit1 != unit2:
                 count.append(index)
                 value = False
                 index += 1
+            else:
+                pass
                 
         if not value:
-            raise RuntimeError, "X units at %s do not match" \
-                  % str(count)
+            raise RuntimeError("X units at %s do not match" % str(count))
+        else:
+            pass
                 
-        if obj1.getYUnits()!=obj2.getYUnits():
-            raise RuntimeError,"Y units do not match"
-
+        if obj1.getYUnits() != obj2.getYUnits():
+            raise RuntimeError("Y units do not match")
+        else:
+            pass
 
     elif obj1_descr == "SO" and obj2_descr == "SO":
 
         if obj1.dim() != obj2.dim():
-            raise IndexError, "SO1 and SO2 are not the same dimension."
+            raise IndexError("SO1 and SO2 are not the same dimension.")
+        else:
+            pass
 
         value = True
         count = []
         index = 1
-        for (axis1, axis2) in map(None, obj1, obj2):
+
+        num_axes = obj1.dim()
+
+        for i in range(num_axes):
+            axis1 = obj1.axis[i]
+            axis2 = obj2.axis[i]
             if axis1 != axis2:
                 count.append(index)
                 value = False
                 index += 1
+            else:
+                pass
                 
         if not value:
-            raise RuntimeError, "X axes at %s do not match" \
-                  % str(count)
+            raise RuntimeError("X axes at %s do not match" % str(count))
+        else:
+            pass
 
     # If the above two criteria are not met, the function should just do
     # nothing. That is what the following statement does. This allows
