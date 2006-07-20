@@ -108,8 +108,8 @@ def wavelength_to_energy(obj, **kwargs):
             
         map_so = hlr_utils.get_map_so(obj, None, i)
         if map_so is not None:
-            map_so.y=axis_manip.reverse_array_cp(map_so.y)
-            map_so.var_y=axis_manip.reverse_array_cp(map_so.var_y)
+            map_so.y = axis_manip.reverse_array_cp(map_so.y)
+            map_so.var_y = axis_manip.reverse_array_cp(map_so.var_y)
         else:
             pass
 
@@ -133,7 +133,7 @@ def wavelength_to_energy(obj, **kwargs):
     return result
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import hlr_test
 
     som1 = hlr_test.generate_som()
