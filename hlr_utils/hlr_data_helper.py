@@ -215,7 +215,7 @@ def get_length(obj1, obj2=None):
         obj1_type = get_descr(obj1)
         obj2_type = empty_type
     else:
-        (obj1_type, obj2_type) = get_descr(obj1,obj2)
+        (obj1_type, obj2_type) = get_descr(obj1, obj2)
         
     if obj1_type == SOM_type and obj2_type == SOM_type:
         if len(obj1) != len(obj2):
