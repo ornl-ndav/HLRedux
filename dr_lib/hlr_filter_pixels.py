@@ -22,7 +22,7 @@
 
 # $Id$
 
-def filter_pixels(obj, paths, start_ids, end_ids, **kwargs):
+def filter_pixels(obj, paths, start_ids, end_ids):
     """
     This function filters a set of pixels based on starting and ending IDs
     for each data path.
@@ -56,13 +56,13 @@ def filter_pixels(obj, paths, start_ids, end_ids, **kwargs):
     o_descr = hlr_utils.get_descr(obj)
 
     if o_descr != "SOM":
-        raise TypeError, "Only SOM operations supported"
+        raise TypeError("Only SOM operations supported")
     else:
         pass
 
     if len(paths) != len(start_ids) and len(start_ids) != len(end_ids):
-        raise RuntimeError, "Data paths, starting ids and ending ids need "\
-              +"to have the same length."
+        raise RuntimeError("Data paths, starting ids and ending ids need "\
+                           +"to have the same length.")
     else:
         pass
 
@@ -93,12 +93,27 @@ def filter_pixels(obj, paths, start_ids, end_ids, **kwargs):
         end_ids = []
         end_ids.append(temp)
 
-    for path, s_id, e_id in map(None, paths, start_ids, end_ids):
+    path_len = len(paths)
+    s_id_len = len(start_ids)
+    e_id_len = len(end_ids)
+
+    if path_len != s_id_len and s_id_len != e_id_len:
+        raise RuntimeError("The lengths of paths, start_ids, and end_ids "\
+                           +"must be the same")
+    # All OK, go on
+    else:
+        pass
+
+    for i in range(path_len):
+        path = paths[i]
+        s_id = start_ids[i]
+        e_id = end_ids[i]
+
         bank = path[0].split('/')[-1]
 
         for i in range(s_id[0], e_id[0]):
             for j in range(s_id[1], e_id[1]):
-                id = (bank, (i, j))
+                pix_id = (bank, (i, j))
 
                 length = hlr_utils.get_length(obj)
 
@@ -109,11 +124,11 @@ def filter_pixels(obj, paths, start_ids, end_ids, **kwargs):
                 while nabove - nbelow > 1:
                     middle = (nabove + nbelow) / 2
 
-                    if id == obj[middle-1].id:
+                    if pix_id == obj[middle-1].id:
                         index = middle - 1
                         break
 
-                    if id < obj[middle-1].id:
+                    if pix_id < obj[middle-1].id:
                         nabove = middle
                     else:
                         nbelow = middle
@@ -126,11 +141,10 @@ def filter_pixels(obj, paths, start_ids, end_ids, **kwargs):
     return (result, obj)
     
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import hlr_test
-    import SOM
 
-    som1=hlr_test.generate_som("histogram", 1, 5)
+    som1 = hlr_test.generate_som("histogram", 1, 5)
 
     som1[0].id = ("bank1", (0, 0))
     som1[1].id = ("bank1", (1, 0))
@@ -138,7 +152,6 @@ if __name__=="__main__":
     som1[3].id = ("bank1", (3, 0))
     som1[4].id = ("bank1", (4, 0))
     
-
     print "********** SOM1"
     print "* ", som1[0]
     print "* ", som1[1]
