@@ -214,8 +214,9 @@ def calc_energy_transfer(config, data_som):
     del data_som1
 
     data_som2.setYLabel("counts")
-    data_som2.setYUnits("counts / ueV")
+    data_som2.setYUnits("counts/ueV")
     data_som2.setAxisUnits(0, "ueV")
+    data_som2.setAxisLabel(0, "energy_transfer")
 
     data_som3 = common_lib.mult_ncerr(data_som2, (1000.0,0.0), axis="x")
 
@@ -434,7 +435,7 @@ def run(config):
                              output_ext="pxl",
                              verbose=config.verbose,
                              message="pixel wavelength information")
-
+        
     del d_som6, m_som1
 
     if config.mon_eff==None:
