@@ -63,8 +63,8 @@ def filter_pixels(config, data_som):
 
 def determine_background(config, bkg_som, num_data_pixels):
 
-    if bkg_som is None:
-        return (0, 0)
+    if config.no_bkg:
+        return None
     else:
         bkg_som1 = dr_lib.sum_all_spectra(bkg_som)
         ratio = (float(len(bkg_som)) / float(num_data_pixels), 0.0)
@@ -149,12 +149,12 @@ def run(config):
         d_som2_D1 = None
         del d_som2_D1
 
-    if config.verbose:
+    if config.verbose and not config.no_bkg:
         print "Determining background"
-        
+
     B = determine_background(config, d_som2_B, len(d_som2_D))
 
-    if config.verbose:
+    if config.verbose and not config.no_bkg:
         print "Subtracting background"
 
     d_som3 = subtract_bkg_from_data(config, d_som2_D, B)
@@ -175,7 +175,7 @@ def run(config):
     else:
         n_som1 = None
 
-    if config.verbose:
+    if config.verbose and config.norm is not None:
         print "Scale normalization spectra"
 
     n_som2 = scale_inc_spec_factor(config, n_som1)
@@ -192,7 +192,8 @@ def run(config):
         n_som2_1 = None
         del n_som2_1
 
-    if config.verbose:
+    if config.verbose and config.norm is not None \
+           and config.geom_factor is not None:
         print "Scale data by normalization"
 
     d_som4 = norm_data_by_inc_spec_factor(config, d_som3, n_som2)
@@ -326,6 +327,11 @@ if __name__=="__main__":
     parser.add_option("", "--dump-all", action="store_true", dest="dump_all",
                       help="Flag to dump combined information")
     parser.set_defaults(dump_all=False)
+
+    parser.add_option("", "--no-bkg", action="store_true", dest="no_bkg",
+                      help="Flag to turn off background estimation and "\
+                      +"subtraction")
+    parser.set_defaults(no_bkg=False)
                     
 
     (options, args) = parser.parse_args()
@@ -410,6 +416,9 @@ if __name__=="__main__":
                                             float(lfacts[2]))
     else:
         config.l_bins = options.l_bins
+
+    # set the ability to turn off background estimation and subtraction
+    config.no_bkg = options.no_bkg
 
     # set the ability to dump the combined specular TOF information
     config.dump_specular = options.dump_specular
