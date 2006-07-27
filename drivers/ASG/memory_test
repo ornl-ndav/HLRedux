@@ -41,14 +41,14 @@ def convert_tof_to_wavelength(data_som):
 def convert_wavelength_to_initial_energy(data_som):
     return common_lib.wavelength_to_energy(data_som)
 
-def run(options, filename):
+def run(opts, filename):
     # Create data source translators for reading in two NeXus files
 
     dst = DST.getInstance("application/x-NeXus", filename)
 
     # Retrieve the SOMs from the DSTs
 
-    if options.full:
+    if opts.full:
         som_id = [("/entry/bank1", 1), ("/entry/bank2", 1)]
         starting_ids = None
         ending_ids = None
@@ -78,15 +78,16 @@ def run(options, filename):
     print "Deleting SOM2"
     del SOM2
 
+    print "ID: ", SOM3[0].id
     print "Done"
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import optparse
 
     import common_lib
     import DST
 
-    parser=optparse.OptionParser("usage: %prog [options] <datafile>")
+    parser = optparse.OptionParser("usage: %prog [options] <datafile>")
 
     parser.add_option("", "--full", action="store_true", default=False,
                       help="Read in full data file.")
