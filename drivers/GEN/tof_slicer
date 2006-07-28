@@ -25,6 +25,8 @@
 # $Id$
 
 def run(config):
+    import sys
+    
     import DST
 
     try:
@@ -56,10 +58,9 @@ def run(config):
                          verbose=config.verbose,
                          message="combined TOF information")
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import os
 
-    import common_lib
     import dr_lib
     import hlr_utils
 
@@ -88,51 +89,52 @@ if __name__=="__main__":
     (options, args) = parser.parse_args()
 
     # set up the configuration
-    config = hlr_utils.Configure()
+    configure = hlr_utils.Configure()
     
     # get the datafile name and check it
     if len(args) == 1:
-        config.data = args[0]
-        if not hlr_utils.file_exists(config.data):
-            parser.error("Data file [%s] does not exist" % config.data)
+        configure.data = args[0]
+        if not hlr_utils.file_exists(configure.data):
+            parser.error("Data file [%s] does not exist" % configure.data)
     else:
         if options.data is not None:
-            config.data = hlr_utils.fix_filename(options.data)
-            if not hlr_utils.file_exists(config.data):
-                parser.error("Data file [%s] does not exist" % config.data)
+            configure.data = hlr_utils.fix_filename(options.data)
+            if not hlr_utils.file_exists(configure.data):
+                parser.error("Data file [%s] does not exist" % configure.data)
         else:
             parser.error("Did not specify a datafile")
     # create the output file name if there isn't one supplied
     if options.output:
-        config.output = hlr_utils.fix_filename(options.output)
+        configure.output = hlr_utils.fix_filename(options.output)
     else:
-        file = os.path.basename(config.data)
-        path = os.path.join(os.getcwd(), file)
-        config.output = hlr_utils.ext_replace(path, "nxs", "tof")
-        print "Using %s as output file" % config.output
+        outfile = os.path.basename(configure.data)
+        path = os.path.join(os.getcwd(), outfile)
+        configure.output = hlr_utils.ext_replace(path, "nxs", "tof")
+        print "Using %s as output file" % configure.output
 
     # set the verbosity
-    config.verbose = options.verbose
+    configure.verbose = options.verbose
 
     # set the data paths
-    config.data_paths = hlr_utils.create_data_paths(options.data_paths)
+    configure.data_paths = hlr_utils.create_data_paths(options.data_paths)
 
     # set the starting ids
     if options.starting_ids is not None:
-        config.starting_ids = hlr_utils.create_id_pairs(options.starting_ids,
-                                                        options.data_paths)
+        configure.starting_ids = hlr_utils.create_id_pairs(\
+            options.starting_ids,\
+            options.data_paths)
     else:
-        config.starting_ids = options.starting_ids
+        configure.starting_ids = options.starting_ids
 
     # set the ending ids
     if options.ending_ids is not None:
-        config.ending_ids = hlr_utils.create_id_pairs(options.ending_ids,
+        configure.ending_ids = hlr_utils.create_id_pairs(options.ending_ids,
                                                       options.data_paths)
     else:
-        config.ending_ids = options.ending_ids
+        configure.ending_ids = options.ending_ids
 
     # set the dump all TOF pixel information
-    config.dump_pxl = options.dump_pxl
+    configure.dump_pxl = options.dump_pxl
 
     # run the program
-    run(config)
+    run(configure)
