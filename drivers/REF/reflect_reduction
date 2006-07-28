@@ -29,7 +29,7 @@ This program covers the functionality outlined in 2.4 Area detector
 measurement of specular reflectivity in <CHANGE:DR_Lib_RS.doc>.
 """
 
-def convert_data_tof_to_wavelength(config, data_som):
+def convert_data_tof_to_wavelength(data_som):
     """Step 1. Convert IDXY(TOF) to wavelength using function 3.15."""
 
     if data_som is None:
@@ -37,7 +37,7 @@ def convert_data_tof_to_wavelength(config, data_som):
     else:
         return common_lib.tof_to_wavelength(data_som, units="microsecond")
 
-def rebin_det_eff(config, data_som, det_eff):
+def rebin_det_eff(data_som, det_eff):
     """Step 2. Rebin IDXY(lambda) and epsilonDXY(lambda) with input
     binning strategy by using function 3.12."""
 
@@ -46,7 +46,7 @@ def rebin_det_eff(config, data_som, det_eff):
     else:
         return dr_lib.rebin_efficiency(data_som, det_eff)
 
-def eff_correct_det(config, data_som, det_eff):
+def eff_correct_det(data_som, det_eff):
     """Step 3. Correct IDXY(lambda) for detector efficiency by using
     the function in 3.9 using IDXY(lambda) as data1 and
     epsilonDXY(lambda) as data2. The result is IeDXY(lambda)."""
@@ -56,21 +56,21 @@ def eff_correct_det(config, data_som, det_eff):
     else:
         return common_lib.div_ncerr(data_som, det_eff)
 
-def filter_pixels(config, data_som):
+def filter_pixels(conf, data_som):
 
-    return dr_lib.filter_pixels(data_som, config.data_paths,
-                                config.starting_ids, config.ending_ids)
+    return dr_lib.filter_pixels(data_som, conf.data_paths,
+                                conf.starting_ids, conf.ending_ids)
 
-def determine_background(config, bkg_som, num_data_pixels):
+def determine_background(conf, bkg_som, num_data_pixels):
 
-    if config.no_bkg:
+    if conf.no_bkg:
         return None
     else:
         bkg_som1 = dr_lib.sum_all_spectra(bkg_som)
         ratio = (float(len(bkg_som)) / float(num_data_pixels), 0.0)
         return common_lib.mult_ncerr(bkg_som1, ratio)
 
-def subtract_bkg_from_data(config, data_som, bkg_som):
+def subtract_bkg_from_data(data_som, bkg_som):
     """Step 4. Subtract the background using function 3.7 with
     IeDXY(lambda) as data1 and IeBXY(lambda) as data2. The result is
     IebDXY(lambda)."""
@@ -80,7 +80,7 @@ def subtract_bkg_from_data(config, data_som, bkg_som):
     else:
         return common_lib.sub_ncerr(data_som, bkg_som[0])
 
-def scale_inc_spec_factor(config, isf_som):
+def scale_inc_spec_factor(conf, isf_som):
     """Step 6. Scale the incident spectrum by the geometry factor
     using function 3.1 with 1/IeM2(lambda) as data1 and G as a. The
     result is the effective incident spectrum factor,
@@ -89,12 +89,12 @@ def scale_inc_spec_factor(config, isf_som):
 
     if isf_som is None:
         return None
-    elif config.geom_factor is None:
+    elif conf.geom_factor is None:
         return isf_som
     else:
-        return common_lib.div_ncerr(isf_som, config.geom_factor)
+        return common_lib.div_ncerr(isf_som, conf.geom_factor)
 
-def norm_data_by_inc_spec_factor(config, data_som, isf_som):
+def norm_data_by_inc_spec_factor(data_som, isf_som):
     """Step 8. Normalize using the incident spectrum factor using
     function 3.9 with IebDXY(lambda) as data1 and Iinc(lambda) as
     data2. The result is the reflectivity, R(lambda)."""
@@ -104,22 +104,22 @@ def norm_data_by_inc_spec_factor(config, data_som, isf_som):
     else:
         return common_lib.div_ncerr(data_som, isf_som)
 
-def combine_spectra(config, data_som):
+def combine_spectra(conf, data_som):
 
-    data_som1 = common_lib.rebin_axis_1D(data_som, config.l_bins)
+    data_som1 = common_lib.rebin_axis_1D(data_som, conf.l_bins)
     data_som2 = dr_lib.sum_all_spectra(data_som1)
-    data_som2[0].id = ("bank1", (0,0))
+    data_som2[0].id = ("bank1", (0, 0))
 
     return data_som2
 
 def run(config):
     import sys
-    
-    if config.data is None:
-        raise RuntimeError, "Need to pass a data filename to the driver "\
-        +"script."
 
     import DST
+    
+    if config.data is None:
+        raise RuntimeError("Need to pass a data filename to the driver "\
+                           +"script.")
 
     try:
         data_dst = DST.getInstance("application/x-NeXus", config.data,
@@ -142,7 +142,7 @@ def run(config):
 
     if config.dump_specular:
         d_som2_D1 = dr_lib.sum_all_spectra(d_som2_D)
-        d_som2_D1[0].id = ("bank1", (0,0))
+        d_som2_D1[0].id = ("bank1", (0, 0))
         hlr_utils.write_file(config.data, "text/Spec", d_som2_D1,
                              output_ext="sdc", verbose=config.verbose,
                              message="combined specular TOF information")
@@ -157,7 +157,7 @@ def run(config):
     if config.verbose and not config.no_bkg:
         print "Subtracting background"
 
-    d_som3 = subtract_bkg_from_data(config, d_som2_D, B)
+    d_som3 = subtract_bkg_from_data(d_som2_D, B)
 
     d_som2_D = None
     d_som2_B = None
@@ -185,7 +185,7 @@ def run(config):
 
     if config.dump_norm and n_som2 is not None:
         n_som2_1 = dr_lib.sum_all_spectra(n_som2)
-        n_som2_1[0].id = ("bank1", (0,0))
+        n_som2_1[0].id = ("bank1", (0, 0))
         hlr_utils.write_file(config.data, "text/Spec", n_som2_1,
                              output_ext="ndc", verbose=config.verbose,
                              message="combined normalization TOF information")
@@ -196,14 +196,14 @@ def run(config):
            and config.geom_factor is not None:
         print "Scale data by normalization"
 
-    d_som4 = norm_data_by_inc_spec_factor(config, d_som3, n_som2)
+    d_som4 = norm_data_by_inc_spec_factor(d_som3, n_som2)
 
     d_som3 = None
     del d_som3
 
     if config.dump_div:
         d_som4_1 = dr_lib.sum_all_spectra(d_som4)
-        d_som4_1[0].id = ("bank1", (0,0))
+        d_som4_1[0].id = ("bank1", (0, 0))
         hlr_utils.write_file(config.data, "text/Spec", d_som4_1,
                              output_ext="div", verbose=config.verbose,
                              message="combined divided TOF information")
@@ -213,7 +213,7 @@ def run(config):
     if config.verbose:
         print "Converting TOF to wavelength"
 
-    d_som5 = convert_data_tof_to_wavelength(config, d_som4)
+    d_som5 = convert_data_tof_to_wavelength(d_som4)
 
     d_som4 = None
     del d_som4
@@ -232,7 +232,7 @@ def run(config):
             if config.verbose:
                 print "Rebinning detector efficiency"
 
-            d_eff2 = rebin_det_eff(config, d_som5, d_eff1)
+            d_eff2 = rebin_det_eff(d_som5, d_eff1)
 
             d_eff1 = None
             del d_eff1
@@ -243,7 +243,7 @@ def run(config):
     if config.verbose and d_eff2 is not None:
         print "Correcting detector data for efficiency"
         
-    d_som6 = eff_correct_det(config, d_som5, d_eff2)
+    d_som6 = eff_correct_det(d_som5, d_eff2)
     
     d_som5 = None
     del d_som5
@@ -266,7 +266,7 @@ def run(config):
                          message="combined Reflectivity information")
     
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import os
     
     import common_lib
@@ -290,7 +290,7 @@ if __name__=="__main__":
     parser.add_option("", "--geom-factor", dest="geom_factor",
                       help="Specify the geometry factor G, err^2")
     
-    parser.add_option("","--det-angle", dest="det_angle",
+    parser.add_option("", "--det-angle", dest="det_angle",
                       help="Specify the detector inclination angle, err^2, "\
                       +"and units")
 
@@ -332,38 +332,37 @@ if __name__=="__main__":
                       help="Flag to turn off background estimation and "\
                       +"subtraction")
     parser.set_defaults(no_bkg=False)
-                    
 
     (options, args) = parser.parse_args()
     
     # set up the configuration
-    config = hlr_utils.Configure()
+    configure = hlr_utils.Configure()
     
     # get the datafile name and check it
     if len(args) == 1:
-        config.data = args[0]
-        if not hlr_utils.file_exists(config.data):
-            parser.error("Data file [%s] does not exist" % config.data)
+        configure.data = args[0]
+        if not hlr_utils.file_exists(configure.data):
+            parser.error("Data file [%s] does not exist" % configure.data)
     else:
         parser.error("Did not specify a datafile")
 
     # create the output file name if there isn't one supplied
     if options.output is not None:
-        config.output = options.output
+        configure.output = options.output
     else:
-        file = os.path.basename(config.data)
-        path = os.path.join(os.getcwd(), file)
-        config.output = hlr_utils.ext_replace(path, "nxs", "txt")
-        print "Using %s as output file" % config.output
+        outfile = os.path.basename(configure.data)
+        path = os.path.join(os.getcwd(), outfile)
+        configure.output = hlr_utils.ext_replace(path, "nxs", "txt")
+        print "Using %s as output file" % configure.output
 
     # set the verbosity
-    config.verbose = options.verbose
+    configure.verbose = options.verbose
 
-    config.norm = hlr_utils.fix_filename(options.norm)
-    if config.norm is not None:
-        if not hlr_utils.file_exists(config.norm):
+    configure.norm = hlr_utils.fix_filename(options.norm)
+    if configure.norm is not None:
+        if not hlr_utils.file_exists(configure.norm):
             parser.error("Normalization file [%s] does not exist" \
-                         % config.norm)
+                         % configure.norm)
         else:
             pass
     else:
@@ -371,68 +370,70 @@ if __name__=="__main__":
 
     if options.det_eff is not None:
         try:
-            config.det_eff = hlr_utils.split_values(options.det_eff)
+            configure.det_eff = hlr_utils.split_values(options.det_eff)
         except ValueError:
-            config.det_eff = options.det_eff
-            if not hlr_utils.file_exists(config.det_eff):
+            configure.det_eff = options.det_eff
+            if not hlr_utils.file_exists(configure.det_eff):
                 parser.error("Detector efficiency file [%s] does not exist" \
-                             % config.det_eff)
+                             % configure.det_eff)
             else:
                 pass
     else:
-        config.det_eff = options.det_eff
+        configure.det_eff = options.det_eff
 
     # set the data paths
-    config.data_paths = hlr_utils.create_data_paths(options.data_paths)
+    configure.data_paths = hlr_utils.create_data_paths(options.data_paths)
 
     if options.geom_factor is not None:
-        config.geom_factor = hlr_utils.split_values(options.geom_factor)
+        configure.geom_factor = hlr_utils.split_values(options.geom_factor)
     else:
-        config.geom_factor = options.geom_factor
+        configure.geom_factor = options.geom_factor
 
     if options.det_angle is not None:
-        config.det_angle = hlr_utils.split_values(options.det_angle)
+        configure.det_angle = hlr_utils.split_values(options.det_angle)
     else:
-        config.det_angle = options.det_angle
+        configure.det_angle = options.det_angle
 
     # set the starting ids
     if options.starting_ids is not None:
-        config.starting_ids = hlr_utils.create_id_pairs(options.starting_ids,
-                                                        options.data_paths)
+        configure.starting_ids = hlr_utils.create_id_pairs(\
+            options.starting_ids,\
+            options.data_paths)
     else:
-        config.starting_ids = options.starting_ids
+        configure.starting_ids = options.starting_ids
 
     # set the ending ids
     if options.ending_ids is not None:
-        config.ending_ids = hlr_utils.create_id_pairs(options.ending_ids,
-                                                      options.data_paths)
+        configure.ending_ids = hlr_utils.create_id_pairs(options.ending_ids,
+                                                         options.data_paths)
     else:
-        config.ending_ids = options.ending_ids
+        configure.ending_ids = options.ending_ids
 
     # set the wavelength bins
     if options.l_bins is not None:
         lfacts = options.l_bins.split(',')
-        config.l_bins = hlr_utils.make_axis(float(lfacts[0]), float(lfacts[1]),
-                                            float(lfacts[2]))
+        configure.l_bins = hlr_utils.make_axis(float(lfacts[0]),
+                                               float(lfacts[1]),
+                                               float(lfacts[2]))
     else:
-        config.l_bins = options.l_bins
+        configure.l_bins = options.l_bins
 
     # set the ability to turn off background estimation and subtraction
-    config.no_bkg = options.no_bkg
+    configure.no_bkg = options.no_bkg
 
     # set the ability to dump the combined specular TOF information
-    config.dump_specular = options.dump_specular
+    configure.dump_specular = options.dump_specular
 
     # set the ability to dump the combined normalization TOF information
-    config.dump_norm = options.dump_norm
+    configure.dump_norm = options.dump_norm
 
     # set the ability to dump the combined divided TOF information
-    config.dump_div = options.dump_div    
+    configure.dump_div = options.dump_div    
     
     if options.dump_all:
-        config.dump_specular = True
-        config.dump_norm = True
-        config.dump_div = True
+        configure.dump_specular = True
+        configure.dump_norm = True
+        configure.dump_div = True
         
     # run the program
-    run(config)
+    run(configure)
