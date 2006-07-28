@@ -56,24 +56,24 @@ def run(config):
                     tag1 = str(j + 1)
                     tag2 = str(i + 1)
                     
-                file = bank + "_" + tag + "_" + tag1 + "_" \
-                       + tag2 + ".tof"
-
+                oufile = bank + "_" + tag + "_" + tag1 + "_" \
+                         + tag2 + ".tof"
+                
                 if config.verbose:
-                    print "Creating %s" % file
+                    print "Creating %s" % oufile
 
                 command = runner + " --data-paths=\"" + path[0] \
                           + "\",1 --starting-ids=" \
                           + str(start_id[0]) + "," + str(start_id[1]) \
                           + " --ending-ids=" + str(end_id[0]) + "," \
-                          + str(end_id[1]) + " --output=" + file \
+                          + str(end_id[1]) + " --output=" + oufile \
                           + " " + config.data
                 if config.ts_verbose:
                     command += " -v"
                 
                 os.system(command)
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import os
 
     import hlr_utils
@@ -105,31 +105,31 @@ if __name__=="__main__":
     (options, args) = parser.parse_args()
 
     # set up the configuration
-    config = hlr_utils.Configure()
+    configure = hlr_utils.Configure()
     
     # get the datafile name and check it
     if len(args) == 1:
-        config.data = args[0]
-        if not hlr_utils.file_exists(config.data):
-            parser.error("Data file [%s] does not exist" % config.data)
+        configure.data = args[0]
+        if not hlr_utils.file_exists(configure.data):
+            parser.error("Data file [%s] does not exist" % configure.data)
     else:
         if options.data is not None:
-            config.data = hlr_utils.fix_filename(options.data)
-            if not hlr_utils.file_exists(config.data):
-                parser.error("Data file [%s] does not exist" % config.data)
+            configure.data = hlr_utils.fix_filename(options.data)
+            if not hlr_utils.file_exists(configure.data):
+                parser.error("Data file [%s] does not exist" % configure.data)
         else:
             parser.error("Did not specify a datafile")
 
     # set the verbosity
-    config.verbose = options.verbose
+    configure.verbose = options.verbose
 
     # set the verbosity on tof_slicer
-    config.ts_verbose = options.ts_verbose
+    configure.ts_verbose = options.ts_verbose
 
     # set vertical
-    config.vertical = options.vertical
+    configure.vertical = options.vertical
 
     # set pixel grouping
-    config.pixel_group = options.pixel_group
+    configure.pixel_group = options.pixel_group
 
-    run(config)
+    run(configure)
