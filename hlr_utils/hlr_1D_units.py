@@ -42,7 +42,7 @@ def hlr_1D_units(som, units):
     """
     
     if not som.hasAxisUnits(units):
-        raise RuntimeError,"No primary axis with %s units" % units
+        raise RuntimeError("No primary axis with %s units" % units)
 
     return som.axisUnitsAt(units)
 
@@ -64,5 +64,5 @@ def hlr_force_units(som, units, dim=1):
     <- The SOM with the units forced to the requested units
     """
     
-    som.setAxisUnits(dim-1,units)
+    som.setAxisUnits(dim-1, units)
     return som
