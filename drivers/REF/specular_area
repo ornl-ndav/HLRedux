@@ -29,7 +29,7 @@ This program covers the functionality outlined in 2.4.3 Area detector
 measurement of specular reflectivity in <CHANGE:DR_Lib_RS.doc>.
 """
 
-def convert_mon_tof_to_wavelength(config, mon_som):
+def convert_mon_tof_to_wavelength(mon_som):
     """Step 1. Convert IM1(TOF) to wavelength using function 3.15."""
 
     if mon_som is None:
@@ -38,7 +38,7 @@ def convert_mon_tof_to_wavelength(config, mon_som):
         return common_lib.tof_to_wavelength(mon_som)
     
 
-def rebin_mon_eff(config, mon_som, mon_eff):
+def rebin_mon_eff(mon_som, mon_eff):
     """Step 2. Rebin eM1(lamda) to IM1(lambdas)'s wavelength axis
     using 3.12. The input is the efficiency eM1(lambda) with the
     output being erM1(lambda)."""
@@ -49,7 +49,7 @@ def rebin_mon_eff(config, mon_som, mon_eff):
         return dr_lib.rebin_efficiency(mon_som, mon_eff)
 
 
-def eff_correct_mon(config, mon_som, mon_eff):
+def eff_correct_mon(mon_som, mon_eff):
     """Step 3. Correct IM1(lambda) for detector efficiency by using
     the function in 3.9 using IM1(lambda) as data1 and erM1(lambda) as
     data2. The result is IeM1(lambda)."""
@@ -60,15 +60,18 @@ def eff_correct_mon(config, mon_som, mon_eff):
         return common_lib.div_ncerr(mon_som, mon_eff)
 
 
-def subtract_bkg_from_data(config, data_som, bkg_som):
+def subtract_bkg_from_data(data_som, bkg_som):
     """Step 4. Subtract the background using function 3.7 with
     IeDXY(lambda) as data1 and IeBXY(lambda) as data2. The result is
     IebDXY(lambda)."""
 
-    return data_som
+    if bkg_som is None:
+        return data_som
+    else:
+        return data_som
 
 
-def calc_inc_spec_factor(config, mrat_som, mon_som):
+def calc_inc_spec_factor(mrat_som, mon_som):
     """Step 5. Determine the incident spectrum factor by using
     function 3.9 with M(lambda) as data1 and IeM1(lambda) as
     data2. The result is the incident spectrum factor,
@@ -103,7 +106,7 @@ def rebin_inc_spec_factor(config):
     pass
 
 
-def norm_data_by_inc_spec_factor(config, data_som, isf_som):
+def norm_data_by_inc_spec_factor(data_som, isf_som):
     """Step 8. Normalize using the incident spectrum factor using
     function 3.9 with IebDXY(lambda) as data1 and Iinc(lambda) as
     data2. The result is the reflectivity, R(lambda)."""
@@ -114,14 +117,14 @@ def norm_data_by_inc_spec_factor(config, data_som, isf_som):
         return common_lib.div_ncerr(data_som, isf_som)
 
 
-def sum_rois(config, data_som):
+def sum_rois(data_som):
     """Step 9. Sum the ROIs weighted by the uncertainties according to
     function 3.10."""
 
     return data_som
 
 
-def convert_data_wavelength_to_scalar_Q(config, data_som):
+def convert_data_wavelength_to_scalar_Q(data_som):
     """This step is not in the requirements document and is only available by
     command-line switch."""
 
@@ -130,12 +133,12 @@ def convert_data_wavelength_to_scalar_Q(config, data_som):
 
 def run(config):
     import sys
-    
-    if config.data is None:
-        raise RuntimeError, "Need to pass a data filename to the driver "\
-        +"script."
 
     import DST
+    
+    if config.data is None:
+        raise RuntimeError("Need to pass a data filename to the driver "\
+                           +"script.")
 
     try:
         data_dst = DST.getInstance("application/x-NeXus", config.data) 
@@ -153,7 +156,7 @@ def run(config):
     else:
         m_som1 = None
 
-    m_som2 = convert_mon_tof_to_wavelength(config, m_som1)
+    m_som2 = convert_mon_tof_to_wavelength(m_som1)
 
     m_som1 = None
     del m_som1
@@ -172,7 +175,7 @@ def run(config):
             if config.verbose:
                 print "Rebinning monitor efficiency"
 
-            m_eff2 = rebin_mon_eff(config, m_som2, m_eff1)
+            m_eff2 = rebin_mon_eff(m_som2, m_eff1)
 
             m_eff1 = None
             del m_eff1
@@ -183,7 +186,7 @@ def run(config):
     if config.verbose and m_eff2 is not None:
         print "Correcting monitor data for efficiency"
         
-    m_som3 = eff_correct_mon(config, m_som2, m_eff2)
+    m_som3 = eff_correct_mon(m_som2, m_eff2)
     
     m_som2 = None
     del m_som2
@@ -192,7 +195,7 @@ def run(config):
 
     bkg_som1 = None
     
-    d_som2 = subtract_bkg_from_data(config, d_som1, bkg_som1)
+    d_som2 = subtract_bkg_from_data(d_som1, bkg_som1)
 
     d_som1 = None
     del d_som1
@@ -207,7 +210,7 @@ def run(config):
     else:
         n_som1 = None
 
-    m_som4 = calc_inc_spec_factor(config, n_som1, m_som3)
+    m_som4 = calc_inc_spec_factor(n_som1, m_som3)
 
     n_som1 = None
     m_som3 = None
@@ -220,17 +223,19 @@ def run(config):
     
     rebin_inc_spec_factor(config)
     
-    d_som3 = norm_data_by_inc_spec_factor(config, d_som2, isf_som)
+    d_som3 = norm_data_by_inc_spec_factor(d_som2, m_som5)
 
     d_som2 = None
     del d_som2
 
-    #d_som4 = sum_rois(config, d_som3)
+    print "ID:", d_som3[0].id
+
+    #d_som4 = sum_rois(d_som3)
     
-    #d_som5 = convert_data_wavelength_to_scalar_Q(config, d_som4)
+    #d_som5 = convert_data_wavelength_to_scalar_Q(d_som4)
  
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import common_lib
     import dr_lib
     import hlr_utils
@@ -243,19 +248,19 @@ if __name__=="__main__":
     parser.add_option("", "--geom-factor", dest="geom_factor",
                       help="Specify the geometry factor G, err^2")
     
-    parser.add_option("","--det-angle", dest="det_angle",
+    parser.add_option("", "--det-angle", dest="det_angle",
                       help="Specify the detector inclination angle, err^2")
     
-    parser.add_option("","--mon-eff", dest="mon_eff",
+    parser.add_option("", "--mon-eff", dest="mon_eff",
                       help="Specify the monitor efficiency file or an "\
                       +"efficiency tuple (efficiency,error^2)")
     
-    parser.add_option("","--data-paths", dest="data_paths",
+    parser.add_option("", "--data-paths", dest="data_paths",
                       help="Specify the comma separated list of detector data"\
                       +"paths and signals. Default is /entry/bank1,1")
     parser.set_defaults(data_paths="/entry/bank1,1")
     
-    parser.add_option("","--mon-path", dest="mon_path",
+    parser.add_option("", "--mon-path", dest="mon_path",
                       help="Specify the comma separated list of monitor "\
                       +"path and signal. Default is /entry/monitor,1")
     parser.set_defaults(mon_path="/entry/monitor,1")
@@ -263,29 +268,29 @@ if __name__=="__main__":
     (options, args) = parser.parse_args()
     
     # set up the configuration
-    config = hlr_utils.Configure()
+    configure = hlr_utils.Configure()
     # get the datafile name and check it
     if len(args) == 1:
-        config.data = args[0]
-        if not hlr_utils.file_exists(config.data):
-            parser.error("Data file [%s] does not exist" % config.data)
+        configure.data = args[0]
+        if not hlr_utils.file_exists(configure.data):
+            parser.error("Data file [%s] does not exist" % configure.data)
     else:
         parser.error("Did not specify a datafile")
     # create the output file name if there isn't one supplied
     if options.output:
-        config.output = options.output
+        configure.output = options.output
     else:
-        config.output = hlr_utils.ext_replace(config.data, "nxs", "txt")
-        print "Using %s as output file" % config.output
+        configure.output = hlr_utils.ext_replace(configure.data, "nxs", "txt")
+        print "Using %s as output file" % configure.output
 
     # set the verbosity
-    config.verbose = options.verbose
+    configure.verbose = options.verbose
 
-    config.norm = hlr_utils.fix_filename(options.norm)
-    if config.norm is not None:
-        if not hlr_utils.file_exists(config.norm):
+    configure.norm = hlr_utils.fix_filename(options.norm)
+    if configure.norm is not None:
+        if not hlr_utils.file_exists(configure.norm):
             parser.error("Normalization file [%s] does not exist" \
-                         % config.norm)
+                         % configure.norm)
         else:
             pass
     else:
@@ -293,32 +298,32 @@ if __name__=="__main__":
 
     if options.mon_eff is not None:
         try:
-            config.mon_eff = hlr_utils.split_values(options.mon_eff)
+            configure.mon_eff = hlr_utils.split_values(options.mon_eff)
         except ValueError:
-            config.mon_eff = options.mon_eff
-            if not hlr_utils.file_exists(config.mon_eff):
+            configure.mon_eff = options.mon_eff
+            if not hlr_utils.file_exists(configure.mon_eff):
                 parser.error("Monitor efficiency file [%s] does not exist" \
-                             % config.mon_eff)
+                             % configure.mon_eff)
             else:
                 pass
     else:
-        config.mon_eff = options.mon_eff 
+        configure.mon_eff = options.mon_eff 
 
     # set the data paths
-    config.data_paths = hlr_utils.create_data_paths(options.data_paths)
+    configure.data_paths = hlr_utils.create_data_paths(options.data_paths)
 
     # set the monitor path
-    config.mon_path = hlr_utils.create_data_path(options.mon_path)
+    configure.mon_path = hlr_utils.create_data_path(options.mon_path)
 
     if options.geom_factor is not None:
-        config.geom_factor = hlr_utils.split_values(options.geom_factor)
+        configure.geom_factor = hlr_utils.split_values(options.geom_factor)
     else:
-        config.geom_factor = options.geom_factor
+        configure.geom_factor = options.geom_factor
 
     if options.det_angle is not None:
-        config.det_angle = hlr_utils.split_values(options.det_angle)
+        configure.det_angle = hlr_utils.split_values(options.det_angle)
     else:
-        config.det_angle = options.det_angle
+        configure.det_angle = options.det_angle
 
     # run the program
-    run(config)
+    run(configure)
