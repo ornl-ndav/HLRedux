@@ -50,5 +50,5 @@ def step5():
     (TOL) of zero."""
     pass
 
-if __name__=="__main__":
+if __name__ == "__main__":
     pass
