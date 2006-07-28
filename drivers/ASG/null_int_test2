@@ -30,28 +30,27 @@
 #
 ###############################################################################
 
-def print_time(tag,start,stop):
-    mili=stop-start
-    mili=int(1000*(mili-int(mili)))
-    start=int(start)
-    stop=int(stop)
-    sec=stop-start
-    min=int(sec/60)
-    sec=sec-min*60
-    hour=int(min/60)
-    min=min-hour*60
-    print "%s=%02d:%02d:%02d.%03d" % (tag,hour,min,sec,mili)
+def print_time(tag, start, stop):
+    mili = stop - start
+    mili = int(1000 * (mili - int(mili)))
+    start = int(start)
+    stop = int(stop)
+    sec = stop - start
+    mins = int(sec / 60)
+    sec = sec - mins * 60
+    hour = int(mins / 60)
+    mins = mins - hour * 60
+    print "%s=%02d:%02d:%02d.%03d" % (tag, hour, mins, sec, mili)
 
-def my_main(options,filename_SOM12,filename_SOM3):
+def my_main(opts, filename_SOM12, filename_SOM3):
     # Import appropriate modules here. NOTE: $PYTHONPATH must reflect
     # where modules can be found.
 
     import common_lib
     import DST
-    from sys import argv, exit
-    from time import localtime, strftime, time
+    from time import time
 
-    start_time=time()
+    start_time = time()
     
     # Create data source translators for reading in two NeXus files
 
@@ -65,7 +64,7 @@ def my_main(options,filename_SOM12,filename_SOM3):
     starting_ids = (20, 190)
     ending_ids = (30, 250)
 
-    if(options.short):
+    if(opts.short):
         SOM1 = dst1.getSOM(som_id, so_axis, start_id=starting_ids,
                            end_id=ending_ids)
         SOM2 = dst2.getSOM(som_id, so_axis, start_id=starting_ids,
@@ -74,8 +73,8 @@ def my_main(options,filename_SOM12,filename_SOM3):
         SOM1 = dst1.getSOM(som_id, so_axis)
         SOM2 = dst2.getSOM(som_id, so_axis)
 
-    if(options.timing):
-        print_time("CREATED SOM12",start_time,time())
+    if(opts.timing):
+        print_time("CREATED SOM12", start_time, time())
 
     # Do the subtraction
     SOM3 = common_lib.sub_ncerr(SOM1, SOM2)
@@ -85,8 +84,8 @@ def my_main(options,filename_SOM12,filename_SOM3):
     SOM3.attr_list["parents"] = {"SOM1" : SOM1.attr_list["filename"],
                                  "SOM2" : SOM2.attr_list["filename"]}
 
-    if(options.timing):
-        print_time("CREATED SOM3 ",start_time,time())
+    if(opts.timing):
+        print_time("CREATED SOM3 ", start_time, time())
 
     # Create output file object
 
@@ -105,29 +104,34 @@ def my_main(options,filename_SOM12,filename_SOM3):
 
     a3c.release_resource()
 
-    if(options.timing):
-        print_time("WROTE SOM3   ",start_time,time())
+    if(opts.timing):
+        print_time("WROTE SOM3   ", start_time, time())
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import optparse
 
-    parser=optparse.OptionParser("usage: %prog [options] <datafile> <outfile>")
-    parser.add_option("","--timing",action="store_true",default=False,
+    parser = optparse.OptionParser("usage: %prog [options] <datafile> "\
+                                   +"<outfile>")
+    parser.add_option("", "--timing", action="store_true",
                       help="Enable timing statements")
-    parser.add_option("","--profile",default=None,
-                      help="Specify the profile output name")
-    parser.add_option("","--short",action="store_true",default=False,
+    parser.set_defaults(timing=False)
+    
+    parser.add_option("", "--profile", help="Specify the profile output name")
+    
+    parser.add_option("", "--short", action="store_true",
                       help="Run abbreviated test")
-    (options,args)=parser.parse_args()
+    parser.set_defaults(short=False)
+    
+    (options, args) = parser.parse_args()
 
     # Confirm the proper number of command line arguments
-    if len(args)!=2:
+    if len(args) != 2:
         parser.error("incorrect number of arguments")
     
-    if options.profile!=None:
+    if options.profile is not None:
         import profile
-        profiler=profile.Profile()
-        profiler.runcall(my_main,options,args[0],args[1])
+        profiler = profile.Profile()
+        profiler.runcall(my_main, options, args[0], args[1])
         profiler.dump_stats(options.profile)
     else:
-        my_main(options,args[0],args[1])
+        my_main(options, args[0], args[1])
