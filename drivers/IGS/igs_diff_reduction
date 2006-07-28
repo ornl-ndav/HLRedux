@@ -24,14 +24,14 @@
 
 # $Id$
 
-def convert_data_to_d_spacing(config, data_som):
+def convert_data_to_d_spacing(data_som):
 
     return common_lib.tof_to_d_spacing(data_som, units="microsecond")
 
-def convert_data_to_tof_focused_det(config, data_som):
+def convert_data_to_tof_focused_det(conf, data_som):
 
     return common_lib.d_spacing_to_tof_focused_det(data_som,
-                                                   pixel_id=config.pixel_id,
+                                                   pixel_id=conf.pixel_id,
                                                    verbose=True)
 
 
@@ -45,12 +45,12 @@ def convert_data_to_scalar_Q(config, data_som):
     
 def run(config):
     import sys
-    
-    if config.data==None:
-        raise RuntimeError, "Need to pass a data filename to the driver "\
-        +"script."
 
     import DST
+    
+    if config.data is None:
+        raise RuntimeError("Need to pass a data filename to the driver "\
+                           +"script.")
 
     try:
         data_dst = DST.getInstance("application/x-NeXus", config.data)
@@ -70,7 +70,7 @@ def run(config):
         if config.verbose:
             print "Converting TOF to d-spacing"
 
-        d_som2 = convert_data_to_d_spacing(config, d_som1)
+        d_som2 = convert_data_to_d_spacing(d_som1)
 
         if config.dump_pxl:
             hlr_utils.write_file(config.data, "text/Spec", d_som2,
@@ -82,7 +82,7 @@ def run(config):
     
         d_som4 = dr_lib.sum_all_spectra(d_som3)
         
-        d_som4[0].id = ("bank3", (0,0))
+        d_som4[0].id = ("bank3", (0, 0))
 
         hlr_utils.write_file(config.output_ds, "text/Spec", d_som4,
                              replace=False, verbose=config.verbose,
@@ -134,7 +134,7 @@ def run(config):
     
         d_som4 = dr_lib.sum_all_spectra(d_som3)
         
-        d_som4[0].id = ("bank3", (0,0))
+        d_som4[0].id = ("bank3", (0, 0))
 
         hlr_utils.write_file(config.output_qt, "text/Spec", d_som4,
                              replace=False, verbose=config.verbose,
@@ -142,7 +142,7 @@ def run(config):
     else:
         pass
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import os
     
     import common_lib
@@ -151,7 +151,6 @@ if __name__=="__main__":
 
     # set up the options available
     parser = hlr_utils.BasicOptions("usage: %prog [options] <datafile>")
-
 
     parser.add_option("", "--d-bins", dest="d_bins",
                       help="Specify the minimum and maximum d-spacing values"\
@@ -186,45 +185,45 @@ if __name__=="__main__":
     (options, args) = parser.parse_args()
    
     # set up the configuration
-    config = hlr_utils.Configure()
+    configure = hlr_utils.Configure()
     
     # get the datafile name and check it
     if len(args) == 1:
-        config.data = args[0]
-        if not hlr_utils.file_exists(config.data):
-            parser.error("Data file [%s] does not exist" % config.data)
+        configure.data = args[0]
+        if not hlr_utils.file_exists(configure.data):
+            parser.error("Data file [%s] does not exist" % configure.data)
     else:
         if options.data is not None:
-            config.data = hlr_utils.fix_filename(options.data)
-            if not hlr_utils.file_exists(config.data):
-                parser.error("Data file [%s] does not exist" % config.data)
+            configure.data = hlr_utils.fix_filename(options.data)
+            if not hlr_utils.file_exists(configure.data):
+                parser.error("Data file [%s] does not exist" % configure.data)
         else:
             parser.error("Did not specify a datafile")
     # create the output file name if there isn't one supplied
     if options.output:
-        config.output = hlr_utils.fix_filename(options.output)
-        print "Using %s as output file" % config.output
+        configure.output = hlr_utils.fix_filename(options.output)
+        print "Using %s as output file" % configure.output
     else:
-        config.output = None
-        file = os.path.basename(config.data)
-        path = os.path.join(os.getcwd(), file)
+        configure.output = None
+        outfile = os.path.basename(configure.data)
+        path = os.path.join(os.getcwd(), outfile)
         if options.d_bins is not None:
-            config.output_ds = hlr_utils.ext_replace(path, "nxs", "ds1")
-            print "Using %s as output file" % config.output_ds
+            configure.output_ds = hlr_utils.ext_replace(path, "nxs", "ds1")
+            print "Using %s as output file" % configure.output_ds
         else:
-            config.output_ds = None
+            configure.output_ds = None
 
         if options.tof_bins is not None:
-            config.output_tof = hlr_utils.ext_replace(path, "nxs", "gs")
-            print "Using %s as output file" % config.output_tof
+            configure.output_tof = hlr_utils.ext_replace(path, "nxs", "gs")
+            print "Using %s as output file" % configure.output_tof
         else:
-            config.output_tof = None            
+            configure.output_tof = None            
             
         if options.Q_bins is not None:
-            config.output_qt = hlr_utils.ext_replace(path, "nxs", "qt1")
-            print "Using %s as output file" % config.output_qt
+            configure.output_qt = hlr_utils.ext_replace(path, "nxs", "qt1")
+            print "Using %s as output file" % configure.output_qt
         else:
-            config.output_qt = None
+            configure.output_qt = None
             
     if options.d_bins is None and options.Q_bins is None:
         parser.error("Must specify at least one type of binning")
@@ -232,39 +231,41 @@ if __name__=="__main__":
         pass
 
     # set the verbosity
-    config.verbose = options.verbose
+    configure.verbose = options.verbose
 
     # set the data paths
-    config.data_paths = hlr_utils.create_data_paths(options.data_paths)
+    configure.data_paths = hlr_utils.create_data_paths(options.data_paths)
 
     # set the d bins
     if options.d_bins is not None:
         dfacts = options.d_bins.split(',')
-        config.d_bins = hlr_utils.make_axis(float(dfacts[0]), float(dfacts[1]),
-                                            float(dfacts[2]))
+        configure.d_bins = hlr_utils.make_axis(float(dfacts[0]),
+                                               float(dfacts[1]),
+                                               float(dfacts[2]))
     else:
-        config.d_bins = options.d_bins
+        configure.d_bins = options.d_bins
 
     # set the Q bins
     if options.Q_bins is not None:
         qfacts = options.Q_bins.split(',')
-        config.Q_bins = hlr_utils.make_axis(float(qfacts[0]), float(qfacts[1]),
-                                            float(qfacts[2]))
+        configure.Q_bins = hlr_utils.make_axis(float(qfacts[0]),
+                                               float(qfacts[1]),
+                                               float(qfacts[2]))
     else:
-        config.Q_bins = options.Q_bins
+        configure.Q_bins = options.Q_bins
 
     # set the tof bins
     if options.tof_bins is not None:
         tfacts = options.tof_bins.split(',')
-        config.tof_bins = hlr_utils.make_axis(float(tfacts[0]),
-                                              float(tfacts[1]),
-                                              float(tfacts[2]))
+        configure.tof_bins = hlr_utils.make_axis(float(tfacts[0]),
+                                                 float(tfacts[1]),
+                                                 float(tfacts[2]))
     else:
-        config.tof_bins = options.tof_bins
+        configure.tof_bins = options.tof_bins
 
-    config.pixel_id = hlr_utils.create_pixel_id(options.pixel_id)
+    configure.pixel_id = hlr_utils.create_pixel_id(options.pixel_id)
 
     # set the ability to dump the d-spacing information
-    config.dump_pxl = options.dump_pxl
+    configure.dump_pxl = options.dump_pxl
 
-    run(config)
+    run(configure)
