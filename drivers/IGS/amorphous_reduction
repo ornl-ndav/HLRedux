@@ -29,58 +29,58 @@ This program covers the functionality outlined in 2.2.1 Powder or
 amorphous material reduction in <CHANGE:DR_Lib_RS.doc>.
 """
 
-def dead_time_correction(config, data_som):
+def dead_time_correction(data_som):
     """Step 1. Apply dead time correction to each I(TOF) using
     function 3.38. The result is ItiXY(TOF)."""
 
     return data_som
 
 
-def subtract_norm_bkg_from_norm(config,norm_som, norm_bkg_som):
+def subtract_norm_bkg_from_norm(norm_som, norm_bkg_som):
     """Step 2. Subtract measured normalization background using 3.6
     with ItNXY(TOF) as data1 and ItNBXY(TOF) as data2. The result is
     ItbNXY(TOF)."""
 
-    if norm_som==None:
+    if norm_som is None:
         return None
-    elif norm_bkg_som==None:
+    elif norm_bkg_som is None:
         return norm_som
 
     return common_lib.sub_ncerr(norm_som, norm_bkg_som)
 
 
-def subtract_dark_count_from_data(config, data_som, dc_som):
+def subtract_dark_count_from_data(data_som, dc_som):
     """Step 3. Subtract the dark count spectrum using function 3.6
     with ItDXY(TOF) as data1 and ItDCXY(TOF) as data2. The result of
     this is ItdDXY(TOF)."""
 
-    if dc_som==None:
+    if dc_som is None:
         return data_som
 
     return common_lib.sub_ncerr(data_som, dc_som)
 
 
-def determine_time_indep_bkg(config, data_som):
+def determine_time_indep_bkg(conf, data_som):
     """Step 4. Determine the sample dependent, time independent
     background B by fitting a line to predetermined end points of
     ItdDXY(TOF) using function 3.43."""
 
     kwargs = {}
 
-    if not config.TOF_start==None:
-        kwargs["start"]=config.TOF_start
+    if conf.TOF_start is not None:
+        kwargs["start"] = conf.TOF_start
 
-    if not config.TOF_end==None:
-        kwargs["end"]=config.TOF_end
+    if conf.TOF_end is not None:
+        kwargs["end"] = conf.TOF_end
 
     return common_lib.weighted_average(data_som, **kwargs)
 
 
-def subtract_time_indep_bkg(config, data_som, B):
+def subtract_time_indep_bkg(data_som, B):
     """Step 5. Subtract B from the data spectrum using function 3.2
     with ItdDXY(TOF) as data1 and B as a. The result is ItdsDXY(TOF)."""
 
-    if B == None:
+    if B is None:
         return data_som
 
     return dr_lib.subtract_time_indep_bkg(data_som, B)
@@ -91,34 +91,33 @@ def subtract_bkg_from_data(config, data_som, bkg_som):
     spectrum using function 3.6 with ItdsDXY(TOF) as data1 and
     ItBXY(TOF) as data2. The result of this is ItdsbDXY(TOF)."""
 
-    if bkg_som == None:
+    if bkg_som is None:
         return data_som
 
     return common_lib.sub_ncerr(data_som, bkg_som)
 
 
-def norm_data_by_van(config, data_som, norm_som):
+def norm_data_by_van(data_som, norm_som):
     """Step 7. Normalize ItdsbDXY(TOF) by vanadium spectrum,
     ItbNXY(TOF), using function 3.9. The result is ItdsbnDXY(TOF)."""
 
-    if norm_som == None:
+    if norm_som is None:
         return data_som
 
     return common_lib.div_ncerr(data_som, norm_som)
 
 
-def convert_data_and_mon_to_wavelength(config, data_som, mon2_som):
+def convert_data_and_mon_to_wavelength(conf, data_som, mon2_som):
     """Step 8. Convert ItM2(TOF) and ItdsbnDXY(TOF) to ItM2(lambda)
     and ItdsbnDXY(lambda) using function 3.15 for M2 and function 3.29
     for DXY."""
 
-    if mon2_som!=None:
-        mon2_som1 = common_lib.tof_to_wavelength(mon2_som,None,
-                                                 "microsecond")
+    if mon2_som is not None:
+        mon2_som1 = common_lib.tof_to_wavelength(mon2_som, units="microsecond")
     else:
         mon2_som1 = None
 
-    if config.no_filter:
+    if conf.no_filter:
         data_som1 = common_lib.tof_to_initial_wavelength_igs(data_som,
                                                              units=
                                                              "microsecond",
@@ -129,10 +128,10 @@ def convert_data_and_mon_to_wavelength(config, data_som, mon2_som):
                                                              "microsecond")
 
         
-    return data_som1, mon2_som1
+    return (data_som1, mon2_som1)
 
 
-def rebin_mon_eff(config, mon2_som, mon2_eff):
+def rebin_mon_eff(mon2_som, mon2_eff):
     """Step 9. Rebin the monitor efficiency to each monitor's
     wavelength axis using 3.12. The input is the efficiency
     eM2(lambda) with the output being erM2(lambda)."""
@@ -140,17 +139,17 @@ def rebin_mon_eff(config, mon2_som, mon2_eff):
     return dr_lib.rebin_efficiency(mon2_som, mon2_eff)
 
 
-def eff_correct_mon(config, mon2_som, mon2_eff):
+def eff_correct_mon(mon2_som, mon2_eff):
     """Step 10. Divide ItM2(lambda) by erM2(lambda) using function
     3.9. The result is IeM2(lambda)."""
 
-    if mon2_eff == None:
+    if mon2_eff is None:
         return mon2_som
 
     return common_lib.div_ncerr(mon2_som, mon2_eff)
 
 
-def rebin_det_eff(config, data_som, det_eff):
+def rebin_det_eff(data_som, det_eff):
     """Step 11. Rebin eDXY(lambda) to the same binning in wavelength
     as ItbdnDXY(lambda) by using function 3.12. The result is
     erDXY(lambda)"""
@@ -158,12 +157,12 @@ def rebin_det_eff(config, data_som, det_eff):
     return dr_lib.rebin_efficiency(data_som, det_eff)
 
 
-def eff_correct_data(config, data_som, det_eff):
+def eff_correct_data(data_som, det_eff):
     """Step 12. Correct ItbdneDXY(lambda) for detector efficiency by
     using the function in 3.9 using ItbdnDXY(lambda) as data1 and
     erDXY(lambda) as data2. The result is ItbdneDXY(lambda)."""
 
-    if det_eff==None:
+    if det_eff is None:
         return data_som
 
     return common_lib.div_ncerr(data_som, det_eff)
@@ -174,16 +173,16 @@ def norm_data_by_mon(config, data_som, mon_som):
     3.5 using ItbdneDXY(lambda) as data1 and IteM2(lambda) as a. The
     result of this is S(lambda)."""
 
-    if mon_som==None:
+    if mon_som is None:
         return data_som
 
     kwargs = {}
 
-    if not config.mon_start==None:
-        kwargs["start"]=config.mon_start
+    if config.mon_start is not None:
+        kwargs["start"] = config.mon_start
 
-    if not config.mon_end==None:
-        kwargs["end"]=config.mon_end
+    if config.mon_end is not None:
+        kwargs["end"] = config.mon_end
 
     int_mon_int = dr_lib.integrate_axis(mon_som, **kwargs)
 
@@ -197,13 +196,13 @@ def calc_E_initial(config, data_som):
                                            offset=config.\
                                            initial_energy_offset)
 
-def calc_energy_transfer(config, data_som):
+def calc_energy_transfer(conf, data_som):
     """Combines Steps 17 and 18 to calculate energy transfer using function
     3.30."""
 
     data_som1 = dr_lib.igs_energy_transfer(data_som,
-                                           lambda_f=config.wavelength_final,
-                                           offset=config.final_energy_offset)
+                                           lambda_f=conf.wavelength_final,
+                                           offset=conf.final_energy_offset)
 
     data_som = None
     del data_som
@@ -218,18 +217,18 @@ def calc_energy_transfer(config, data_som):
     data_som2.setAxisUnits(0, "ueV")
     data_som2.setAxisLabel(0, "energy_transfer")
 
-    data_som3 = common_lib.mult_ncerr(data_som2, (1000.0,0.0), axis="x")
+    data_som3 = common_lib.mult_ncerr(data_som2, (1000.0, 0.0), axis="x")
 
     data_som2 = None
     del data_som2
         
-    return common_lib.mult_ncerr(data_som3, (1.0/1000.0,0.0), axis="y")
+    return common_lib.mult_ncerr(data_som3, (1.0/1000.0, 0.0), axis="y")
 
 
-def create_final(config, data_som):
+def create_final(conf, data_som):
     """Combines Steps 14,16,19,20 and 21 to create final 2D spectrum"""
 
-    return dr_lib.create_2D_dist(data_som,config.E_bins,config.Q_bins,
+    return dr_lib.create_2D_dist(data_som, conf.E_bins, conf.Q_bins,
                                  so_id="Full Detector",
                                  y_label="counts",
                                  y_units="counts / (ueV * A^-1)",
@@ -240,9 +239,9 @@ def create_final(config, data_som):
 def run(config):
     import sys
     
-    if config.data==None:
-        raise RuntimeError, "Need to pass a data filename to the driver "\
-        +"script."
+    if config.data is None:
+        raise RuntimeError("Need to pass a data filename to the driver "\
+                           +"script.")
 
     import DST
 
@@ -259,18 +258,18 @@ def run(config):
 
     d_som1 = data_dst.getSOM(config.data_paths, so_axis)
 
-    if config.dead_time!=None:
+    if config.dead_time is not None:
         if config.verbose:
             print "Doing dead-time correction"
             
-        d_som2 = dead_time_correction(config, d_som1)
+        d_som2 = dead_time_correction(d_som1)
     else:
         d_som2 = d_som1
         
     d_som1 = None
     del d_som1
         
-    if not config.norm==None:
+    if config.norm is not None:
         if config.verbose:
             print "Reading normalization file"
             
@@ -280,7 +279,7 @@ def run(config):
     else:
         n_som1 = None
 
-    if not config.norm_bkg==None:
+    if config.norm_bkg is not None:
         if config.verbose:
             print "Reading normalization background file"
             
@@ -290,18 +289,18 @@ def run(config):
     else:
         n_bkg_som1 = None
 
-    if config.verbose and n_bkg_som1 != None:
+    if config.verbose and n_bkg_som1 is not None:
         print "Subtracting background for normalization"
         
-    n_som2 = subtract_norm_bkg_from_norm(config, n_som1, n_bkg_som1)
+    n_som2 = subtract_norm_bkg_from_norm(n_som1, n_bkg_som1)
 
     n_bkg_som1 = None
     n_som1 = None
 
     del n_bkg_som1, n_som1
 
-    if not config.dark_count==None:
-        if option.verbose:
+    if config.dark_count is not None:
+        if config.verbose:
             print "Reading dark count file"
             
         dc_dst = DST.getInstance("application/x-NeXus", config.dark_count)
@@ -310,10 +309,10 @@ def run(config):
     else:
         dc_som1 = None
 
-    if config.verbose and dc_som1 != None:
+    if config.verbose and dc_som1 is not None:
         print "Subtracting dark count from data"
         
-    d_som3 = subtract_dark_count_from_data(config, d_som2, dc_som1)
+    d_som3 = subtract_dark_count_from_data(d_som2, dc_som1)
 
     d_som2 = None
     dc_som1 = None
@@ -328,17 +327,17 @@ def run(config):
     else:
         B = None
 
-    if config.verbose and B != None:
+    if config.verbose and B is not None:
         print "Subtracting time-independent background from data"
         
-    d_som4 = subtract_time_indep_bkg(config, d_som3, B)
+    d_som4 = subtract_time_indep_bkg(d_som3, B)
 
     d_som3 = None
     B = None
 
     del d_som3, B
 
-    if not config.data_bkg==None:
+    if config.data_bkg is not None:
         if config.verbose:
             print "Reading in background data file"
             
@@ -348,20 +347,20 @@ def run(config):
     else:
         bkg_som1 = None
 
-    if config.verbose and bkg_som1 != None:
+    if config.verbose and bkg_som1 is not None:
         print "Subtracting background from data"
         
     d_som5 = subtract_bkg_from_data(config, d_som4, bkg_som1)
 
     d_som4 = None
-    bkg_som4 = None
+    bkg_som1 = None
         
     del d_som4, bkg_som1
 
-    if config.verbose and n_som2 != None:
+    if config.verbose and n_som2 is not None:
         print "Normalizing data by normalization data"
 
-    d_som6 = norm_data_by_van(config, d_som5, n_som2)
+    d_som6 = norm_data_by_van(d_som5, n_som2)
 
     d_som5 = None
     n_som2 = None
@@ -387,24 +386,25 @@ def run(config):
             else:
                 pass
         except KeyError:
-            raise RuntimeError, "A final wavelength was not provided on the "\
-                  +"command-line nor in the data file. Please provide one."
+            raise RuntimeError("A final wavelength was not provided on the "\
+                               +"command-line nor in the data file. "\
+                               +"Please provide one.")
     else:
         d_som6.attr_list["Wavelength_final"] = config.wavelength_final
 
     # Note: time_zero MUST be a tuple
-    if config.time_zero==None:
+    if config.time_zero is None:
         try:
             config.time_zero = d_som6.attr_list["Time_zero"]
         except KeyError:
             config.time_zero = (0.0, 0.0)
-            d_som6.attr_list["Time_zero"]=config.time_zero
+            d_som6.attr_list["Time_zero"] = config.time_zero
     else:
-        d_som6.attr_list["Time_zero"]=config.time_zero
+        d_som6.attr_list["Time_zero"] = config.time_zero
 
     data_dst.release_resource()
 
-    if config.mon_geom:
+    if config.mon_geom is not None:
         if config.verbose:
             print "Reading monitor geometry file"
             
@@ -413,7 +413,7 @@ def run(config):
         mon_geom_dst.release_resource()
         m_som1.setGeometry(mon_geom)
 
-    if config.det_geom:
+    if config.det_geom is not None:
         if config.verbose:
             print "Reading in detector geometry file"
             
@@ -425,7 +425,8 @@ def run(config):
     if config.verbose:
         print "Converting TOF to wavelength"
 
-    d_som7, m_som2 = convert_data_and_mon_to_wavelength(config, d_som6, m_som1)
+    (d_som7, m_som2) = convert_data_and_mon_to_wavelength(config, d_som6,
+                                                          m_som1)
 
     d_som6 = None
     m_som1 = None
@@ -438,7 +439,7 @@ def run(config):
         
     del d_som6, m_som1
 
-    if config.mon_eff==None:
+    if config.mon_eff is None:
         m_eff2 = None
     else:
         try:
@@ -452,7 +453,7 @@ def run(config):
             if config.verbose:
                 print "Rebinning monitor efficiency"
 
-            m_eff2 = rebin_mon_eff(config, m_som2, m_eff1)
+            m_eff2 = rebin_mon_eff(m_som2, m_eff1)
                 
             m_eff1 = None
             del m_eff1
@@ -460,15 +461,15 @@ def run(config):
         except AttributeError:
             m_eff2 = config.mon_eff
 
-    if config.verbose and m_eff2 != None:
+    if config.verbose and m_eff2 is not None:
         print "Correcting monitor data for efficiency"
         
-    m_som3 = eff_correct_mon(config, m_som2, m_eff2)
+    m_som3 = eff_correct_mon(m_som2, m_eff2)
 
     m_som2 = None
     del m_som2
 
-    if config.det_eff==None:
+    if config.det_eff is None:
         det_eff2 = None
     else:
         try:
@@ -482,7 +483,7 @@ def run(config):
             if config.verbose:
                 print "Rebinning detector efficiency"
 
-            det_eff2 = rebin_det_eff(config, d_som7, det_eff1)
+            det_eff2 = rebin_det_eff(d_som7, det_eff1)
 
             det_eff1 = None
             del det_eff1
@@ -490,10 +491,10 @@ def run(config):
         except AttributeError:
             det_eff2 = config.det_eff
 
-    if config.verbose and det_eff2 != None:
+    if config.verbose and det_eff2 is not None:
         print "Correcting data for detector efficiency"
 
-    d_som8 = eff_correct_data(config, d_som7, det_eff2)
+    d_som8 = eff_correct_data(d_som7, det_eff2)
 
     det_eff2 = None
     del det_eff2
@@ -501,7 +502,7 @@ def run(config):
     d_som7 = None
     del d_som7
 
-    if config.verbose and m_som3 != None:
+    if config.verbose and m_som3 is not None:
         print "Normalizing data by monitor"
         
     d_som9 = norm_data_by_mon(config, d_som8, m_som3)
@@ -564,7 +565,7 @@ def run(config):
     if config.verbose:
         print "Creating 2D spectrum"
         
-    d_som13 = create_final(config,d_som12)
+    d_som13 = create_final(config, d_som12)
 
     d_som12 = None
     del d_som12
@@ -577,7 +578,7 @@ def run(config):
                          replace=False)
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import os
     
     import common_lib
@@ -595,7 +596,7 @@ if __name__=="__main__":
                       help="Specify the starting TOF bin for time-independent"\
                       +"background estimation")
     
-    parser.add_option("", "--tof-end",dest="TOF_end",
+    parser.add_option("", "--tof-end", dest="TOF_end",
                       help="Specify the ending TOF bin for time-independent"\
                       +"background estimation")
     
@@ -613,7 +614,7 @@ if __name__=="__main__":
                       help="Flag for turning off time-independent background"\
                       +"subtraction")
     
-    parser.add_option("","--final-wavelength", dest="wavelength_final",
+    parser.add_option("", "--final-wavelength", dest="wavelength_final",
                       help="Specify the final wavelength lambda, err^2 in "\
                       +"Angstroms")
     
@@ -632,7 +633,7 @@ if __name__=="__main__":
     parser.add_option("", "--mon-geom", dest="mon_geom",
                       help="Specify the monitor geometry file")
     
-    parser.add_option("","--det-geom", dest="det_geom",
+    parser.add_option("", "--det-geom", dest="det_geom",
                       help="Specify the detector geometry file")
     
     parser.add_option("", "--energy-bins", dest="E_bins",
@@ -680,186 +681,189 @@ if __name__=="__main__":
                       help="Flag to turn off negative wavelength filtering.")
     parser.set_defaults(no_filter=False)
 
-    parser.add_option("","--final-energy-offset", dest="final_energy_offset",
-                      help="Specify the final energy offset, err^2 in ueV")
+    parser.add_option("", "--final-energy-offset", dest="final_energy_offset",
+                      help="Specify the final energy offset, err^2 in meV")
 
-    parser.add_option("","--initial-energy-offset",
+    parser.add_option("", "--initial-energy-offset",
                       dest="initial_energy_offset",
-                      help="Specify the initial energy offset, err^2 in ueV")
+                      help="Specify the initial energy offset, err^2 in meV")
     
     (options, args) = parser.parse_args()
 
     # set up the configuration
-    config = hlr_utils.Configure()
+    configure = hlr_utils.Configure()
     
     # get the datafile name and check it
     if len(args) == 1:
-        config.data = args[0]
-        if not hlr_utils.file_exists(config.data):
-            parser.error("Data file [%s] does not exist" % config.data)
+        configure.data = args[0]
+        if not hlr_utils.file_exists(configure.data):
+            parser.error("Data file [%s] does not exist" % configure.data)
     else:
         if options.data is not None:
-            config.data = hlr_utils.fix_filename(options.data)
-            if not hlr_utils.file_exists(config.data):
-                parser.error("Data file [%s] does not exist" % config.data)
+            configure.data = hlr_utils.fix_filename(options.data)
+            if not hlr_utils.file_exists(configure.data):
+                parser.error("Data file [%s] does not exist" % configure.data)
         else:
             parser.error("Did not specify a datafile")
     # create the output file name if there isn't one supplied
     if options.output:
-        config.output = hlr_utils.fix_filename(options.output)
+        configure.output = hlr_utils.fix_filename(options.output)
     else:
-        file = os.path.basename(config.data)
-        path = os.path.join(os.getcwd(), file)
-        config.output = hlr_utils.ext_replace(path, "nxs", "txt")
-        print "Using %s as output file" % config.output
+        outfile = os.path.basename(configure.data)
+        path = os.path.join(os.getcwd(), outfile)
+        configure.output = hlr_utils.ext_replace(path, "nxs", "txt")
+        print "Using %s as output file" % configure.output
 
     # set the verbosity
-    config.verbose = options.verbose
+    configure.verbose = options.verbose
 
-    config.norm = hlr_utils.fix_filename(options.norm)
-    if config.norm is not None:
-        if not hlr_utils.file_exists(config.norm):
+    configure.norm = hlr_utils.fix_filename(options.norm)
+    if configure.norm is not None:
+        if not hlr_utils.file_exists(configure.norm):
             parser.error("Normalization file [%s] does not exist" \
-                         % config.norm)
+                         % configure.norm)
             
-    config.norm_bkg = hlr_utils.fix_filename(options.norm_bkg)
-    if config.norm_bkg is not None:
-        if not hlr_utils.file_exists(config.norm_bkg):
+    configure.norm_bkg = hlr_utils.fix_filename(options.norm_bkg)
+    if configure.norm_bkg is not None:
+        if not hlr_utils.file_exists(configure.norm_bkg):
             parser.error("Normalization background file [%s] does not exist"\
-                         % config.norm_bkg)
+                         % configure.norm_bkg)
 
-    config.data_bkg = hlr_utils.fix_filename(options.data_bkg)
-    if config.data_bkg is not None:
-        if not hlr_utils.file_exists(config.data_bkg):
+    configure.data_bkg = hlr_utils.fix_filename(options.data_bkg)
+    if configure.data_bkg is not None:
+        if not hlr_utils.file_exists(configure.data_bkg):
             parser.error("Background file [%s] does not exist" \
-                         % config.data_bkg)
+                         % configure.data_bkg)
             
-    config.dark_count = hlr_utils.fix_filename(options.dark_count)
-    if config.dark_count is not None:
-        if not hlr_utils.file_exists(config.dark_count):
+    configure.dark_count = hlr_utils.fix_filename(options.dark_count)
+    if configure.dark_count is not None:
+        if not hlr_utils.file_exists(configure.dark_count):
             parser.error("Dark-count file [%s] does not exist" \
-                         % config.dark_count)
+                         % configure.dark_count)
 
     if options.mon_eff is not None:
         try:
-            config.mon_eff = hlr_utils.split_values(options.mon_eff)
+            configure.mon_eff = hlr_utils.split_values(options.mon_eff)
         except ValueError:
-            config.mon_eff = hlr_utils.fix_filename(options.mon_eff)
-            if not hlr_utils.file_exists(config.mon_eff):
+            configure.mon_eff = hlr_utils.fix_filename(options.mon_eff)
+            if not hlr_utils.file_exists(configure.mon_eff):
                 parser.error("Monitor efficiency file [%s] does not exist" \
-                             % config.mon_eff)
+                             % configure.mon_eff)
     else:
-        config.mon_eff = options.mon_eff
+        configure.mon_eff = options.mon_eff
 
     if options.det_eff is not None:
         try:
-            config.det_eff = hlr_utils.split_values(options.det_eff)
+            configure.det_eff = hlr_utils.split_values(options.det_eff)
         except ValueError:
-            config.det_eff = hlr_utils.fix_filename(options.det_eff)
-            if not hlr_utils.file_exists(config.det_eff):
+            configure.det_eff = hlr_utils.fix_filename(options.det_eff)
+            if not hlr_utils.file_exists(configure.det_eff):
                 parser.error("Detector efficiency file [%s] does not exist" \
-                             % config.det_eff)
+                             % configure.det_eff)
     else:
-        config.det_eff = options.det_eff
+        configure.det_eff = options.det_eff
             
-    config.mon_geom = hlr_utils.fix_filename(options.mon_geom)
-    if config.mon_geom is not None:
-        if not hlr_utils.file_exists(config.mon_geom):
+    configure.mon_geom = hlr_utils.fix_filename(options.mon_geom)
+    if configure.mon_geom is not None:
+        if not hlr_utils.file_exists(configure.mon_geom):
             parser.error("Monitor geometry file [%s] does not exist" \
-                         % config.mon_geom)
+                         % configure.mon_geom)
 
-    config.det_geom = hlr_utils.fix_filename(options.det_geom)
-    if config.det_geom is not None:
-        if not hlr_utils.file_exists(config.det_geom):
+    configure.det_geom = hlr_utils.fix_filename(options.det_geom)
+    if configure.det_geom is not None:
+        if not hlr_utils.file_exists(configure.det_geom):
             parser.error("Detector geometry file [%s] does not exist" \
-                         % config.det_geom)
+                         % configure.det_geom)
 
     # set the data paths
-    config.data_paths = hlr_utils.create_data_paths(options.data_paths)
+    configure.data_paths = hlr_utils.create_data_paths(options.data_paths)
 
     # set the monitor path
-    config.mon_path = hlr_utils.create_data_paths(options.mon_path)
+    configure.mon_path = hlr_utils.create_data_paths(options.mon_path)
 
     # set the dead time
     if options.dead_time is not None:
-        config.dead_time = hlr_utils.split_values(options.dead_time)
+        configure.dead_time = hlr_utils.split_values(options.dead_time)
     else:
-        config.dead_time = options.dead_time
+        configure.dead_time = options.dead_time
         
     # set the TOF start bin
-    config.TOF_start = options.TOF_start
+    configure.TOF_start = options.TOF_start
     # set the TOF end bin
-    config.TOF_end = options.TOF_end
+    configure.TOF_end = options.TOF_end
     # set the monitor start bin
-    config.mon_start = options.mon_start
+    configure.mon_start = options.mon_start
     # set the monitor end bin
-    config.mon_end = options.mon_end
+    configure.mon_end = options.mon_end
     # set no_mon_norm flag
-    config.no_mon_norm = options.no_mon_norm
+    configure.no_mon_norm = options.no_mon_norm
     # set no_tib flag
-    config.no_tib = options.no_tib
+    configure.no_tib = options.no_tib
 
     # set the final wavelength
     if options.wavelength_final is not None:
-        config.wavelength_final=hlr_utils.split_values(options.wavelength_final)
+        configure.wavelength_final = hlr_utils.split_values(\
+            options.wavelength_final)
     else:
-        config.wavelength_final = options.wavelength_final
+        configure.wavelength_final = options.wavelength_final
 
     # set the final energy offset
     if options.final_energy_offset is not None:
-        config.final_energy_offset = \
+        configure.final_energy_offset = \
                                    hlr_utils.split_values(options.\
                                                           final_energy_offset)
     else:
-        config.final_energy_offset = options.final_energy_offset
+        configure.final_energy_offset = options.final_energy_offset
 
     # set the initial energy offset
     if options.initial_energy_offset is not None:
-        config.\
+        configure.\
                  initial_energy_offset = \
                  hlr_utils.split_values(options.\
                                         initial_energy_offset)
     else:
-        config.initial_energy_offset = options.initial_energy_offset
+        configure.initial_energy_offset = options.initial_energy_offset
 
     # set the time-zero offset
     if options.time_zero is not None:
-        config.time_zero=hlr_utils.split_values(options.time_zero)
+        configure.time_zero = hlr_utils.split_values(options.time_zero)
     else:
-        config.time_zero = options.time_zero
+        configure.time_zero = options.time_zero
 
     # set the E bins
     if options.E_bins is not None:
         efacts = options.E_bins.split(',')
-        config.E_bins = hlr_utils.make_axis(float(efacts[0]), float(efacts[1]),
-                                            float(efacts[2]))
+        configure.E_bins = hlr_utils.make_axis(float(efacts[0]),
+                                               float(efacts[1]),
+                                               float(efacts[2]))
     else:
-        config.E_bins = options.E_bins
+        configure.E_bins = options.E_bins
 
     # set the Q bins
     if options.Q_bins is not None:
         qfacts = options.Q_bins.split(',')
-        config.Q_bins = hlr_utils.make_axis(float(qfacts[0]), float(qfacts[1]),
-                                            float(qfacts[2]))
+        configure.Q_bins = hlr_utils.make_axis(float(qfacts[0]),
+                                               float(qfacts[1]),
+                                               float(qfacts[2]))
     else:
-        config.Q_bins = options.Q_bins
+        configure.Q_bins = options.Q_bins
 
     # set the ability to dump the wavelength information
-    config.dump_wave = options.dump_wave
+    configure.dump_wave = options.dump_wave
 
     # set the ability to dump the energy transfer information
-    config.dump_energy = options.dump_energy
+    configure.dump_energy = options.dump_energy
     
     # set the ability to dump the initial energy information
-    config.dump_initial_energy = options.dump_initial_energy
+    configure.dump_initial_energy = options.dump_initial_energy
 
     if options.dump_all:
-        config.dump_wave = True
-        config.dump_energy = True
-        config.dump_initial_energy = True
+        configure.dump_wave = True
+        configure.dump_energy = True
+        configure.dump_initial_energy = True
 
     # set the no filter option
-    config.no_filter = options.no_filter
+    configure.no_filter = options.no_filter
     
     # run the program
-    run(config)
+    run(configure)
