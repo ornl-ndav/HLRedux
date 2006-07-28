@@ -25,7 +25,8 @@
 # $Id$
 
 def run(config):
-
+    import sys
+    
     import dr_lib
     import DST
     import SOM
@@ -109,18 +110,16 @@ def run(config):
 
             tag1 = str(i + 1)
                     
-            file = bank + "_" + tag + "_" + tag1 + ".tof"
+            outfile = bank + "_" + tag + "_" + tag1 + ".tof"
 
-            hlr_utils.write_file(file, "text/Spec", tSOM,
+            hlr_utils.write_file(outfile, "text/Spec", tSOM,
                                  verbose=config.verbose,
                                  message="intensity sum file", replace=False)
                     
 
 
 
-if __name__=="__main__":
-    import os
-
+if __name__ == "__main__":
     import hlr_utils
 
     # set up the options available
@@ -145,28 +144,28 @@ if __name__=="__main__":
     (options, args) = parser.parse_args()
 
     # set up the configuration
-    config = hlr_utils.Configure()
+    configure = hlr_utils.Configure()
     
     # get the datafile name and check it
     if len(args) == 1:
-        config.data = args[0]
-        if not hlr_utils.file_exists(config.data):
-            parser.error("Data file [%s] does not exist" % config.data)
+        configure.data = args[0]
+        if not hlr_utils.file_exists(configure.data):
+            parser.error("Data file [%s] does not exist" % configure.data)
     else:
         if options.data is not None:
-            config.data = hlr_utils.fix_filename(options.data)
-            if not hlr_utils.file_exists(config.data):
-                parser.error("Data file [%s] does not exist" % config.data)
+            configure.data = hlr_utils.fix_filename(options.data)
+            if not hlr_utils.file_exists(configure.data):
+                parser.error("Data file [%s] does not exist" % configure.data)
         else:
             parser.error("Did not specify a datafile")
 
     # set the verbosity
-    config.verbose = options.verbose
+    configure.verbose = options.verbose
 
     # set vertical
-    config.vertical = options.vertical
+    configure.vertical = options.vertical
 
     # set pixel grouping
-    config.pixel_group = options.pixel_group
+    configure.pixel_group = options.pixel_group
 
-    run(config)
+    run(configure)
