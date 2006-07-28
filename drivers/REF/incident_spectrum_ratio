@@ -29,7 +29,7 @@ This program covers the functionality outlined in 2.4.1 Measurement of
 incident spectrum ration, M(lambda) in <CHANGE:DR_Lib_RS.doc>.
 """
 
-def convert_mon_tof_to_wavelength(config, mon_som):
+def convert_mon_tof_to_wavelength(mon_som):
     """Step 1. Convert IM1(TOF) and IM2(TOF) to wavelength using
     function 3.15."""
 
@@ -39,7 +39,7 @@ def convert_mon_tof_to_wavelength(config, mon_som):
         return common_lib.tof_to_wavelength(mon_som, units="microsecond")
     
 
-def rebin_mon_eff(config, mon_som, mon_eff):
+def rebin_mon_eff(mon_som, mon_eff):
     """Step 2. Rebin the monitor efficiency to each monitor's
     wavelength axis using 3.12. The input is the efficiency
     epsilon(lambda) with the output being epsilon^r(lambda)."""
@@ -49,7 +49,7 @@ def rebin_mon_eff(config, mon_som, mon_eff):
     else:
         return dr_lib.rebin_efficiency(mon_som, mon_eff)
 
-def eff_correct_mon(config, mon_som, mon_eff):
+def eff_correct_mon(mon_som, mon_eff):
     """Step 3. Correct for monitor efficiency by using the function
     in 3.9 using I(lambda) as data1 and epsilon^r(lambda) as
     data2. The result is I^epsilon(lambda)."""
@@ -59,7 +59,7 @@ def eff_correct_mon(config, mon_som, mon_eff):
     else:
         return common_lib.div_ncerr(mon_som, mon_eff)
 
-def rebin_mon2_to_mon1(config, mon1_som, mon2_som):
+def rebin_mon2_to_mon1(mon1_som, mon2_som):
     """Step 4. Rebin I^epsilon_M2(lambda) to I^epsilon_M1(lambda)'s
     wavelength axis using function 3.12. The input is
     I^epsilon_M2(lambda) with the output being I^epsilonr_M2(lambda)."""
@@ -69,7 +69,7 @@ def rebin_mon2_to_mon1(config, mon1_som, mon2_som):
     else:
         return dr_lib.rebin_efficiency(mon1_som, mon2_som)
 
-def calc_M(config, mon1_som, mon2_som):
+def calc_M(mon1_som, mon2_som):
     """Step 5. Divide the two monitor intensities using function 3.9
     with I^epsilon_M1(lambda) as data1 and I^epsilonr_M2(lambda) as
     data2. The result is M(lambda)."""
@@ -80,8 +80,8 @@ def run(config):
     import sys
     
     if config.data is None:
-        raise RuntimeError, "Need to pass a data filename to the driver "\
-        +"script."
+        raise RuntimeError("Need to pass a data filename to the driver "\
+                           +"script.")
 
     import DST
 
@@ -103,7 +103,7 @@ def run(config):
     if config.verbose:
         print "Converting monitor 1 data from TOF to wavelength"
 
-    m1_som2 = convert_mon_tof_to_wavelength(config, m1_som1)
+    m1_som2 = convert_mon_tof_to_wavelength(m1_som1)
 
     m1_som1 = None
     del m1_som1
@@ -118,7 +118,7 @@ def run(config):
     if config.verbose:
         print "Converting monitor 2 data from TOF to wavelength"
         
-    m2_som2 = convert_mon_tof_to_wavelength(config, m2_som1)
+    m2_som2 = convert_mon_tof_to_wavelength(m2_som1)
 
     m2_som1 = None
     del m2_som1
@@ -137,7 +137,7 @@ def run(config):
             if config.verbose:
                 print "Rebinning monitor 1 efficiency"
 
-            m1_eff2 = rebin_mon1_eff(config, m1_som2, m1_eff1)
+            m1_eff2 = rebin_mon_eff(m1_som2, m1_eff1)
 
             m1_eff1 = None
             del m1_eff1
@@ -148,7 +148,7 @@ def run(config):
     if config.verbose and m1_eff2 is not None:
         print "Correcting monitor 1 data for efficiency"
         
-    m1_som3 = eff_correct_mon(config, m1_som2, m1_eff2)
+    m1_som3 = eff_correct_mon(m1_som2, m1_eff2)
     
     m1_som2 = None
     del m1_som2
@@ -162,23 +162,23 @@ def run(config):
                 print "Reading monitor 2 efficiency file"
                 
             mon2_eff_dst = DST.getInstance("text/xml", config.mon2_eff)
-            m2_eff2 = mon2_eff_dst.getSOM(config.mon2_path)
+            m2_eff1 = mon2_eff_dst.getSOM(config.mon2_path)
             mon2_eff_dst.release_resource()
             if config.verbose:
                 print "Rebinning monitor 2 efficiency"
 
-            m2_eff2 = rebin_mon2_eff(config, m2_som2, m2_eff1)
+            m2_eff2 = rebin_mon_eff(m2_som2, m2_eff1)
 
             m2_eff1 = None
             del m2_eff1
                     
         except AttributeError:
-            m_eff2 = config.mon2_eff
+            m2_eff2 = config.mon2_eff
 
     if config.verbose and m2_eff2 is not None:
         print "Correcting monitor 2 data for efficiency"
         
-    m2_som3 = eff_correct_mon(config, m2_som2, m2_eff2)
+    m2_som3 = eff_correct_mon(m2_som2, m2_eff2)
     
     m2_som2 = None
     del m2_som2
@@ -186,24 +186,17 @@ def run(config):
     if config.verbose:
         print "Rebinning monitor 2 to monitor 1"
 
-    # BEGIN SNS-FIXME
-    # try/except should be removed when real histogram monitor data is
-    # available
-    try:
-        m2_som4 = rebin_mon2_to_mon1(config, m1_som3, m2_som3)
-    except IndexError:
-        m2_som4 = m2_som3
-    # END SNS-FIXME
+    m2_som4 = rebin_mon2_to_mon1(m1_som3, m2_som3)
 
     m2_som3 = None
     del m2_som3
 
-    M_som = calc_M(config, m1_som3, m2_som4)
+    M_som = calc_M(m1_som3, m2_som4)
 
     if config.verbose:
-        print "AA:",M_som
+        print "AA:", M_som
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import common_lib
     import dr_lib
     import hlr_utils
@@ -233,55 +226,55 @@ if __name__=="__main__":
     (options, args) = parser.parse_args()
     
     # set up the configuration
-    config = hlr_utils.Configure()
+    configure = hlr_utils.Configure()
     # get the datafile name and check it
     if len(args) == 1:
-        config.data = args[0]
-        if not hlr_utils.file_exists(config.data):
-            parser.error("Data file [%s] does not exist" % config.data)
+        configure.data = args[0]
+        if not hlr_utils.file_exists(configure.data):
+            parser.error("Data file [%s] does not exist" % configure.data)
     else:
         parser.error("Did not specify a datafile")
     # create the output file name if there isn't one supplied
     if options.output:
-        config.output = options.output
+        configure.output = options.output
     else:
-        config.output = hlr_utils.ext_replace(config.data, "nxs", "txt")
-        print "Using %s as output file" % config.output
+        configure.output = hlr_utils.ext_replace(configure.data, "nxs", "txt")
+        print "Using %s as output file" % configure.output
 
     # set the verbosity
-    config.verbose = options.verbose
+    configure.verbose = options.verbose
 
     if options.mon1_eff is not None:
         try:
-            config.mon1_eff = hlr_utils.split_values(options.mon1_eff)
+            configure.mon1_eff = hlr_utils.split_values(options.mon1_eff)
         except ValueError:
-            config.mon1_eff = options.mon1_eff
-            if not hlr_utils.file_exists(config.mon1_eff):
+            configure.mon1_eff = options.mon1_eff
+            if not hlr_utils.file_exists(configure.mon1_eff):
                 parser.error("Monitor 1 efficiency file [%s] does not exist" \
-                             % config.mon1_eff)
+                             % configure.mon1_eff)
             else:
                 pass
     else:
-        config.mon1_eff = options.mon1_eff
+        configure.mon1_eff = options.mon1_eff
 
     if options.mon2_eff is not None:
         try:
-            config.mon2_eff = hlr_utils.split_values(options.mon2_eff)
+            configure.mon2_eff = hlr_utils.split_values(options.mon2_eff)
         except ValueError:
-            config.mon2_eff = options.mon2_eff
-            if not hlr_utils.file_exists(config.mon2_eff):
+            configure.mon2_eff = options.mon2_eff
+            if not hlr_utils.file_exists(configure.mon2_eff):
                 parser.error("Monitor 2 efficiency file [%s] does not exist" \
-                             % config.mon2_eff)
+                             % configure.mon2_eff)
             else:
                 pass
     else:
-        config.mon2_eff = options.mon2_eff
+        configure.mon2_eff = options.mon2_eff
 
     # set the monitor 1 path
-    config.mon1_path = hlr_utils.create_data_path(options.mon1_path)
+    configure.mon1_path = hlr_utils.create_data_path(options.mon1_path)
 
     # set the monitor 2 path
-    config.mon2_path = hlr_utils.create_data_path(options.mon2_path)
+    configure.mon2_path = hlr_utils.create_data_path(options.mon2_path)
 
     # run the program
-    run(config)
+    run(configure)
