@@ -25,6 +25,8 @@
 # $Id$
 
 def run(config):
+    import sys
+    
     import DST
     import SOM
 
@@ -32,12 +34,12 @@ def run(config):
     rSO = SOM.SO()
 
     counter = 0
-    for file in config.data:
+    for ifile in config.data:
 
         try:
-            data_dst = DST.getInstance("application/x-NeXus", file)
+            data_dst = DST.getInstance("application/x-NeXus", ifile)
         except SystemError:
-            print "ERROR: Failed to data read file %s" % file
+            print "ERROR: Failed to data read file %s" % ifile
             sys.exit(-1)
 
         so_axis = "time_of_flight"
@@ -86,10 +88,9 @@ def run(config):
                          message="rocking curve information")
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import os
     
-    import common_lib
     import dr_lib
     import hlr_utils
     
@@ -111,42 +112,42 @@ if __name__=="__main__":
     (options, args) = parser.parse_args()
 
     # set up the configuration
-    config = hlr_utils.Configure()
+    configure = hlr_utils.Configure()
 
     # get the datafile names and check them
     if args:
-        for file in args:
-            if not hlr_utils.file_exists(file):
+        for infile in args:
+            if not hlr_utils.file_exists(infile):
                 print "Data file [%s] does not exist, removing from list" % \
-                      file
-                args.remove(file)
+                      infile
+                args.remove(infile)
             else:
                 pass
 
-        config.data = args
+        configure.data = args
     else:
         parser.error("Did not specify a datafile")
         
     # create the output file name if there isn't one supplied
     if options.output is not None:
-        config.output = options.output
+        configure.output = options.output
     else:
-        config.output = os.path.join(os.getcwd(), "rocking_curve.txt")
-        print "Using %s as output file" % config.output
+        configure.output = os.path.join(os.getcwd(), "rocking_curve.txt")
+        print "Using %s as output file" % configure.output
 
     # set the verbosity
-    config.verbose = options.verbose
+    configure.verbose = options.verbose
 
     # set the data paths
-    config.data_paths = hlr_utils.create_data_paths(options.data_paths)
+    configure.data_paths = hlr_utils.create_data_paths(options.data_paths)
 
     # set the x-axis information list
-    config.info = options.info
+    configure.info = options.info
 
     # If x-axis information given, the number of entries and the number of
     # given data files MUST match
-    if config.info is not None:
-        if len(args) != len(config.info):
+    if configure.info is not None:
+        if len(args) != len(configure.info):
             raise RuntimeError("The number of files and x-axis entries "\
                                +"must be the same")
         else:
@@ -155,5 +156,5 @@ if __name__=="__main__":
         pass
 
     # run the program
-    run(config)
+    run(configure)
         
