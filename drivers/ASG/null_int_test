@@ -30,19 +30,19 @@
 #
 ###############################################################################
 
-def print_time(tag,start,stop):
-    mili=stop-start
-    mili=int(1000*(mili-int(mili)))
-    start=int(start)
-    stop=int(stop)
-    sec=stop-start
-    min=int(sec/60)
-    sec=sec-min*60
-    hour=int(min/60)
-    min=min-hour*60
-    print "%s=%02d:%02d:%02d.%03d" % (tag,hour,min,sec,mili)
+def print_time(tag, start, stop):
+    mili = stop - start
+    mili = int(1000 * (mili - int(mili)))
+    start = int(start)
+    stop = int(stop)
+    sec = stop - start
+    mins = int(sec / 60)
+    sec = sec - min * 60
+    hour = int(min / 60)
+    mins = mins - hour * 60
+    print "%s=%02d:%02d:%02d.%03d" % (tag, hour, mins, sec, mili)
 
-def my_main(options,filename_SOM12,filename_SOM3):
+def my_main(opts, filename_SOM12, filename_SOM3):
     # Import appropriate modules here. NOTE: $PYTHONPATH must reflect where
     # modules can be found.
 
@@ -50,16 +50,16 @@ def my_main(options,filename_SOM12,filename_SOM3):
     import DST
     from SOM import SO
     from SOM import SOM
-    from time import localtime, strftime, time
+    from time import time
 
-    start_time=time()
+    start_time = time()
     # Create data source translators for reading in two NeXus files
 
     dst1 = DST.getInstance("application/x-NeXus", filename_SOM12)
     dst2 = DST.getInstance("application/x-NeXus", filename_SOM12)
 
-    if(options.timing):
-        print_time("CREATED DST  ",start_time,time())
+    if opts.timing:
+        print_time("CREATED DST  ", start_time, time())
 
     # Retrieve the SOMs from the DSTs
 
@@ -68,7 +68,7 @@ def my_main(options,filename_SOM12,filename_SOM3):
     starting_ids = (20, 190)
     ending_ids = (30, 250)
 
-    if(options.short):
+    if opts.short:
         SOM1 = dst1.getSOM(som_id, so_axis, start_id=starting_ids,
                            end_id=ending_ids)
         SOM2 = dst2.getSOM(som_id, so_axis, start_id=starting_ids,
@@ -77,11 +77,14 @@ def my_main(options,filename_SOM12,filename_SOM3):
         SOM1 = dst1.getSOM(som_id, so_axis)
         SOM2 = dst2.getSOM(som_id, so_axis)
 
-    if len(SOM1) != len(SOM2):
-        raise IndexError, "SOM1 and SOM2 are not the same length!"
+    len_SOM1 = len(SOM1)
+    len_SOM2 = len(SOM2)
 
-    if(options.timing):
-        print_time("CREATED SOM12",start_time,time())
+    if len_SOM1 != len_SOM2:
+        raise IndexError("SOM1 and SOM2 are not the same length!")
+
+    if opts.timing:
+        print_time("CREATED SOM12", start_time, time())
 
     # Create SOM3
 
@@ -92,23 +95,25 @@ def my_main(options,filename_SOM12,filename_SOM3):
     SOM3.copyAttributes(SOM1)
     SOM3.attr_list["filename"] = filename_SOM3
     SOM3.attr_list["parents"] = {"SOM1" : SOM1.attr_list["filename"],
-                                 "SOM2" : SOM2.attr_list["filename"]}                    
-    if(options.timing):
-        print_time("CREATED SOM3 ",start_time,time())
+                                 "SOM2" : SOM2.attr_list["filename"]}
+
+    if opts.timing:
+        print_time("CREATED SOM3 ", start_time, time())
 
     # Loop on spectrum to do subtraction
 
     SOM3.attr_list["operations"] = [("Step 1", "Subtraction (SOM1 - SOM2)")]
 
-    for (SO1, SO2) in map(None, SOM1, SOM2):
+    for i in range(len_SOM1):
         SO3 = SO()
-        SO3.axis[0].val = SO1.axis[0].val
-        SO3.id = SO1.id
-        SO3.y, SO3.var_y = sub_ncerr(SO1.y, SO1.var_y, SO2.y, SO2.var_y)
+        SO3.axis[0].val = SOM1[i].axis[0].val
+        SO3.id = SOM1[i].id
+        SO3.y, SO3.var_y = sub_ncerr(SOM1[i].y, SOM1[i].var_y,
+                                     SOM2[i].y, SOM2[i].var_y)
         SOM3.append(SO3)
 
-    if(options.timing):
-        print_time("FILLED SOM3  ",start_time,time())
+    if(opts.timing):
+        print_time("FILLED SOM3  ", start_time, time())
 
     # Create output file object
 
@@ -127,29 +132,34 @@ def my_main(options,filename_SOM12,filename_SOM3):
 
     a3c.release_resource()
 
-    if(options.timing):
-        print_time("WROTE SOM3   ",start_time,time())
+    if opts.timing:
+        print_time("WROTE SOM3   ", start_time, time())
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import optparse
 
-    parser=optparse.OptionParser("usage: %prog [options] <datafile> <outfile>")
-    parser.add_option("","--timing",action="store_true",default=False,
+    parser = optparse.OptionParser("usage: %prog [options] <datafile> "\
+                                   +"<outfile>")
+    parser.add_option("", "--timing", action="store_true",
                       help="Enable timing statements")
-    parser.add_option("","--profile",default=None,
-                      help="Specify the profile output name")
-    parser.add_option("","--short",action="store_true",default=False,
+    parser.set_defaults(timing=False)
+    
+    parser.add_option("", "--profile", help="Specify the profile output name")
+    
+    parser.add_option("", "--short", action="store_true",
                       help="Run abbreviated test")
-    (options,args)=parser.parse_args()
+    parser.set_defaults(short=False)
+    
+    (options, args) = parser.parse_args()
 
     # Confirm the proper number of command line arguments
-    if len(args)!=2:
+    if len(args) != 2:
         parser.error("incorrect number of arguments")
     
-    if options.profile!=None:
+    if options.profile is not None:
         import profile
-        profiler=profile.Profile()
-        profiler.runcall(my_main,options,args[0],args[1])
+        profiler = profile.Profile()
+        profiler.runcall(my_main, options, args[0], args[1])
         profiler.dump_stats(options.profile)
     else:
-        my_main(options,args[0],args[1])
+        my_main(options, args[0], args[1])
