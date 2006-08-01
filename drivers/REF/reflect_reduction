@@ -162,6 +162,44 @@ def run(config):
     d_som2_D = None
     d_som2_B = None
     del d_som2_D, d_som2_B
+        
+    if config.verbose:
+        print "Converting TOF to wavelength"
+
+    d_som4 = convert_data_tof_to_wavelength(d_som3)
+
+    d_som3 = None
+    del d_som3
+    
+    if config.det_eff is None:
+        d_eff2 = None
+    else:
+        try:
+            config.det_eff.title()
+            if config.verbose:
+                print "Reading detector efficiency file"
+                
+            det_eff_dst = DST.getInstance("text/xml", config.det_eff)
+            d_eff1 = det_eff_dst.getSOM(config.data_paths)
+            det_eff_dst.release_resource()
+            if config.verbose:
+                print "Rebinning detector efficiency"
+
+            d_eff2 = rebin_det_eff(d_som4, d_eff1)
+
+            d_eff1 = None
+            del d_eff1
+                    
+        except AttributeError:
+            d_eff2 = config.det_eff
+
+    if config.verbose and d_eff2 is not None:
+        print "Correcting detector data for efficiency"
+        
+    d_som5 = eff_correct_det(d_som4, d_eff2)
+    
+    d_som4 = None
+    del d_som4
 
     if config.norm is not None:
         if config.verbose:
@@ -169,8 +207,8 @@ def run(config):
 
         norm_dst = DST.getInstance("application/x-NeXus", config.norm)
         n_som1 = norm_dst.getSOM(config.data_paths, so_axis,
-                                 start_id=config.starting_ids,
-                                 end_id=config.ending_ids)
+                                 start_id=config.norm_starting_ids,
+                                 end_id=config.norm_ending_ids)
         norm_dst.release_resource()
     else:
         n_som1 = None
@@ -192,66 +230,34 @@ def run(config):
         n_som2_1 = None
         del n_som2_1
 
-    if config.verbose and config.norm is not None \
-           and config.geom_factor is not None:
-        print "Scale data by normalization"
+    if config.verbose and config.norm is not None:
+        print "Converting TOF to wavelength (norm)"
 
-    d_som4 = norm_data_by_inc_spec_factor(d_som3, n_som2)
+    n_som3 = convert_data_tof_to_wavelength(n_som2)
 
-    d_som3 = None
-    del d_som3
-
-    if config.dump_div:
-        d_som4_1 = dr_lib.sum_all_spectra(d_som4)
-        d_som4_1[0].id = ("bank1", (0, 0))
-        hlr_utils.write_file(config.data, "text/Spec", d_som4_1,
-                             output_ext="div", verbose=config.verbose,
-                             message="combined divided TOF information")
-        d_som4_1 = None
-        del d_som4_1
-        
-    if config.verbose:
-        print "Converting TOF to wavelength"
-
-    d_som5 = convert_data_tof_to_wavelength(d_som4)
-
-    d_som4 = None
-    del d_som4
-    
-    if config.det_eff is None:
-        d_eff2 = None
-    else:
-        try:
-            config.det_eff.title()
-            if config.verbose:
-                print "Reading detector efficiency file"
-                
-            det_eff_dst = DST.getInstance("text/xml", config.det_eff)
-            d_eff1 = det_eff_dst.getSOM(config.data_paths)
-            det_eff_dst.release_resource()
-            if config.verbose:
-                print "Rebinning detector efficiency"
-
-            d_eff2 = rebin_det_eff(d_som5, d_eff1)
-
-            d_eff1 = None
-            del d_eff1
-                    
-        except AttributeError:
-            d_eff2 = config.det_eff
-
-    if config.verbose and d_eff2 is not None:
-        print "Correcting detector data for efficiency"
-        
-    d_som6 = eff_correct_det(d_som5, d_eff2)
-    
-    d_som5 = None
-    del d_som5
+    n_som2 = None
+    del n_som2
 
     if config.verbose:
         print "Combining spectra"
 
-    d_som7 = combine_spectra(config, d_som6)
+    d_som6 = combine_spectra(config, d_som5)
+    if config.norm is not None:
+        n_som4 = combine_spectra(config, n_som3)
+    else:
+        n_som4 = None
+
+    d_som5 = None
+    del d_som5
+
+    n_som3 = None
+    del n_som3
+
+    if config.verbose and config.norm is not None \
+           and config.geom_factor is not None:
+        print "Scale data by normalization"
+
+    d_som7 = norm_data_by_inc_spec_factor(d_som6, n_som4)
 
     d_som6 = None
     del d_som6
@@ -302,6 +308,14 @@ if __name__ == "__main__":
                       help="Specify the comma separated list of i and j pixel"\
                       +" locations on the detector. This is inclusive.")
 
+    parser.add_option("", "--norm-starting-ids", dest="norm_starting_ids",
+                      help="Specify the comma separated list of i and j pixel"\
+                      +" locations on the detector. This is inclusive.")
+
+    parser.add_option("", "--norm-ending-ids", dest="norm_ending_ids",
+                      help="Specify the comma separated list of i and j pixel"\
+                      +" locations on the detector. This is inclusive.")
+
     parser.add_option("", "--l-bins", dest="l_bins",
                       help="Specify the minimum and maximum wavelength values"\
                       +"and the wavelength bin width in Angstroms")
@@ -317,12 +331,6 @@ if __name__ == "__main__":
                       help="Flag to dump the combined normalization TOF "\
                       +"information")
     parser.set_defaults(dump_norm=False)
-
-    parser.add_option("", "--dump-div", action="store_true",
-                      dest="dump_div",
-                      help="Flag to dump the combined divided TOF "\
-                      +"information")
-    parser.set_defaults(dump_div=False)
 
     parser.add_option("", "--dump-all", action="store_true", dest="dump_all",
                       help="Flag to dump combined information")
@@ -409,6 +417,23 @@ if __name__ == "__main__":
     else:
         configure.ending_ids = options.ending_ids
 
+    # set the norm_starting ids
+    if options.norm_starting_ids is not None:
+        configure.norm_starting_ids = hlr_utils.create_id_pairs(\
+            options.norm_starting_ids,\
+            options.data_paths)
+    else:
+        configure.norm_starting_ids = configure.starting_ids
+
+    # set the norm_ending ids
+    if options.norm_ending_ids is not None:
+        configure.norm_ending_ids = hlr_utils.create_id_pairs(\
+            options.norm_ending_ids,
+            options.data_paths)
+    else:
+        configure.norm_ending_ids = configure.ending_ids
+
+
     # set the wavelength bins
     if options.l_bins is not None:
         lfacts = options.l_bins.split(',')
@@ -427,13 +452,9 @@ if __name__ == "__main__":
     # set the ability to dump the combined normalization TOF information
     configure.dump_norm = options.dump_norm
 
-    # set the ability to dump the combined divided TOF information
-    configure.dump_div = options.dump_div    
-    
     if options.dump_all:
         configure.dump_specular = True
         configure.dump_norm = True
-        configure.dump_div = True
         
     # run the program
     run(configure)
