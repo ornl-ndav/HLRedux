@@ -22,6 +22,9 @@
 
 # $Id$
 
+import hlr_utils
+import SOM
+
 def create_2D_dist(som, *args, **kwargs):
     """
     This function takes a SOM of single spectrum with energy transfer axes and
@@ -73,9 +76,7 @@ def create_2D_dist(som, *args, **kwargs):
     """
 
     import common_lib
-    import hlr_utils
     import nessi_list
-    import SOM
 
     # Setup some variables 
     dim = 2
@@ -244,8 +245,6 @@ def create_2D_dist(som, *args, **kwargs):
 
 if __name__ == "__main__":
     import hlr_test
-    import hlr_utils
-    import SOM
 
     som1 = hlr_test.generate_som("histogram", 1, 3)
     som1.attr_list["Wavelength_final"] = (1, 1)
