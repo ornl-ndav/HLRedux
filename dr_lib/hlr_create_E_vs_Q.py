@@ -22,6 +22,8 @@
 
 # $Id$
 
+import SOM
+
 def create_E_vs_Q(obj, E, k):
     """
     This functions takes a SOM with a wavelength axis, energy and wavevector
@@ -78,7 +80,6 @@ def create_E_vs_Q(obj, E, k):
     import array_manip
     import axis_manip
     import nessi_list
-    import SOM
 
     y_len = len(obj[0])
     y2d_len = y_len * y_len
@@ -135,7 +136,6 @@ def create_E_vs_Q(obj, E, k):
 if __name__ == "__main__":
 
     import hlr_test
-    import SOM
 
     som1 = hlr_test.generate_som()
     som1.setAllAxisUnits(["Angstroms"])
