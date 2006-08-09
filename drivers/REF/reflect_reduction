@@ -134,6 +134,7 @@ def run(config):
         print "Reading data file"
 
     d_som1 = data_dst.getSOM(config.data_paths, so_axis)
+    d_som1.attr_list["proton_charge"] = data_dst.getParameter("proton charge")
     
     if config.verbose:
         print "Filtering specular and background pixels"
