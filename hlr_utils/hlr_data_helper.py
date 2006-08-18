@@ -101,6 +101,8 @@ def result_insert(result, descr, value, map_so, axis="y", pap=0, xvals=None):
     -------
     <- A SOM, SO, list or tuple with the provided information inserted
     """
+
+    import copy
     
     if descr is None:
         result_type = get_type(result)
@@ -129,12 +131,12 @@ def result_insert(result, descr, value, map_so, axis="y", pap=0, xvals=None):
             result.y = value[0]
             result.var_y = value[1]
             result.id = map_so.id
-            result.axis = map_so.axis
+            result.axis = copy.deepcopy(map_so.axis)
 
         elif axis.lower() == "x":
             result.id = map_so.id
-            result.y = map_so.y
-            result.var_y = map_so.var_y
+            result.y = copy.deepcopy(map_so.y)
+            result.var_y = copy.deepcopy(map_so.var_y)
             for i in range(map_so.dim()):
                 if i == pap:
                     result.axis[pap].val = value[0]
@@ -167,9 +169,9 @@ def result_insert(result, descr, value, map_so, axis="y", pap=0, xvals=None):
 
             else:
                 result.id = value.id
-                result.y = value.y
-                result.var_y = value.var_y
-                result.axis = value.axis
+                result.y = copy.deepcopy(value.y)
+                result.var_y = copy.deepcopy(value.var_y)
+                result.axis = copy.deepcopy(value.axis)
 
     elif result_type == num_type:
         result.append(value[0])
