@@ -204,12 +204,10 @@ def calc_energy_transfer(conf, data_som):
                                            lambda_f=conf.wavelength_final,
                                            offset=conf.final_energy_offset)
 
-    data_som = None
     del data_som
 
     data_som2 = common_lib.frequency_to_energy(data_som1)
 
-    data_som1 = None
     del data_som1
 
     data_som2.setYLabel("counts")
@@ -219,11 +217,9 @@ def calc_energy_transfer(conf, data_som):
 
     data_som3 = common_lib.mult_ncerr(data_som2, (1000.0, 0.0), axis="x")
 
-    data_som2 = None
     del data_som2
-        
-    return common_lib.mult_ncerr(data_som3, (1.0/1000.0, 0.0), axis="y")
 
+    return common_lib.mult_ncerr(data_som3, (1.0/1000.0, 0.0), axis="y")
 
 def create_final(conf, data_som):
     """Combines Steps 14,16,19,20 and 21 to create final 2D spectrum"""
@@ -258,6 +254,16 @@ def run(config):
 
     d_som1 = data_dst.getSOM(config.data_paths, so_axis)
 
+    if config.no_mon_norm:
+        m_som1 = None
+    else:
+        if config.verbose:
+            print "Reading in monitor data from data file"
+        som_id = config.mon_path
+        m_som1 = data_dst.getSOM(som_id, so_axis)
+
+    data_dst.release_resource()
+
     if config.dead_time is not None:
         if config.verbose:
             print "Doing dead-time correction"
@@ -265,10 +271,9 @@ def run(config):
         d_som2 = dead_time_correction(d_som1)
     else:
         d_som2 = d_som1
-        
-    d_som1 = None
+
     del d_som1
-        
+
     if config.norm is not None:
         if config.verbose:
             print "Reading normalization file"
@@ -294,9 +299,6 @@ def run(config):
         
     n_som2 = subtract_norm_bkg_from_norm(n_som1, n_bkg_som1)
 
-    n_bkg_som1 = None
-    n_som1 = None
-
     del n_bkg_som1, n_som1
 
     if config.dark_count is not None:
@@ -314,11 +316,8 @@ def run(config):
         
     d_som3 = subtract_dark_count_from_data(d_som2, dc_som1)
 
-    d_som2 = None
-    dc_som1 = None
-
     del d_som2, dc_som1
-    
+
     if not config.no_tib:
         if config.verbose:
             print "Determining time-independent background from data"
@@ -331,9 +330,6 @@ def run(config):
         print "Subtracting time-independent background from data"
         
     d_som4 = subtract_time_indep_bkg(d_som3, B)
-
-    d_som3 = None
-    B = None
 
     del d_som3, B
 
@@ -352,9 +348,6 @@ def run(config):
         
     d_som5 = subtract_bkg_from_data(config, d_som4, bkg_som1)
 
-    d_som4 = None
-    bkg_som1 = None
-        
     del d_som4, bkg_som1
 
     if config.verbose and n_som2 is not None:
@@ -362,18 +355,7 @@ def run(config):
 
     d_som6 = norm_data_by_van(d_som5, n_som2)
 
-    d_som5 = None
-    n_som2 = None
-        
     del d_som5, n_som2
-
-    if config.no_mon_norm:
-        m_som1 = None
-    else:
-        if config.verbose:
-            print "Reading in monitor data from data file"
-        som_id = config.mon_path
-        m_som1 = data_dst.getSOM(som_id, so_axis)
 
     # Note: wavelength_final MUST be a tuple
     if config.wavelength_final is None:
@@ -402,8 +384,6 @@ def run(config):
     else:
         d_som6.attr_list["Time_zero"] = config.time_zero
 
-    data_dst.release_resource()
-
     if config.mon_geom is not None:
         if config.verbose:
             print "Reading monitor geometry file"
@@ -427,9 +407,6 @@ def run(config):
 
     (d_som7, m_som2) = convert_data_and_mon_to_wavelength(config, d_som6,
                                                           m_som1)
-
-    d_som6 = None
-    m_som1 = None
 
     if config.dump_wave:
         hlr_utils.write_file(config.data, "text/Spec", d_som7,
@@ -455,7 +432,6 @@ def run(config):
 
             m_eff2 = rebin_mon_eff(m_som2, m_eff1)
                 
-            m_eff1 = None
             del m_eff1
                     
         except AttributeError:
@@ -466,7 +442,6 @@ def run(config):
         
     m_som3 = eff_correct_mon(m_som2, m_eff2)
 
-    m_som2 = None
     del m_som2
 
     if config.det_eff is None:
@@ -485,7 +460,6 @@ def run(config):
 
             det_eff2 = rebin_det_eff(d_som7, det_eff1)
 
-            det_eff1 = None
             del det_eff1
 
         except AttributeError:
@@ -496,18 +470,13 @@ def run(config):
 
     d_som8 = eff_correct_data(d_som7, det_eff2)
 
-    det_eff2 = None
-    del det_eff2
-
-    d_som7 = None
-    del d_som7
+    del d_som7, det_eff2
 
     if config.verbose and m_som3 is not None:
         print "Normalizing data by monitor"
         
     d_som9 = norm_data_by_mon(config, d_som8, m_som3)
 
-    d_som8 = None
     del d_som8
 
     # Note: initial_energy_offset MUST be a tuple
@@ -527,7 +496,7 @@ def run(config):
 
     if config.verbose:
         print "Converting initial wavelength to E_initial"
-        
+
     d_som11 = calc_E_initial(config, d_som9)
 
     if config.dump_initial_energy:
@@ -536,7 +505,6 @@ def run(config):
                              verbose=config.verbose,
                              message="pixel initial energy information")
 
-    d_som9 = None
     del d_som9
 
     # Note: final_energy_offset MUST be a tuple
@@ -553,8 +521,10 @@ def run(config):
 
     if config.verbose:
         print "Calculating energy transfer"
-        
-    d_som12 = calc_energy_transfer(config, d_som11)
+
+    d_som12 = calc_energy_transfer(config, d_som11, memory)
+
+    del d_som11
 
     if config.dump_energy:
         hlr_utils.write_file(config.data, "text/Spec", d_som12,
@@ -564,10 +534,9 @@ def run(config):
 
     if config.verbose:
         print "Creating 2D spectrum"
-        
+
     d_som13 = create_final(config, d_som12)
 
-    d_som12 = None
     del d_som12
 
     # Writing 2D DAVE file
