@@ -214,6 +214,8 @@ def create_2D_dist(som, *args, **kwargs):
     comb_som = SOM.SOM()
     comb_som.copyAttributes(som_1)
 
+    del som_1
+
     # Check for y_label keyword argument
     if kwargs.has_key("y_label"):
         comb_som.setYLabel(kwargs["y_label"])
@@ -239,6 +241,8 @@ def create_2D_dist(som, *args, **kwargs):
         comb_som.setAllAxisUnits(["A^-1", "THz"])
 
     comb_som.append(so_dim)
+
+    del so_dim
 
     return comb_som
 
