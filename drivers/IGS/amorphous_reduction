@@ -522,7 +522,7 @@ def run(config):
     if config.verbose:
         print "Calculating energy transfer"
 
-    d_som12 = calc_energy_transfer(config, d_som11, memory)
+    d_som12 = calc_energy_transfer(config, d_som11)
 
     del d_som11
 
