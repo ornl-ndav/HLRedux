@@ -157,7 +157,6 @@ def create_2D_dist(som, *args, **kwargs):
     # Rebin data to E axis
     som_1 = common_lib.rebin_axis_1D(som, args[0])
 
-    som = None
     del som
 
     inst = som_1.attr_list.instrument
@@ -197,8 +196,7 @@ def create_2D_dist(som, *args, **kwargs):
                                                              so_dim.var_y,
                                                              val,
                                                              err2,
-                                                             a_start=start,
-                                                             b_size=length)
+                                                             a_start=start)
 
         # If the Q value is not found in the given axis, do nothing and
         # continue
