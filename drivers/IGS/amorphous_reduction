@@ -388,19 +388,19 @@ def run(config):
         if config.verbose:
             print "Reading monitor geometry file"
             
-        mon_geom_dst = DST.getInstance("text/xml", config.mon_geom)
-        mon_geom = mon_geom_dst.getGeometry()
+        mon_geom_dst = DST.getInstance("application/x-NxsGeom",
+                                       config.mon_geom)
+        mon_geom_dst.setGeometry(config.mon_path, m_som1)
         mon_geom_dst.release_resource()
-        m_som1.setGeometry(mon_geom)
 
     if config.det_geom is not None:
         if config.verbose:
             print "Reading in detector geometry file"
             
-        det_geom_dst = DST.getInstance("text/xml", config.det_geom)
-        det_geom = det_geom_dst.getGeometry()
+        det_geom_dst = DST.getInstance("application/x-NxsGeom",
+                                       config.det_geom)
+        det_geom_dst.setGeometry(config.data_paths, d_som6)
         det_geom_dst.release_resource()
-        d_som6.setGeometry(det_geom)
 
     if config.verbose:
         print "Converting TOF to wavelength"
