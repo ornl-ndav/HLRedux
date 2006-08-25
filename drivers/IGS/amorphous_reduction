@@ -252,7 +252,8 @@ def run(config):
     if config.verbose:
         print "Reading data file"
 
-    d_som1 = data_dst.getSOM(config.data_paths, so_axis)
+    d_som1 = data_dst.getSOM(config.data_paths, so_axis,
+                             mask_file=config.mask_file)
 
     if config.no_mon_norm:
         m_som1 = None
@@ -279,7 +280,8 @@ def run(config):
             print "Reading normalization file"
             
         norm_dst = DST.getInstance("application/x-NeXus", config.norm)
-        n_som1 = norm_dst.getSOM(config.data_paths, so_axis)
+        n_som1 = norm_dst.getSOM(config.data_paths, so_axis,
+                                 mask_file=config.mask_file)
         norm_dst.release_resource()
     else:
         n_som1 = None
@@ -289,7 +291,8 @@ def run(config):
             print "Reading normalization background file"
             
         norm_bkg_dst = DST.getInstance("application/x-NeXus", config.norm_bkg)
-        n_bkg_som1 = norm_bkg_dst.getSOM(config.data_paths, so_axis)
+        n_bkg_som1 = norm_bkg_dst.getSOM(config.data_paths, so_axis,
+                                         mask_file=config.mask_file)
         n_bkg_som1.release_resource()
     else:
         n_bkg_som1 = None
@@ -306,7 +309,8 @@ def run(config):
             print "Reading dark count file"
             
         dc_dst = DST.getInstance("application/x-NeXus", config.dark_count)
-        dc_som1 = dc_dst.getSOM(config.data_paths, so_axis)
+        dc_som1 = dc_dst.getSOM(config.data_paths, so_axis,
+                                mask_file=config.mask_file)
         dc_dst.release_resource()
     else:
         dc_som1 = None
@@ -338,7 +342,8 @@ def run(config):
             print "Reading in background data file"
             
         bkg_dst = DST.getInstance("application/x-NeXus", config.data_bkg)
-        bkg_som1 = bkg_dst.getSOM(config.data_paths, so_axis)
+        bkg_som1 = bkg_dst.getSOM(config.data_paths, so_axis,
+                                  mask_file=config.mask_file)
         bkg_dst.release_resource()
     else:
         bkg_som1 = None
@@ -656,6 +661,10 @@ if __name__ == "__main__":
     parser.add_option("", "--initial-energy-offset",
                       dest="initial_energy_offset",
                       help="Specify the initial energy offset, err^2 in meV")
+
+    parser.add_option("", "--mask-file", dest="mask_file",
+                      help="Specify a file that contains a list of pixel ids "\
+                      +"to be masked from the data")
     
     (options, args) = parser.parse_args()
 
@@ -743,6 +752,12 @@ if __name__ == "__main__":
         if not hlr_utils.file_exists(configure.det_geom):
             parser.error("Detector geometry file [%s] does not exist" \
                          % configure.det_geom)
+
+    configure.mask_file = hlr_utils.fix_filename(options.mask_file)
+    if configure.mask_file is not None:
+        if not hlr_utils.file_exists(configure.mask_file):
+            parser.error("Pixel mask file [%s] does not exist" \
+                         % configure.mask_file)
 
     # set the data paths
     configure.data_paths = hlr_utils.create_data_paths(options.data_paths)
