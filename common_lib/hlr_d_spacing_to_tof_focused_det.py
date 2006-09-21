@@ -64,10 +64,6 @@ def d_spacing_to_tof_focused_det(obj, **kwargs):
     # import the helper functions
     import hlr_utils
 
-    # constants
-    M_OVER_H = 1.0 / 0.003956034
-    M_OVER_H_2 = M_OVER_H * M_OVER_H
-
     # set up for working through data
     (result, res_descr) = hlr_utils.empty_result(obj)
     o_descr = hlr_utils.get_descr(obj)
@@ -172,30 +168,19 @@ def d_spacing_to_tof_focused_det(obj, **kwargs):
         pl_err2 = hlr_utils.get_err2(pathlength, 0, p_descr)
         angle = hlr_utils.get_value(polar, 0, p_descr)
         angle_err2 = hlr_utils.get_err2(polar, 0, p_descr)
-            
-    L_foc_2 = pl * pl
-    sin_foc = math.sin(angle/2.0)
-    sin_foc_2 = sin_foc * sin_foc
-    cos_foc_2 = math.cos(angle/2.0) * math.cos(angle/2.0)
-    BIG_CONSTANT = 2.0 * M_OVER_H * pl * sin_foc
 
-    import nessi_list
-
+    # iterate through the values
+    import axis_manip
+    
     for i in range(hlr_utils.get_length(obj)):
         val = hlr_utils.get_value(obj, i, o_descr, "x", axis)
         err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
 
         map_so = hlr_utils.get_map_so(obj, None, i)
 
-        value = (nessi_list.NessiList(), nessi_list.NessiList())
-        for v, e2 in map(None, val, err2):
-            value[0].append(BIG_CONSTANT * v)
-
-            term1 = v * v * sin_foc_2 * pl_err2
-            term2 = 0.25 * cos_foc_2 * L_foc_2 * v * v * angle_err2
-            term3 = sin_foc_2 * L_foc_2 * e2
-            value[1].append(4.0 * M_OVER_H_2 * (term1 + term2 + term3))
-
+        value = axis_manip.d_spacing_to_tof_focused_det(val, err2, pl, pl_err2,
+                                                        angle, angle_err2)
+                                                        
         hlr_utils.result_insert(result, res_descr, value, map_so, "x", axis)
 
     return result
