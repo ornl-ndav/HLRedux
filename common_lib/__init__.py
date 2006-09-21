@@ -35,6 +35,7 @@ from hlr_sumw_ncerr import *
 from hlr_tof_to_d_spacing import *
 from hlr_tof_to_initial_wavelength_igs import *
 from hlr_tof_to_wavelength import *
+from hlr_wavelength_to_d_spacing import *
 from hlr_wavelength_to_energy import *
 from hlr_wavelength_to_scalar_k import *
 from hlr_wavelength_to_scalar_Q import *
