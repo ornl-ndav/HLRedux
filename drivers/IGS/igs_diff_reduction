@@ -26,7 +26,10 @@
 
 def convert_data_to_d_spacing(data_som):
 
-    return common_lib.tof_to_d_spacing(data_som, units="microsecond")
+    data_som1 = common_lib.tof_to_wavelength(data_som, inst_param="total",
+                                             units="microsecond")
+    
+    return common_lib.wavelength_to_d_spacing(data_som1)
 
 def convert_data_to_tof_focused_det(conf, data_som):
 
