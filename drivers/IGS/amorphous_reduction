@@ -200,26 +200,9 @@ def calc_energy_transfer(conf, data_som):
     """Combines Steps 17 and 18 to calculate energy transfer using function
     3.30."""
 
-    data_som1 = dr_lib.igs_energy_transfer(data_som,
-                                           lambda_f=conf.wavelength_final,
-                                           offset=conf.final_energy_offset)
-
-    del data_som
-
-    data_som2 = common_lib.frequency_to_energy(data_som1)
-
-    del data_som1
-
-    data_som2.setYLabel("counts")
-    data_som2.setYUnits("counts/ueV")
-    data_som2.setAxisUnits(0, "ueV")
-    data_som2.setAxisLabel(0, "energy_transfer")
-
-    data_som3 = common_lib.mult_ncerr(data_som2, (1000.0, 0.0), axis="x")
-
-    del data_som2
-
-    return common_lib.mult_ncerr(data_som3, (1.0/1000.0, 0.0), axis="y")
+    return dr_lib.igs_energy_transfer(data_som,
+                                      lambda_f=conf.wavelength_final,
+                                      offset=conf.final_energy_offset)
 
 def create_final(conf, data_som):
     """Combines Steps 14,16,19,20 and 21 to create final 2D spectrum"""
