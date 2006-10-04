@@ -22,6 +22,7 @@
 
 from hlr_create_2D_dist import *
 from hlr_create_E_vs_Q import *
+from hlr_create_X_vs_pixpos import *
 from hlr_filter_pixels import *
 from hlr_igs_energy_transfer import *
 from hlr_integrate_axis import *
