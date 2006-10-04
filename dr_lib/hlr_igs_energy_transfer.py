@@ -107,9 +107,9 @@ def igs_energy_transfer(obj, **kwargs):
 
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
     if res_descr == "SOM":
-        result = hlr_utils.hlr_force_units(result, "THz", axis)
-        result.setAxisLabel(axis, "energy")
-        result.setYUnits("Counts/THz")
+        result = hlr_utils.hlr_force_units(result, "ueV", axis)
+        result.setAxisLabel(axis, "energy_transfer")
+        result.setYUnits("Counts/ueV")
         result.setYLabel("Intensity")
     else:
         pass
@@ -122,6 +122,9 @@ def igs_energy_transfer(obj, **kwargs):
         val = hlr_utils.get_value(obj, i, o_descr, "x", axis)
         err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
 
+        y_val = hlr_utils.get_value(obj, i, o_descr, "y", axis)
+        y_err2 = hlr_utils.get_err2(obj, i, o_descr, "y", axis)
+        
         map_so = hlr_utils.get_map_so(obj, None, i)
         
         l_f = hlr_utils.get_special(lambda_f, map_so)
@@ -143,8 +146,13 @@ def igs_energy_transfer(obj, **kwargs):
             E_f_new = (E_f, E_f_err2)
 
         value = axis_manip.energy_transfer(val, err2, E_f_new[0], E_f_new[1])
+        value2 = axis_manip.frequency_to_energy(value[0], value[1])
+        value3 = array_manip.mult_ncerr(value2[0], value2[1], 1000.0, 0.0)
         
-        hlr_utils.result_insert(result, res_descr, value, map_so, "x")
+        value4 = array_manip.mult_ncerr(y_val, y_err2, 1.0/1000.0, 0.0)
+
+        hlr_utils.result_insert(result, res_descr, value4, map_so, "all",
+                                0, [value3[0]])
 
     return result
 
