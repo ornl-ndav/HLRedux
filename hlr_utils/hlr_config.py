@@ -31,6 +31,6 @@ class Configure:
     """
     def __init__(self):
 
-        self.verbose = None
+        self.verbose = False
         self.data = None
         self.output = None
