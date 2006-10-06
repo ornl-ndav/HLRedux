@@ -292,6 +292,17 @@ def write_file(filename, dst_type, data, **kwargs):
     output_dst.writeSOM(data)
     output_dst.release_resource()
 
+    # Write out metadata if someone provided the Configuration object
+    try:
+        conf = data.attr_list["config"]
+        rmd_filename = hlr_utils.ext_replace(fixed_filename, output_ext, "rmd")
+        rmd_file = open(rmd_filename, "w")
+        rmd_dst = DST.getInstance("text/rmd", rmd_file)
+        rmd_dst.writeSOM(data)
+        rmd_dst.release_resource()
+    except KeyError:
+        pass
+
 
 def create_id_pairs(pairs, paths, **kwargs):
     """
