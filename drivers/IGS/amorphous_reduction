@@ -529,6 +529,8 @@ def run(config):
 
     # Writing 2D DAVE file
 
+    d_som13.attr_list["config"] = config
+
     hlr_utils.write_file(config.output, "text/Dave2d", d_som13,
                          verbose=config.verbose,
                          message="data",

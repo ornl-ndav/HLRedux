@@ -268,6 +268,8 @@ def run(config):
     else:
         d_som7.attr_list["detector_angle"] = config.det_angle
 
+    d_som7.attr_list["config"] = config
+
     hlr_utils.write_file(config.output, "text/Spec", d_som7, replace=False,
                          verbose=config.verbose,
                          message="combined Reflectivity information")
