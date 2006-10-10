@@ -315,7 +315,12 @@ def create_id_pairs(pairs, paths, **kwargs):
     length = len(mylist)
 
     size = len(paths.split(','))
-
+    try:
+        if int(paths.split(',')[1]) == 1:
+            size = 1
+    except TypeError:
+        pass
+    
     if length == 2 and length/2 == size:
         use_extend = True
     else:
@@ -330,6 +335,7 @@ def create_id_pairs(pairs, paths, **kwargs):
             id_pairs.append((int(mylist[i]), int(mylist[i + 1])))
 
     # The number of data paths and the number of id pairs is equal
+    print "AA:",length,size
     if length/2 == size:
         if length == 2:
             return tuple(id_pairs)
