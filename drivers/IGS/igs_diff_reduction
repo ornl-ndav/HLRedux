@@ -63,6 +63,11 @@ def run(config):
 
     so_axis = "time_of_flight"
 
+    if config.Q_bins is not None:
+        rmd_written = False
+    else:
+        rmd_written = True
+
     if config.verbose:
         print "Reading data file"
 
@@ -116,7 +121,14 @@ def run(config):
                              replace=True, output_ext="toff",
                              verbose=config.verbose,
                              message="combined TOF focused information")
-        
+
+        d_som7.attr_list["config"] = config
+
+        if rmd_written:
+            hlr_utils.write_file(config.data, "text/rmd", d_som7,
+                                 replace=True, output_ext="rmd",
+                                 verbose=config.verbose,
+                                 message="metadata")
         
     else:
         pass
@@ -142,6 +154,11 @@ def run(config):
         hlr_utils.write_file(config.output_qt, "text/Spec", d_som4,
                              replace=False, verbose=config.verbose,
                              message="combined Q information")
+
+        hlr_utils.write_file(config.data, "text/rmd", d_som7,
+                             replace=True, output_ext="rmd",
+                             verbose=config.verbose,
+                             message="metadata")
     else:
         pass
 
