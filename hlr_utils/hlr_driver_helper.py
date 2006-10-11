@@ -335,7 +335,6 @@ def create_id_pairs(pairs, paths, **kwargs):
             id_pairs.append((int(mylist[i]), int(mylist[i + 1])))
 
     # The number of data paths and the number of id pairs is equal
-    print "AA:",length,size
     if length/2 == size:
         if length == 2:
             return tuple(id_pairs)
