@@ -40,8 +40,11 @@ def convert_data_to_wavelength(conf, data_som):
 
     return common_lib.tof_to_wavelength(data_som, inst_param="total",
                                         units="microsecond")
+def convert_data_to_d_spacing(data_som):
 
-def create_final(conf, data_som):
+    return common_lib.wavelength_to_d_spacing(data_som)
+
+def create_final1(conf, data_som):
 
     return dr_lib.create_X_vs_pixpos(data_som, conf.l_bins,
                                      so_id="Full Detector",
@@ -50,9 +53,24 @@ def create_final(conf, data_som):
                                      x_label="wavelength",
                                      x_units="Angstroms")
 
+def create_final2(conf, data_som):
+
+    return dr_lib.create_X_vs_pixpos(data_som, conf.d_bins,
+                                     so_id="Full Detector",
+                                     y_label="counts",
+                                     y_units="counts / A",
+                                     x_label="d-spacing",
+                                     x_units="Angstroms")
+
 def convert_data_to_scalar_Q(conf, data_som):
 
     return common_lib.wavelength_to_scalar_Q(data_som, half_angle=True)
+
+def combine_spectra(bins, data_som):
+
+    data_som1 = common_lib.rebin_axis_1D(data_som, bins)
+    
+    return dr_lib.sum_all_spectra(data_som1)
 
 def run(config):
 
@@ -137,7 +155,7 @@ def run(config):
     if config.verbose:
         print "Creating 2D spectrum"
 
-    d_som5 = create_final(config, d_som4)
+    d_som5 = create_final1(config, d_som4)
 
     # Writing 2D DAVE file
 
@@ -146,15 +164,50 @@ def run(config):
                          message="data",
                          replace=False)
 
+    del d_som5
+
     if config.verbose:
         print "Converting wavelength to scalar Q"
 
     d_som6 = convert_data_to_scalar_Q(config, d_som4)
 
-    hlr_utils.write_file(config.data, "text/Spec", d_som6,
-                         output_ext="qxl",
+    if config.dump_mom:
+        hlr_utils.write_file(config.data, "text/Spec", d_som6,
+                             output_ext="qxl",
+                             verbose=config.verbose,
+                             message="pixel Q information")
+
+    d_som7 = combine_spectra(config.Q_bins, d_som6)
+    del d_som6
+
+    hlr_utils.write_file(config.data, "text/Spec", d_som7,
+                         output_ext="qt",
                          verbose=config.verbose,
-                         message="pixel Q information")
+                         message="Q information")
+        
+    del d_som7
+
+    if config.verbose:
+        print "Converting wavelength to d_spacing"
+
+    d_som8 = convert_data_to_d_spacing(d_som4)
+
+    d_som9 = combine_spectra(config.d_bins, d_som8)
+
+    hlr_utils.write_file(config.data, "text/Spec", d_som9,
+                         output_ext="ds1",
+                         verbose=config.verbose,
+                         message="d_spacing information")
+    del d_som9
+
+    d_som10 = create_final2(config, d_som8)
+
+    hlr_utils.write_file(config.data, "text/Dave2d", d_som10,
+                         output_ext="pbd",
+                         verbose=config.verbose,
+                         message="data",
+                         replace=True)
+    
     
 if __name__ == "__main__":
     import os
@@ -173,11 +226,18 @@ if __name__ == "__main__":
     parser.add_option("", "--lambda-bins", dest="l_bins",
                       help="Specify the minimum and maximum wavelength "\
                       +"values and the wavelength bin width in Angstroms")
+    parser.set_defaults(l_bins="0,10,0.005")
     
     parser.add_option("", "--mom-trans-bins", dest="Q_bins",
                       help="Specify the minimum and maximum momentum transfer"\
                       +" values and the momentum transfer bin width in"\
                       +" Angstroms^-1")
+    parser.set_defaults(Q_bins="0,10,0.005")
+    
+    parser.add_option("", "--d-bins", dest="d_bins",
+                      help="Specify the minimum and maximum d-spacing values"\
+                      +" and the d-spacing bin width in Angstroms")
+    parser.set_defaults(d_bins="0,10,0.005")
 
     parser.add_option("", "--data-paths", dest="data_paths",
                       help="Specify the comma separated list of detector data"\
@@ -245,7 +305,7 @@ if __name__ == "__main__":
     # set the data paths
     configure.data_paths = hlr_utils.create_data_paths(options.data_paths)
 
-    # set the E bins
+    # set the lambda bins
     if options.l_bins is not None:
         lfacts = options.l_bins.split(',')
         configure.l_bins = hlr_utils.make_axis(float(lfacts[0]),
@@ -262,6 +322,15 @@ if __name__ == "__main__":
                                                float(qfacts[2]))
     else:
         configure.Q_bins = options.Q_bins
+
+    # set the d bins
+    if options.d_bins is not None:
+        dfacts = options.d_bins.split(',')
+        configure.d_bins = hlr_utils.make_axis(float(dfacts[0]),
+                                               float(dfacts[1]),
+                                               float(dfacts[2]))
+    else:
+        configure.d_bins = options.d_bins        
 
     # set the ability to dump the wavelength information
     configure.dump_wave = options.dump_wave
