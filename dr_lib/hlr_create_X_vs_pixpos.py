@@ -198,15 +198,15 @@ def create_X_vs_pixpos(som, *args, **kwargs):
 
     # Check for x_labels keyword argument
     if kwargs.has_key("x_label"):
-        comb_som.setAllAxisLabels([kwargs["x_label"], "Pixel Number"])
+        comb_som.setAllAxisLabels(["Pixel Number", kwargs["x_label"]])
     else:
-        comb_som.setAllAxisLabels(["Arbitrary", "Pixel Number"])
+        comb_som.setAllAxisLabels(["Pixel Number", "Arbitrary"])
 
     # Check for x_units keyword argument
     if kwargs.has_key("x_units"):
-        comb_som.setAllAxisUnits([kwargs["x_units"], "Pixel#"])
+        comb_som.setAllAxisUnits(["Pixel#", kwargs["x_units"]])
     else:
-        comb_som.setAllAxisUnits(["Arb", "Pixel#"])
+        comb_som.setAllAxisUnits(["Pixel#", "Arb"])
 
     comb_som.append(so_dim)
 
