@@ -57,6 +57,7 @@ def create_X_vs_pixpos(som, *args, **kwargs):
                   individual x axes labels
        - x_units=<list of string> This is a list of strings that sets the
                  individual x axes units
+       - rebin=<boolean> Flag for turning rebin on or off. Default is True
 
     Returns:
     -------
@@ -152,8 +153,17 @@ def create_X_vs_pixpos(som, *args, **kwargs):
     so_dim.y = nessi_list.NessiList(N_tot)
     so_dim.var_y = nessi_list.NessiList(N_tot)
 
+    # Check for rebinning
+    try:
+        rebin = kwargs["rebin"]
+    except KeyError:
+        rebin = True
+
     # Rebin data to X axis
-    som_1 = common_lib.rebin_axis_1D(som, args[0])
+    if rebin:
+        som_1 = common_lib.rebin_axis_1D(som, args[0])
+    else:
+        som_1 = som
 
     del som
 
