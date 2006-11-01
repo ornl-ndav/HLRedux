@@ -22,6 +22,16 @@
 #                                                                              
 # $Id$
 
+def create_tof_2D(conf, data_som):
+
+    return dr_lib.create_X_vs_pixpos(data_som, data_som[0].axis[0].val,
+                                     so_id="Full Detector",
+                                     y_label="counts",
+                                     y_units="counts / A",
+                                     x_label="Time-of-flight",
+                                     x_units="microseconds",
+                                     rebin="False")
+
 def subtract_bkg_from_data(config, data_som, bkg_som):
 
     if bkg_som is None:
@@ -92,7 +102,16 @@ def run(config):
     d_som1 = data_dst.getSOM(config.data_paths, so_axis)
 
     data_dst.release_resource()
+    
+    d_som1_A = create_tof_2D(config, d_som1)
 
+    hlr_utils.write_file(config.data, "text/Dave2d", d_som1_A,
+                         output_ext="tof",
+                         verbose=config.verbose,
+                         message="TOF information")
+
+    del d_som1_A
+    
     if config.norm is not None:
         if config.verbose:
             print "Reading normalization file"
