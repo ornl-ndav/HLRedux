@@ -163,6 +163,15 @@ def run(config):
     d_som2_D = None
     d_som2_B = None
     del d_som2_D, d_som2_B
+
+    if config.det_geom is not None:
+        if config.verbose:
+            print "Reading in detector geometry file"
+
+        det_geom_dst = DST.getInstance("application/x-NxsGeom",
+                                       config.det_geom)
+        det_geom_dst.setGeometry(config.data_paths, d_som3)
+        det_geom_dst.release_resource()
         
     if config.verbose:
         print "Converting TOF to wavelength"
@@ -347,6 +356,9 @@ if __name__ == "__main__":
                       +"subtraction")
     parser.set_defaults(no_bkg=False)
 
+    parser.add_option("", "--det-geom", dest="det_geom",
+                      help="Specify the detector geometry file")
+
     (options, args) = parser.parse_args()
     
     # set up the configuration
@@ -394,6 +406,16 @@ if __name__ == "__main__":
                 pass
     else:
         configure.det_eff = options.det_eff
+
+    configure.det_geom = hlr_utils.fix_filename(options.det_geom)
+    if configure.det_geom is not None:
+        if not hlr_utils.file_exists(configure.det_geom):
+            parser.error("Detector geometry file [%s] does not exist" \
+                         % configure.det_geom)
+        else:
+            pass
+    else:
+        pass
 
     # set the data paths
     configure.data_paths = hlr_utils.create_data_paths(options.data_paths)
