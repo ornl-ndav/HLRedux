@@ -68,6 +68,7 @@ instrument_scripts = {
     'get_specular_background',
     'incident_spectrum_ratio',
     'reflect_reduction',
+    'reflect_tofred',
     'rocking_curve',
     'specular_area',
     'specular_point'
