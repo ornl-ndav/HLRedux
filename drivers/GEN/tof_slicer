@@ -51,8 +51,11 @@ def run(config):
     else:
         pass
 
-    d_som2 = dr_lib.sum_all_spectra(d_som1)
-    d_som2[0].id = d_som1[0].id
+    if len(d_som1) == 1:
+        d_som2 = d_som1
+    else:
+        d_som2 = dr_lib.sum_all_spectra(d_som1)
+        d_som2[0].id = d_som1[0].id
 
     hlr_utils.write_file(config.output, "text/Spec", d_som2, replace=False,
                          verbose=config.verbose,
@@ -129,7 +132,8 @@ if __name__ == "__main__":
     # set the ending ids
     if options.ending_ids is not None:
         configure.ending_ids = hlr_utils.create_id_pairs(options.ending_ids,
-                                                      options.data_paths)
+                                                         options.data_paths,
+                                                         inc=True)
     else:
         configure.ending_ids = options.ending_ids
 
