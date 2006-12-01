@@ -327,9 +327,12 @@ if __name__ == "__main__":
     # set the lambda bins
     if options.l_bins is not None:
         lfacts = options.l_bins.split(',')
-        configure.l_bins = hlr_utils.make_axis(float(lfacts[0]),
-                                               float(lfacts[1]),
-                                               float(lfacts[2]))
+        if len(lfacts) == 3:
+            configure.l_bins = hlr_utils.make_axis(float(lfacts[0]),
+                                                   float(lfacts[1]),
+                                                   float(lfacts[2]))
+        else:
+            configure.l_bins = hlr_utils.make_axis_file(options.l_bins)
     else:
         configure.l_bins = options.l_bins
 
