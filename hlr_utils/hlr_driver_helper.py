@@ -370,6 +370,11 @@ def create_id_pairs(pairs, paths, **kwargs):
     <- A tuple or list of tuples of the pixel id pairs
     """
 
+    try:
+        increment = kwargs["inc"]
+    except KeyError:
+        increment = False
+
     mylist = pairs.split(',')
     length = len(mylist)
 
@@ -387,11 +392,20 @@ def create_id_pairs(pairs, paths, **kwargs):
 
     id_pairs = []
 
+    # Must extend the end ids by one since the ids are given as inclusive
+    # and python's range command treats the last number as exclusive
+    if increment:
+        offset = 1
+    else:
+        offset = 0
+    
     for i in range(0, length, 2):
         if use_extend:
-            id_pairs.extend((int(mylist[i]), int(mylist[i + 1])))
+            id_pairs.extend((int(mylist[i]) + offset,
+                             int(mylist[i + 1]) + offset))
         else:
-            id_pairs.append((int(mylist[i]), int(mylist[i + 1])))
+            id_pairs.append((int(mylist[i]) + offset,
+                             int(mylist[i + 1]) + offset))
 
     # The number of data paths and the number of id pairs is equal
     if length/2 == size:
