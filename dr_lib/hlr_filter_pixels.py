@@ -111,8 +111,8 @@ def filter_pixels(obj, paths, start_ids, end_ids):
 
         bank = path[0].split('/')[-1]
 
-        for i in range(s_id[0], e_id[0]+1):
-            for j in range(s_id[1], e_id[1]+1):
+        for i in range(s_id[0], e_id[0]):
+            for j in range(s_id[1], e_id[1]):
                 pix_id = (bank, (i, j))
 
                 length = hlr_utils.get_length(obj)
