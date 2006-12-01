@@ -144,6 +144,65 @@ def make_axis(axis_min, axis_max, delta, **kwargs):
 
     return axis
 
+def make_axis_file(filename, **kwargs):
+    """
+    This function takes a file of minimum, maximum and a delta values and
+    converts those numbers into an axis.
+
+    Parameters:
+    ----------
+    -> filename is the name of the file containing the axis values
+    -> kwargs is a list of key word arguments that the function accepts:
+          type= a string containing the type of axis desired. Type can be
+                histogram, coordinate or density (the last two are synonyms).
+                If type is not provided the default is histogram
+
+    Returns:
+    -------
+    <- A NessiList that contains the axis
+
+    Exceptions:
+    ----------
+    <- RuntimeError is raised if the type provided via kwarg type is not
+       histogram or density or coordinate
+    """
+
+    import math
+    import nessi_list
+
+    axis = nessi_list.NessiList()
+
+    ifile = open(filename, "r")
+
+    alllines = ifile.readlines()
+
+    for eachline in alllines:
+        values = eachline.split(',')
+
+        axis_min = float(values[0])
+        axis_max = float(values[1])
+        delta = float(values[2])
+
+        n_bins = int(math.fabs(axis_max - axis_min) / delta)
+    
+        for i in range(n_bins):
+            axis.append(axis_min + i * delta)
+
+    axis_max = float(alllines[-1].split(',')[1])
+
+    try:
+        if(kwargs["type"] == "histogram"):
+            axis.append(axis_max)
+        elif(kwargs["type"] == "density" or kwargs["type"] == "coordinate"):
+            pass
+        else:
+            raise RuntimeError("Do not understand type: %s" % kwargs["type"])
+        
+    except KeyError:
+        axis.append(axis_max)
+
+    return axis
+
 def fix_filename(filename):
     """
     This function takes a filename contaning things like ~/ or $HOME and
