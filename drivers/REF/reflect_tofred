@@ -35,6 +35,8 @@ def determine_background(conf, bkg_som, num_data_pixels):
         return None
     else:
         bkg_som1 = dr_lib.sum_all_spectra(bkg_som)
+        if conf.verbose:
+            print "Background counts:", dr_lib.integrate_axis(bkg_som1)
         ratio = (1.0 / float(len(bkg_som)), 0.0)
         return common_lib.mult_ncerr(bkg_som1, ratio)
 
@@ -74,8 +76,9 @@ def norm_data_by_inc_spec_factor(data_som, isf_som):
 
 def combine_spectra(data_som):
 
+    id = data_som[0].id
     data_som1 = dr_lib.sum_all_spectra(data_som)
-    data_som1[0].id = ("bank1", (0, 0))
+    data_som1[0].id = id
 
     return data_som1
 
@@ -88,30 +91,58 @@ def run(config):
         raise RuntimeError("Need to pass a data filename to the driver "\
                            +"script.")
 
-    try:
-        data_dst = DST.getInstance("application/x-NeXus", config.data,
-                                   noinst=True) 
-    except SystemError:
-        print "ERROR: Failed to data read file %s" % config.data
-        sys.exit(-1)
-
     so_axis = "time_of_flight"
 
-    if config.verbose:
-        print "Reading data file"
+    for i in xrange(config.num_data_files):
+        if config.num_data_files == 1:
+            file_name = config.data
+        else:
+            file_name = config.data[i]
 
-    d_som1 = data_dst.getSOM(config.data_paths, so_axis)
-    d_som1.attr_list["proton_charge"] = data_dst.getParameter("proton_charge")
+        print "File:",file_name
+            
+        try:
+            data_dst = DST.getInstance("application/x-NeXus", file_name) 
+        except SystemError:
+            print "ERROR: Failed to data read file %s" % file_name
+            sys.exit(-1)
+
+        if config.verbose:
+            if config.num_data_files == 1:
+                print "Reading data file"
+            else:
+                print "Reading data file %d" % i
+
+        if i == 0:
+            d_som1 = data_dst.getSOM(config.data_paths, so_axis)
+            d_som1.attr_list["proton_charge"] = data_dst.getParameter("proton_charge")
+        else:
+            d_som_t = data_dst.getSOM(config.data_paths, so_axis)
+            d_som1 = common_lib.add_ncerr(d_som_t, d_som1)
+            del d_som_t
+
+        data_dst.release_resource()
+
+    if config.num_data_files == 1:
+        main_data = config.data
+    else:
+        main_data = config.data[-1]
     
     if config.verbose:
         print "Filtering specular and background pixels"
         
     (d_som2_D, d_som2_B) = filter_pixels(config, d_som1)
 
+    if config.verbose:
+        print "Pixel counts:", len(d_som2_D), len(d_som2_B)
+
     if config.dump_specular:
+        
         d_som2_D1 = dr_lib.sum_all_spectra(d_som2_D)
+        if config.verbose:
+            print "Signal counts:", dr_lib.integrate_axis(d_som2_D1)
         d_som2_D1[0].id = ("bank1", (0, 0))
-        hlr_utils.write_file(config.data, "text/Spec", d_som2_D1,
+        hlr_utils.write_file(main_data, "text/Spec", d_som2_D1,
                              output_ext="sdc", verbose=config.verbose,
                              message="combined specular TOF information")
         d_som2_D1 = None
@@ -123,7 +154,7 @@ def run(config):
     B = determine_background(config, d_som2_B, len(d_som2_D))
 
     if not config.no_bkg:
-        hlr_utils.write_file(config.data, "text/Spec", B,
+        hlr_utils.write_file(main_data, "text/Spec", B,
                              output_ext="bkg", verbose=config.verbose,
                              message="combined background TOF information")
         
@@ -141,7 +172,7 @@ def run(config):
     del d_som3
     
     if config.dump_sub:
-        hlr_utils.write_file(config.data, "text/Spec", d_som4,
+        hlr_utils.write_file(main_data, "text/Spec", d_som4,
                              output_ext="sub", verbose=config.verbose,
                              message="combined subtracted TOF information")
 
@@ -153,6 +184,7 @@ def run(config):
         n_som1 = norm_dst.getSOM(config.data_paths, so_axis,
                                  start_id=config.norm_starting_ids,
                                  end_id=config.norm_ending_ids)
+        print "Norm Pixels:", len(n_som1)
         norm_dst.release_resource()
     else:
         n_som1 = None
@@ -163,7 +195,7 @@ def run(config):
         n_som2 = None
 
     if config.dump_norm and config.norm is not None:
-        hlr_utils.write_file(config.data, "text/Spec", n_som2,
+        hlr_utils.write_file(main_data, "text/Spec", n_som2,
                              output_ext="nom", verbose=config.verbose,
                              message="combined normalization TOF information")
 
@@ -185,7 +217,7 @@ def run(config):
 
     d_som5.attr_list["config"] = config
 
-    hlr_utils.write_file(config.data, "text/rmd", d_som5,
+    hlr_utils.write_file(main_data, "text/rmd", d_som5,
                          output_ext="rmd", verbose=config.verbose,
                          message="metadata")
 
@@ -265,10 +297,22 @@ if __name__ == "__main__":
     configure = hlr_utils.Configure()
     
     # get the datafile name and check it
-    if len(args) == 1:
+    configure.num_data_files = len(args)
+    
+    if configure.num_data_files == 1:
         configure.data = args[0]
         if not hlr_utils.file_exists(configure.data):
             parser.error("Data file [%s] does not exist" % configure.data)
+    elif configure.num_data_files > 1:
+        for infile in args:
+            if not hlr_utils.file_exists(infile):
+                print "Data file [%s] does not exist, removing from list" % \
+                      infile
+                args.remove(infile)
+            else:
+                pass
+
+        configure.data = args
     else:
         parser.error("Did not specify a datafile")
 
@@ -276,7 +320,11 @@ if __name__ == "__main__":
     if options.output is not None:
         configure.output = options.output
     else:
-        outfile = os.path.basename(configure.data)
+        if configure.num_data_files == 1:
+            dfile_name = configure.data
+        else:
+            dfile_name = configure.data[0]
+        outfile = os.path.basename(dfile_name)
         path = os.path.join(os.getcwd(), outfile)
         configure.output = hlr_utils.ext_replace(path, "nxs", "txt")
         print "Using %s as output file" % configure.output
@@ -328,7 +376,8 @@ if __name__ == "__main__":
     # set the ending ids
     if options.ending_ids is not None:
         configure.ending_ids = hlr_utils.create_id_pairs(options.ending_ids,
-                                                         options.data_paths)
+                                                         options.data_paths,
+                                                         inc=True)
     else:
         configure.ending_ids = options.ending_ids
 
@@ -344,7 +393,7 @@ if __name__ == "__main__":
     if options.norm_ending_ids is not None:
         configure.norm_ending_ids = hlr_utils.create_id_pairs(\
             options.norm_ending_ids,
-            options.data_paths)
+            options.data_paths, inc=True)
     else:
         configure.norm_ending_ids = configure.ending_ids
 
@@ -367,3 +416,4 @@ if __name__ == "__main__":
         
     # run the program
     run(configure)
+
