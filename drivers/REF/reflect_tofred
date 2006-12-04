@@ -122,11 +122,12 @@ def run(config):
             del d_som_t
 
         data_dst.release_resource()
+        del data_dst
 
     if config.num_data_files == 1:
         main_data = config.data
     else:
-        main_data = config.data[-1]
+        main_data = config.data[0]
     
     if config.verbose:
         print "Filtering specular and background pixels"
@@ -199,7 +200,7 @@ def run(config):
                              output_ext="nom", verbose=config.verbose,
                              message="combined normalization TOF information")
 
-    if config.verbose:
+    if config.verbose and config.norm is not None:
         print "Normalizing data"
         
     d_som5 = norm_data_by_inc_spec_factor(d_som4, n_som2)
