@@ -458,7 +458,7 @@ if __name__ == "__main__":
     if options.norm_ending_ids is not None:
         configure.norm_ending_ids = hlr_utils.create_id_pairs(\
             options.norm_ending_ids,
-            options.data_paths
+            options.data_paths,
             inc=True)
     else:
         configure.norm_ending_ids = configure.ending_ids
