@@ -67,7 +67,7 @@ def determine_background(conf, bkg_som, num_data_pixels):
         return None
     else:
         bkg_som1 = dr_lib.sum_all_spectra(bkg_som)
-        ratio = (float(len(bkg_som)) / float(num_data_pixels), 0.0)
+        ratio = (1.0 / float(len(bkg_som)), 0.0)
         return common_lib.mult_ncerr(bkg_som1, ratio)
 
 def subtract_bkg_from_data(data_som, bkg_som):
@@ -441,7 +441,8 @@ if __name__ == "__main__":
     # set the ending ids
     if options.ending_ids is not None:
         configure.ending_ids = hlr_utils.create_id_pairs(options.ending_ids,
-                                                         options.data_paths)
+                                                         options.data_paths,
+                                                         inc=True)
     else:
         configure.ending_ids = options.ending_ids
 
@@ -457,7 +458,8 @@ if __name__ == "__main__":
     if options.norm_ending_ids is not None:
         configure.norm_ending_ids = hlr_utils.create_id_pairs(\
             options.norm_ending_ids,
-            options.data_paths)
+            options.data_paths
+            inc=True)
     else:
         configure.norm_ending_ids = configure.ending_ids
 
