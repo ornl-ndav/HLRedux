@@ -43,8 +43,17 @@ def run(config):
     else:
         tag = "h"
         size = max_ids[1] / config.pixel_group
-        reps = max_ids[0]
+        reps = max_ids[0] / config.sum_tubes
         label = "Tube Number"
+
+    try:
+        data_dst = DST.getInstance("application/x-NeXus",
+                                   config.data)
+    except SystemError:
+        print "ERROR: Failed to data read file %s" % config.data
+        sys.exit(-1)
+        
+    so_axis = "time_of_flight"
 
     for path in banks:
         bank = path[0].split('/')[-1]
@@ -61,17 +70,16 @@ def run(config):
                     starting_id = (i, config.pixel_group * j)
                     ending_id = (i + 1, config.pixel_group * (j + 1))
                 else:
-                    starting_id = (j, config.pixel_group * i)
-                    ending_id = (j + 1, config.pixel_group * (i + 1))
-
-                try:
-                    data_dst = DST.getInstance("application/x-NeXus",
-                                               config.data)
-                except SystemError:
-                    print "ERROR: Failed to data read file %s" % config.data
-                    sys.exit(-1)
-
-                so_axis = "time_of_flight"
+                    if config.sum_tubes == 1:
+                        x1 = j
+                        x2 = j + 1
+                    else:
+                        x1 = j * config.sum_tubes
+                        x2 = (j + 1) * config.sum_tubes
+                    
+                    starting_id = (x1, config.pixel_group * i)
+                    ending_id = (x2, config.pixel_group * (i + 1))
+                    print "A:",starting_id,ending_id
 
                 d_som1 = data_dst.getSOM(path, so_axis,
                                          start_id=starting_id,
@@ -96,9 +104,6 @@ def run(config):
 
                 counter += 1
 
-                data_dst.release_resource()
-
-
             tSOM.attr_list["filename"] = config.data
             tSOM.setTitle("TOF Pixel Summation")
             tSOM.setDataSetType("density")
@@ -116,7 +121,7 @@ def run(config):
                                  verbose=config.verbose,
                                  message="intensity sum file", replace=False)
                     
-
+    data_dst.release_resource()
 
 
 if __name__ == "__main__":
@@ -140,6 +145,12 @@ if __name__ == "__main__":
                       help="Number of pixels in a grouping. The default "\
                       +"value is 4.")
     parser.set_defaults(pixel_group=4)
+
+    parser.add_option("", "--sum-tubes", dest="sum_tubes", type="int",
+                      metavar="INT",
+                      help="Number of tubes to sum over. The default "\
+                      +"value is 1.")
+    parser.set_defaults(sum_tubes=1)
 
     (options, args) = parser.parse_args()
 
@@ -168,4 +179,11 @@ if __name__ == "__main__":
     # set pixel grouping
     configure.pixel_group = options.pixel_group
 
+    # set sum tubes
+    configure.sum_tubes = options.sum_tubes    
+    if configure.sum_tubes <= 0:
+        parser.error("sum-tubes must be greater than zero (default is 1)")
+    else:
+        pass
+    
     run(configure)
