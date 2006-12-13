@@ -43,6 +43,13 @@ def run(config):
     for path in banks:
         bank = path[0].split('/')[-1]
 
+        if bank.endswith("1"):
+            tubes = config.sum_tubes_bank1
+        elif bank.endswith("2"):
+            tubes = config.sum_tubes_bank2
+        else:
+            tubes = None
+
         for i in range(size):
             for j in range(reps):
 
@@ -102,6 +109,14 @@ if __name__ == "__main__":
                       +"tof_slicer")
     parser.set_defaults(ts_verbose=False)
 
+    parser.add_option("", "--sum-tubes-bank1", dest="sum_tubes_bank1",
+                      help="Provide a listing of tubes to sum over for "\
+                      +"bank1. Example: 1,3,5,10-37,45,57-64")
+
+    parser.add_option("", "--sum-tubes-bank2", dest="sum_tubes_bank2",
+                      help="Provide a listing of tubes to sum over for "\
+                      +"bank2. Example: 1,3,5,10-37,45,57-64")    
+
     (options, args) = parser.parse_args()
 
     # set up the configuration
@@ -131,5 +146,19 @@ if __name__ == "__main__":
 
     # set pixel grouping
     configure.pixel_group = options.pixel_group
+
+    if options.sum_tubes_bank1 is not None:
+        import sns_inst_util
+        configure.sum_tubes_bank1 = sns_inst_util.generateList(\
+            options.sum_tubes_bank1.split(','))
+    else:
+        configure.sum_tubes_bank1 = options.sum_tubes_bank1
+
+    if options.sum_tubes_bank2 is not None:
+        import sns_inst_util
+        configure.sum_tubes_bank2 = sns_inst_util.generateList(\
+            options.sum_tubes_bank2.split(','))
+    else:
+        configure.sum_tubes_bank2 = options.sum_tubes_bank2
 
     run(configure)
