@@ -27,6 +27,7 @@
 def run(config):
 
     runner = "tof_slicer"
+    filter = "mask_generator"
     banks = [("/entry/bank1", 1), ("/entry/bank2", 1)]
 
     max_ids = (64, 64)
@@ -43,47 +44,93 @@ def run(config):
     for path in banks:
         bank = path[0].split('/')[-1]
 
-        if bank.endswith("1"):
+        if bank.endswith("1") and config.sum_tubes_bank1 is not None:
             tubes = config.sum_tubes_bank1
-        elif bank.endswith("2"):
+        elif bank.endswith("2") and config.sum_tubes_bank2 is not None:
             tubes = config.sum_tubes_bank2
         else:
             tubes = None
 
-        for i in range(size):
-            for j in range(reps):
-
-                start_id = (i, config.pixel_group * j)
-                end_id = (i + 1, config.pixel_group * (j + 1))
-
-                if config.vertical:
-                    tag1 = str(i + 1)
-                    tag2 = str(j + 1)
-                else:
-                    tag1 = str(j + 1)
-                    tag2 = str(i + 1)
+        if tubes is None:
+            for i in range(size):
+                for j in range(reps):
                     
-                oufile = bank + "_" + tag + "_" + tag1 + "_" \
-                         + tag2 + ".tof"
-                
-                if config.verbose:
-                    print "Creating %s" % oufile
+                    start_id = (i, config.pixel_group * j)
+                    end_id = (i + 1, config.pixel_group * (j + 1))
+                    
+                    if config.vertical:
+                        tag1 = str(i + 1)
+                        tag2 = str(j + 1)
+                    else:
+                        tag1 = str(j + 1)
+                        tag2 = str(i + 1)
+                        
+                    oufile = bank + "_" + tag + "_" + tag1 + "_" \
+                                 + tag2 + ".tof"
+                        
+                    if config.verbose:
+                        print "Creating %s" % oufile
+                        
+                    command = runner + " --data-paths=\"" + path[0] \
+                              + "\",1 --starting-ids=" \
+                              + str(start_id[0]) + "," \
+                              + str(start_id[1]) \
+                              + " --ending-ids=" + str(end_id[0]) \
+                              + "," \
+                              + str(end_id[1]) + " --output=" \
+                              + oufile \
+                              + " " + config.data
+                    if config.ts_verbose:
+                        command += " -v"
+                                
+                    os.system(command)
+        else:
+            for j in range(reps):
+                start_id = config.pixel_group * j
+                end_id = config.pixel_group * (j + 1)
 
-                command = runner + " --data-paths=\"" + path[0] \
-                          + "\",1 --starting-ids=" \
-                          + str(start_id[0]) + "," + str(start_id[1]) \
-                          + " --ending-ids=" + str(end_id[0]) + "," \
-                          + str(end_id[1]) + " --output=" + oufile \
-                          + " " + config.data
-                if config.ts_verbose:
-                    command += " -v"
+                counter = 0
+                for tube in tubes:
+                    run_gen = []
+                    run_gen.append(filter)
+                    run_gen.append("--bank-ids=%s,%s" % (bank[-1], bank[-1]))
+                    run_gen.append("--h-ranges=%d,%d" % (tube-1, tube-1))
+                    run_gen.append("--v-ranges=%d,%d" % (start_id, end_id-1))
+                    if counter != 0:
+                        run_gen.append("--append")
+
+                    os.system(" ".join(run_gen))
+                    counter += 1
+                    
+                roifile = "pixel_mask.dat"
+
+                tag1 = str(j + 1)
                 
-                os.system(command)
+                oufile = bank + "_" + tag + "_" + tag1 + ".tof"
+
+                if config.verbose:
+                        print "Creating %s" % oufile
+                        
+                command = []
+
+                command.append(runner)
+                command.append("--data-paths=%s,1" % path[0])
+                command.append("--roi-file=%s" % roifile)
+                command.append("--output=%s" % oufile)
+                command.append(config.data)
+                if config.ts_verbose:
+                    command.append("-v")
+
+                os.system(" ".join(command))
+
+                os.remove(roifile)
+                
 
 if __name__ == "__main__":
     import os
 
     import hlr_utils
+    import sns_inst_util
 
     # set up the options available
     parser = hlr_utils.BasicOptions("usage: %prog [options] <datafile>")
@@ -147,15 +194,15 @@ if __name__ == "__main__":
     # set pixel grouping
     configure.pixel_group = options.pixel_group
 
+    # set bank1 tubes for summing 
     if options.sum_tubes_bank1 is not None:
-        import sns_inst_util
         configure.sum_tubes_bank1 = sns_inst_util.generateList(\
             options.sum_tubes_bank1.split(','))
     else:
         configure.sum_tubes_bank1 = options.sum_tubes_bank1
 
+    # set bank2 tubes for summing 
     if options.sum_tubes_bank2 is not None:
-        import sns_inst_util
         configure.sum_tubes_bank2 = sns_inst_util.generateList(\
             options.sum_tubes_bank2.split(','))
     else:
