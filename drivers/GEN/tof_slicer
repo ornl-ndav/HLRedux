@@ -40,9 +40,13 @@ def run(config):
     if config.verbose:
         print "Reading data file"
 
-    d_som1 = data_dst.getSOM(config.data_paths, so_axis,
-                             start_id=config.starting_ids,
-                             end_id=config.ending_ids)
+    if config.roi_file is None:
+        d_som1 = data_dst.getSOM(config.data_paths, so_axis,
+                                 start_id=config.starting_ids,
+                                 end_id=config.ending_ids)
+    else:
+        d_som1 = data_dst.getSOM(config.data_paths, so_axis,
+                                 roi_file=config.roi_file)
 
     if config.dump_pxl:
         hlr_utils.write_file(config.data, "text/Spec", d_som1, replace=True,
@@ -89,6 +93,10 @@ if __name__ == "__main__":
                       help="Flag to dump the TOF for all pixels")
     parser.set_defaults(dump_pxl=False)
 
+    parser.add_option("", "--roi-file", dest="roi_file",
+                      help="Specify a file that contains a list of pixel ids "\
+                      +"from a region-of-interest to be read from the data")
+
     (options, args) = parser.parse_args()
 
     # set up the configuration
@@ -114,6 +122,13 @@ if __name__ == "__main__":
         path = os.path.join(os.getcwd(), outfile)
         configure.output = hlr_utils.ext_replace(path, "nxs", "tof")
         print "Using %s as output file" % configure.output
+
+    # get the roi file name and check it 
+    configure.roi_file = hlr_utils.fix_filename(options.roi_file)
+    if configure.roi_file is not None:
+        if not hlr_utils.file_exists(configure.roi_file):
+            parser.error("Pixel roi file [%s] does not exist" \
+                         % configure.roi_file)
 
     # set the verbosity
     configure.verbose = options.verbose
