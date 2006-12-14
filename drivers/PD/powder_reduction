@@ -226,6 +226,13 @@ def run(config):
                          verbose=config.verbose,
                          message="data",
                          replace=True)
+
+    d_som10.attr_list["config"] = config
+
+    hlr_utils.write_file(config.data, "text/rmd", d_som10,
+                         output_ext="rmd", verbose=config.verbose,
+                         message="metadata")
+    
     
     
 if __name__ == "__main__":
