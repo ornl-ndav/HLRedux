@@ -215,7 +215,7 @@ def create_final(conf, data_som):
                                  x_units=["1/Angstroms","ueV"])
 
 
-def run(config):
+def run(config, tim=None):
     import sys
     
     if config.data is None:
@@ -223,12 +223,16 @@ def run(config):
                            +"script.")
 
     import DST
-
+        
     try:
         data_dst = DST.getInstance("application/x-NeXus", config.data)
     except SystemError:
         print "ERROR: Failed to data read file %s" % config.data
         sys.exit(-1)
+
+    if tim is not None:
+        tim.getTime(False)
+        old_time = tim.getOldTime()
 
     so_axis = "time_of_flight"
 
@@ -238,6 +242,9 @@ def run(config):
     d_som1 = data_dst.getSOM(config.data_paths, so_axis,
                              mask_file=config.mask_file)
 
+    if tim is not None:
+        tim.getTime(msg="After reading data: ")
+
     if config.no_mon_norm:
         m_som1 = None
     else:
@@ -245,6 +252,8 @@ def run(config):
             print "Reading in monitor data from data file"
         som_id = config.mon_path
         m_som1 = data_dst.getSOM(som_id, so_axis)
+        if tim is not None:
+            tim.getTime(msg="After reading monitor data: ")
 
     data_dst.release_resource()
 
@@ -253,6 +262,8 @@ def run(config):
             print "Doing dead-time correction"
             
         d_som2 = dead_time_correction(d_som1)
+        if tim is not None:
+            tim.getTime(msg="After dead-time correction: ")
     else:
         d_som2 = d_som1
 
@@ -265,6 +276,9 @@ def run(config):
         norm_dst = DST.getInstance("application/x-NeXus", config.norm)
         n_som1 = norm_dst.getSOM(config.data_paths, so_axis,
                                  mask_file=config.mask_file)
+        if tim is not None:
+            tim.getTime(msg="After reading normalization data: ")
+
         norm_dst.release_resource()
     else:
         n_som1 = None
@@ -276,6 +290,9 @@ def run(config):
         norm_bkg_dst = DST.getInstance("application/x-NeXus", config.norm_bkg)
         n_bkg_som1 = norm_bkg_dst.getSOM(config.data_paths, so_axis,
                                          mask_file=config.mask_file)
+        if tim is not None:
+            tim.getTime(msg="After reading normalization backgroun data: ")
+
         n_bkg_som1.release_resource()
     else:
         n_bkg_som1 = None
@@ -284,6 +301,11 @@ def run(config):
         print "Subtracting background for normalization"
         
     n_som2 = subtract_norm_bkg_from_norm(n_som1, n_bkg_som1)
+
+    if n_bkg_som1 is not None:
+        if tim is not None:
+            tim.getTime(msg="After subtraction background from "\
+                        +"normalization: ")
 
     del n_bkg_som1, n_som1
 
@@ -294,6 +316,9 @@ def run(config):
         dc_dst = DST.getInstance("application/x-NeXus", config.dark_count)
         dc_som1 = dc_dst.getSOM(config.data_paths, so_axis,
                                 mask_file=config.mask_file)
+        if tim is not None:
+            tim.getTime(msg="After reading dark-count data: ")
+
         dc_dst.release_resource()
     else:
         dc_som1 = None
@@ -303,6 +328,10 @@ def run(config):
         
     d_som3 = subtract_dark_count_from_data(d_som2, dc_som1)
 
+    if dc_som1 is not None:
+        if tim is not None:
+            tim.getTime(msg="After subtracting dark counts from data: ")
+
     del d_som2, dc_som1
 
     if not config.no_tib:
@@ -310,6 +339,8 @@ def run(config):
             print "Determining time-independent background from data"
             
         B = determine_time_indep_bkg(config, d_som3)
+        if tim is not None:
+            tim.getTime(msg="After determining time-independent background: ")
     else:
         B = None
 
@@ -317,6 +348,10 @@ def run(config):
         print "Subtracting time-independent background from data"
         
     d_som4 = subtract_time_indep_bkg(d_som3, B)
+
+    if B is not None:
+        if tim is not None:
+            tim.getTime(msg="After subtracting time-independent background: ")
 
     del d_som3, B
 
@@ -327,6 +362,9 @@ def run(config):
         bkg_dst = DST.getInstance("application/x-NeXus", config.data_bkg)
         bkg_som1 = bkg_dst.getSOM(config.data_paths, so_axis,
                                   mask_file=config.mask_file)
+        if tim is not None:
+            tim.getTime(msg="After reading sample background data: ")
+
         bkg_dst.release_resource()
     else:
         bkg_som1 = None
@@ -336,12 +374,20 @@ def run(config):
         
     d_som5 = subtract_bkg_from_data(config, d_som4, bkg_som1)
 
+    if bkg_som1 is not None:
+        if tim is not None:
+            tim.getTime(msg="After subtraction background from data: ")
+
     del d_som4, bkg_som1
 
     if config.verbose and n_som2 is not None:
         print "Normalizing data by normalization data"
 
     d_som6 = norm_data_by_van(d_som5, n_som2)
+
+    if n_som2 is not None:
+        if tim is not None:
+            tim.getTime(msg="After normalizing data: ")
 
     del d_som5, n_som2
 
@@ -393,8 +439,14 @@ def run(config):
     if config.verbose:
         print "Converting TOF to wavelength"
 
+    if tim is not None:
+        tim.getTime(False)
+
     (d_som7, m_som2) = convert_data_and_mon_to_wavelength(config, d_som6,
                                                           m_som1)
+
+    if tim is not None:
+        tim.getTime(msg="After converting TOF to wavelength: ")
 
     if config.dump_wave:
         hlr_utils.write_file(config.data, "text/Spec", d_som7,
@@ -485,7 +537,13 @@ def run(config):
     if config.verbose:
         print "Converting initial wavelength to E_initial"
 
+    if tim is not None:
+        tim.getTime(False)
+
     d_som11 = calc_E_initial(config, d_som9)
+
+    if tim is not None:
+        tim.getTime(msg="After converting initial wavelength to E_initial: ")
 
     if config.dump_initial_energy:
         hlr_utils.write_file(config.data, "text/Spec", d_som11,
@@ -510,7 +568,13 @@ def run(config):
     if config.verbose:
         print "Calculating energy transfer"
 
+    if tim is not None:
+        tim.getTime(False)
+
     d_som12 = calc_energy_transfer(config, d_som11)
+
+    if tim is not None:
+        tim.getTime(msg="After calculating energy transfer: ")
 
     del d_som11
 
@@ -523,7 +587,13 @@ def run(config):
     if config.verbose:
         print "Creating 2D spectrum"
 
+    if tim is not None:
+        tim.getTime(False)
+
     d_som13 = create_final(config, d_som12)
+
+    if tim is not None:
+        tim.getTime(msg="After creation of final spectrum: ")
 
     del d_som12
 
@@ -541,7 +611,10 @@ def run(config):
                          verbose=config.verbose,
                          message="metadata",
                          replace=True)
-
+    
+    if tim is not None:
+        tim.setOldTime(old_time)
+        tim.getTime(msg="Total Running Time: ")
 
 if __name__ == "__main__":
     import os
@@ -656,7 +729,11 @@ if __name__ == "__main__":
     parser.add_option("", "--mask-file", dest="mask_file",
                       help="Specify a file that contains a list of pixel ids "\
                       +"to be masked from the data")
-    
+
+    parser.add_option("", "--timing", action="store_true", dest="timing",
+                      help="Flag to turn on timing of code")
+    parser.set_defaults(timing=False)
+
     (options, args) = parser.parse_args()
 
     # set up the configuration
@@ -839,6 +916,12 @@ if __name__ == "__main__":
 
     # set the no filter option
     configure.no_filter = options.no_filter
+
+    if options.timing:
+        import sns_timing
+        timer = sns_timing.DiffTime()
+    else:
+        timer = None
     
     # run the program
-    run(configure)
+    run(configure, timer)
