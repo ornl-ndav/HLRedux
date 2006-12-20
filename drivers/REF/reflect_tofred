@@ -82,7 +82,7 @@ def combine_spectra(data_som):
 
     return data_som1
 
-def run(config):
+def run(config, tim):
     import sys
 
     import DST
@@ -90,6 +90,9 @@ def run(config):
     if config.data is None:
         raise RuntimeError("Need to pass a data filename to the driver "\
                            +"script.")
+
+    if tim is not None:
+        old_time = tim.getOldTime()
 
     so_axis = "time_of_flight"
 
@@ -115,10 +118,22 @@ def run(config):
 
         if i == 0:
             d_som1 = data_dst.getSOM(config.data_paths, so_axis)
+
+            if tim is not None:
+                tim.getTime(msg="After reading data: ")
+
             d_som1.attr_list["proton_charge"] = data_dst.getParameter("proton_charge")
         else:
             d_som_t = data_dst.getSOM(config.data_paths, so_axis)
+
+            if tim is not None:
+                tim.getTime(msg="After reading data: ")
+
             d_som1 = common_lib.add_ncerr(d_som_t, d_som1)
+
+            if tim is not None:
+                tim.getTime(msg="After adding spectra: ")
+
             del d_som_t
 
         data_dst.release_resource()
@@ -131,15 +146,26 @@ def run(config):
     
     if config.verbose:
         print "Filtering specular and background pixels"
-        
+
+    if tim is not None:
+        tim.getTime(False)
+
     (d_som2_D, d_som2_B) = filter_pixels(config, d_som1)
+
+    if tim is not None:
+        tim.getTime(msg="After filtering pixels: ")
 
     if config.verbose:
         print "Pixel counts:", len(d_som2_D), len(d_som2_B)
 
     if config.dump_specular:
+        if tim is not None:
+            tim.getTime(False)
         
         d_som2_D1 = dr_lib.sum_all_spectra(d_som2_D)
+
+        if tim is not None:
+            tim.getTime(msg="After summing signal spectra: ")
         if config.verbose:
             print "Signal counts:", dr_lib.integrate_axis(d_som2_D1)
         d_som2_D1[0].id = ("bank1", (0, 0))
@@ -152,7 +178,13 @@ def run(config):
     if config.verbose and not config.no_bkg:
         print "Determining background"
 
+    if tim is not None:
+        tim.getTime(False)
+
     B = determine_background(config, d_som2_B, len(d_som2_D))
+
+    if tim is not None:
+            tim.getTime(msg="After background determination: ")
 
     if not config.no_bkg:
         hlr_utils.write_file(main_data, "text/Spec", B,
@@ -162,13 +194,25 @@ def run(config):
     if config.verbose and not config.no_bkg:
         print "Subtracting background"
 
+    if tim is not None:
+        tim.getTime(False)
+
     d_som3 = subtract_bkg_from_data(d_som2_D, B)
+
+    if tim is not None:
+        tim.getTime(msg="After subtracting background: ")
 
     d_som2_D = None
     d_som2_B = None
     del d_som2_D, d_som2_B
 
+    if tim is not None:
+        tim.getTime(False)
+
     d_som4 = combine_spectra(d_som3)
+
+    if tim is not None:
+        tim.getTime(msg="After combining signal spectra: ")
 
     del d_som3
     
@@ -202,8 +246,14 @@ def run(config):
 
     if config.verbose and config.norm is not None:
         print "Normalizing data"
-        
+
+    if tim is not None:
+        tim.getTime(False)
+
     d_som5 = norm_data_by_inc_spec_factor(d_som4, n_som2)
+
+    if tim is not None:
+        tim.getTime(msg="After normalizing signal spectra: ")
 
     del d_som4
 
@@ -221,6 +271,10 @@ def run(config):
     hlr_utils.write_file(main_data, "text/rmd", d_som5,
                          output_ext="rmd", verbose=config.verbose,
                          message="metadata")
+
+    if tim is not None:
+        tim.setOldTime(old_time)
+        tim.getTime(msg="Completing driver: ")
 
 if __name__ == "__main__":
     import os
@@ -291,6 +345,10 @@ if __name__ == "__main__":
 
     parser.add_option("", "--det-geom", dest="det_geom",
                       help="Specify the detector geometry file")
+
+    parser.add_option("", "--timing", action="store_true", dest="timing",
+                      help="Flag to turn on timing of code")
+    parser.set_defaults(timing=False)
 
     (options, args) = parser.parse_args()
     
@@ -414,7 +472,14 @@ if __name__ == "__main__":
         configure.dump_specular = True
         configure.dump_sub = True
         configure.dump_norm = True
+
+
+    if options.timing:
+        import sns_timing
+        timer = sns_timing.DiffTime()
+    else:
+        timer = None
         
     # run the program
-    run(configure)
+    run(configure, timer)
 
