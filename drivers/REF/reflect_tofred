@@ -368,6 +368,7 @@ if __name__ == "__main__":
                 print "Data file [%s] does not exist, removing from list" % \
                       infile
                 args.remove(infile)
+                configure.num_data_files -= 1
             else:
                 pass
 
