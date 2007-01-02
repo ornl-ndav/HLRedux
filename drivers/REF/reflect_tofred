@@ -119,6 +119,10 @@ def run(config, tim):
         if i == 0:
             d_som1 = data_dst.getSOM(config.data_paths, so_axis)
 
+            if config.verbose:
+                print "# SO:",len(d_som1)
+                print "# TOF:",len(d_som1[0])
+
             if tim is not None:
                 tim.getTime(msg="After reading data: ")
 
