@@ -363,7 +363,9 @@ if __name__ == "__main__":
         if not hlr_utils.file_exists(configure.data):
             parser.error("Data file [%s] does not exist" % configure.data)
     elif configure.num_data_files > 1:
-        for infile in args:
+        import copy
+        tmplist = copy.deepcopy(args)
+        for infile in tmplist:
             if not hlr_utils.file_exists(infile):
                 print "Data file [%s] does not exist, removing from list" % \
                       infile
@@ -372,7 +374,12 @@ if __name__ == "__main__":
             else:
                 pass
 
-        configure.data = args
+        del tmplist
+        if configure.num_data_files == 0:
+            raise RuntimeError("No valid files are present. Reduction cannot "\
+                               +"be run.")
+        else:
+            configure.data = args
     else:
         parser.error("Did not specify a datafile")
 
