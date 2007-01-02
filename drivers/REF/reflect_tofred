@@ -140,8 +140,14 @@ def run(config, tim):
 
             del d_som_t
 
+            if tim is not None:
+                tim.getTime(msg="After SOM deletion")
+
         data_dst.release_resource()
         del data_dst
+
+        if tim is not None:
+            tim.getTime(msg="After resource release and DST deletion")
 
     if config.num_data_files == 1:
         main_data = config.data
