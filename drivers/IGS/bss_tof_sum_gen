@@ -79,7 +79,6 @@ def run(config):
                     
                     starting_id = (x1, config.pixel_group * i)
                     ending_id = (x2, config.pixel_group * (i + 1))
-                    print "A:",starting_id,ending_id
 
                 d_som1 = data_dst.getSOM(path, so_axis,
                                          start_id=starting_id,
