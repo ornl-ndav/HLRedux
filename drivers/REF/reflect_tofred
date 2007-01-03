@@ -124,19 +124,19 @@ def run(config, tim):
                 print "# TOF:",len(d_som1[0])
 
             if tim is not None:
-                tim.getTime(msg="After reading data: ")
+                tim.getTime(msg="After reading data")
 
             d_som1.attr_list["proton_charge"] = data_dst.getParameter("proton_charge")
         else:
             d_som_t = data_dst.getSOM(config.data_paths, so_axis)
 
             if tim is not None:
-                tim.getTime(msg="After reading data: ")
+                tim.getTime(msg="After reading data")
 
             d_som1 = common_lib.add_ncerr(d_som_t, d_som1)
 
             if tim is not None:
-                tim.getTime(msg="After adding spectra: ")
+                tim.getTime(msg="After adding spectra")
 
             del d_som_t
 
@@ -163,7 +163,7 @@ def run(config, tim):
     (d_som2_D, d_som2_B) = filter_pixels(config, d_som1)
 
     if tim is not None:
-        tim.getTime(msg="After filtering pixels: ")
+        tim.getTime(msg="After filtering pixels")
 
     if config.verbose:
         print "Pixel counts:", len(d_som2_D), len(d_som2_B)
@@ -175,7 +175,7 @@ def run(config, tim):
         d_som2_D1 = dr_lib.sum_all_spectra(d_som2_D)
 
         if tim is not None:
-            tim.getTime(msg="After summing signal spectra: ")
+            tim.getTime(msg="After summing signal spectra")
         if config.verbose:
             print "Signal counts:", dr_lib.integrate_axis(d_som2_D1)
         d_som2_D1[0].id = ("bank1", (0, 0))
@@ -194,7 +194,7 @@ def run(config, tim):
     B = determine_background(config, d_som2_B, len(d_som2_D))
 
     if tim is not None:
-            tim.getTime(msg="After background determination: ")
+            tim.getTime(msg="After background determination")
 
     if not config.no_bkg:
         hlr_utils.write_file(main_data, "text/Spec", B,
@@ -210,7 +210,7 @@ def run(config, tim):
     d_som3 = subtract_bkg_from_data(d_som2_D, B)
 
     if tim is not None:
-        tim.getTime(msg="After subtracting background: ")
+        tim.getTime(msg="After subtracting background")
 
     d_som2_D = None
     d_som2_B = None
@@ -222,7 +222,7 @@ def run(config, tim):
     d_som4 = combine_spectra(d_som3)
 
     if tim is not None:
-        tim.getTime(msg="After combining signal spectra: ")
+        tim.getTime(msg="After combining signal spectra")
 
     del d_som3
     
@@ -263,7 +263,7 @@ def run(config, tim):
     d_som5 = norm_data_by_inc_spec_factor(d_som4, n_som2)
 
     if tim is not None:
-        tim.getTime(msg="After normalizing signal spectra: ")
+        tim.getTime(msg="After normalizing signal spectra")
 
     del d_som4
 
@@ -284,7 +284,7 @@ def run(config, tim):
 
     if tim is not None:
         tim.setOldTime(old_time)
-        tim.getTime(msg="Completing driver: ")
+        tim.getTime(msg="Completing driver")
 
 if __name__ == "__main__":
     import os
