@@ -117,10 +117,17 @@ def run(config, tim):
                 print "Reading data file %d" % i
 
         if i == 0:
-            d_som1 = data_dst.getSOM(config.data_paths, so_axis)
-
+            if config.use_roi_file:
+                d_som1 = data_dst.getSOM(config.data_paths, so_axis,
+                                         roi_file=config.signal_roi_file)
+                b_som1 = data_dst.getSOM(config.data_paths, so_axis,
+                                         roi_file=config.bkg_roi_file)
+            else:
+                d_som1 = data_dst.getSOM(config.data_paths, so_axis)
+                if config.verbose:
+                    print "# SO:",len(d_som1)
+                
             if config.verbose:
-                print "# SO:",len(d_som1)
                 print "# TOF:",len(d_som1[0])
 
             if tim is not None:
@@ -128,17 +135,27 @@ def run(config, tim):
 
             d_som1.attr_list["proton_charge"] = data_dst.getParameter("proton_charge")
         else:
-            d_som_t = data_dst.getSOM(config.data_paths, so_axis)
+            if config.use_roi_file:
+                d_som_t = data_dst.getSOM(config.data_paths, so_axis,
+                                          roi_file=config.signal_roi_file)
+                b_som_t = data_dst.getSOM(config.data_paths, so_axis,
+                                          roi_file=config.bkg_roi_file)
+            else:
+                d_som_t = data_dst.getSOM(config.data_paths, so_axis)
 
             if tim is not None:
                 tim.getTime(msg="After reading data")
 
             d_som1 = common_lib.add_ncerr(d_som_t, d_som1)
+            if config.use_roi_file:
+                b_som1 = common_lib.add_ncerr(b_som_t, b_som1)
 
             if tim is not None:
                 tim.getTime(msg="After adding spectra")
 
             del d_som_t
+            if config.use_roi_file:
+                del b_som_t
 
             if tim is not None:
                 tim.getTime(msg="After SOM deletion")
@@ -160,7 +177,12 @@ def run(config, tim):
     if tim is not None:
         tim.getTime(False)
 
-    (d_som2_D, d_som2_B) = filter_pixels(config, d_som1)
+    if config.use_roi_file:
+        d_som2_D = d_som1
+        d_som2_B = b_som1
+        del b_som1, d_som1
+    else:
+        (d_som2_D, d_som2_B) = filter_pixels(config, d_som1)
 
     if tim is not None:
         tim.getTime(msg="After filtering pixels")
@@ -236,9 +258,13 @@ def run(config, tim):
             print "Reading normalization file"
 
         norm_dst = DST.getInstance("application/x-NeXus", config.norm)
-        n_som1 = norm_dst.getSOM(config.data_paths, so_axis,
-                                 start_id=config.norm_starting_ids,
-                                 end_id=config.norm_ending_ids)
+        if config.use_roi_file:
+            n_som1 = norm_dst.getSOM(config.data_paths, so_axis,
+                                     roi_file=config.signal_roi_file)
+        else:
+            n_som1 = norm_dst.getSOM(config.data_paths, so_axis,
+                                     start_id=config.norm_starting_ids,
+                                     end_id=config.norm_ending_ids)
         print "Norm Pixels:", len(n_som1)
         norm_dst.release_resource()
     else:
@@ -360,6 +386,23 @@ if __name__ == "__main__":
                       help="Flag to turn on timing of code")
     parser.set_defaults(timing=False)
 
+    parser.add_option("", "--signal-roi-file", dest="signal_roi_file",
+                      help="Specify the file containing the list pixel IDs "
+                      +"for the signal region.")
+
+    parser.add_option("", "--bkg-roi-file", dest="bkg_roi_file",
+                      help="Specify the file containing the list pixel IDs "
+                      +"for the background region.")
+
+    parser.add_option("", "--norm-signal-roi-file",
+                      dest="norm_signal_roi_file",
+                      help="Specify the file containing the list pixel IDs "
+                      +"for the normalization signal region.")
+
+    parser.add_option("", "--norm-bkg-roi-file", dest="norm_bkg_roi_file",
+                      help="Specify the file containing the list pixel IDs "
+                      +"for the normalization background region.")    
+
     (options, args) = parser.parse_args()
     
     # set up the configuration
@@ -429,6 +472,52 @@ if __name__ == "__main__":
     else:
         pass
 
+    # get the data path for the signal ROI file
+    configure.signal_roi_file = hlr_utils.fix_filename(options.signal_roi_file)
+    if configure.signal_roi_file is not None:
+        if not hlr_utils.file_exists(configure.signal_roi_file):
+            parser.error("Signal ROI file [%s] does not exist" \
+                         % configure.signal_roi_file)
+        else:
+            pass
+    else:
+        pass
+
+    # get the data path for the background ROI file
+    configure.bkg_roi_file = hlr_utils.fix_filename(options.bkg_roi_file)
+    if configure.bkg_roi_file is not None:
+        if not hlr_utils.file_exists(configure.bkg_roi_file):
+            parser.error("Background ROI file [%s] does not exist" \
+                         % configure.bkg_roi_file)
+        else:
+            pass
+    else:
+        pass
+
+    # get the data path for the normalization signal ROI file
+    configure.norm_signal_roi_file = hlr_utils.fix_filename(\
+        options.norm_signal_roi_file)
+    if configure.norm_signal_roi_file is not None:
+        if not hlr_utils.file_exists(configure.norm_signal_roi_file):
+            parser.error("Normalization Signal ROI file [%s] does not exist" \
+                         % configure.norm_signal_roi_file)
+        else:
+            pass
+    else:
+        configure.norm_signal_roi_file = configure.signal_roi_file
+    
+    # get the data path for the normalization background ROI file
+    configure.norm_bkg_roi_file = hlr_utils.fix_filename(\
+        options.norm_bkg_roi_file)
+    if configure.norm_bkg_roi_file is not None:
+        if not hlr_utils.file_exists(configure.norm_bkg_roi_file):
+            parser.error("Normalization Background ROI file [%s] does not "\
+                         +"exist" % configure.norm_bkg_roi_file)
+        else:
+            pass
+    else:
+        configure.norm_bkg_roi_file = configure.bkg_roi_file
+
     # set the data paths
     configure.data_paths = hlr_utils.create_data_paths(options.data_paths)
 
@@ -474,6 +563,20 @@ if __name__ == "__main__":
     else:
         configure.norm_ending_ids = configure.ending_ids
 
+    # check if PID files are being used
+    if configure.signal_roi_file is not None and \
+           configure.bkg_roi_file is not None:
+        configure.use_roi_file = True
+    else:
+        configure.use_roi_file = False
+
+    if not configure.use_roi_file and (configure.starting_ids is None \
+                                       and configure.ending_ids is None):
+        parser.error("Starting and ending ID flags must be used if signal "\
+                     +"and background ROI file flags are not used.")
+    else:
+        pass
+
     # set the ability to turn off background estimation and subtraction
     configure.no_bkg = options.no_bkg
 
@@ -490,7 +593,6 @@ if __name__ == "__main__":
         configure.dump_specular = True
         configure.dump_sub = True
         configure.dump_norm = True
-
 
     if options.timing:
         import sns_timing
