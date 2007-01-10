@@ -1,0 +1,160 @@
+#!/usr/bin/env python
+
+#                  High-Level Reduction Functions
+#           A part of the SNS Analysis Software Suite.
+#
+#                  Spallation Neutron Source
+#          Oak Ridge National Laboratory, Oak Ridge TN.
+#
+#
+#                             NOTICE
+#
+# For this software and its associated documentation, permission is granted
+# to reproduce, prepare derivative works, and distribute copies to the public
+# for any purpose and without fee.
+#
+# This material was prepared as an account of work sponsored by an agency of
+# the United States Government.  Neither the United States Government nor the
+# United States Department of Energy, nor any of their employees, makes any
+# warranty, express or implied, or assumes any legal liability or
+# responsibility for the accuracy, completeness, or usefulness of any
+# information, apparatus, product, or process disclosed, or represents that
+# its use would not infringe privately owned rights.
+#
+
+# $Id$
+
+def run(config, tim):
+    import sys
+
+    import DST
+    
+    if config.data is None:
+        raise RuntimeError("Need to pass a data filename to the driver "\
+                           +"script.")
+
+    if tim is not None:
+        old_time = tim.getOldTime()
+
+    so_axis = "time_of_flight"
+
+    for i in xrange(config.num_data_files):
+        if config.num_data_files == 1:
+            file_name = config.data
+        else:
+            file_name = config.data[i]
+
+        print "File:",file_name
+            
+        try:
+            data_dst = DST.getInstance("application/x-NeXus", file_name) 
+        except SystemError:
+            print "ERROR: Failed to data read file %s" % file_name
+            sys.exit(-1)
+
+        if config.verbose:
+            if config.num_data_files == 1:
+                print "Reading data file"
+            else:
+                print "Reading data file %d" % i
+
+        if i == 0:
+            d_som1 = data_dst.getSOM(config.data_paths, so_axis)
+            print "# SO:",len(d_som1)
+            print "# TOF:",len(d_som1[0])
+
+            if tim is not None:
+                tim.getTime(msg="After reading data")
+        else:
+            d_som_t = data_dst.getSOM(config.data_paths, so_axis)
+
+            if tim is not None:
+                tim.getTime(msg="After reading data")
+
+            d_som1 = common_lib.add_ncerr(d_som_t, d_som1)
+
+            if tim is not None:
+                tim.getTime(msg="After adding spectra")
+
+            del d_som_t
+
+            if tim is not None:
+                tim.getTime(msg="After SOM deletion")
+
+        data_dst.release_resource()
+        del data_dst
+
+        if tim is not None:
+            tim.getTime(msg="After resource release and DST deletion")
+
+    if tim is not None:
+        tim.setOldTime(old_time)
+        tim.getTime(msg="Completing driver")
+
+if __name__ == "__main__":
+    import os
+
+    import common_lib
+    import hlr_utils
+    
+    # set up the options available
+    parser = hlr_utils.BasicOptions("usage: %prog [options] <datafile>")
+
+    # Add REF specific options
+    parser.add_option("", "--data-paths", dest="data_paths",
+                      help="Specify the comma separated list of detector data"\
+                      +"paths and signals. Default is /entry/bank1,1")
+    parser.set_defaults(data_paths="/entry/bank1,1")
+
+    parser.add_option("", "--timing", action="store_true", dest="timing",
+                      help="Flag to turn on timing of code")
+    parser.set_defaults(timing=True)
+
+    (options, args) = parser.parse_args()
+    
+    # set up the configuration
+    configure = hlr_utils.Configure()
+    
+    # get the datafile name and check it
+    configure.num_data_files = len(args)
+    
+    if configure.num_data_files == 1:
+        configure.data = args[0]
+        if not hlr_utils.file_exists(configure.data):
+            parser.error("Data file [%s] does not exist" % configure.data)
+    elif configure.num_data_files > 1:
+        import copy
+        tmplist = copy.deepcopy(args)
+        for infile in tmplist:
+            if not hlr_utils.file_exists(infile):
+                print "Data file [%s] does not exist, removing from list" % \
+                      infile
+                args.remove(infile)
+                configure.num_data_files -= 1
+            else:
+                pass
+
+        del tmplist
+        if configure.num_data_files == 0:
+            raise RuntimeError("No valid files are present. Reduction cannot "\
+                               +"be run.")
+        else:
+            configure.data = args
+    else:
+        parser.error("Did not specify a datafile")
+
+    # set the verbosity
+    configure.verbose = options.verbose
+
+    # set the data paths
+    configure.data_paths = hlr_utils.create_data_paths(options.data_paths)
+
+    if options.timing:
+        import sns_timing
+        timer = sns_timing.DiffTime()
+    else:
+        timer = None
+        
+    # run the program
+    run(configure, timer)
+
