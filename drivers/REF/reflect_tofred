@@ -24,14 +24,21 @@
 
 # $Id$
 
-def filter_pixels(conf, data_som):
+def filter_pixels(conf, data_som, type="sample"):
 
-    return dr_lib.filter_pixels(data_som, conf.data_paths,
-                                conf.starting_ids, conf.ending_ids)
+    if type == "sample":
+        return dr_lib.filter_pixels(data_som, conf.data_paths,
+                                    conf.starting_ids, conf.ending_ids)
+    elif type == "norm":
+        return dr_lib.filter_pixels(data_som, conf.data_paths,
+                                    conf.norm_starting_ids,
+                                    conf.norm_ending_ids)
 
-def determine_background(conf, bkg_som, num_data_pixels):
+def determine_background(conf, bkg_som, num_data_pixels, type="sample"):
 
-    if conf.no_bkg:
+    if conf.no_bkg and type == "sample":
+        return None
+    elif conf.no_norm_bkg and type == "norm":
         return None
     else:
         bkg_som1 = dr_lib.sum_all_spectra(bkg_som)
@@ -171,7 +178,7 @@ def run(config, tim):
     else:
         main_data = config.data[0]
     
-    if config.verbose:
+    if config.verbose and not config.use_roi_file:
         print "Filtering specular and background pixels"
 
     if tim is not None:
@@ -184,7 +191,7 @@ def run(config, tim):
     else:
         (d_som2_D, d_som2_B) = filter_pixels(config, d_som1)
 
-    if tim is not None:
+    if tim is not None and not config.use_roi_file:
         tim.getTime(msg="After filtering pixels")
 
     if config.verbose:
@@ -216,7 +223,7 @@ def run(config, tim):
     B = determine_background(config, d_som2_B, len(d_som2_D))
 
     if tim is not None:
-            tim.getTime(msg="After background determination")
+        tim.getTime(msg="After background determination")
 
     if not config.no_bkg:
         hlr_utils.write_file(main_data, "text/Spec", B,
@@ -261,22 +268,91 @@ def run(config, tim):
         if config.use_roi_file:
             n_som1 = norm_dst.getSOM(config.data_paths, so_axis,
                                      roi_file=config.signal_roi_file)
+            if not config.no_norm_bkg:
+                n_som1_b = norm_dst.getSOM(config.data_paths, so_axis,
+                                           roi_file=config.bkg_roi_file)
+            else:
+                n_som1_b = None
         else:
-            n_som1 = norm_dst.getSOM(config.data_paths, so_axis,
-                                     start_id=config.norm_starting_ids,
-                                     end_id=config.norm_ending_ids)
-        print "Norm Pixels:", len(n_som1)
+            n_som1 = norm_dst.getSOM(config.data_paths, so_axis)
         norm_dst.release_resource()
     else:
         n_som1 = None
+        n_som1_b = None
+
+    if config.verbose and not config.use_roi_file and config.norm is not None:
+        print "Filtering normalization specular and background pixels"
+
+    if tim is not None:
+        tim.getTime(False)
 
     if config.norm is not None:
-        n_som2 = combine_spectra(n_som1)
+        if config.use_roi_file:
+            n_som2_D = n_som1
+            n_som2_B = n_som1_b
+            del n_som1, n_som1_b
+        else:
+            (n_som2_D, n_som2_B) = filter_pixels(config, n_som1, "norm")
     else:
-        n_som2 = None
+        n_som2_D = None
+        n_som2_B = None
+
+    if tim is not None and not config.use_roi_file and config.norm is not None:
+        tim.getTime(msg="After filtering normalization pixels")
+
+    if config.verbose and config.norm is not None:
+        result = []
+        result.append("Normalization Pixel counts:")
+        result.append(str(len(n_som2_D)))
+        if n_som2_B is not None:
+            result.append(str(len(n_som2_B)))
+        print " ".join(result)
+
+    if config.verbose and not config.no_norm_bkg and config.norm is not None:
+        print "Determining normalization background"
+
+    if tim is not None:
+        tim.getTime(False)
+
+    if config.norm is not None:
+        B_n = determine_background(config, n_som2_B, len(n_som2_D), "norm")
+    else:
+        B_n = None
+
+    if tim is not None and not config.no_norm_bkg and config.norm is not None:
+        tim.getTime(msg="After normalization background determination")
+
+    if not config.no_norm_bkg and B_n is not None:
+        hlr_utils.write_file(main_data, "text/Spec", B_n,
+                             output_ext="bnm", verbose=config.verbose,
+                             message="combined normalization background TOF "\
+                             +"information")
+        
+    if config.verbose and not config.no_norm_bkg and config.norm is not None:
+        print "Subtracting normalization background"
+
+    if tim is not None:
+        tim.getTime(False)
+    if config.norm is not None:
+        n_som3 = subtract_bkg_from_data(n_som2_D, B_n)
+    else:
+        n_som3 = None
+
+    if tim is not None and not config.no_norm_bkg and config.norm is not None:
+        tim.getTime(msg="After subtracting normalization background")
+
+    del n_som2_D, n_som2_B
+
+    if tim is not None:
+        tim.getTime(False)
+
+    if config.norm is not None:
+        n_som4 = combine_spectra(n_som3)
+    else:
+        n_som4 = None
 
     if config.dump_norm and config.norm is not None:
-        hlr_utils.write_file(main_data, "text/Spec", n_som2,
+        hlr_utils.write_file(main_data, "text/Spec", n_som4,
                              output_ext="nom", verbose=config.verbose,
                              message="combined normalization TOF information")
 
@@ -286,12 +362,12 @@ def run(config, tim):
     if tim is not None:
         tim.getTime(False)
 
-    d_som5 = norm_data_by_inc_spec_factor(d_som4, n_som2)
+    d_som5 = norm_data_by_inc_spec_factor(d_som4, n_som4)
 
-    if tim is not None:
+    if tim is not None and config.norm is not None:
         tim.getTime(msg="After normalizing signal spectra")
 
-    del d_som4
+    del d_som4, n_som4
 
     if config.det_angle is None:
         d_som5.attr_list["detector_angle"] = (0.0, "degree")
@@ -402,6 +478,12 @@ if __name__ == "__main__":
     parser.add_option("", "--norm-bkg-roi-file", dest="norm_bkg_roi_file",
                       help="Specify the file containing the list pixel IDs "
                       +"for the normalization background region.")    
+
+    parser.add_option("", "--no-norm-bkg", action="store_true",
+                      dest="no_norm_bkg",
+                      help="Flag to turn off normalization background "\
+                      +"estimation and subtraction")
+    parser.set_defaults(no_norm_bkg=False)
 
     (options, args) = parser.parse_args()
     
@@ -579,6 +661,10 @@ if __name__ == "__main__":
 
     # set the ability to turn off background estimation and subtraction
     configure.no_bkg = options.no_bkg
+
+    # set the ability to turn off normalization background estimation
+    # and subtraction
+    configure.no_norm_bkg = options.no_norm_bkg
 
     # set the ability to dump the combined specular TOF information
     configure.dump_specular = options.dump_specular
