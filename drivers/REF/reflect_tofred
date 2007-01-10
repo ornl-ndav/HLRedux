@@ -267,10 +267,10 @@ def run(config, tim):
         norm_dst = DST.getInstance("application/x-NeXus", config.norm)
         if config.use_roi_file:
             n_som1 = norm_dst.getSOM(config.data_paths, so_axis,
-                                     roi_file=config.signal_roi_file)
+                                     roi_file=config.norm_signal_roi_file)
             if not config.no_norm_bkg:
                 n_som1_b = norm_dst.getSOM(config.data_paths, so_axis,
-                                           roi_file=config.bkg_roi_file)
+                                           roi_file=config.norm_bkg_roi_file)
             else:
                 n_som1_b = None
         else:
