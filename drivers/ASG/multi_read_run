@@ -28,7 +28,14 @@ def run(config, tim):
     import sys
 
     import DST
-    
+
+    if config.one_pixel:
+        s_id = (0,0)
+        e_id = (1,1)
+    else:
+        s_id = None
+        e_id = None
+
     if config.data is None:
         raise RuntimeError("Need to pass a data filename to the driver "\
                            +"script.")
@@ -59,19 +66,22 @@ def run(config, tim):
                 print "Reading data file %d" % i
 
         if i == 0:
-            d_som1 = data_dst.getSOM(config.data_paths, so_axis)
+            d_som1 = data_dst.getSOM(config.data_paths, so_axis,
+                                     start_id=s_id, end_id=e_id)
             print "# SO:",len(d_som1)
             print "# TOF:",len(d_som1[0])
 
             if tim is not None:
                 tim.getTime(msg="After reading data")
         else:
-            d_som_t = data_dst.getSOM(config.data_paths, so_axis)
+            d_som_t = data_dst.getSOM(config.data_paths, so_axis,
+                                      start_id=s_id, end_id=e_id)
 
             if tim is not None:
                 tim.getTime(msg="After reading data")
 
-            d_som1 = common_lib.add_ncerr(d_som_t, d_som1)
+            if not config.no_add:
+                d_som1 = common_lib.add_ncerr(d_som_t, d_som1)
 
             if tim is not None:
                 tim.getTime(msg="After adding spectra")
@@ -109,6 +119,17 @@ if __name__ == "__main__":
     parser.add_option("", "--timing", action="store_true", dest="timing",
                       help="Flag to turn on timing of code")
     parser.set_defaults(timing=True)
+
+    parser.add_option("", "--profile", dest="profile",
+                      help="Specify the profiling output name")
+
+    parser.add_option("", "--no-add", action="store_true", dest="no_add",
+                      help="Flag for turning off SOM additions.")
+    parser.set_defaults(no_add=False)
+
+    parser.add_option("", "--one-pixel", action="store_true", dest="one_pixel",
+                      help="Flag for reading only one pixel.")
+    parser.set_defaults(one_pixel=False)
 
     (options, args) = parser.parse_args()
     
@@ -149,6 +170,12 @@ if __name__ == "__main__":
     # set the data paths
     configure.data_paths = hlr_utils.create_data_paths(options.data_paths)
 
+    # set the no-add flag
+    configure.no_add = options.no_add
+
+    # set the one-pixel flag
+    configure.one_pixel = options.one_pixel
+    
     if options.timing:
         import sns_timing
         timer = sns_timing.DiffTime()
@@ -156,5 +183,11 @@ if __name__ == "__main__":
         timer = None
         
     # run the program
-    run(configure, timer)
+    if options.profile is not None:
+        import profile
+        profiler = profile.Profile()
+        profiler.runcall(run, configure, timer)
+        profiler.dump_stats(options.profile)        
+    else:
+        run(configure, timer)
 
