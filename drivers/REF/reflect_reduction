@@ -56,15 +56,22 @@ def eff_correct_det(data_som, det_eff):
     else:
         return common_lib.div_ncerr(data_som, det_eff)
 
-def filter_pixels(conf, data_som):
+def filter_pixels(conf, data_som, btype="sample"):
 
-    return dr_lib.filter_pixels(data_som, conf.data_paths,
-                                conf.starting_ids, conf.ending_ids)
+    if btype == "sample":
+        return dr_lib.filter_pixels(data_som, conf.data_paths,
+                                    conf.starting_ids, conf.ending_ids)
+    elif btype == "norm":
+        return dr_lib.filter_pixels(data_som, conf.data_paths,
+                                    conf.norm_starting_ids,
+                                    conf.norm_ending_ids)
 
-def determine_background(conf, bkg_som, num_data_pixels):
+def determine_background(conf, bkg_som, num_data_pixels, btype="sample"):
 
-    if conf.no_bkg:
+    if conf.no_bkg and btype == "sample":
         return None
+    elif conf.no_norm_bkg and btype == "norm":
+        return None    
     else:
         bkg_som1 = dr_lib.sum_all_spectra(bkg_som)
         ratio = (1.0 / float(len(bkg_som)), 0.0)
@@ -230,62 +237,98 @@ def run(config):
         if config.use_roi_file:
             n_som1 = norm_dst.getSOM(config.data_paths, so_axis,
                                      roi_file=config.norm_signal_roi_file)
+            if not config.no_norm_bkg:
+                n_som1_b = norm_dst.getSOM(config.data_paths, so_axis,
+                                           roi_file=config.bkg_roi_file)
+            else:
+                n_som1_b = None
+
         else:
-            n_som1 = norm_dst.getSOM(config.data_paths, so_axis,
-                                     start_id=config.norm_starting_ids,
-                                     end_id=config.norm_ending_ids)
+            n_som1 = norm_dst.getSOM(config.data_paths, so_axis)
         norm_dst.release_resource()
     else:
         n_som1 = None
+        n_som1_b = None
 
     if config.verbose and config.norm is not None:
         print "Scale normalization spectra"
 
     n_som2 = scale_inc_spec_factor(config, n_som1)
-
-    n_som1 = None
     del n_som1
+    
+    if config.use_roi_file:
+        n_som2_b = scale_inc_spec_factor(config, n_som1_b)
+        del n_som1_b
 
     if config.dump_norm and n_som2 is not None:
         n_som2_1 = dr_lib.sum_all_spectra(n_som2)
         n_som2_1[0].id = ("bank1", (0, 0))
         hlr_utils.write_file(config.data, "text/Spec", n_som2_1,
-                             output_ext="ndc", verbose=config.verbose,
+                             output_ext="nom", verbose=config.verbose,
                              message="combined normalization TOF information")
-        n_som2_1 = None
         del n_som2_1
+
+    if config.norm is not None:
+        if config.use_roi_file:
+            n_som3_D = n_som2
+            n_som3_B = n_som2_b
+            del n_som2, n_som2_b
+        else:
+            (n_som3_D, n_som3_B) = filter_pixels(config, n_som2, "norm")
+    else:
+        n_som3_D = None
+        n_som3_B = None
+
+    if config.verbose and not config.no_norm_bkg and config.norm is not None:
+        print "Determining normalization background"
+
+    if config.norm is not None:
+        B_n = determine_background(config, n_som3_B, len(n_som3_D), "norm")
+    else:
+        B_n = None
+
+    if not config.no_norm_bkg and B_n is not None and config.dump_norm_bkg:
+        hlr_utils.write_file(config.data, "text/Spec", B_n,
+                             output_ext="bnm", verbose=config.verbose,
+                             message="combined normalization background TOF "\
+                             +"information")
+        
+    if config.verbose and not config.no_norm_bkg and config.norm is not None:
+        print "Subtracting normalization background"
+
+    if config.norm is not None:
+        n_som4 = subtract_bkg_from_data(n_som3_D, B_n)
+    else:
+        n_som4 = None
+
+    del n_som3_D, n_som3_B
+
 
     if config.verbose and config.norm is not None:
         print "Converting TOF to wavelength (norm)"
 
-    n_som3 = convert_data_tof_to_wavelength(n_som2)
+    n_som5 = convert_data_tof_to_wavelength(n_som4)
 
-    n_som2 = None
-    del n_som2
+    del n_som4
 
     if config.verbose:
         print "Combining spectra"
 
     d_som6 = combine_spectra(config, d_som5)
     if config.norm is not None:
-        n_som4 = combine_spectra(config, n_som3)
+        n_som6 = combine_spectra(config, n_som5)
     else:
-        n_som4 = None
+        n_som6 = None
 
-    d_som5 = None
-    del d_som5
-
-    n_som3 = None
-    del n_som3
+    del d_som5, n_som5
 
     if config.verbose and config.norm is not None \
            and config.geom_factor is not None:
         print "Scale data by normalization"
 
-    d_som7 = norm_data_by_inc_spec_factor(d_som6, n_som4)
+    d_som7 = norm_data_by_inc_spec_factor(d_som6, n_som6)
 
-    d_som6 = None
-    del d_som6
+    del d_som6, n_som6
 
     if config.det_angle is None:
         d_som7.attr_list["detector_angle"] = (0.0, "degree")
@@ -390,6 +433,18 @@ if __name__ == "__main__":
     parser.add_option("", "--norm-bkg-roi-file", dest="norm_bkg_roi_file",
                       help="Specify the file containing the list pixel IDs "
                       +"for the normalization background region.")    
+
+    parser.add_option("", "--no-norm-bkg", action="store_true",
+                      dest="no_norm_bkg",
+                      help="Flag to turn off normalization background "\
+                      +"estimation and subtraction")
+    parser.set_defaults(no_norm_bkg=False)
+
+    parser.add_option("", "--dump-norm-bkg", action="store_true",
+                      dest="dump_norm_bkg",
+                      help="Flag to dump the combined normalization "\
+                      +"background TOF information")
+    parser.set_defaults(dump_norm_bkg=False)
 
     (options, args) = parser.parse_args()
     
@@ -567,15 +622,24 @@ if __name__ == "__main__":
     # set the ability to turn off background estimation and subtraction
     configure.no_bkg = options.no_bkg
 
+    # set the ability to turn off normalization background estimation
+    # and subtraction
+    configure.no_norm_bkg = options.no_norm_bkg
+
     # set the ability to dump the combined specular TOF information
     configure.dump_specular = options.dump_specular
 
     # set the ability to dump the combined normalization TOF information
     configure.dump_norm = options.dump_norm
 
+    # set the ability to dump the combined normalization background TOF
+    # information
+    configure.dump_norm_bkg = options.dump_norm_bkg
+
     if options.dump_all:
         configure.dump_specular = True
         configure.dump_norm = True
+        configure.dump_norm_bkg = True
         
     # run the program
     run(configure)
