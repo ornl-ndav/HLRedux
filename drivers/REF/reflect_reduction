@@ -173,6 +173,11 @@ def run(config):
 
     B = determine_background(config, d_som2_B, len(d_som2_D))
 
+    if not config.no_bkg:
+        hlr_utils.write_file(config.data, "text/Spec", B,
+                             output_ext="bkg", verbose=config.verbose,
+                             message="combined background TOF information")
+
     if config.verbose and not config.no_bkg:
         print "Subtracting background"
 
