@@ -29,6 +29,10 @@ def run(config, tim):
 
     import DST
 
+    if config.mem:
+        import sns_memory_util
+        my_mem = sns_memory_util.mem_stat()
+    
     if config.one_pixel:
         s_id = (0,0)
         e_id = (1,1)
@@ -51,13 +55,20 @@ def run(config, tim):
         else:
             file_name = config.data[i]
 
-        print "File:",file_name
-            
         try:
+            if config.mem:
+                sns_memory_util.print_mem_stat("Before ID", my_mem, wait=0)
+            
             data_dst = DST.getInstance("application/x-NeXus", file_name) 
         except SystemError:
             print "ERROR: Failed to data read file %s" % file_name
             sys.exit(-1)
+
+        if tim is not None:
+            tim.getTime(msg="After initializing DST")
+
+        if config.mem:
+            sns_memory_util.print_mem_stat("After ID", my_mem, wait=0)
 
         if config.verbose:
             if config.num_data_files == 1:
@@ -66,6 +77,10 @@ def run(config, tim):
                 print "Reading data file %d" % i
 
         if i == 0:
+
+            if config.mem:
+                sns_memory_util.print_mem_stat("Before R", my_mem, wait=0)
+            
             d_som1 = data_dst.getSOM(config.data_paths, so_axis,
                                      start_id=s_id, end_id=e_id)
             print "# SO:",len(d_som1)
@@ -73,26 +88,44 @@ def run(config, tim):
 
             if tim is not None:
                 tim.getTime(msg="After reading data")
+
+            if config.mem:
+                sns_memory_util.print_mem_stat("After R", my_mem, wait=0)    
         else:
+            if config.mem:
+                sns_memory_util.print_mem_stat("Before R", my_mem, wait=0)
+
             d_som_t = data_dst.getSOM(config.data_paths, so_axis,
                                       start_id=s_id, end_id=e_id)
 
             if tim is not None:
                 tim.getTime(msg="After reading data")
 
+            if config.mem:
+                sns_memory_util.print_mem_stat("After R", my_mem, wait=0) 
+
             if not config.no_add:
                 d_som1 = common_lib.add_ncerr(d_som_t, d_som1)
 
-            if tim is not None:
+            if tim is not None and not config.no_add:
                 tim.getTime(msg="After adding spectra")
 
+            if config.mem and config.ref:
+                sns_memory_util.print_refcount(d_som_t, "d_som_t", recurse=1,
+                                               iter=1)
             del d_som_t
+
+            if config.mem:
+                sns_memory_util.print_mem_stat("After DS", my_mem, wait=0) 
 
             if tim is not None:
                 tim.getTime(msg="After SOM deletion")
 
         data_dst.release_resource()
         del data_dst
+
+        if config.mem:
+            sns_memory_util.print_mem_stat("After RRDD", my_mem, wait=0)
 
         if tim is not None:
             tim.getTime(msg="After resource release and DST deletion")
@@ -106,7 +139,7 @@ if __name__ == "__main__":
 
     import common_lib
     import hlr_utils
-    
+
     # set up the options available
     parser = hlr_utils.BasicOptions("usage: %prog [options] <datafile>")
 
@@ -131,14 +164,22 @@ if __name__ == "__main__":
                       help="Flag for reading only one pixel.")
     parser.set_defaults(one_pixel=False)
 
+    parser.add_option("", "--mem", action="store_true", dest="mem",
+                      help="Flag for turning on memory profiling.")
+    parser.set_defaults(mem=False)
+
+    parser.add_option("", "--ref", action="store_true", dest="ref",
+                      help="Flag for turning on reference counting.")
+    parser.set_defaults(ref=False)    
+
     (options, args) = parser.parse_args()
-    
+
     # set up the configuration
     configure = hlr_utils.Configure()
-    
+
     # get the datafile name and check it
     configure.num_data_files = len(args)
-    
+
     if configure.num_data_files == 1:
         configure.data = args[0]
         if not hlr_utils.file_exists(configure.data):
@@ -175,6 +216,12 @@ if __name__ == "__main__":
 
     # set the one-pixel flag
     configure.one_pixel = options.one_pixel
+
+    # set the memory flag
+    configure.mem = options.mem
+
+    # set the reference counting flag
+    configure.ref = options.ref    
     
     if options.timing:
         import sns_timing
