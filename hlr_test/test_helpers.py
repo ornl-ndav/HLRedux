@@ -45,7 +45,7 @@ def generate_so(data_type, start, stop=0, dim=1, extra=0):
         stop = start
         start = 0
         
-    so = SOM.SO(dim)
+    so = SOM.SO(dim, construct=True)
     if start == stop:
         return so
 
