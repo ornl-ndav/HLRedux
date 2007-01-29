@@ -43,7 +43,7 @@ def convert_data_to_scalar_Q(config, data_som):
     data_som1 = common_lib.tof_to_wavelength(data_som, inst_param="total",
                                              units="microsecond")
 
-    return common_lib.wavelength_to_scalar_Q(data_som1, half_angle=True)
+    return common_lib.wavelength_to_scalar_Q(data_som1)
 
     
 def run(config):
