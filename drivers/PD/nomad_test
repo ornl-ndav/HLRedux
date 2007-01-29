@@ -74,7 +74,7 @@ def create_final2(conf, data_som):
 
 def convert_data_to_scalar_Q(conf, data_som):
 
-    return common_lib.wavelength_to_scalar_Q(data_som, half_angle=True)
+    return common_lib.wavelength_to_scalar_Q(data_som)
 
 def combine_spectra(bins, data_som):
 
