@@ -52,6 +52,13 @@ def sum_all_spectra(obj):
     else:
         pass
 
+    # If there is only one SO, why run
+    if len(obj) == 1:
+        return obj
+    # OK, we need to sum 
+    else:
+        pass
+
     (result, res_descr) = hlr_utils.empty_result(obj)
 
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
