@@ -717,7 +717,7 @@ if __name__ == "__main__":
     
     parser.add_option("", "--no-filter", action="store_true", dest="no_filter",
                       help="Flag to turn off negative wavelength filtering.")
-    parser.set_defaults(no_filter=False)
+    parser.set_defaults(no_filter=True)
 
     parser.add_option("", "--final-energy-offset", dest="final_energy_offset",
                       help="Specify the final energy offset, err^2 in meV")
