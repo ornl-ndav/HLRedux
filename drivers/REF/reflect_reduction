@@ -602,8 +602,7 @@ if __name__ == "__main__":
         configure.norm_ending_ids = configure.ending_ids
 
     # check if PID files are being used
-    if configure.signal_roi_file is not None and \
-           configure.bkg_roi_file is not None:
+    if configure.signal_roi_file:
         configure.use_roi_file = True
     else:
         configure.use_roi_file = False
@@ -626,11 +625,18 @@ if __name__ == "__main__":
 
     # set the ability to turn off background estimation and subtraction
     configure.no_bkg = options.no_bkg
+    if configure.use_roi_file:
+        if configure.bkg_roi_file is None and not configure.no_bkg:
+            print "Shutting off background subtraction"
+            configure.no_bkg = True
 
     # set the ability to turn off normalization background estimation
     # and subtraction
     configure.no_norm_bkg = options.no_norm_bkg
-
+    if configure.use_roi_file:
+        if configure.norm_bkg_roi_file is None and not configure.no_norm_bkg:
+            configure.no_norm_bkg = True
+            
     # set the ability to dump the combined specular TOF information
     configure.dump_specular = options.dump_specular
 
