@@ -173,8 +173,7 @@ def create_2D_dist(som, *args, **kwargs):
         l_f = hlr_utils.get_special(lambda_final, so)
         
         Q = axis_manip.wavelength_to_scalar_Q(l_f[0], l_f[1],
-                                              angle / 2.0,
-                                              angle_err2 / 2.0)
+                                              angle, angle_err2)
 
         # Find Q value in given momentum transfer axis
         index = -1
