@@ -228,7 +228,10 @@ def run(config, tim=None):
         tim.getTime(False)
         old_time = tim.getOldTime()
 
-    so_axis = "time_of_flight"
+    if not config.mc:
+        so_axis = "time_of_flight"
+    else:
+        so_axis = "Time_of_Flight__us_"
 
     if config.verbose:
         print "Reading data file"
@@ -250,6 +253,9 @@ def run(config, tim=None):
             tim.getTime(msg="After reading monitor data: ")
 
     data_dst.release_resource()
+
+    if config.mc:
+        d_som1.attr_list["Wavelength_final"] = (6.627, 0.0)
 
     if config.dead_time is not None:
         if config.verbose:
@@ -385,6 +391,24 @@ def run(config, tim=None):
 
     del d_som5, n_som2
 
+    if config.mon_geom is not None:
+        if config.verbose:
+            print "Reading monitor geometry file"
+            
+        mon_geom_dst = DST.getInstance("application/x-NxsGeom",
+                                       config.mon_geom)
+        mon_geom_dst.setGeometry(config.mon_path, m_som1)
+        mon_geom_dst.release_resource()
+
+    if config.det_geom is not None:
+        if config.verbose:
+            print "Reading in detector geometry file"
+            
+        det_geom_dst = DST.getInstance("application/x-NxsGeom",
+                                       config.det_geom)
+        det_geom_dst.setGeometry(config.data_paths, d_som6)
+        det_geom_dst.release_resource()
+
     # Note: wavelength_final MUST be a tuple
     if config.wavelength_final is None:
         try:
@@ -421,24 +445,6 @@ def run(config, tim=None):
             d_som6.attr_list["Time_zero_offset"] = config.time_zero_offset
     else:
         d_som6.attr_list["Time_zero_offset"] = config.time_zero_offset
-
-    if config.mon_geom is not None:
-        if config.verbose:
-            print "Reading monitor geometry file"
-            
-        mon_geom_dst = DST.getInstance("application/x-NxsGeom",
-                                       config.mon_geom)
-        mon_geom_dst.setGeometry(config.mon_path, m_som1)
-        mon_geom_dst.release_resource()
-
-    if config.det_geom is not None:
-        if config.verbose:
-            print "Reading in detector geometry file"
-            
-        det_geom_dst = DST.getInstance("application/x-NxsGeom",
-                                       config.det_geom)
-        det_geom_dst.setGeometry(config.data_paths, d_som6)
-        det_geom_dst.release_resource()
 
     if config.verbose:
         print "Converting TOF to wavelength"
@@ -742,6 +748,10 @@ if __name__ == "__main__":
                       help="Specify the time zero slope, err^2 in "\
                       +"microseconds")
 
+    parser.add_option("", "--mc", action="store_true", dest="mc",
+                      help="Flag to turn on MC reading")
+    parser.set_defaults(mc=False)
+
     (options, args) = parser.parse_args()
 
     # set up the configuration
@@ -932,6 +942,9 @@ if __name__ == "__main__":
 
     # set the no filter option
     configure.no_filter = options.no_filter
+
+    # set MC option
+    configure.mc = options.mc
 
     if options.timing:
         import sns_timing
