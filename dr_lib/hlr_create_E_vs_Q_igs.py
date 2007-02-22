@@ -50,6 +50,8 @@ def create_E_vs_Q_igs(E_t_som, k_i_som, *args, **kwargs):
        the function. Here are the currently accepted keywords:
        - withXVar=<string>. The string will either be True or False. If the
                   keyword is not present, the default value will be False
+       - fast=<boolean> Turn on the use of the diagonal rebinning. This will
+                        the default operation
        - data_type=<string> The string can be either histogram, density or
                    coordinate. If the keyword is not present, the default
                    value will be histogram
@@ -127,6 +129,11 @@ def create_E_vs_Q_igs(E_t_som, k_i_som, *args, **kwargs):
     except KeyError:
         offset = 1
 
+    try:
+        run_fast = kwargs["fast"]
+    except KeyError:
+        run_fast = True
+
     so_dim = SOM.SO(dim)
 
     for i in range(dim):
@@ -159,13 +166,12 @@ def create_E_vs_Q_igs(E_t_som, k_i_som, *args, **kwargs):
     
     # Length of 2D data block
     y_len = len(E_t_som[0])
-    print "H:",y_len
     y2d_len = y_len * y_len
 
     for j in range(hlr_utils.get_length(E_t_som)):
         # Get lambda_f from instrument information
         map_so = hlr_utils.get_map_so(E_t_som, None, j)
-        print "A:",map_so.id
+        #print "A:",map_so.id
         (angle, angle_err2) = hlr_utils.get_parameter("polar", map_so, inst)
         #print "polar:",angle
         l_f = hlr_utils.get_special(lambda_final, map_so)
@@ -173,20 +179,15 @@ def create_E_vs_Q_igs(E_t_som, k_i_som, *args, **kwargs):
         # Convert lambda_f to k_f
         k_f = axis_manip.wavelength_to_scalar_k(l_f[0], l_f[1])
 
-        #print "k_f:",k_f[0]
-
         # Get k_i axis
         k_i_val = hlr_utils.get_value(k_i_som, j, "SOM", "x")
         k_i_err2 = hlr_utils.get_err2(k_i_som, j, "SOM", "x")
 
-        #print "k_i:",k_i_val
-        
         # Convert k_i and k_f to Q
         Q = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i_val, k_i_err2,
                                                          k_f[0], k_f[1],
                                                          angle, angle_err2)
 
-        #print "Q:",Q[0]
         del k_i_val, k_i_err2
 
         # Get E_t axis
@@ -198,26 +199,31 @@ def create_E_vs_Q_igs(E_t_som, k_i_som, *args, **kwargs):
         yval = axis_manip.reverse_array_nc(yval)
         yerr2 = axis_manip.reverse_array_nc(yerr2)
 
-        y_2d = nessi_list.NessiList(y2d_len)
-        var_y_2d= nessi_list.NessiList(y2d_len)
+        if run_fast:
+            common_lib.rebin_diagonal((yval, yerr2), (so_dim.y, so_dim.var_y),
+                                      Q[0], E_t,
+                                      so_dim.axis[0].val,
+                                      so_dim.axis[1].val)
+        else:
+            y_2d = nessi_list.NessiList(y2d_len)
+            var_y_2d= nessi_list.NessiList(y2d_len)
+            
+            for m in xrange(y_len):
+                y_2d[m * (y_len + 1)] = yval[m]
+                var_y_2d[m * (y_len + 1)] = yerr2[m]
+                
+                # Rebin both axes
+                y_2d_new = axis_manip.rebin_axis_2D(Q[0], E_t,
+                                                    y_2d, var_y_2d,
+                                                    so_dim.axis[0].val,
+                                                    so_dim.axis[1].val)
+                del y_2d, var_y_2d
 
-        for m in xrange(y_len):
-            y_2d[m * (y_len + 1)] = yval[m]
-            var_y_2d[m * (y_len + 1)] = yerr2[m]
-
-        # Rebin both axes
-        y_2d_new = axis_manip.rebin_axis_2D(Q[0], E_t,
-                                            y_2d, var_y_2d,
-                                            so_dim.axis[0].val,
-                                            so_dim.axis[1].val)
-        #print "F:",y_2d_new
-        del y_2d, var_y_2d
-
-        # Add data 
-        (so_dim.y, so_dim.var_y) = array_manip.add_ncerr(so_dim.y,
-                                                         so_dim.var_y,
-                                                         y_2d_new[0],
-                                                         y_2d_new[1])
+                # Add data 
+                (so_dim.y, so_dim.var_y) = array_manip.add_ncerr(so_dim.y,
+                                                                 so_dim.var_y,
+                                                                 y_2d_new[0],
+                                                                 y_2d_new[1])
 
     # Check for so_id keyword argument
     if kwargs.has_key("so_id"):
@@ -260,6 +266,7 @@ def create_E_vs_Q_igs(E_t_som, k_i_som, *args, **kwargs):
 
 if __name__ == "__main__":
     import hlr_test
+    import axis_manip
 
     som1 = hlr_test.generate_som("histogram", 1, 3)
     som1.attr_list["Wavelength_final"] = (1, 1)
@@ -269,10 +276,11 @@ if __name__ == "__main__":
     x_axis_err = hlr_utils.make_axis(0, 1, 0.25)
 
     som2 = hlr_test.generate_som("histogram", 1, 3)
+    som2[0].axis[0].val = axis_manip.reverse_array_nc(som2[0].axis[0].val)
+    som2[1].axis[0].val = axis_manip.reverse_array_nc(som2[1].axis[0].val)
+    som2[2].axis[0].val = axis_manip.reverse_array_nc(som2[2].axis[0].val)
     som2.attr_list.instrument = SOM.ASG_Instrument()
 
-    print "B:",type(som1[0].axis[0].val)
-    
     print "********** SOM1"
     print "* ", som1[0]
     print "* ", som1[1]
