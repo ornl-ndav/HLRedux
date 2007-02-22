@@ -29,6 +29,7 @@ from hlr_init_scatt_wavevector_to_scalar_Q import *
 from hlr_mult_ncerr import *
 from hlr_rebin_axis_1D import *
 from hlr_rebin_axis_2D import *
+from hlr_rebin_diagonal import rebin_diagonal
 from hlr_reverse_array_cp import *
 from hlr_sub_ncerr import *
 from hlr_sumw_ncerr import *
