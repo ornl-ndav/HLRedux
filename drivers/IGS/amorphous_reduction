@@ -202,25 +202,27 @@ def calc_energy_transfer(conf, data_som):
                                       lambda_f=conf.wavelength_final,
                                       offset=conf.final_energy_offset)
 
-def create_final(conf, E_t_som, k_i_som):
+def create_final(conf, data_som):
     """Combines Steps 16,19,20 and 21 to create final 2D spectrum"""
 
-    if conf.correct:
-        return dr_lib.create_E_vs_Q_igs(E_t_som, k_i_som,
-                                        conf.E_bins, conf.Q_bins,
-                                        so_id="Full Detector",
-                                        y_label="counts",
-                                        y_units="counts / (ueV * A^-1)",
-                                        x_labels=["Q transfer",
-                                                  "energy transfer"],
-                                        x_units=["1/Angstroms","ueV"])
-    else:
-        return dr_lib.create_2D_dist(data_som, conf.E_bins, conf.Q_bins,
-                                     so_id="Full Detector",
-                                     y_label="counts",
-                                     y_units="counts / (ueV * A^-1)",
-                                     x_labels=["Q transfer","energy transfer"],
-                                     x_units=["1/Angstroms","ueV"])
+    return dr_lib.create_2D_dist(data_som, conf.E_bins, conf.Q_bins,
+                                 so_id="Full Detector",
+                                 y_label="counts",
+                                 y_units="counts / (ueV * A^-1)",
+                                 x_labels=["Q transfer","energy transfer"],
+                                 x_units=["1/Angstroms","ueV"])
+
+def create_final_new(conf, E_t_som, k_i_som):
+    """Combines Steps 16,19,20 and 21 to create final 2D spectrum"""
+
+    return dr_lib.create_E_vs_Q_igs(E_t_som, k_i_som,
+                                    conf.E_bins, conf.Q_bins,
+                                    so_id="Full Detector",
+                                    y_label="counts",
+                                    y_units="counts / (ueV * A^-1)",
+                                    x_labels=["Q transfer",
+                                              "energy transfer"],
+                                    x_units=["1/Angstroms","ueV"])
 
 def run(config, tim=None):
     import sys
@@ -624,7 +626,10 @@ def run(config, tim=None):
     if tim is not None:
         tim.getTime(False)
 
-    d_som13 = create_final(config, d_som12, d_som10)
+    if config.correct:
+        d_som13 = create_final_new(config, d_som12, d_som10)
+    else:
+        d_som13 = create_final(config, d_som12)
 
     if tim is not None:
         tim.getTime(msg="After creation of final spectrum: ")
