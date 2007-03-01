@@ -53,13 +53,12 @@ if __name__ == "__main__":
                       help="Disable verbose print statements")
     parser.set_defaults(verbose=False)
     parser.add_option("-n", "--norm", dest="norm",
-                      help="Normalization run")
+                      help="Normalization runs")
     
     (options, args) = parser.parse_args()
     if options.verbose:
         options.multi = True
 
-    #inst = sns_inst_util.getInstrument(options.inst)
     inst = options.inst
     (runs, redArgs) = sns_inst_util.splitArgs(args, sys.argv, options)
     if len(inst) <= 0:
@@ -83,11 +82,12 @@ if __name__ == "__main__":
     runs = " ".join(runlist)
 
     if options.norm is not None:
-        cmd = "findnexus -i %s %s" % (inst, options.norm) 
+        cmd = "findnexus -s -i %s %s" % (inst, options.norm) 
         norm = clean_str(run_cmd(cmd, False))
+        normlist = norm.split(' ')
         if options.verbose:
-            print "N:",norm
-        redArgs += (" --norm=%s" % norm)
+            print "N:",normlist
+        redArgs += (" --norm=%s" % ",".join(normlist))
 
     command = "%s %s %s" % (COMMAND, runs, redArgs)
     if options.verbose:
