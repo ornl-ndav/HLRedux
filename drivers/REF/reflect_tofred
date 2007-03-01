@@ -491,12 +491,13 @@ if __name__ == "__main__":
     if options.norm is not None:
         norm_file_list = options.norm.split(',')
         configure.num_norm_files = len(norm_file_list)
+        print "Normfiles",configure.num_norm_files
         if configure.num_norm_files == 1:
             configure.norm = norm_file_list
             if not hlr_utils.file_exists(configure.norm[0]):
                 parser.error("Normalization file [%s] does not exist" % \
                              configure.norm[0])
-        elif configure.num_data_files > 1:
+        elif configure.num_norm_files > 1:
             import copy
             tmplist = copy.deepcopy(norm_file_list)
             for infile in tmplist:
@@ -504,12 +505,12 @@ if __name__ == "__main__":
                     print "Normalization file [%s] does not exist, removing "\
                           +"from list" % infile
                     norm_file_list.remove(infile)
-                configure.num_norm_files -= 1
-            else:
-                pass
+                    configure.num_norm_files -= 1
+                else:
+                    pass
 
             del tmplist
-            if configure.num_data_files == 0:
+            if configure.num_norm_files == 0:
                 raise RuntimeError("No valid normalization files are present."\
                                    +" Reduction cannot be run.")
             else:
