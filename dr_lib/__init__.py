@@ -20,6 +20,7 @@
 # its use would not infringe privately owned rights.
 #
 
+from hlr_add_files import *
 from hlr_create_2D_dist import *
 from hlr_create_E_vs_Q_igs import *
 from hlr_create_X_vs_pixpos import *

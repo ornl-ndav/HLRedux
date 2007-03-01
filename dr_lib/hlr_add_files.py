@@ -1,0 +1,182 @@
+#                  High-Level Reduction Functions
+#           A part of the SNS Analysis Software Suite.
+#
+#                  Spallation Neutron Source
+#          Oak Ridge National Laboratory, Oak Ridge TN.
+#
+#
+#                             NOTICE
+#
+# For this software and its associated documentation, permission is granted
+# to reproduce, prepare derivative works, and distribute copies to the public
+# for any purpose and without fee.
+#
+# This material was prepared as an account of work sponsored by an agency of
+# the United States Government.  Neither the United States Government nor the
+# United States Department of Energy, nor any of their employees, makes any
+# warranty, express or implied, or assumes any legal liability or
+# responsibility for the accuracy, completeness, or usefulness of any
+# information, apparatus, product, or process disclosed, or represents that
+# its use would not infringe privately owned rights.
+#
+
+# $Id$
+
+def add_files(filelist, **kwargs):
+    """
+    This function takes a list of NeXus files and various keyword arguments
+    and returns a data SOM and a background SOM (if requested) that is the
+    sum of all the data from the specified files. It is assumed that the files
+    contain similar data as only crude cross-checks will be made. You have
+    been warned.
+
+    Parameters:
+    ----------
+    -> filelist is a Python list containing the names of the files to sum
+    -> kwargs is a list of key word arguments that the function accepts:
+       SO_Axis=<string> This is the name of the main axis to read from the
+                        NeXus file
+       Data_Paths=<tuple> This is a tuple of tuples that contain the data
+                          paths and signals for the requested detector banks
+       Signal_ROI=<filename> This is the name of a file that contains a list
+                             of pixel IDs that will be read from the data file
+                             and stored as a signal SOM
+       Bkg_ROI=<filename> This is the name of a file that contains a list
+                          of pixel IDs that will be read from the data file
+                          and stored as a background SOM
+       Verbose=<boolean> This is a flag to turn on print statments. The
+                         default is False
+       Timer=<timer object> This is an SNS Timer object used for showing the
+                            performance timing in the function
+
+    Returns:
+    -------
+    <- A data SOM
+    <- A background SOM or None if background is not requested
+
+    Exceptions:
+    ----------
+    <- System exit if any file cannot be read
+    """
+
+    import common_lib
+    import DST
+
+    # Parse keywords
+    try:
+        so_axis = kwargs["SO_Axis"]
+    except KeyError:
+        so_axis = "time_of_flight"
+    
+    try:
+        data_paths = kwargs["Data_Paths"]
+    except KeyError:
+        data_paths = None
+
+    try:
+        signal_roi = kwargs["Signal_ROI"]
+    except KeyError:
+        signal_roi = None 
+    try:
+        bkg_roi = kwargs["Bkg_ROI"]
+    except KeyError:
+        bkg_roi = None        
+
+    try:
+        verbose = kwargs["Verbose"]
+    except KeyError:
+        verbose = False
+
+    try:
+        timer = kwargs["Timer"]
+    except KeyError:
+        timer = None
+
+    counter = 0
+
+    for filename in filelist:
+        if verbose:
+            print "File:",filename
+            
+        try:
+            data_dst = DST.getInstance("application/x-NeXus", filename) 
+        except SystemError:
+            print "ERROR: Failed to data read file %s" % filename
+            sys.exit(-1)
+
+        if verbose:
+            print "Reading data file %d" % counter
+
+        if counter == 0:
+            d_som1 = data_dst.getSOM(data_paths, so_axis,
+                                     roi_file=signal_roi)
+
+            if verbose:
+                print "# Signal SO:",len(d_som1)
+                print "# TOF:",len(d_som1[0])
+
+            if bkg_roi is not None:
+                b_som1 = data_dst.getSOM(data_paths, so_axis,
+                                         roi_file=bkg_roi)
+                if verbose:
+                    print "# Background SO:",len(b_som1)
+
+            else:
+                b_som1 = None
+
+            if timer is not None:
+                timer.getTime(msg="After reading data")
+
+        else:
+            d_som_t = data_dst.getSOM(data_paths, so_axis,
+                                      roi_file=signal_roi)
+            if bkg_roi is not None:
+                b_som_t = data_dst.getSOM(data_paths, so_axis,
+                                          roi_file=bkg_roi)
+            else:
+                b_som_t = None
+            if timer is not None:
+                timer.getTime(msg="After reading data")
+
+            d_som1 = common_lib.add_ncerr(d_som_t, d_som1)
+            if bkg_roi is not None:
+                b_som1 = common_lib.add_ncerr(b_som_t, b_som1)
+
+            if timer is not None:
+                timer.getTime(msg="After adding spectra")
+
+            del d_som_t
+            if bkg_roi is not None:
+                del b_som_t
+
+            if timer is not None:
+                timer.getTime(msg="After SOM deletion")
+
+        data_dst.release_resource()
+        del data_dst
+        counter += 1
+
+        if timer is not None:
+            timer.getTime(msg="After resource release and DST deletion")
+
+
+    return (d_som1, b_som1)
+
+if __name__ == "__main__":
+
+    my_files = []
+    my_files.append("/SNS/REF_L/2006_2_4B_SCI/1/1845/NeXus/REF_L_1845.nxs")
+    my_files.append("/SNS/REF_L/2006_2_4B_SCI/1/1848/NeXus/REF_L_1848.nxs")
+
+    my_paths = ("/entry/bank1", 1)
+
+    signal_roi_file = "../../hlr_test/files/REF_L_1845_signal_Pid.txt"
+    bkg_roi_file = "../../hlr_test/files/REF_L_1845_background_Pid.txt"
+
+    (d_som, b_som) = add_files(my_files, Data_Paths=my_paths,
+                               Signal_ROI=signal_roi_file,
+                               Bkg_ROI=bkg_roi_file, Verbose=True)
+
+    print "Length Data:", len(d_som)
+    if b_som is not None:
+        print "Length Background:", len(b_som)
