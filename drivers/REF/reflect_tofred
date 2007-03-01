@@ -491,7 +491,6 @@ if __name__ == "__main__":
     if options.norm is not None:
         norm_file_list = options.norm.split(',')
         configure.num_norm_files = len(norm_file_list)
-        print "Normfiles",configure.num_norm_files
         if configure.num_norm_files == 1:
             configure.norm = norm_file_list
             if not hlr_utils.file_exists(configure.norm[0]):
