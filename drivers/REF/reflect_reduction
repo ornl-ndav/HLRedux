@@ -119,7 +119,7 @@ def combine_spectra(conf, data_som):
 
     return data_som2
 
-def run(config):
+def run(config, tim):
     import sys
 
     import DST
@@ -127,6 +127,8 @@ def run(config):
     if config.data is None:
         raise RuntimeError("Need to pass a data filename to the driver "\
                            +"script.")
+    if tim is not None:
+        old_time = tim.getOldTime()
 
     try:
         data_dst = DST.getInstance("application/x-NeXus", config.data,
@@ -148,7 +150,10 @@ def run(config):
     else:
         d_som1 = data_dst.getSOM(config.data_paths, so_axis)
     d_som1.attr_list["proton_charge"] = data_dst.getParameter("proton_charge")
-    
+
+    if tim is not None:
+        tim.getTime(msg="After reading data")
+
     if config.verbose and not config.use_roi_file:
         print "Filtering specular and background pixels"
 
@@ -173,6 +178,9 @@ def run(config):
 
     B = determine_background(config, d_som2_B, len(d_som2_D))
 
+    if tim is not None:
+        tim.getTime(msg="After background determination")
+
     if not config.no_bkg:
         hlr_utils.write_file(config.data, "text/Spec", B,
                              output_ext="bkg", verbose=config.verbose,
@@ -182,6 +190,9 @@ def run(config):
         print "Subtracting background"
 
     d_som3 = subtract_bkg_from_data(d_som2_D, B)
+
+    if tim is not None:
+        tim.getTime(msg="After subtracting background")
 
     d_som2_D = None
     d_som2_B = None
@@ -238,6 +249,9 @@ def run(config):
         if config.verbose:
             print "Reading normalization file"
 
+        if tim is not None:
+            tim.getTime(False)
+
         norm_dst = DST.getInstance("application/x-NeXus", config.norm)
         if config.use_roi_file:
             n_som1 = norm_dst.getSOM(config.data_paths, so_axis,
@@ -251,6 +265,9 @@ def run(config):
         else:
             n_som1 = norm_dst.getSOM(config.data_paths, so_axis)
         norm_dst.release_resource()
+
+        if tim is not None:
+            tim.getTime(msg="After reading normalization file")
     else:
         n_som1 = None
         n_som1_b = None
@@ -287,10 +304,16 @@ def run(config):
     if config.verbose and not config.no_norm_bkg and config.norm is not None:
         print "Determining normalization background"
 
+    if tim is not None:
+        tim.getTime(False)
+
     if config.norm is not None:
         B_n = determine_background(config, n_som3_B, len(n_som3_D), "norm")
     else:
         B_n = None
+
+    if tim is not None and not config.no_norm_bkg and config.norm is not None:
+        tim.getTime(msg="After normalization background determination")
 
     if not config.no_norm_bkg and B_n is not None and config.dump_norm_bkg:
         hlr_utils.write_file(config.data, "text/Spec", B_n,
@@ -301,18 +324,29 @@ def run(config):
     if config.verbose and not config.no_norm_bkg and config.norm is not None:
         print "Subtracting normalization background"
 
+    if tim is not None:
+        tim.getTime(False)
+
     if config.norm is not None:
         n_som4 = subtract_bkg_from_data(n_som3_D, B_n)
     else:
         n_som4 = None
 
-    del n_som3_D, n_som3_B
+    if tim is not None and not config.no_norm_bkg and config.norm is not None:
+        tim.getTime(msg="After subtracting normalization background")
 
+    del n_som3_D, n_som3_B
 
     if config.verbose and config.norm is not None:
         print "Converting TOF to wavelength (norm)"
 
+    if tim is not None:
+        tim.getTime(False)
+
     n_som5 = convert_data_tof_to_wavelength(n_som4)
+
+    if tim is not None:
+        tim.getTime(msg="After wavelength conversion")
 
     del n_som4
 
@@ -333,6 +367,9 @@ def run(config):
 
     d_som7 = norm_data_by_inc_spec_factor(d_som6, n_som6)
 
+    if tim is not None and config.norm is not None:
+        tim.getTime(msg="After normalizing signal spectra")
+
     del d_som6, n_som6
 
     if config.det_angle is None:
@@ -349,6 +386,10 @@ def run(config):
     hlr_utils.write_file(config.data, "text/rmd", d_som7,
                          output_ext="rmd", verbose=config.verbose,
                          message="metadata")
+
+    if tim is not None:
+        tim.setOldTime(old_time)
+        tim.getTime(msg="Completing driver")
 
 if __name__ == "__main__":
     import os
@@ -450,6 +491,10 @@ if __name__ == "__main__":
                       help="Flag to dump the combined normalization "\
                       +"background TOF information")
     parser.set_defaults(dump_norm_bkg=False)
+
+    parser.add_option("", "--timing", action="store_true", dest="timing",
+                      help="Flag to turn on timing of code")
+    parser.set_defaults(timing=False)
 
     (options, args) = parser.parse_args()
     
@@ -651,6 +696,12 @@ if __name__ == "__main__":
         configure.dump_specular = True
         configure.dump_norm = True
         configure.dump_norm_bkg = True
-        
+
+    if options.timing:
+        import sns_timing
+        timer = sns_timing.DiffTime()
+    else:
+        timer = None
+
     # run the program
-    run(configure)
+    run(configure, timer)
