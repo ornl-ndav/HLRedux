@@ -103,75 +103,18 @@ def run(config, tim):
 
     so_axis = "time_of_flight"
 
-    for i in xrange(config.num_data_files):
-        if config.num_data_files == 1:
-            file_name = config.data
-        else:
-            file_name = config.data[i]
+    if config.num_data_files == 1:
+        filelist = [config.data]
+    else:
+        filelist = config.data
 
-        print "File:",file_name
-            
-        try:
-            data_dst = DST.getInstance("application/x-NeXus", file_name) 
-        except SystemError:
-            print "ERROR: Failed to data read file %s" % file_name
-            sys.exit(-1)
-
-        if config.verbose:
-            if config.num_data_files == 1:
-                print "Reading data file"
-            else:
-                print "Reading data file %d" % i
-
-        if i == 0:
-            if config.use_roi_file:
-                d_som1 = data_dst.getSOM(config.data_paths, so_axis,
-                                         roi_file=config.signal_roi_file)
-                b_som1 = data_dst.getSOM(config.data_paths, so_axis,
-                                         roi_file=config.bkg_roi_file)
-            else:
-                d_som1 = data_dst.getSOM(config.data_paths, so_axis)
-                if config.verbose:
-                    print "# SO:",len(d_som1)
-                
-            if config.verbose:
-                print "# TOF:",len(d_som1[0])
-
-            if tim is not None:
-                tim.getTime(msg="After reading data")
-
-            d_som1.attr_list["proton_charge"] = data_dst.getParameter("proton_charge")
-        else:
-            if config.use_roi_file:
-                d_som_t = data_dst.getSOM(config.data_paths, so_axis,
-                                          roi_file=config.signal_roi_file)
-                b_som_t = data_dst.getSOM(config.data_paths, so_axis,
-                                          roi_file=config.bkg_roi_file)
-            else:
-                d_som_t = data_dst.getSOM(config.data_paths, so_axis)
-
-            if tim is not None:
-                tim.getTime(msg="After reading data")
-
-            d_som1 = common_lib.add_ncerr(d_som_t, d_som1)
-            if config.use_roi_file:
-                b_som1 = common_lib.add_ncerr(b_som_t, b_som1)
-
-            if tim is not None:
-                tim.getTime(msg="After adding spectra")
-
-            del d_som_t
-            if config.use_roi_file:
-                del b_som_t
-
-            if tim is not None:
-                tim.getTime(msg="After SOM deletion")
-
-        data_dst.release_resource()
-        del data_dst
-
-        if tim is not None:
-            tim.getTime(msg="After resource release and DST deletion")
+    (d_som1, b_som1) = dr_lib.add_files(filelist,
+                                        Data_Paths=config.data_paths,
+                                        SO_Axis=so_axis,
+                                        Signal_ROI=config.signal_roi_file,
+                                        Bkg_ROI=config.bkg_roi_file,
+                                        Verbose=config.verbose,
+                                        Timer=tim)
 
     if config.num_data_files == 1:
         main_data = config.data
@@ -264,18 +207,21 @@ def run(config, tim):
         if config.verbose:
             print "Reading normalization file"
 
-        norm_dst = DST.getInstance("application/x-NeXus", config.norm)
-        if config.use_roi_file:
-            n_som1 = norm_dst.getSOM(config.data_paths, so_axis,
-                                     roi_file=config.norm_signal_roi_file)
-            if not config.no_norm_bkg:
-                n_som1_b = norm_dst.getSOM(config.data_paths, so_axis,
-                                           roi_file=config.norm_bkg_roi_file)
-            else:
-                n_som1_b = None
-        else:
-            n_som1 = norm_dst.getSOM(config.data_paths, so_axis)
-        norm_dst.release_resource()
+        if tim is not None:
+            tim.getTime(False)
+
+        filelist = config.norm
+        
+        (n_som1, n_som1_b) = dr_lib.add_files(filelist,
+                                       Data_Paths=config.data_paths,
+                                       SO_Axis=so_axis,
+                                       Signal_ROI=config.norm_signal_roi_file,
+                                       Bkg_ROI=config.norm_bkg_roi_file,
+                                       Verbose=config.verbose,
+                                       Timer=tim)
+
+        if tim is not None:
+            tim.getTime(msg="After reading normalization file")
     else:
         n_som1 = None
         n_som1_b = None
@@ -333,6 +279,7 @@ def run(config, tim):
 
     if tim is not None:
         tim.getTime(False)
+
     if config.norm is not None:
         n_som3 = subtract_bkg_from_data(n_som2_D, B_n)
     else:
@@ -540,16 +487,36 @@ if __name__ == "__main__":
     # set the verbosity
     configure.verbose = options.verbose
 
-    configure.norm = hlr_utils.fix_filename(options.norm)
-    if configure.norm is not None:
-        if not hlr_utils.file_exists(configure.norm):
-            parser.error("Normalization file [%s] does not exist" \
-                         % configure.norm)
-        else:
-            pass
-    else:
-        pass
+    # get normalization files
+    if options.norm is not None:
+        norm_file_list = options.norm.split(',')
+        configure.num_norm_files = len(norm_file_list)
+        if configure.num_norm_files == 1:
+            configure.norm = norm_file_list
+            if not hlr_utils.file_exists(configure.norm[0]):
+                parser.error("Normalization file [%s] does not exist" % \
+                             configure.norm[0])
+        elif configure.num_data_files > 1:
+            import copy
+            tmplist = copy.deepcopy(norm_file_list)
+            for infile in tmplist:
+                if not hlr_utils.file_exists(infile):
+                    print "Normalization file [%s] does not exist, removing "\
+                          +"from list" % infile
+                    norm_file_list.remove(infile)
+                configure.num_norm_files -= 1
+            else:
+                pass
 
+            del tmplist
+            if configure.num_data_files == 0:
+                raise RuntimeError("No valid normalization files are present."\
+                                   +" Reduction cannot be run.")
+            else:
+                configure.norm = norm_file_list
+    else:
+        configure.norm = options.norm
+        
     configure.det_geom = hlr_utils.fix_filename(options.det_geom)
     if configure.det_geom is not None:
         if not hlr_utils.file_exists(configure.det_geom):
