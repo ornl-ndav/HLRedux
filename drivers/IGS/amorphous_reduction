@@ -562,13 +562,13 @@ def run(config, tim=None):
     if config.verbose:
         print "Converting initial wavelength to k_initial"
 
-    if tim is not None:
-        tim.getTime(False)
+    #if tim is not None:
+    #    tim.getTime(False)
 
-    d_som10 = calc_k_initial(config, d_som9)
+    #d_som10 = calc_k_initial(config, d_som9)
 
-    if tim is not None:
-        tim.getTime(msg="After converting initial wavelength to k_initial: ")
+    #if tim is not None:
+    #    tim.getTime(msg="After converting initial wavelength to k_initial: ")
         
     if config.verbose:
         print "Converting initial wavelength to E_initial"
@@ -627,14 +627,16 @@ def run(config, tim=None):
         tim.getTime(False)
 
     if config.correct:
-        d_som13 = create_final_new(config, d_som12, d_som10)
+        #d_som13 = create_final_new(config, d_som12, d_som10)
     else:
         d_som13 = create_final(config, d_som12)
 
     if tim is not None:
         tim.getTime(msg="After creation of final spectrum: ")
 
-    del d_som12, d_som10
+    del d_som12
+    #if config.correct:
+    #    del d_som10
 
     # Writing 2D DAVE file
 
