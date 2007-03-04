@@ -559,8 +559,8 @@ def run(config, tim=None):
         d_som9.attr_list["Initial_energy_offset"] = \
                                                   config.initial_energy_offset
 
-    if config.verbose:
-        print "Converting initial wavelength to k_initial"
+    #if config.verbose:
+    #    print "Converting initial wavelength to k_initial"
 
     #if tim is not None:
     #    tim.getTime(False)
@@ -628,6 +628,7 @@ def run(config, tim=None):
 
     if config.correct:
         #d_som13 = create_final_new(config, d_som12, d_som10)
+        pass
     else:
         d_som13 = create_final(config, d_som12)
 
