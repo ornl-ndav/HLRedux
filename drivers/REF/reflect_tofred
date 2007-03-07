@@ -119,6 +119,7 @@ def run(config, tim):
     if config.num_data_files == 1:
         main_data = config.data
     else:
+        d_som1.attr_list["filename"] = config.data
         main_data = config.data[0]
     
     if config.verbose and not config.use_roi_file:
