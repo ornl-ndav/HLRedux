@@ -378,6 +378,11 @@ def create_id_pairs(pairs, paths, **kwargs):
     mylist = pairs.split(',')
     length = len(mylist)
 
+    if length % 2 != 0:
+        raise RuntimeError("Expected an even number of Id pairs")
+    else:
+        pass
+
     size = len(paths.split(','))
     try:
         if int(paths.split(',')[1]) == 1:
