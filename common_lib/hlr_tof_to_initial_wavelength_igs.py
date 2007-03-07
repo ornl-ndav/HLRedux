@@ -231,7 +231,7 @@ def tof_to_initial_wavelength_igs(obj, **kwargs):
         if run_filter:
             index = 0
             for val in value[0]:
-                if val > 0:
+                if val >= 0:
                     break
                 index += 1
 
