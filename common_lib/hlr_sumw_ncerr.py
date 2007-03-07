@@ -88,7 +88,7 @@ def sumw_ncerr(obj1, obj2, **kwargs):
     # iterate through the values
     import array_manip
     
-    for i in range(hlr_utils.get_length(obj1, obj2)):
+    for i in xrange(hlr_utils.get_length(obj1, obj2)):
         val1 = hlr_utils.get_value(obj1, i, o1_descr, axis, axis_pos)
         err2_1 = hlr_utils.get_err2(obj1, i, o1_descr, axis, axis_pos)
 

@@ -208,7 +208,7 @@ def tof_to_initial_wavelength_igs_lin_time_zero(obj, **kwargs):
     # iterate through the values
     import axis_manip
     
-    for i in range(hlr_utils.get_length(obj)):
+    for i in xrange(hlr_utils.get_length(obj)):
         val = hlr_utils.get_value(obj, i, o_descr, "x", axis)
         err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
 

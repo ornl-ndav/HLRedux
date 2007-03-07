@@ -75,7 +75,7 @@ def weighted_average(obj, **kwargs):
     # iterate through the values
     import utils
     
-    for i in range(hlr_utils.get_length(obj)):
+    for i in xrange(hlr_utils.get_length(obj)):
         val = hlr_utils.get_value(obj, i, o_descr, "y")
         err2 = hlr_utils.get_err2(obj, i, o_descr, "y")
 

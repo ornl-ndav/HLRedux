@@ -85,7 +85,7 @@ def div_ncerr(left, right, **kwargs):
     # iterate through the values
     import array_manip
     
-    for i in range(hlr_utils.get_length(left, right)):
+    for i in xrange(hlr_utils.get_length(left, right)):
         val1 = hlr_utils.get_value(left, i, l_descr, axis, axis_pos)
         err2_1 = hlr_utils.get_err2(left, i, l_descr, axis, axis_pos)
 

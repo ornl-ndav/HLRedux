@@ -124,7 +124,7 @@ def init_scatt_wavevector_to_scalar_Q(initk, scattk, **kwargs):
     # iterate through the values
     import axis_manip
     
-    for i in range(hlr_utils.get_length(initk, scattk)):
+    for i in xrange(hlr_utils.get_length(initk, scattk)):
         val1 = hlr_utils.get_value(initk, i, i_descr, "x")
         err2_1 = hlr_utils.get_err2(initk, i, i_descr, "x")
         

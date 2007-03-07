@@ -66,7 +66,7 @@ def rebin_axis_1D(obj, axis_out):
     # iterate through the values
     import axis_manip
     
-    for i in range(hlr_utils.get_length(obj)):
+    for i in xrange(hlr_utils.get_length(obj)):
         axis_in = hlr_utils.get_value(obj, i, o_descr, "x", 0)
         val = hlr_utils.get_value(obj, i, o_descr)
         err2 = hlr_utils.get_err2(obj, i, o_descr)

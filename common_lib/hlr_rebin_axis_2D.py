@@ -74,7 +74,7 @@ def rebin_axis_2D(obj, axis1_out, axis2_out):
     # iterate through the values
     import axis_manip
     
-    for i in range(hlr_utils.get_length(obj)):
+    for i in xrange(hlr_utils.get_length(obj)):
         axis1_in = hlr_utils.get_value(obj, i, o_descr, "x", 0)
         axis2_in = hlr_utils.get_value(obj, i, o_descr, "x", 1)
         val = hlr_utils.get_value(obj, i, o_descr)

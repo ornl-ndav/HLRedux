@@ -93,7 +93,7 @@ def wavelength_to_energy(obj, **kwargs):
     import array_manip
     import axis_manip
     
-    for i in range(hlr_utils.get_length(obj)):
+    for i in xrange(hlr_utils.get_length(obj)):
         val = hlr_utils.get_value(obj, i, o_descr, "x", axis)
         err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
 

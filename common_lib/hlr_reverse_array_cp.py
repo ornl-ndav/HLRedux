@@ -61,7 +61,7 @@ def reverse_array_cp(obj):
     # iterate through the values
     import axis_manip
     
-    for i in range(hlr_utils.get_length(obj)):
+    for i in xrange(hlr_utils.get_length(obj)):
         val = hlr_utils.get_value(obj, i, o_descr)
         err2 = hlr_utils.get_err2(obj, i, o_descr)
 
