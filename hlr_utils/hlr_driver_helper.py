@@ -292,8 +292,8 @@ def write_file(filename, dst_type, data, **kwargs):
     -> data is a SOM that contains the output to be written to file
     -> kwargs is a list of key word arguments that the function accepts:
           message=<string> This is part of the message that will be printed
-                  to STDOUT if verbose is switched on. The default message
-                  is \"output file\"
+                  to STDOUT if verbose keyword is set to True. The default
+                  message is \"output file\"
           data_ext=<string> This is the extension on the data file. This is
                    used in conjunction with output_ext and replace to convert
                    the data filename into an output filename. The default
@@ -302,8 +302,13 @@ def write_file(filename, dst_type, data, **kwargs):
                      file. The default value is \"txt\".
           verbose=<True or False> This determines whether or not the print
                   statement is executed. The default value is False.
-          replace=<True or False> This determines whether or not the parameter
-                  filename is modifed to produce the output filename
+          replace_ext=<boolean> This determines whether or not the extension
+                     on the incoming filename is replaced with output_ext.
+                     The default behavior is True (replace extension)
+          replace_path=<boolean> This determines whether or not the directory
+                      path on the incoming filename is replaced with the
+                      directory where the driver is running. The default
+                      behavior is True (replace path)
     """
 
     import os
@@ -332,16 +337,25 @@ def write_file(filename, dst_type, data, **kwargs):
         verbose = False
 
     try:
-        replace = kwargs["replace"]
+        replace_path = kwargs["replace_path"]
     except KeyError:
-        replace = True
+        replace_path = True
 
-    if replace:
-        fixed_filename = os.path.basename(filename)
-        path = os.path.join(os.getcwd(), fixed_filename)
-        fixed_filename = hlr_utils.ext_replace(path, data_ext, output_ext)
+    try:
+        replace_ext = kwargs["replace_ext"]
+    except KeyError:
+        replace_ext = True        
+
+    if replace_path:
+        fixed_filename = os.path.join(os.getcwd(), os.path.basename(filename))
     else:
         fixed_filename = filename
+
+    if replace_ext:
+        fixed_filename = hlr_utils.ext_replace(fixed_filename, data_ext,
+                                               output_ext)
+    else:
+        pass
         
     resource = open(fixed_filename, "w")
     output_dst = DST.getInstance(dst_type, resource)
