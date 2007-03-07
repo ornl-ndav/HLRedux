@@ -87,7 +87,7 @@ def integrate_axis(obj, **kwargs):
     integration = 0
     integration_error2 = 0
 
-    for i in range(hlr_utils.get_length(obj)):
+    for i in xrange(hlr_utils.get_length(obj)):
     
         value = hlr_utils.get_value(obj, i, o_descr, axis, axis_pos)
         error = hlr_utils.get_err2(obj, i, o_descr, axis, axis_pos)
@@ -101,7 +101,7 @@ def integrate_axis(obj, **kwargs):
 
         value_len = len(value)
 
-        for i in range(value_len):
+        for i in xrange(value_len):
             integration += value[i]
             integration_error2 += error[i]
             

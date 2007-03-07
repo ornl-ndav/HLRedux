@@ -169,7 +169,7 @@ def create_X_vs_pixpos(som, *args, **kwargs):
 
     import array_manip
     
-    for i in range(hlr_utils.get_length(som_1)):
+    for i in xrange(hlr_utils.get_length(som_1)):
 
         val = hlr_utils.get_value(som_1, i, "SOM", "y")
         err2 = hlr_utils.get_err2(som_1, i, "SOM", "y")

@@ -71,7 +71,7 @@ def subtract_time_indep_bkg(obj, B_list):
     import common_lib
 
     # iterate through the values
-    for i in range(hlr_utils.get_length(obj)):
+    for i in xrange(hlr_utils.get_length(obj)):
         val1 = hlr_utils.get_value(obj, i, o_descr, "all")
         val2 = hlr_utils.get_value(B_list, i, l_descr, "all")
         value = common_lib.sub_ncerr(val1, val2)

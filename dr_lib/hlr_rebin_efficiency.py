@@ -90,7 +90,7 @@ def rebin_efficiency(obj1, obj2, **kwargs):
     # iterate through the values
     import common_lib
 
-    for i in range(hlr_utils.get_length(obj1, obj2)):
+    for i in xrange(hlr_utils.get_length(obj1, obj2)):
         val1 = hlr_utils.get_value(obj1, i, o1_descr, "all")
         val2 = hlr_utils.get_value(obj2, i, o2_descr, "x")
         

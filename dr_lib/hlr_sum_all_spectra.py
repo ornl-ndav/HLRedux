@@ -74,7 +74,7 @@ def sum_all_spectra(obj):
     so_id_list.append(val1.id)
     so_id_list.append(val2.id)
 
-    for i in range(2, hlr_utils.get_length(obj)):
+    for i in xrange(2, hlr_utils.get_length(obj)):
         val = hlr_utils.get_value(obj, i, o_descr, "all")
         value = common_lib.add_ncerr(val, value)
         so_id_list.append(val.id)

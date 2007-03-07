@@ -165,7 +165,7 @@ def create_2D_dist(som, *args, **kwargs):
     import array_manip
     import axis_manip
     
-    for i in range(hlr_utils.get_length(som_1)):
+    for i in xrange(hlr_utils.get_length(som_1)):
         # Find Q for pixel
         so = hlr_utils.get_value(som_1, i, "SOM", "all")
         (angle, angle_err2) = hlr_utils.get_parameter("polar", so, inst)
@@ -177,7 +177,7 @@ def create_2D_dist(som, *args, **kwargs):
 
         # Find Q value in given momentum transfer axis
         index = -1
-        for j in range(N_y[0]):
+        for j in xrange(N_y[0]):
             if Q[0] >= args[Q_pos][j] and Q[0] < args[Q_pos][j + 1]:
                 index = j
                 break

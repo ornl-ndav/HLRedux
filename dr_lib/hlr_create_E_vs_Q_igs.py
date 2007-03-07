@@ -168,7 +168,7 @@ def create_E_vs_Q_igs(E_t_som, k_i_som, *args, **kwargs):
     y_len = len(E_t_som[0])
     y2d_len = y_len * y_len
 
-    for j in range(hlr_utils.get_length(E_t_som)):
+    for j in xrange(hlr_utils.get_length(E_t_som)):
         # Get lambda_f from instrument information
         map_so = hlr_utils.get_map_so(E_t_som, None, j)
         #print "A:",map_so.id
