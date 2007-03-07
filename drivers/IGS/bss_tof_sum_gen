@@ -118,7 +118,8 @@ def run(config):
 
             hlr_utils.write_file(outfile, "text/Spec", tSOM,
                                  verbose=config.verbose,
-                                 message="intensity sum file", replace=False)
+                                 message="intensity sum file",
+                                 replace_ext=False)
                     
     data_dst.release_resource()
 

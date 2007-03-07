@@ -91,7 +91,6 @@ def run(config):
 
         if config.dump_pxl:
             hlr_utils.write_file(config.data, "text/Spec", d_som2,
-                                 replace=True,
                                  output_ext="dsp", verbose=config.verbose,
                                  message="pixel d-spacing information")
 
@@ -102,7 +101,7 @@ def run(config):
         d_som4[0].id = ("bank3", (0, 0))
 
         hlr_utils.write_file(config.output_ds, "text/Spec", d_som4,
-                             replace=False, verbose=config.verbose,
+                             replace_ext=False, verbose=config.verbose,
                              message="combined d-spacing information")
 
         if config.verbose:
@@ -112,7 +111,6 @@ def run(config):
 
         if config.dump_pxl:
             hlr_utils.write_file(config.data, "text/Spec", d_som5,
-                                 replace=True,
                                  output_ext="tfp", verbose=config.verbose,
                                  message="pixel TOF focused information")
 
@@ -123,11 +121,11 @@ def run(config):
         d_som7[0].id = config.pixel_id
 
         hlr_utils.write_file(config.output_tof, "text/GSAS", d_som7,
-                             replace=False, verbose=config.verbose,
+                             replace_ext=False, verbose=config.verbose,
                              message="combined TOF focused information")
 
         hlr_utils.write_file(config.data, "text/Spec", d_som7,
-                             replace=True, output_ext="toff",
+                             output_ext="toff",
                              verbose=config.verbose,
                              message="combined TOF focused information")
 
@@ -135,8 +133,7 @@ def run(config):
 
         if rmd_written:
             hlr_utils.write_file(config.data, "text/rmd", d_som7,
-                                 replace=True, output_ext="rmd",
-                                 verbose=config.verbose,
+                                 output_ext="rmd", verbose=config.verbose,
                                  message="metadata")
         
     else:
@@ -150,7 +147,6 @@ def run(config):
     
         if config.dump_pxl:
             hlr_utils.write_file(config.data, "text/Spec", d_som2,
-                                 replace=True,
                                  output_ext="qtp", verbose=config.verbose,
                                  message="pixel Q information")
         
@@ -161,12 +157,11 @@ def run(config):
         d_som4[0].id = ("bank3", (0, 0))
 
         hlr_utils.write_file(config.output_qt, "text/Spec", d_som4,
-                             replace=False, verbose=config.verbose,
+                             replace_ext=False, verbose=config.verbose,
                              message="combined Q information")
 
         hlr_utils.write_file(config.data, "text/rmd", d_som7,
-                             replace=True, output_ext="rmd",
-                             verbose=config.verbose,
+                             output_ext="rmd", verbose=config.verbose,
                              message="metadata")
     else:
         pass

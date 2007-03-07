@@ -49,7 +49,7 @@ def run(config):
                                  roi_file=config.roi_file)
 
     if config.dump_pxl:
-        hlr_utils.write_file(config.data, "text/Spec", d_som1, replace=True,
+        hlr_utils.write_file(config.data, "text/Spec", d_som1,
                              output_ext="tfp", verbose=config.verbose,
                              message="pixel TOF information")
     else:
@@ -61,7 +61,7 @@ def run(config):
         d_som2 = dr_lib.sum_all_spectra(d_som1)
         d_som2[0].id = d_som1[0].id
 
-    hlr_utils.write_file(config.output, "text/Spec", d_som2, replace=False,
+    hlr_utils.write_file(config.output, "text/Spec", d_som2, replace_ext=False,
                          verbose=config.verbose,
                          message="combined TOF information")
 

@@ -644,15 +644,14 @@ def run(config, tim=None):
     hlr_utils.write_file(config.output, "text/Dave2d", d_som13,
                          verbose=config.verbose,
                          message="data",
-                         replace=False)
+                         replace_ext=False)
 
     d_som13.attr_list["config"] = config
 
     hlr_utils.write_file(config.data, "text/rmd", d_som13,
                          output_ext="rmd",
                          verbose=config.verbose,
-                         message="metadata",
-                         replace=True)
+                         message="metadata")
     
     if tim is not None:
         tim.setOldTime(old_time)
