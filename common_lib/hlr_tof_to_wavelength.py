@@ -38,8 +38,8 @@ def tof_to_wavelength(obj, **kwargs):
                       its associated error^2
           inst_param= a string containing the type of parameter requested
                       from an associated instrument. For this function the
-                      acceptable parameters are primary and secondary. Default
-                      is primary.
+                      acceptable parameters are primary, secondary and total.
+                      Default is primary.
           units= a string containing the expected units for this function.
                  The default for this function is microseconds
 
