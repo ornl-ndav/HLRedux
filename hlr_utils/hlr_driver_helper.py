@@ -364,6 +364,8 @@ def create_id_pairs(pairs, paths, **kwargs):
     ----------
     -> pairs is a string containing a list of pixel id pairs
     -> paths is a string containing a list of NeXus data paths and signal pairs
+    -> kwargs is a list of key word arguments that the function accepts:
+         inc=<boolean> is a switch to increment the ending ids by 1
 
     Returns:
     -------
