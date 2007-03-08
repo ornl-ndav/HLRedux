@@ -557,3 +557,34 @@ def get_special(info, so):
         return info.get_value(so.id)
     except AttributeError:
         return info
+
+def check_lojac(obj):
+    """
+    This function takes an data set (SOM, SO, list of tuples or tuple) and
+    determined if the linear-order Jacobian (lojac) should be calculated.
+
+    Parameters:
+    ----------
+    -> obj is a SOM, SO, list of tuples or a tuple
+
+    Returns:
+    -------
+    <- A boolean determining the calculation of lojac
+    """
+
+    descr = get_type(obj)
+
+    if descr == "SOM":
+        if obj.getDataSetType() != "histogram":
+            return False
+        else:
+            return True
+    elif descr == "SO":
+        if len(obj) == len(obj.axis[0].val) - 1:
+            return True
+        elif len(obj) == len(obj.axis[0].val):
+            return False
+        else:
+            return False
+    else:
+        return False
