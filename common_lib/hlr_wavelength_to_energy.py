@@ -152,7 +152,7 @@ def wavelength_to_energy(obj, **kwargs):
 
         if lojac:
             hlr_utils.result_insert(result, res_descr, counts, map_so,
-                                    "all", axis, [value[0]])
+                                    "all", axis, [rev_value[0]])
         else:
             hlr_utils.result_insert(result, res_descr, rev_value, map_so, "x",
                                     axis)
