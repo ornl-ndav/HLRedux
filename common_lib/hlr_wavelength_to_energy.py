@@ -35,7 +35,10 @@ def wavelength_to_energy(obj, **kwargs):
     -> obj is the SOM, SO or tuple to be converted
     -> kwargs is a list of key word arguments that the function accepts:
           offset=an information object containing energy offset information
-          units= a string containing the expected units for this function.
+          lojac=<boolean> is a flag that allows one to turn off the
+                          calculation of the linear-order Jacobian. The
+                          default action is True for histogram data.
+           units= a string containing the expected units for this function.
                  The default for this function is Angstroms
 
     Return:
@@ -73,6 +76,11 @@ def wavelength_to_energy(obj, **kwargs):
     except KeyError:
         offset = None
 
+    try:
+        lojac = kwargs["lojac"]
+    except KeyError:
+        lojac = hlr_utils.check_lojac(obj)
+
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
     if o_descr == "SOM":
@@ -92,12 +100,24 @@ def wavelength_to_energy(obj, **kwargs):
     # iterate through the values
     import array_manip
     import axis_manip
-    
+    if lojac:
+        import utils
+
     for i in xrange(hlr_utils.get_length(obj)):
         val = hlr_utils.get_value(obj, i, o_descr, "x", axis)
         err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
 
+        map_so = hlr_utils.get_map_so(obj, None, i)
+
         value = axis_manip.wavelength_to_energy(val, err2)
+
+        if lojac:
+            y_val = hlr_utils.get_value(obj, i, o_descr, "y")
+            y_err2 = hlr_utils.get_err2(obj, i, o_descr, "y")
+            counts = utils.linear_order_jacobian(val, value[0],
+                                                 y_val, y_err2)
+        else:
+            pass
 
         if o_descr != "number":
             value1 = axis_manip.reverse_array_cp(value[0])
@@ -105,11 +125,14 @@ def wavelength_to_energy(obj, **kwargs):
             rev_value = (value1, value2)
         else:
             rev_value = value
-            
-        map_so = hlr_utils.get_map_so(obj, None, i)
+        
         if map_so is not None:
-            map_so.y = axis_manip.reverse_array_cp(map_so.y)
-            map_so.var_y = axis_manip.reverse_array_cp(map_so.var_y)
+            if not lojac:
+                map_so.y = axis_manip.reverse_array_cp(map_so.y)
+                map_so.var_y = axis_manip.reverse_array_cp(map_so.var_y)
+            else:
+                map_so.y = axis_manip.reverse_array_cp(y_val)
+                map_so.var_y = axis_manip.reverse_array_cp(y_err2)
         else:
             pass
 
@@ -127,8 +150,12 @@ def wavelength_to_energy(obj, **kwargs):
         else:
             pass
 
-        hlr_utils.result_insert(result, res_descr, rev_value, map_so, "x",
-                                axis)
+        if lojac:
+            hlr_utils.result_insert(result, res_descr, counts, map_so,
+                                    "all", axis, [value[0]])
+        else:
+            hlr_utils.result_insert(result, res_descr, rev_value, map_so, "x",
+                                    axis)
 
     return result
 
