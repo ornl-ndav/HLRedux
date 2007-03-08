@@ -254,6 +254,7 @@ def run(config, tim=None):
     d_som1 = data_dst.getSOM(config.data_paths, so_axis,
                              roi_file=config.roi_file)
 
+    print "A:",len(d_som1)
     if tim is not None:
         tim.getTime(msg="After reading data: ")
 
@@ -298,62 +299,11 @@ def run(config, tim=None):
     else:
         n_som1 = None
 
-    if config.norm_bkg is not None:
-        if config.verbose:
-            print "Reading normalization background file"
-            
-        norm_bkg_dst = DST.getInstance("application/x-NeXus", config.norm_bkg)
-        n_bkg_som1 = norm_bkg_dst.getSOM(config.data_paths, so_axis,
-                                         roi_file=config.roi_file)
-        if tim is not None:
-            tim.getTime(msg="After reading normalization background data: ")
-
-        n_bkg_som1.release_resource()
-    else:
-        n_bkg_som1 = None
-
-    if config.verbose and n_bkg_som1 is not None:
-        print "Subtracting background for normalization"
-        
-    n_som2 = subtract_norm_bkg_from_norm(n_som1, n_bkg_som1)
-
-    if n_bkg_som1 is not None:
-        if tim is not None:
-            tim.getTime(msg="After subtraction background from "\
-                        +"normalization: ")
-
-    del n_bkg_som1, n_som1
-
-    if config.dark_count is not None:
-        if config.verbose:
-            print "Reading dark count file"
-            
-        dc_dst = DST.getInstance("application/x-NeXus", config.dark_count)
-        dc_som1 = dc_dst.getSOM(config.data_paths, so_axis,
-                                roi_file=config.roi_file)
-        if tim is not None:
-            tim.getTime(msg="After reading dark-count data: ")
-
-        dc_dst.release_resource()
-    else:
-        dc_som1 = None
-
-    if config.verbose and dc_som1 is not None:
-        print "Subtracting dark count from data"
-        
-    d_som3 = subtract_dark_count_from_data(d_som2, dc_som1)
-
-    if dc_som1 is not None:
-        if tim is not None:
-            tim.getTime(msg="After subtracting dark counts from data: ")
-
-    del d_som2, dc_som1
-
     if not config.no_tib:
         if config.verbose:
             print "Determining time-independent background from data"
             
-        B = determine_time_indep_bkg(config, d_som3)
+        B = determine_time_indep_bkg(config, d_som2)
         if tim is not None:
             tim.getTime(msg="After determining time-independent background: ")
     else:
@@ -362,19 +312,19 @@ def run(config, tim=None):
     if config.verbose and B is not None:
         print "Subtracting time-independent background from data"
         
-    d_som4 = subtract_time_indep_bkg(d_som3, B)
+    d_som4 = subtract_time_indep_bkg(d_som2, B)
 
     if B is not None:
         if tim is not None:
             tim.getTime(msg="After subtracting time-independent background: ")
 
-    del d_som3, B
+    del d_som2, B
 
-    if config.data_bkg is not None:
+    if config.back is not None:
         if config.verbose:
             print "Reading in background data file"
             
-        bkg_dst = DST.getInstance("application/x-NeXus", config.data_bkg)
+        bkg_dst = DST.getInstance("application/x-NeXus", config.back)
         bkg_som1 = bkg_dst.getSOM(config.data_paths, so_axis,
                                   roi_file=config.roi_file)
         if tim is not None:
@@ -395,16 +345,16 @@ def run(config, tim=None):
 
     del d_som4, bkg_som1
 
-    if config.verbose and n_som2 is not None:
+    if config.verbose and n_som1 is not None:
         print "Normalizing data by normalization data"
 
-    d_som6 = norm_data_by_van(d_som5, n_som2)
+    d_som6 = norm_data_by_van(d_som5, n_som1)
 
-    if n_som2 is not None:
+    if n_som1 is not None:
         if tim is not None:
             tim.getTime(msg="After normalizing data: ")
 
-    del d_som5, n_som2
+    del d_som5, n_som1
 
     if config.mon_geom is not None:
         if config.verbose:
@@ -665,7 +615,8 @@ if __name__ == "__main__":
     import hlr_utils
     
     # set up the options available
-    parser = hlr_utils.SNSOptions("usage: %prog [options] <datafile>")
+    parser = hlr_utils.SNSOptions("usage: %prog [options] <datafile>",
+                                  inst="IGS")
 
     # Add BSS specific options
     parser.add_option("", "--dead-time", dest="dead_time",
@@ -822,24 +773,12 @@ if __name__ == "__main__":
             parser.error("Normalization file [%s] does not exist" \
                          % configure.norm)
             
-    configure.norm_bkg = hlr_utils.fix_filename(options.norm_bkg)
-    if configure.norm_bkg is not None:
-        if not hlr_utils.file_exists(configure.norm_bkg):
-            parser.error("Normalization background file [%s] does not exist"\
-                         % configure.norm_bkg)
-
-    configure.data_bkg = hlr_utils.fix_filename(options.data_bkg)
-    if configure.data_bkg is not None:
-        if not hlr_utils.file_exists(configure.data_bkg):
+    configure.back = hlr_utils.fix_filename(options.back)
+    if configure.back is not None:
+        if not hlr_utils.file_exists(configure.back):
             parser.error("Background file [%s] does not exist" \
-                         % configure.data_bkg)
+                         % configure.back)
             
-    configure.dark_count = hlr_utils.fix_filename(options.dark_count)
-    if configure.dark_count is not None:
-        if not hlr_utils.file_exists(configure.dark_count):
-            parser.error("Dark-count file [%s] does not exist" \
-                         % configure.dark_count)
-
     if options.mon_eff is not None:
         try:
             configure.mon_eff = hlr_utils.split_values(options.mon_eff)
