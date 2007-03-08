@@ -92,9 +92,6 @@ class SNSOptions(BasicOptions):
             instrument = ""
 
         # Instrument characterization file options
-        self.add_option("", "--data-bkg",
-                        help="Specify the data background file")
-
         self.add_option("", "--norm", help="Specify the normalization file")
         
         if instrument == "IGS":
@@ -104,10 +101,6 @@ class SNSOptions(BasicOptions):
             self.add_option("", "--back",
                             help="Specify the background (empty instrument) "\
                             +"file")
-
-        elif instrument == "REF":
-            self.add_option("", "--norm-bkg",
-                            help="Specify the normalization background file")
 
         else:
             pass
