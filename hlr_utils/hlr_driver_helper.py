@@ -38,12 +38,7 @@ def file_exists(filename):
     
     import os.path
 
-    if filename.startswith("~"):
-        filename = os.path.expanduser(filename)
-    elif filename.startswith("$"):
-        filename = os.path.expandvars(filename)
-
-    return os.path.isfile(filename)
+    return os.path.isfile(fix_filename(filename))
 
 
 def ext_replace(name, ext_out, ext_in):
