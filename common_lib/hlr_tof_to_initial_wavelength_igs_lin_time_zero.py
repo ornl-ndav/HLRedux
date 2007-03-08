@@ -49,6 +49,9 @@ def tof_to_initial_wavelength_igs_lin_time_zero(obj, **kwargs):
                                 associated error^2
           run_filter=<True or False> This determines if the filter on the
                      negative wavelengths is run
+          lojac=<boolean> is a flag that allows one to turn off the
+                          calculation of the linear-order Jacobian. The
+                          default action is True for histogram data.
           units= a string containing the expected units for this function.
                  The default for this function is microseconds
 
@@ -96,6 +99,11 @@ def tof_to_initial_wavelength_igs_lin_time_zero(obj, **kwargs):
         dist_sample_detector = kwargs["dist_sample_detector"]
     except KeyError:
         dist_sample_detector = None
+
+    try:
+        lojac = kwargs["lojac"]
+    except KeyError:
+        lojac = hlr_utils.check_lojac(obj)
 
     try:
         units = kwargs["units"]
@@ -207,6 +215,8 @@ def tof_to_initial_wavelength_igs_lin_time_zero(obj, **kwargs):
 
     # iterate through the values
     import axis_manip
+    if lojac:
+        import utils
     
     for i in xrange(hlr_utils.get_length(obj)):
         val = hlr_utils.get_value(obj, i, o_descr, "x", axis)
@@ -262,8 +272,8 @@ def tof_to_initial_wavelength_igs_lin_time_zero(obj, **kwargs):
         # Remove all wavelengths < 0
         if run_filter:
             index = 0
-            for val in value[0]:
-                if val >= 0:
+            for valx in value[0]:
+                if valx >= 0:
                     break
                 index += 1
 
@@ -271,10 +281,21 @@ def tof_to_initial_wavelength_igs_lin_time_zero(obj, **kwargs):
             value[1].__delslice__(0, index)
             map_so.y.__delslice__(0, index)
             map_so.var_y.__delslice__(0, index)
+            if lojac:
+                val.__delslice__(0, index)
+                err2.__delslice__(0, index)
         else:
             pass
 
-        hlr_utils.result_insert(result, res_descr, value, map_so, "x", axis)
+        if lojac:
+            counts = utils.linear_order_jacobian(val, value[0],
+                                                 map_so.y, map_so.var_y)
+            hlr_utils.result_insert(result, res_descr, counts, map_so,
+                                    "all", axis, [value[0]])
+
+        else:
+            hlr_utils.result_insert(result, res_descr, value, map_so,
+                                    "x", axis)
 
     return result
 
