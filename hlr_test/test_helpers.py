@@ -83,6 +83,7 @@ def generate_som(data_type="histogram", dim=1, number=2):
     """
 
     som = SOM.SOM()
+    som.setDataSetType(data_type)
     count = 0
     for i in range(number):
         so = generate_so(data_type, count, count + 5, dim)
