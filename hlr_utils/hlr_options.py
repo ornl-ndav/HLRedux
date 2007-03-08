@@ -77,6 +77,10 @@ class SNSOptions(BasicOptions):
                  program in which the option class is used
         -> option_list (OPTIONAL) is a list containing the alternative method
                        of providing options
+        -> kwargs is a list of keyword arguments that the function accepts
+           inst=<string> is a string containing the type name of the
+                         instrument. Current names are DGS, IGS, PD, REF, SAS,
+                         SCD.
         """
         # parent constructor
         BasicOptions.__init__(self, usage, option_list)
@@ -93,17 +97,17 @@ class SNSOptions(BasicOptions):
 
         self.add_option("", "--norm", help="Specify the normalization file")
         
-        self.add_option("", "--norm-bkg",
-                        help="Specify the normalization background file")
-
-        if instrument != "REF":
+        if instrument == "IGS":
             self.add_option("", "--ecan",
-                            help="Specify the empty container file")
+                            help="Specify the empty sample container file")
         
-            self.add_option("", "--ecan-bkg",
-                            help="Specify the empty container background file")
+            self.add_option("", "--back",
+                            help="Specify the background (empty instrument) "\
+                            +"file")
 
-            self.add_option("", "--dark-count",
-                            help="Specify the dark count file")
+        elif instrument == "REF":
+            self.add_option("", "--norm-bkg",
+                            help="Specify the normalization background file")
+
         else:
             pass
