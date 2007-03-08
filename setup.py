@@ -61,6 +61,7 @@ instrument_scripts = {
     'amorphous_reduction',
     'bss_tof_spect_gen',
     'bss_tof_sum_gen',
+    'calc_norm_eff',
     'delta_E0',
     'igs_diff_reduction'
     ],
