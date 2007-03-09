@@ -48,6 +48,9 @@ def integrate_spectra(obj, **kwargs):
     # import the helper functions
     import hlr_utils
 
+    if obj is None:
+        return obj
+
     # set up for working through data
     # This time highest object in the hierarchy is NOT what we need
     result = []
