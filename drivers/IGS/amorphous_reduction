@@ -26,7 +26,8 @@
 
 """
 This program covers the functionality outlined in 2.2.1 Powder or
-amorphous material reduction in <CHANGE:DR_Lib_RS.doc>.
+amorphous material reduction in
+http://www.sns.gov/asg/projects/SCL/reqspec/DR_Lib_RS.doc
 """
 
 def dead_time_correction(data_som):
