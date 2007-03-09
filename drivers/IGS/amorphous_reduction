@@ -30,39 +30,8 @@ amorphous material reduction in
 http://www.sns.gov/asg/projects/SCL/reqspec/DR_Lib_RS.doc
 """
 
-def dead_time_correction(data_som):
-    """Step 1. Apply dead time correction to each I(TOF) using
-    function 3.38. The result is ItiXY(TOF)."""
-
-    return data_som
-
-
-def subtract_norm_bkg_from_norm(norm_som, norm_bkg_som):
-    """Step 2. Subtract measured normalization background using 3.6
-    with ItNXY(TOF) as data1 and ItNBXY(TOF) as data2. The result is
-    ItbNXY(TOF)."""
-
-    if norm_som is None:
-        return None
-    elif norm_bkg_som is None:
-        return norm_som
-
-    return common_lib.sub_ncerr(norm_som, norm_bkg_som)
-
-
-def subtract_dark_count_from_data(data_som, dc_som):
-    """Step 3. Subtract the dark count spectrum using function 3.6
-    with ItDXY(TOF) as data1 and ItDCXY(TOF) as data2. The result of
-    this is ItdDXY(TOF)."""
-
-    if dc_som is None:
-        return data_som
-
-    return common_lib.sub_ncerr(data_som, dc_som)
-
-
 def determine_time_indep_bkg(conf, data_som):
-    """Step 4. Determine the sample dependent, time independent
+    """Step 3. Determine the sample dependent, time independent
     background B by fitting a line to predetermined end points of
     ItdDXY(TOF) using function 3.43."""
 
@@ -78,7 +47,7 @@ def determine_time_indep_bkg(conf, data_som):
 
 
 def subtract_time_indep_bkg(data_som, B):
-    """Step 5. Subtract B from the data spectrum using function 3.2
+    """Step 4. Subtract B from the data spectrum using function 3.2
     with ItdDXY(TOF) as data1 and B as a. The result is ItdsDXY(TOF)."""
 
     if B is None:
@@ -87,16 +56,38 @@ def subtract_time_indep_bkg(data_som, B):
     return dr_lib.subtract_time_indep_bkg(data_som, B)
 
 
-def subtract_bkg_from_data(config, data_som, bkg_som):
-    """Step 6. Subtract the measured background spectrum from the data
-    spectrum using function 3.6 with ItdsDXY(TOF) as data1 and
-    ItBXY(TOF) as data2. The result of this is ItdsbDXY(TOF)."""
+def subtract_bkg_from_data(conf, data_som, bkg_som, **kwargs):
+    """
+    This function subtracts one data set from another
+    """
 
+    try:
+        t = kwargs["timer"]
+    except KeyError:
+        t = None
+
+    try:
+        dataset1 = kwargs["dataset1"]
+    except KeyError:
+        dataset1 = "dataset1"
+
+    try:
+        dataset2 = kwargs["dataset2"]
+    except KeyError:
+        dataset2 = "dataset2"
+                
     if bkg_som is None:
         return data_som
 
-    return common_lib.sub_ncerr(data_som, bkg_som)
+    if conf.verbose and bkg_som is not None:
+        print "Subtracting %s from %s" % (dataset1, dataset2)
 
+    data_som2 = common_lib.sub_ncerr(data_som, bkg_som)
+
+    if t is not None:
+        t.getTime(msg="After subtracting %s from %s " % (dataset1, dataset2))
+
+    return data_som2
 
 def norm_data_by_van(data_som, norm_som):
     """Step 7. Normalize ItdsbDXY(TOF) by vanadium spectrum,
@@ -109,12 +100,14 @@ def norm_data_by_van(data_som, norm_som):
 
 
 def convert_data_and_mon_to_wavelength(conf, data_som, mon2_som):
-    """Step 8. Convert ItM2(TOF) and ItdsbnDXY(TOF) to ItM2(lambda)
-    and ItdsbnDXY(lambda) using function 3.15 for M2 and function 3.48
+    """Step 5. Convert ItM2(TOF) and ItdsbnDXY(TOF) to ItM2(lambda)
+    and ItdsbnDXY(lambda) using function 3.50 for M2 and function 3.48
     for DXY."""
 
     if mon2_som is not None:
-        mon2_som1 = common_lib.tof_to_wavelength(mon2_som, units="microsecond")
+        mon2_som1 = common_lib.tof_to_wavelength_lin_time_zero(
+            mon2_som,
+            units="microsecond")
     else:
         mon2_som1 = None
 
@@ -164,24 +157,14 @@ def eff_correct_data(data_som, det_eff):
 
 
 def norm_data_by_mon(config, data_som, mon_som):
-    """Step 13. Normalize by the integrated monitor intensity using
-    3.5 using ItbdneDXY(lambda) as data1 and IteM2(lambda) as a. The
-    result of this is S(lambda)."""
+    """Step 9. Normalize by the monitor spectrum using 3.9 using
+    ItsiXY(lambda) as data1 and IteM2(lambda) as data2. The result of this is
+    ItsmiXY(lambda)."""
 
     if mon_som is None:
         return data_som
 
-    kwargs = {}
-
-    if config.mon_start is not None:
-        kwargs["start"] = config.mon_start
-
-    if config.mon_end is not None:
-        kwargs["end"] = config.mon_end
-
-    int_mon_int = dr_lib.integrate_axis(mon_som, **kwargs)
-
-    return common_lib.div_ncerr(data_som, int_mon_int)
+    return common_lib.div_ncerr(data_som, mon_som)
 
 def calc_k_initial(config, data_som):
     """Step 14. Calculate incident wavevector using function 3.24."""
@@ -225,54 +208,155 @@ def create_final_new(conf, E_t_som, k_i_som):
                                               "energy transfer"],
                                     x_units=["1/Angstroms","ueV"])
 
-def run(config, tim=None):
-    import sys
-    
-    if config.data is None:
-        raise RuntimeError("Need to pass a data filename to the driver "\
-                           +"script.")
+def process_data(datalist, conf, t, i_geom_dst, **kwargs):
+    """
+    This function combines Steps 1 through 9 of the data reduction process as
+    specified by the document. 
+    """
 
-    import DST
-        
     try:
-        data_dst = DST.getInstance("application/x-NeXus", config.data)
+        dataset_type = kwargs["dataset_type"]
+    except KeyError:
+        dataset_type = "data"
+
+    # Step 1: Open appropriate data files
+    try:
+        data_dst = DST.getInstance("application/x-NeXus", datalist)
     except SystemError:
-        print "ERROR: Failed to data read file %s" % config.data
+        print "ERROR: Failed to read file %s" % datalist
         sys.exit(-1)
+
+    if not conf.mc:
+        so_axis = "time_of_flight"
+    else:
+        so_axis = "Time_of_Flight__us_"
+
+    if conf.verbose:
+        print "Reading %s file" % dataset_type
+
+    dp_som1 = data_dst.getSOM(conf.data_paths, so_axis,
+                              roi_file=conf.roi_file)
+
+    if t is not None:
+        t.getTime(msg="After reading %s " % dataset_type)
+
+    if conf.inst_geom is not None:
+        i_geom_dst.setGeometry(conf.data_paths, dp_som1)
+
+    if conf.no_mon_norm:
+        dm_som1 = None
+    else:
+        if conf.verbose:
+            print "Reading in monitor data from %s file" % dataset_type
+        som_id = conf.mon_path
+        dm_som1 = data_dst.getSOM(som_id, so_axis)
+        
+        if t is not None:
+            t.getTime(msg="After reading monitor data ")
+
+        if conf.inst_geom is not None:
+            i_geom_dst.setGeometry(conf.mon_path, dm_som1)
+
+    data_dst.release_resource()
+
+    # Step 2: Dead Time Correction
+    # No dead time correction is being applied to the data yet
+
+    # Step 3: Time-independent background determination
+    if not conf.no_tib:
+        if conf.verbose:
+            print "Determining time-independent background from data"
+            
+        B = determine_time_indep_bkg(conf, dp_som1)
+        if t is not None:
+            t.getTime(msg="After determining time-independent background ")
+    else:
+        B = None
+
+    # Step 4: Subtract time-independent background
+    if conf.verbose and B is not None:
+        print "Subtracting time-independent background from data"
+        
+    dp_som2 = subtract_time_indep_bkg(dp_som1, B)
+
+    if B is not None:
+        if t is not None:
+            t.getTime(msg="After subtracting time-independent background ")
+
+    del dp_som1, B
+
+
+    if conf.wavelength_final is not None:
+        dp_som1.attr_list["Wavelength_final"] = conf.wavelength_final
+
+    # Note: time_zero_slope MUST be a tuple
+    if conf.time_zero_slope is not None:
+        dp_som1.attr_list["Time_zero_slope"] = conf.time_zero_slope
+
+    # Note: time_zero_offset MUST be a tuple
+    if conf.time_zero_offset is notNone:
+        dp_som1.attr_list["Time_zero_offset"] = conf.time_zero_offset
+
+
+    # Step 5: Convert TOF to wavelength for data and monitor
+    if conf.verbose:
+        print "Converting TOF to wavelength"
+
+    if t is not None:
+        t.getTime(False)
+
+    (dp_som3, dm_som2) = convert_data_and_mon_to_wavelength(conf, dp_som2,
+                                                            dm_som1)
+
+    if t is not None:
+        t.getTime(msg="After converting TOF to wavelength ")
+
+    if conf.dump_wave:
+        hlr_utils.write_file(datalist, "text/Spec", dp_som3,
+                             output_ext="pxl",
+                             verbose=conf.verbose,
+                             message="pixel wavelength information")
+    if conf.dump_mon_wave:        
+        hlr_utils.write_file(datalist, "text/Spec", dm_som2,
+                             output_ext="mxl",
+                             verbose=conf.verbose,
+                             message="monitor wavelength information")
+        
+    del dp_som2, dm_som1
+
+    # Step 9: Normalize data by monitor
+    if conf.verbose and dm_som2 is not None:
+        print "Normalizing data by monitor"
+        
+    dp_somX = norm_data_by_mon(conf, dp_somX, dm_som2)
+
+
+def run(config, tim=None):
+    import sys 
+    import DST
 
     if tim is not None:
         tim.getTime(False)
         old_time = tim.getOldTime()
 
-    if not config.mc:
-        so_axis = "time_of_flight"
-    else:
-        so_axis = "Time_of_Flight__us_"
+    if config.data is None:
+        raise RuntimeError("Need to pass a data filename to the driver "\
+                           +"script.")
 
-    if config.verbose:
-        print "Reading data file"
-
-    d_som1 = data_dst.getSOM(config.data_paths, so_axis,
-                             roi_file=config.roi_file)
-
-    if tim is not None:
-        tim.getTime(msg="After reading data: ")
-
-    if config.no_mon_norm:
-        m_som1 = None
-    else:
+    if config.inst_geom is not None:
         if config.verbose:
-            print "Reading in monitor data from data file"
-        som_id = config.mon_path
-        m_som1 = data_dst.getSOM(som_id, so_axis)
-        if tim is not None:
-            tim.getTime(msg="After reading monitor data: ")
+            print "Reading in instrument geometry file"
+            
+        inst_geom_dst = DST.getInstance("application/x-NxsGeom",
+                                        config.inst_geom)
+    else:
+        inst_geom_dst = None
 
-    data_dst.release_resource()
+    d_som1 = process_data(config.data, config, tim, inst_geom_dst)
 
-    if config.mc:
-        d_som1.attr_list["Wavelength_final"] = (6.627, 0.0)
-
+    #if config.mc:
+    #    d_som1.attr_list["Wavelength_final"] = (6.627, 0.0)
+    """
     if config.dead_time is not None:
         if config.verbose:
             print "Doing dead-time correction"
@@ -284,143 +368,68 @@ def run(config, tim=None):
         d_som2 = d_som1
 
     del d_som1
+    """
 
-    if config.norm is not None:
-        if config.verbose:
-            print "Reading normalization file"
+    if config.ecan is not None:
+        e_som1 = process_data(config.ecan, config, tim, inst_geom_dst,
+                             dataset_type="empty can")
+    else:
+        e_som1 = None
             
-        norm_dst = DST.getInstance("application/x-NeXus", config.norm)
-        n_som1 = norm_dst.getSOM(config.data_paths, so_axis,
-                                 roi_file=config.roi_file)
-        if tim is not None:
-            tim.getTime(msg="After reading normalization data: ")
-
-        norm_dst.release_resource()
+    if config.norm is not None:
+        n_som1 = process_data(config.norm, config, tim, inst_geom_dst,
+                             dataset_type="normalization")
     else:
         n_som1 = None
 
-    if not config.no_tib:
-        if config.verbose:
-            print "Determining time-independent background from data"
-            
-        B = determine_time_indep_bkg(config, d_som2)
-        if tim is not None:
-            tim.getTime(msg="After determining time-independent background: ")
-    else:
-        B = None
-
-    if config.verbose and B is not None:
-        print "Subtracting time-independent background from data"
-        
-    d_som4 = subtract_time_indep_bkg(d_som2, B)
-
-    if B is not None:
-        if tim is not None:
-            tim.getTime(msg="After subtracting time-independent background: ")
-
-    del d_som2, B
-
     if config.back is not None:
-        if config.verbose:
-            print "Reading in background data file"
-            
-        bkg_dst = DST.getInstance("application/x-NeXus", config.back)
-        bkg_som1 = bkg_dst.getSOM(config.data_paths, so_axis,
-                                  roi_file=config.roi_file)
-        if tim is not None:
-            tim.getTime(msg="After reading sample background data: ")
-
-        bkg_dst.release_resource()
+        b_som1 = process_data(config.back, config, tim, inst_geom_dst,
+                             dataset_type="background")
     else:
-        bkg_som1 = None
+        b_som1 = None
 
-    if config.verbose and bkg_som1 is not None:
-        print "Subtracting background from data"
+    inst_geom_dst.release_resource()
         
-    d_som5 = subtract_bkg_from_data(config, d_som4, bkg_som1)
+    # Step 10: Subtract background spectrum from sample spectrum    
+    d_som2 = subtract_bkg_from_data(config, d_som1, b_som1, timer=t,
+                                    dataset1="background", dataset2="data")
 
-    if bkg_som1 is not None:
-        if tim is not None:
-            tim.getTime(msg="After subtraction background from data: ")
+    # Step 11: Subtract background spectrum from empty can spectrum    
+    e_som2 = subtract_bkg_from_data(config, e_som1, b_som1, timer=t,
+                                    dataset1="background",
+                                    dataset2="empty can")
 
-    del d_som4, bkg_som1
+    # Step 12: Subtract background spectrum from normalization spectrum
+    n_som2 = subtract_bkg_from_data(config, n_som1, b_som1, timer=t,
+                                    dataset1="background",
+                                    dataset2="normalization")
+    del b_som1
 
-    if config.verbose and n_som1 is not None:
+    # Step 13: Subtract empty can spectrum from sample spectrum    
+    d_som3 = subtract_bkg_from_data(config, d_som2, e_som2, timer=t,
+                                    dataset1="empty can",
+                                    dataset2="data")
+
+    del d_som2
+    
+    # Step 14: Subtract empty can spectrum from normalization spectrum
+    n_som3 = subtract_bkg_from_data(config, n_som2, e_som2, timer=t,
+                                    dataset1="empty can",
+                                    dataset2="normalization")    
+
+    del n_som2, e_som2
+
+
+    if config.verbose and n_som2 is not None:
         print "Normalizing data by normalization data"
 
-    d_som6 = norm_data_by_van(d_som5, n_som1)
+    d_som4 = norm_data_by_van(d_som3, n_som3)
 
-    if n_som1 is not None:
+    if n_som3 is not None:
         if tim is not None:
             tim.getTime(msg="After normalizing data: ")
 
-    del d_som5, n_som1
-
-    if config.inst_geom is not None:
-        if config.verbose:
-            print "Reading in instrument geometry file"
-            
-        inst_geom_dst = DST.getInstance("application/x-NxsGeom",
-                                       config.inst_geom)
-        inst_geom_dst.setGeometry(config.data_paths, d_som6)
-        inst_geom_dst.release_resource()
-
-    # Note: wavelength_final MUST be a tuple
-    if config.wavelength_final is None:
-        try:
-            config.wavelength_final = d_som6.attr_list["Wavelength_final"]
-            if config.wavelength_final is None:
-                raise RuntimeError("A final wavelength was not provided on "\
-                                   +"the command-line nor in the data file. "\
-                                   +"Please provide one.")
-            else:
-                pass
-        except KeyError:
-            raise RuntimeError("A final wavelength was not provided on the "\
-                               +"command-line nor in the data file. "\
-                               +"Please provide one.")
-    else:
-        d_som6.attr_list["Wavelength_final"] = config.wavelength_final
-
-    # Note: time_zero_slope MUST be a tuple
-    if config.time_zero_slope is None:
-        try:
-            config.time_zero_slope = d_som6.attr_list["Time_zero_slope"]
-        except KeyError:
-            config.time_zero_slope = (float(0.0), float(0.0))
-            d_som6.attr_list["Time_zero_slope"] = config.time_zero_slope
-    else:
-        d_som6.attr_list["Time_zero_slope"] = config.time_zero_slope
-
-    # Note: time_zero_offset MUST be a tuple
-    if config.time_zero_offset is None:
-        try:
-            config.time_zero_offset = d_som6.attr_list["Time_zero_offset"]
-        except KeyError:
-            config.time_zero_offset = (float(0.0), float(0.0))
-            d_som6.attr_list["Time_zero_offset"] = config.time_zero_offset
-    else:
-        d_som6.attr_list["Time_zero_offset"] = config.time_zero_offset
-
-    if config.verbose:
-        print "Converting TOF to wavelength"
-
-    if tim is not None:
-        tim.getTime(False)
-
-    (d_som7, m_som2) = convert_data_and_mon_to_wavelength(config, d_som6,
-                                                          m_som1)
-
-    if tim is not None:
-        tim.getTime(msg="After converting TOF to wavelength: ")
-
-    if config.dump_wave:
-        hlr_utils.write_file(config.data, "text/Spec", d_som7,
-                             output_ext="pxl",
-                             verbose=config.verbose,
-                             message="pixel wavelength information")
-        
-    del d_som6, m_som1
+    del d_som3, n_som3
 
     if config.mon_eff is None:
         m_eff2 = None
@@ -478,27 +487,8 @@ def run(config, tim=None):
 
     del d_som7, det_eff2
 
-    if config.verbose and m_som3 is not None:
-        print "Normalizing data by monitor"
-        
-    d_som9 = norm_data_by_mon(config, d_som8, m_som3)
 
     del d_som8
-
-    # Note: initial_energy_offset MUST be a tuple
-    if config.initial_energy_offset is None:
-        try:
-            config.initial_energy_offset = \
-                                       d_som9.attr_list\
-                                       ["Initial_energy_offset"]
-        except KeyError:
-            config.initial_energy_offset = None
-            d_som9.attr_list["Initial_energy_offset"] = \
-                                                    config.\
-                                                    initial_energy_offset
-    else:
-        d_som9.attr_list["Initial_energy_offset"] = \
-                                                  config.initial_energy_offset
 
     #if config.verbose:
     #    print "Converting initial wavelength to k_initial"
@@ -529,18 +519,6 @@ def run(config, tim=None):
                              message="pixel initial energy information")
 
     del d_som9
-
-    # Note: final_energy_offset MUST be a tuple
-    if config.final_energy_offset is None:
-        try:
-            config.final_energy_offset = \
-                                       d_som11.attr_list["Final_energy_offset"]
-        except KeyError:
-            config.final_energy_offset = None
-            d_som11.attr_list["Final_energy_offset"] = \
-                                                    config.final_energy_offset
-    else:
-        d_som11.attr_list["Final_energy_offset"] = config.final_energy_offset
 
     if config.verbose:
         print "Calculating energy transfer"
@@ -642,7 +620,7 @@ if __name__ == "__main__":
                       help="Specify the final wavelength lambda, err^2 in "\
                       +"Angstroms")
     
-    parser.add_option("", "--mon-eff", dest="mon_eff",
+    parser.add_option("", "--mon-eff", dest="mon_eff", metavar="TUPLE",
                       help="Specify the monitor efficiency file or an "\
                       +"efficiency tuple (efficiency,error2)")
     
@@ -663,6 +641,12 @@ if __name__ == "__main__":
                       help="Flag to dump the wavelength information for all"\
                       +" pixels")
     parser.set_defaults(dump_wave=False)
+
+    parser.add_option("", "--dump-mon-wave", action="store_true",
+                      dest="dump_mon_wave",
+                      help="Flag to dump the wavelength information for the"\
+                      +" monitor")
+    parser.set_defaults(dump_mon_wave=False)    
     
     parser.add_option("", "--dump-energy", action="store_true",
                       dest="dump_energy",
@@ -692,13 +676,6 @@ if __name__ == "__main__":
                       help="Flag to turn on negative wavelength filtering. "\
                       +"This is the default operation.")   
     parser.set_defaults(filter=True)
-
-    parser.add_option("", "--final-energy-offset", dest="final_energy_offset",
-                      help="Specify the final energy offset, err^2 in meV")
-
-    parser.add_option("", "--initial-energy-offset",
-                      dest="initial_energy_offset",
-                      help="Specify the initial energy offset, err^2 in meV")
 
     parser.add_option("", "--roi-file", dest="roi_file",
                       help="Specify a file that contains a list of pixel ids "\
@@ -831,23 +808,6 @@ if __name__ == "__main__":
     else:
         configure.wavelength_final = options.wavelength_final
 
-    # set the final energy offset
-    if options.final_energy_offset is not None:
-        configure.final_energy_offset = \
-                                   hlr_utils.split_values(options.\
-                                                          final_energy_offset)
-    else:
-        configure.final_energy_offset = options.final_energy_offset
-
-    # set the initial energy offset
-    if options.initial_energy_offset is not None:
-        configure.\
-                 initial_energy_offset = \
-                 hlr_utils.split_values(options.\
-                                        initial_energy_offset)
-    else:
-        configure.initial_energy_offset = options.initial_energy_offset
-
     # set the time-zero offset
     if options.time_zero_offset is not None:
         configure.time_zero_offset = hlr_utils.split_values(
@@ -883,6 +843,9 @@ if __name__ == "__main__":
     # set the ability to dump the wavelength information
     configure.dump_wave = options.dump_wave
 
+    # set the ability to dump the monitor wavelength information
+    configure.dump_mon_wave = options.dump_mon_wave    
+
     # set the ability to dump the energy transfer information
     configure.dump_energy = options.dump_energy
     
@@ -891,6 +854,7 @@ if __name__ == "__main__":
 
     if options.dump_all:
         configure.dump_wave = True
+        configure.dump_mon_wave = True
         configure.dump_energy = True
         configure.dump_initial_energy = True
 
