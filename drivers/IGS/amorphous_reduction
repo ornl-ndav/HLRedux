@@ -89,16 +89,6 @@ def subtract_bkg_from_data(conf, data_som, bkg_som, **kwargs):
 
     return data_som2
 
-def norm_data_by_van(data_som, norm_som):
-    """Step 7. Normalize ItdsbDXY(TOF) by vanadium spectrum,
-    ItbNXY(TOF), using function 3.9. The result is ItdsbnDXY(TOF)."""
-
-    if norm_som is None:
-        return data_som
-
-    return common_lib.div_ncerr(data_som, norm_som)
-
-
 def convert_data_and_mon_to_wavelength(conf, data_som, mon2_som):
     """Step 5. Convert ItM2(TOF) and ItdsbnDXY(TOF) to ItM2(lambda)
     and ItdsbnDXY(lambda) using function 3.50 for M2 and function 3.48
@@ -117,54 +107,6 @@ def convert_data_and_mon_to_wavelength(conf, data_som, mon2_som):
         run_filter=conf.filter)
         
     return (data_som1, mon2_som1)
-
-
-def rebin_mon_eff(mon2_som, mon2_eff):
-    """Step 9. Rebin the monitor efficiency to each monitor's
-    wavelength axis using 3.12. The input is the efficiency
-    eM2(lambda) with the output being erM2(lambda)."""
-
-    return dr_lib.rebin_efficiency(mon2_som, mon2_eff)
-
-
-def eff_correct_mon(mon2_som, mon2_eff):
-    """Step 10. Divide ItM2(lambda) by erM2(lambda) using function
-    3.9. The result is IeM2(lambda)."""
-
-    if mon2_eff is None:
-        return mon2_som
-
-    return common_lib.div_ncerr(mon2_som, mon2_eff)
-
-
-def rebin_det_eff(data_som, det_eff):
-    """Step 11. Rebin eDXY(lambda) to the same binning in wavelength
-    as ItbdnDXY(lambda) by using function 3.12. The result is
-    erDXY(lambda)"""
-
-    return dr_lib.rebin_efficiency(data_som, det_eff)
-
-
-def eff_correct_data(data_som, det_eff):
-    """Step 12. Correct ItbdneDXY(lambda) for detector efficiency by
-    using the function in 3.9 using ItbdnDXY(lambda) as data1 and
-    erDXY(lambda) as data2. The result is ItbdneDXY(lambda)."""
-
-    if det_eff is None:
-        return data_som
-
-    return common_lib.div_ncerr(data_som, det_eff)
-
-
-def norm_data_by_mon(config, data_som, mon_som):
-    """Step 9. Normalize by the monitor spectrum using 3.9 using
-    ItsiXY(lambda) as data1 and IteM2(lambda) as data2. The result of this is
-    ItsmiXY(lambda)."""
-
-    if mon_som is None:
-        return data_som
-
-    return common_lib.div_ncerr(data_som, mon_som)
 
 def calc_k_initial(config, data_som):
     """Step 14. Calculate incident wavevector using function 3.24."""
@@ -210,17 +152,20 @@ def create_final_new(conf, E_t_som, k_i_som):
 
 def process_data(datalist, conf, t, i_geom_dst, **kwargs):
     """
-    This function combines Steps 1 through 9 of the data reduction process as
+    This function combines Steps 1 through 8 of the data reduction process as
     specified by the document. 
     """
+    print "In process data"
+    import DST
 
     try:
         dataset_type = kwargs["dataset_type"]
     except KeyError:
         dataset_type = "data"
-
+    
     # Step 1: Open appropriate data files
     try:
+        print "Open data DST"
         data_dst = DST.getInstance("application/x-NeXus", datalist)
     except SystemError:
         print "ERROR: Failed to read file %s" % datalist
@@ -285,6 +230,8 @@ def process_data(datalist, conf, t, i_geom_dst, **kwargs):
 
     del dp_som1, B
 
+    # Provide override capability for final wavelength, time-zero slope and
+    # time-zero offset
 
     if conf.wavelength_final is not None:
         dp_som1.attr_list["Wavelength_final"] = conf.wavelength_final
@@ -294,7 +241,7 @@ def process_data(datalist, conf, t, i_geom_dst, **kwargs):
         dp_som1.attr_list["Time_zero_slope"] = conf.time_zero_slope
 
     # Note: time_zero_offset MUST be a tuple
-    if conf.time_zero_offset is notNone:
+    if conf.time_zero_offset is not None:
         dp_som1.attr_list["Time_zero_offset"] = conf.time_zero_offset
 
 
@@ -324,12 +271,31 @@ def process_data(datalist, conf, t, i_geom_dst, **kwargs):
         
     del dp_som2, dm_som1
 
-    # Step 9: Normalize data by monitor
+    # Step 6: Efficiency correct monitor
     if conf.verbose and dm_som2 is not None:
+        print "Efficiency correct monitor data"
+
+    dm_som3 = dr_lib.feff_correct_mon(dm_som2)
+
+    del dm_som2
+
+    # Step 7: Rebin monitor axis onto detector pixel axis
+    if conf.verbose and dm_som3 is not None:
+        print "Rebin monitor axis to detector pixel axis"
+
+    dm_som4 = dr_lib.rebin_efficiency(dm_som3, dp_som3)
+
+    del dm_som3
+
+    # Step 8: Normalize data by monitor
+    if conf.verbose and dm_som4 is not None:
         print "Normalizing data by monitor"
         
-    dp_somX = norm_data_by_mon(conf, dp_somX, dm_som2)
+    dp_som4 = norm_data_by_mon(conf, dp_som3, dm_som4)
 
+    del dm_som4
+
+    return dp_som4
 
 def run(config, tim=None):
     import sys 
@@ -343,6 +309,7 @@ def run(config, tim=None):
         raise RuntimeError("Need to pass a data filename to the driver "\
                            +"script.")
 
+    # Read in geometry if one is provided
     if config.inst_geom is not None:
         if config.verbose:
             print "Reading in instrument geometry file"
@@ -352,36 +319,24 @@ def run(config, tim=None):
     else:
         inst_geom_dst = None
 
+    # Perform Steps 1-8 on sample data
     d_som1 = process_data(config.data, config, tim, inst_geom_dst)
 
-    #if config.mc:
-    #    d_som1.attr_list["Wavelength_final"] = (6.627, 0.0)
-    """
-    if config.dead_time is not None:
-        if config.verbose:
-            print "Doing dead-time correction"
-            
-        d_som2 = dead_time_correction(d_som1)
-        if tim is not None:
-            tim.getTime(msg="After dead-time correction: ")
-    else:
-        d_som2 = d_som1
-
-    del d_som1
-    """
-
+    # Perform Steps 1-8 on empty can data
     if config.ecan is not None:
         e_som1 = process_data(config.ecan, config, tim, inst_geom_dst,
                              dataset_type="empty can")
     else:
         e_som1 = None
-            
+
+    # Perform Steps 1-8 on normalization data            
     if config.norm is not None:
         n_som1 = process_data(config.norm, config, tim, inst_geom_dst,
                              dataset_type="normalization")
     else:
         n_som1 = None
 
+    # Perform Steps 1-8 on background data
     if config.back is not None:
         b_som1 = process_data(config.back, config, tim, inst_geom_dst,
                              dataset_type="background")
@@ -390,105 +345,52 @@ def run(config, tim=None):
 
     inst_geom_dst.release_resource()
         
-    # Step 10: Subtract background spectrum from sample spectrum    
+    # Step 9: Subtract background spectrum from sample spectrum    
     d_som2 = subtract_bkg_from_data(config, d_som1, b_som1, timer=t,
                                     dataset1="background", dataset2="data")
 
-    # Step 11: Subtract background spectrum from empty can spectrum    
+    # Step 10: Subtract background spectrum from empty can spectrum    
     e_som2 = subtract_bkg_from_data(config, e_som1, b_som1, timer=t,
                                     dataset1="background",
                                     dataset2="empty can")
 
-    # Step 12: Subtract background spectrum from normalization spectrum
+    # Step 11: Subtract background spectrum from normalization spectrum
     n_som2 = subtract_bkg_from_data(config, n_som1, b_som1, timer=t,
                                     dataset1="background",
                                     dataset2="normalization")
     del b_som1
 
-    # Step 13: Subtract empty can spectrum from sample spectrum    
+    # Step 12: Subtract empty can spectrum from sample spectrum    
     d_som3 = subtract_bkg_from_data(config, d_som2, e_som2, timer=t,
                                     dataset1="empty can",
                                     dataset2="data")
 
     del d_som2
     
-    # Step 14: Subtract empty can spectrum from normalization spectrum
+    # Step 13: Subtract empty can spectrum from normalization spectrum
     n_som3 = subtract_bkg_from_data(config, n_som2, e_som2, timer=t,
                                     dataset1="empty can",
                                     dataset2="normalization")    
 
     del n_som2, e_som2
 
+    # Step 14: Integrate normalization spectra
+    if config.verbose and n_som2 is not None:
+        print "Integrating normalization spectra"
 
+    norm_int = dr_lib.integrate_spectra(n_som2, start=config.norm_start,
+                                        end=config.norm_end)
+        
     if config.verbose and n_som2 is not None:
         print "Normalizing data by normalization data"
 
-    d_som4 = norm_data_by_van(d_som3, n_som3)
+    d_som4 = common_lib.div_ncerr(d_som3, norm_int)
 
-    if n_som3 is not None:
+    if n_som2 is not None:
         if tim is not None:
-            tim.getTime(msg="After normalizing data: ")
+            tim.getTime(msg="After normalizing data ")
 
-    del d_som3, n_som3
-
-    if config.mon_eff is None:
-        m_eff2 = None
-    else:
-        try:
-            config.mon_eff.title()
-            if config.verbose:
-                print "Reading monitor efficiency file"
-                
-            mon_eff_dst = DST.getInstance("text/xml", config.mon_eff)
-            m_eff1 = mon_eff_dst.getSOM("/entry/monitor2")
-            mon_eff_dst.release_resource()
-            if config.verbose:
-                print "Rebinning monitor efficiency"
-
-            m_eff2 = rebin_mon_eff(m_som2, m_eff1)
-                
-            del m_eff1
-                    
-        except AttributeError:
-            m_eff2 = config.mon_eff
-
-    if config.verbose and m_eff2 is not None:
-        print "Correcting monitor data for efficiency"
-        
-    m_som3 = eff_correct_mon(m_som2, m_eff2)
-
-    del m_som2
-
-    if config.det_eff is None:
-        det_eff2 = None
-    else:
-        try:
-            config.det_eff.title()
-            if config.verbose:
-                print "Reading detector efficiency file"
-                
-            det_eff_dst = DST.getInstance("text/xml", config.det_eff)
-            det_eff1 = det_eff_dst.getSOM("/entry/dectector")
-            det_eff_dst.release_resource()
-            if config.verbose:
-                print "Rebinning detector efficiency"
-
-            det_eff2 = rebin_det_eff(d_som7, det_eff1)
-
-            del det_eff1
-
-        except AttributeError:
-            det_eff2 = config.det_eff
-
-    if config.verbose and det_eff2 is not None:
-        print "Correcting data for detector efficiency"
-
-    d_som8 = eff_correct_data(d_som7, det_eff2)
-
-    del d_som7, det_eff2
-
-
-    del d_som8
+    del d_som3, n_som2
 
     #if config.verbose:
     #    print "Converting initial wavelength to k_initial"
@@ -496,10 +398,10 @@ def run(config, tim=None):
     #if tim is not None:
     #    tim.getTime(False)
 
-    #d_som10 = calc_k_initial(config, d_som9)
+    #d_som5 = calc_k_initial(config, d_som4)
 
     #if tim is not None:
-    #    tim.getTime(msg="After converting initial wavelength to k_initial: ")
+    #    tim.getTime(msg="After converting initial wavelength to k_initial ")
         
     if config.verbose:
         print "Converting initial wavelength to E_initial"
@@ -507,18 +409,18 @@ def run(config, tim=None):
     if tim is not None:
         tim.getTime(False)
 
-    d_som11 = calc_E_initial(config, d_som9)
+    d_som6 = calc_E_initial(config, d_som4)
 
     if tim is not None:
-        tim.getTime(msg="After converting initial wavelength to E_initial: ")
+        tim.getTime(msg="After converting initial wavelength to E_initial ")
 
     if config.dump_initial_energy:
-        hlr_utils.write_file(config.data, "text/Spec", d_som11,
+        hlr_utils.write_file(config.data, "text/Spec", d_som6,
                              output_ext="ixl",
                              verbose=config.verbose,
                              message="pixel initial energy information")
 
-    del d_som9
+    del d_som4
 
     if config.verbose:
         print "Calculating energy transfer"
@@ -526,15 +428,15 @@ def run(config, tim=None):
     if tim is not None:
         tim.getTime(False)
 
-    d_som12 = calc_energy_transfer(config, d_som11)
+    d_som7 = calc_energy_transfer(config, d_som6)
 
     if tim is not None:
-        tim.getTime(msg="After calculating energy transfer: ")
+        tim.getTime(msg="After calculating energy transfer ")
 
     del d_som11
 
     if config.dump_energy:
-        hlr_utils.write_file(config.data, "text/Spec", d_som12,
+        hlr_utils.write_file(config.data, "text/Spec", d_som7,
                              output_ext="exl",
                              verbose=config.verbose,
                              message="pixel energy transfer information")
@@ -546,28 +448,28 @@ def run(config, tim=None):
         tim.getTime(False)
 
     if config.correct:
-        #d_som13 = create_final_new(config, d_som12, d_som10)
+        #d_som8 = create_final_new(config, d_som7, d_som5)
         pass
     else:
-        d_som13 = create_final(config, d_som12)
+        d_som8 = create_final(config, d_som7)
 
     if tim is not None:
-        tim.getTime(msg="After creation of final spectrum: ")
+        tim.getTime(msg="After creation of final spectrum ")
 
-    del d_som12
+    del d_som7
     #if config.correct:
-    #    del d_som10
+    #    del d_som5
 
     # Writing 2D DAVE file
 
-    hlr_utils.write_file(config.output, "text/Dave2d", d_som13,
+    hlr_utils.write_file(config.output, "text/Dave2d", d_som8,
                          verbose=config.verbose,
                          message="data",
                          replace_ext=False)
 
-    d_som13.attr_list["config"] = config
+    d_som8.attr_list["config"] = config
 
-    hlr_utils.write_file(config.data, "text/rmd", d_som13,
+    hlr_utils.write_file(config.data, "text/rmd", d_som8,
                          output_ext="rmd",
                          verbose=config.verbose,
                          message="metadata")
@@ -606,11 +508,13 @@ if __name__ == "__main__":
                       dest="no_mon_norm",
                       help="Flag for turning off monitor normalization")
     
-    parser.add_option("", "--mon-start", dest="mon_start",
-                      help="Specify the starting bin for monitor integration")
+    parser.add_option("", "--norm-start", dest="norm_start",
+                      help="Specify the starting wavelength for "\
+                      +"normalization integration")
     
-    parser.add_option("", "--mon-end", dest="mon_end",
-                      help="Specify the ending bin for monitor")
+    parser.add_option("", "--norm-end", dest="norm_end",
+                      help="Specify the ending wavelength for "\
+                      +"normalization integration")
     
     parser.add_option("", "--no-tib", action="store_true", dest="no_tib",
                       help="Flag for turning off time-independent background"\
@@ -792,10 +696,10 @@ if __name__ == "__main__":
     configure.TOF_start = options.TOF_start
     # set the TOF end bin
     configure.TOF_end = options.TOF_end
-    # set the monitor start bin
-    configure.mon_start = options.mon_start
-    # set the monitor end bin
-    configure.mon_end = options.mon_end
+    # set the normalization start wavelength
+    configure.norm_start = options.norm_start
+    # set the normalization end wavelength
+    configure.norm_end = options.norm_end
     # set no_mon_norm flag
     configure.no_mon_norm = options.no_mon_norm
     # set no_tib flag
