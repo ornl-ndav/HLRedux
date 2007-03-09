@@ -24,6 +24,7 @@ from hlr_add_files import *
 from hlr_create_2D_dist import *
 from hlr_create_E_vs_Q_igs import *
 from hlr_create_X_vs_pixpos import *
+from hlr_feff_correct_mon import *
 from hlr_filter_pixels import *
 from hlr_igs_energy_transfer import *
 from hlr_integrate_axis import *
