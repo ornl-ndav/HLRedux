@@ -28,6 +28,7 @@ from hlr_feff_correct_mon import *
 from hlr_filter_pixels import *
 from hlr_igs_energy_transfer import *
 from hlr_integrate_axis import *
+from hlr_integrate_spectra import *
 from hlr_rebin_efficiency import *
 from hlr_subtract_time_indep_bkg import *
 from hlr_sum_all_spectra import *
