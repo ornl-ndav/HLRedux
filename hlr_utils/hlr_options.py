@@ -91,6 +91,16 @@ class SNSOptions(BasicOptions):
         except KeyError:
             instrument = ""
 
+        # General instrument driver options
+
+        self.add_option("", "--inst-geom", dest="inst_geom",
+                        metavar="FILENAME",
+                        help="Specify the instrument geometry file")
+
+        self.add_option("", "--data-paths", dest="data_paths",
+                        help="Specify the comma separated list of detector "\
+                        +"data paths and signals.")
+
         # Instrument characterization file options
         self.add_option("", "--norm", help="Specify the normalization file")
         
