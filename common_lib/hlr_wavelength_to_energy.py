@@ -131,8 +131,8 @@ def wavelength_to_energy(obj, **kwargs):
                 map_so.y = axis_manip.reverse_array_cp(map_so.y)
                 map_so.var_y = axis_manip.reverse_array_cp(map_so.var_y)
             else:
-                map_so.y = axis_manip.reverse_array_cp(y_val)
-                map_so.var_y = axis_manip.reverse_array_cp(y_err2)
+                map_so.y = axis_manip.reverse_array_cp(counts[0])
+                map_so.var_y = axis_manip.reverse_array_cp(counts[1])
         else:
             pass
 
@@ -150,12 +150,8 @@ def wavelength_to_energy(obj, **kwargs):
         else:
             pass
 
-        if lojac:
-            hlr_utils.result_insert(result, res_descr, counts, map_so,
-                                    "all", axis, [rev_value[0]])
-        else:
-            hlr_utils.result_insert(result, res_descr, rev_value, map_so, "x",
-                                    axis)
+        hlr_utils.result_insert(result, res_descr, rev_value, map_so, "x",
+                                axis)
 
     return result
 
