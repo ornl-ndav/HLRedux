@@ -53,6 +53,10 @@ def rebin_efficiency(obj1, obj2, **kwargs):
 
     # import the helper functions
     import hlr_utils
+
+    # Kickout if monitor object is None
+    if obj1 is None:
+        return obj2
     
     # set up for working through data
     (result, res_descr) = hlr_utils.empty_result(obj1, obj2)
