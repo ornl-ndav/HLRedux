@@ -56,7 +56,7 @@ def rebin_efficiency(obj1, obj2, **kwargs):
 
     # Kickout if monitor object is None
     if obj1 is None:
-        return obj2
+        return obj1
     
     # set up for working through data
     (result, res_descr) = hlr_utils.empty_result(obj1, obj2)
