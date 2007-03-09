@@ -68,7 +68,11 @@ def integrate_axis(obj, **kwargs):
 
     # Check for ending bin
     try: 
-        end = kwargs["end"] + 1
+        end = kwargs["end"]
+        if end != -1:
+            end += 1
+        else:
+            pass
     except KeyError:
         end = -1
 
