@@ -89,10 +89,16 @@ def tof_to_wavelength_lin_time_zero(obj, **kwargs):
     except KeyError:
         time_zero_slope = None
 
+    # Current constants for Time Zero Slope
+    TIME_ZERO_SLOPE = (float(0.0), float(0.0))
+    
     try:
         time_zero_offset = kwargs["time_zero_offset"]
     except KeyError:
         time_zero_offset = None        
+
+    # Current constants for Time Zero Offset
+    TIME_ZERO_OFFSET = (float(0.0), float(0.0))
 
     try:
         lojac = kwargs["lojac"]
@@ -141,12 +147,11 @@ def tof_to_wavelength_lin_time_zero(obj, **kwargs):
                 t_0_slope = obj.attr_list["Time_zero_slope"][0]
                 t_0_slope_err2 = obj.attr_list["Time_zero_slope"][1]
             except KeyError:
-                raise RuntimeError("Please provide a time-zero-slope "\
-                                   +"parameter either via the function call "\
-                                   +"or the SOM")
+                t_0_slope = TIME_ZERO_SLOPE[0]
+                t_0_slope_err2 = TIME_ZERO_SLOPE[1]
         else:
-            t_0_slope = float(0.0)
-            t_0_slope_err2 = float(0.0)
+            t_0_slope = TIME_ZERO_SLOPE[0]
+            t_0_slope_err2 = TIME_ZERO_SLOPE[1]
 
     if time_zero_offset is not None:
         t_0_offset_descr = hlr_utils.get_descr(time_zero_offset)
@@ -156,12 +161,11 @@ def tof_to_wavelength_lin_time_zero(obj, **kwargs):
                 t_0_offset = obj.attr_list["Time_zero_offset"][0]
                 t_0_offset_err2 = obj.attr_list["Time_zero_offset"][1]
             except KeyError:
-                raise RuntimeError("Please provide a time-zero-offset "\
-                                   +"parameter either via the function call "\
-                                   +"or the SOM")
+                t_0_offset = TIME_ZERO_OFFSET[0]
+                t_0_offset_err2 = TIME_ZERO_OFFSET[1]
         else:
-            t_0_offset = float(0.0)
-            t_0_offset_err2 = float(0.0)
+            t_0_offset = TIME_ZERO_OFFSET[0]
+            t_0_offset_err2 = TIME_ZERO_OFFSET[1]
 
     # iterate through the values
     import axis_manip
