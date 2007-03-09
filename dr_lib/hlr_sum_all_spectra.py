@@ -22,7 +22,9 @@
 
 # $Id$
 
-def sum_all_spectra(obj):
+import hlr_utils
+
+def sum_all_spectra(obj, **kwargs):
     """
     This function takes all the SOs in a SOM and sums them together using the
     summing by weights concept. All of the SOs are assumed to have the same
@@ -31,6 +33,11 @@ def sum_all_spectra(obj):
     Parameters:
     ----------
     -> obj is a SOM in which all of the SOs are to be summed together
+    -> kwargs is a list of keyword arguments that the function accepts
+       rebin_axis=<object> is a NessiList or a list of NessiLists containing
+                           the axes to rebin the spectra onto.
+       rebin_axis_dim=<int> is the dimension on the spectra being rebinned.
+                            The default value is 1.
 
     Returns:
     -------
@@ -38,11 +45,9 @@ def sum_all_spectra(obj):
 
     Exceptions:
     ----------
-    <- TypeError is raised if anything other than a SOM is given 
+    <- TypeError is raised if anything other than a SOM is given
+    <- RuntimeError is raised if an unknown rebinning dimension is given
     """
-
-    # import the helper functions
-    import hlr_utils
 
     o_descr = hlr_utils.get_descr(obj)
 
@@ -59,30 +64,52 @@ def sum_all_spectra(obj):
     else:
         pass
 
-    (result, res_descr) = hlr_utils.empty_result(obj)
+    try:
+        rebin_axis = kwargs["rebin_axis"]
+    except KeyError:
+        rebin_axis = None
 
-    result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
+    try:
+        rebin_axis_dim = kwargs["rebin_axis_dim"]
+    except KeyError:
+        rebin_axis_dim = 1
 
-    # iterate through the values
     import common_lib
 
+    if rebin_axis is not None:
+        if rebin_axis_dim == 1:
+            obj1 = common_lib.rebin_axis_1D(obj, rebin_axis)
+        elif rebin_axis_dim == 2:
+            obj1 = common_lib.rebin_axis_2D(obj, rebin_axis[0], rebin_axis[1])
+        else:
+            raise RuntimeError("Do not have rebinning method for %dD." % \
+                               rebin_axis_dim)
+    else:
+        obj1 = obj
+
+    del obj
+
+    (result, res_descr) = hlr_utils.empty_result(obj1)
+
+    result = hlr_utils.copy_som_attr(result, res_descr, obj1, o_descr)
+
+    # iterate through the values
     so_id_list = []
 
-    val1 = hlr_utils.get_value(obj, 0, o_descr, "all")
-    val2 = hlr_utils.get_value(obj, 1, o_descr, "all")
+    val1 = hlr_utils.get_value(obj1, 0, o_descr, "all")
+    val2 = hlr_utils.get_value(obj1, 1, o_descr, "all")
     value = common_lib.add_ncerr(val1, val2)
     so_id_list.append(val1.id)
     so_id_list.append(val2.id)
 
-    for i in xrange(2, hlr_utils.get_length(obj)):
-        val = hlr_utils.get_value(obj, i, o_descr, "all")
+    for i in xrange(2, hlr_utils.get_length(obj1)):
+        val = hlr_utils.get_value(obj1, i, o_descr, "all")
         value = common_lib.add_ncerr(val, value)
         so_id_list.append(val.id)
 
-
     hlr_utils.result_insert( result, res_descr, value, None, "all")
     result.attr_list["Summed IDs"] = so_id_list
-    result[0].id = 0
+    result[0].id = so_id_list[0]
             
     return result
 
@@ -101,6 +128,8 @@ if __name__ == "__main__":
     so3.id = 3
     som1.append(so3)
 
+    axis_new = hlr_utils.make_axis(0, 5, 2.5)
+
     print "********** SOM1"
     print "* ", som1[0]
     print "* ", som1[1]
@@ -108,4 +137,5 @@ if __name__ == "__main__":
 
     print "********** sum_all_spectra"
     print "* som:", sum_all_spectra(som1)
+    print "* som (rebin):", sum_all_spectra(som1, rebin_axis=axis_new)
 
