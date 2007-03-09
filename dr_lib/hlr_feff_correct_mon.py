@@ -43,6 +43,9 @@ def feff_correct_mon(obj, **kwargs):
     # import the helper functions
     import hlr_utils
 
+    if obj is None:
+        return obj
+
     # set up for working through data
     (result, res_descr) = hlr_utils.empty_result(obj)
     o_descr = hlr_utils.get_descr(obj)
