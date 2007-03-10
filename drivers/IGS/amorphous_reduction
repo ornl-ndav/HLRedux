@@ -45,7 +45,6 @@ def determine_time_indep_bkg(conf, data_som):
 
     return common_lib.weighted_average(data_som, **kwargs)
 
-
 def subtract_time_indep_bkg(data_som, B):
     """Step 4. Subtract B from the data spectrum using function 3.2
     with ItdDXY(TOF) as data1 and B as a. The result is ItdsDXY(TOF)."""
@@ -54,40 +53,6 @@ def subtract_time_indep_bkg(data_som, B):
         return data_som
 
     return dr_lib.subtract_time_indep_bkg(data_som, B)
-
-
-def subtract_bkg_from_data(conf, data_som, bkg_som, **kwargs):
-    """
-    This function subtracts one data set from another
-    """
-
-    try:
-        t = kwargs["timer"]
-    except KeyError:
-        t = None
-
-    try:
-        dataset1 = kwargs["dataset1"]
-    except KeyError:
-        dataset1 = "dataset1"
-
-    try:
-        dataset2 = kwargs["dataset2"]
-    except KeyError:
-        dataset2 = "dataset2"
-                
-    if bkg_som is None:
-        return data_som
-
-    if conf.verbose and bkg_som is not None:
-        print "Subtracting %s from %s" % (dataset1, dataset2)
-
-    data_som2 = common_lib.sub_ncerr(data_som, bkg_som)
-
-    if t is not None:
-        t.getTime(msg="After subtracting %s from %s " % (dataset1, dataset2))
-
-    return data_som2
 
 def convert_data_and_mon_to_wavelength(conf, data_som, mon2_som):
     """Step 5. Convert ItM2(TOF) and ItdsbnDXY(TOF) to ItM2(lambda)
@@ -343,31 +308,42 @@ def run(config, tim=None):
     inst_geom_dst.release_resource()
         
     # Step 9: Subtract background spectrum from sample spectrum    
-    d_som2 = subtract_bkg_from_data(config, d_som1, b_som1, timer=tim,
-                                    dataset1="background", dataset2="data")
+    d_som2 = dr_lib.subtract_bkg_from_data(d_som1, b_som1,
+                                           verbose=config.verbose,
+                                           timer=tim,
+                                           dataset1="background",
+                                           dataset2="data")
 
     # Step 10: Subtract background spectrum from empty can spectrum    
-    e_som2 = subtract_bkg_from_data(config, e_som1, b_som1, timer=tim,
-                                    dataset1="background",
-                                    dataset2="empty can")
+    e_som2 = dr_lib.subtract_bkg_from_data(e_som1, b_som1,
+                                           verbose=config.verbose,
+                                           timer=tim,
+                                           dataset1="background",
+                                           dataset2="empty can")
 
     # Step 11: Subtract background spectrum from normalization spectrum
-    n_som2 = subtract_bkg_from_data(config, n_som1, b_som1, timer=tim,
-                                    dataset1="background",
-                                    dataset2="normalization")
+    n_som2 = dr_lib.subtract_bkg_from_data(n_som1, b_som1,
+                                           verbose=config.verbose,
+                                           timer=tim,
+                                           dataset1="background",
+                                           dataset2="normalization")
     del b_som1
 
     # Step 12: Subtract empty can spectrum from sample spectrum    
-    d_som3 = subtract_bkg_from_data(config, d_som2, e_som2, timer=tim,
-                                    dataset1="empty can",
-                                    dataset2="data")
+    d_som3 = dr_lib.subtract_bkg_from_data(d_som2, e_som2,
+                                           verbose=config.verbose,
+                                           timer=tim,
+                                           dataset1="empty can",
+                                           dataset2="data")
 
     del d_som2
     
     # Step 13: Subtract empty can spectrum from normalization spectrum
-    n_som3 = subtract_bkg_from_data(config, n_som2, e_som2, timer=tim,
-                                    dataset1="empty can",
-                                    dataset2="normalization")    
+    n_som3 = dr_lib.subtract_bkg_from_data(n_som2, e_som2,
+                                           verbose=config.verbose,
+                                           timer=tim,
+                                           dataset1="empty can",
+                                           dataset2="normalization")    
 
     del n_som2, e_som2
 
