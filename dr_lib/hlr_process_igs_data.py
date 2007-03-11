@@ -23,6 +23,7 @@
 # $Id$
 
 import common_lib
+import dr_lib
 
 def process_igs_data(datalist, conf, **kwargs):
     """
