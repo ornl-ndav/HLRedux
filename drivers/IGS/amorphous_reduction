@@ -200,6 +200,15 @@ def run(config, tim=None):
                              verbose=config.verbose,
                              message="pixel energy transfer information")
 
+    # Write 3-columna ASCII file for E_t
+    d_som7_1 = dr_lib.sum_all_spectra(d_som7, rebin_axis=config.E_bins)
+    hlr_utils.write_file(config.data, "text/Spec", d_som7_1,
+                             output_ext="etr",
+                             verbose=config.verbose,
+                             message="combined energy transfer information") 
+
+    del d_som7_1
+
     # Steps 18 to end: Calculate Q and create S(Q, E_t)
     if config.verbose:
         print "Creating 2D spectrum"
@@ -208,7 +217,7 @@ def run(config, tim=None):
         tim.getTime(False)
 
     if config.correct:
-        d_som8 = dr_lib.create_E_vs_Q_igs(d_dom7, d_som5,
+        d_som8 = dr_lib.create_E_vs_Q_igs(d_som7, d_som5,
                                           config.E_bins, config.Q_bins,
                                           so_id="Full Detector",
                                           y_label="counts",
