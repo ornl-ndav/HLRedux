@@ -30,44 +30,6 @@ amorphous material reduction in
 http://www.sns.gov/asg/projects/SCL/reqspec/DR_Lib_RS.doc
 """
 
-def calc_k_initial(config, data_som):
-    """Step 14. Calculate incident wavevector using function 3.24."""
-
-    return common_lib.wavelength_to_scalar_k(data_som)
-
-def calc_E_initial(config, data_som):
-    """Step 15. Calculate incident energy using function 3.22."""
-
-    return common_lib.wavelength_to_energy(data_som)
-
-def calc_energy_transfer(conf, data_som):
-    """Combines Steps 17 and 18 to calculate energy transfer using function
-    3.30."""
-
-    return dr_lib.igs_energy_transfer(data_som)
-
-def create_final(conf, data_som):
-    """Combines Steps 16,19,20 and 21 to create final 2D spectrum"""
-
-    return dr_lib.create_2D_dist(data_som, conf.E_bins, conf.Q_bins,
-                                 so_id="Full Detector",
-                                 y_label="counts",
-                                 y_units="counts / (ueV * A^-1)",
-                                 x_labels=["Q transfer","energy transfer"],
-                                 x_units=["1/Angstroms","ueV"])
-
-def create_final_new(conf, E_t_som, k_i_som):
-    """Combines Steps 16,19,20 and 21 to create final 2D spectrum"""
-
-    return dr_lib.create_E_vs_Q_igs(E_t_som, k_i_som,
-                                    conf.E_bins, conf.Q_bins,
-                                    so_id="Full Detector",
-                                    y_label="counts",
-                                    y_units="counts / (ueV * A^-1)",
-                                    x_labels=["Q transfer",
-                                              "energy transfer"],
-                                    x_units=["1/Angstroms","ueV"])
-
 def run(config, tim=None):
     import sys 
     import DST
@@ -183,24 +145,29 @@ def run(config, tim=None):
 
     del d_som3, norm_int
 
-    #if config.verbose:
-    #    print "Converting initial wavelength to k_initial"
+    # Step 15: Convert initial wavelength to k_initial
+    if config.verbose and config.correct:
+        print "Converting initial wavelength to k_initial"
 
-    #if tim is not None:
-    #    tim.getTime(False)
+    if tim is not None and config.correct:
+        tim.getTime(False)
 
-    #d_som5 = calc_k_initial(config, d_som4)
+    if config.correct:
+        d_som5 = common_lib.wavelength_to_scalar_k(d_som4)
+    else:
+        d_som5 = None
 
-    #if tim is not None:
-    #    tim.getTime(msg="After converting initial wavelength to k_initial ")
-        
+    if tim is not None and config.correct:
+        tim.getTime(msg="After converting initial wavelength to k_initial ")
+
+    # Step 16: Convert initial wavelength to E_initial
     if config.verbose:
         print "Converting initial wavelength to E_initial"
 
     if tim is not None:
         tim.getTime(False)
 
-    d_som6 = calc_E_initial(config, d_som4)
+    d_som6 = common_lib.wavelength_to_energy(d_som4)
 
     if tim is not None:
         tim.getTime(msg="After converting initial wavelength to E_initial ")
@@ -213,13 +180,14 @@ def run(config, tim=None):
 
     del d_som4
 
+    # Step 17: Calculate energy transfer
     if config.verbose:
         print "Calculating energy transfer"
 
     if tim is not None:
         tim.getTime(False)
 
-    d_som7 = calc_energy_transfer(config, d_som6)
+    d_som7 = dr_lib.igs_energy_transfer(d_som6)
 
     if tim is not None:
         tim.getTime(msg="After calculating energy transfer ")
@@ -232,6 +200,7 @@ def run(config, tim=None):
                              verbose=config.verbose,
                              message="pixel energy transfer information")
 
+    # Steps 18 to end: Calculate Q and create S(Q, E_t)
     if config.verbose:
         print "Creating 2D spectrum"
 
@@ -239,17 +208,29 @@ def run(config, tim=None):
         tim.getTime(False)
 
     if config.correct:
-        #d_som8 = create_final_new(config, d_som7, d_som5)
-        pass
+        d_som8 = dr_lib.create_E_vs_Q_igs(d_dom7, d_som5,
+                                          config.E_bins, config.Q_bins,
+                                          so_id="Full Detector",
+                                          y_label="counts",
+                                          y_units="counts / (ueV * A^-1)",
+                                          x_labels=["Q transfer",
+                                                    "energy transfer"],
+                                          x_units=["1/Angstroms","ueV"])
     else:
-        d_som8 = create_final(config, d_som7)
+        d_som8 = dr_lib.create_2D_dist(d_som7, config.E_bins, config.Q_bins,
+                                       so_id="Full Detector",
+                                       y_label="counts",
+                                       y_units="counts / (ueV * A^-1)",
+                                       x_labels=["Q transfer",
+                                                 "energy transfer"],
+                                       x_units=["1/Angstroms","ueV"])
 
     if tim is not None:
         tim.getTime(msg="After creation of final spectrum ")
 
     del d_som7
-    #if config.correct:
-    #    del d_som5
+    if config.correct:
+        del d_som5
 
     # Writing 2D DAVE file
 
