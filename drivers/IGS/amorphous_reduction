@@ -277,12 +277,8 @@ if __name__ == "__main__":
     parser.add_option("", "--dead-time", dest="dead_time",
                       help="Dead time with units (no spaces)")
     
-    parser.add_option("", "--tof-start", dest="TOF_start",
-                      help="Specify the starting TOF bin for time-independent"\
-                      +"background estimation")
-    
-    parser.add_option("", "--tof-end", dest="TOF_end",
-                      help="Specify the ending TOF bin for time-independent"\
+    parser.add_option("", "--tib-tofs", dest="tib_tofs",
+                      help="Specify four TOF values bin for time-independent"\
                       +"background estimation")
     
     parser.add_option("", "--no-mon-norm", action="store_true",
@@ -479,10 +475,8 @@ if __name__ == "__main__":
     else:
         configure.dead_time = options.dead_time
         
-    # set the TOF start bin
-    configure.TOF_start = options.TOF_start
-    # set the TOF end bin
-    configure.TOF_end = options.TOF_end
+    # set the time-independent background TOFs
+    configure.tibs_tofs = options.tibs_tofs
     # set the normalization start wavelength
     configure.norm_start = options.norm_start
     # set the normalization end wavelength
