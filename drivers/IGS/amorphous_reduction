@@ -476,7 +476,10 @@ if __name__ == "__main__":
         configure.dead_time = options.dead_time
         
     # set the time-independent background TOFs
-    configure.tibs_tofs = options.tibs_tofs
+    if options.tib_tofs is not None:
+        configure.tib_tofs = options.tib_tofs.split(',')
+    else:
+        configure.tib_tofs = options.tib_tofs
     # set the normalization start wavelength
     configure.norm_start = options.norm_start
     # set the normalization end wavelength
@@ -485,6 +488,10 @@ if __name__ == "__main__":
     configure.no_mon_norm = options.no_mon_norm
     # set no_tib flag
     configure.no_tib = options.no_tib
+
+    if not configure.no_tib and configure.tib_tofs is None:
+        parser.error("Must provide TOF channels via tib-tofs or set no-tib "
+                     +"flag.")
 
     # set the final wavelength
     if options.wavelength_final is not None:
