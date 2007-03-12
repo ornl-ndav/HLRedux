@@ -40,12 +40,16 @@ def determine_time_indep_bkg(obj, tof_vals, **kwargs):
        associated error 
     """
 
+    # Kickout if tof_vals is NoneType
+    if tof_vals is None:
+        return obj
+
     # import the helper functions
     import hlr_utils
 
     o_descr = hlr_utils.get_descr(obj)
 
-    if o_descr != "SOM" or o_descr != "SO":
+    if o_descr != "SOM" and o_descr != "SO":
         raise TypeError("Incoming object must be a SOM or a SO")
     # Have a SOM or SO
     else:
@@ -58,18 +62,42 @@ def determine_time_indep_bkg(obj, tof_vals, **kwargs):
         res_descr = "list"
     else:
         res_descr = "number"
-    
 
+    num_tof_vals = float(len(tof_vals))
+
+    import bisect
+
+    # iterate through the values
+    for i in xrange(hlr_utils.get_length(obj)):
+        obj1 = hlr_utils.get_value(obj, i, o_descr, "all")
+
+        average = 0.0
+        ave_err2 = 0.0
+        for tof in tof_vals:
+            index = bisect.bisect(obj1.axis[0].val, tof) - 1
+            average += obj1.y[index]
+            ave_err2 += obj1.var_y[index]
+
+        average /= num_tof_vals
+        ave_err2 /= num_tof_vals
+
+        hlr_utils.result_insert(result, res_descr, (average, ave_err2), None,
+                                "all")
+
+    import copy
+    return copy.deepcopy(result)
 
 if __name__ == "__main__":
     import hlr_test
 
     som1 = hlr_test.generate_som()
 
+    tof_channels = [1.5, 3.0]
+ 
     print "********** SOM1"
     print "* ", som1[0]
     print "* ", som1[1]
 
     print "********** determine_time_indep_bkg"
-    print "* ", determine_time_indep_bkg(som1)
+    print "* ", determine_time_indep_bkg(som1, tof_channels)
     
