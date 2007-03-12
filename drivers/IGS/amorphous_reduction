@@ -203,10 +203,10 @@ def run(config, tim=None):
     # Write 3-columna ASCII file for E_t
     d_som7_1 = dr_lib.sum_all_spectra(d_som7, rebin_axis=config.E_bins)
     hlr_utils.write_file(config.data, "text/Spec", d_som7_1,
-                             output_ext="etr",
-                             verbose=config.verbose,
-                             message="combined energy transfer information") 
-
+                         output_ext="etr",
+                         verbose=config.verbose,
+                         message="combined energy transfer information") 
+    
     del d_som7_1
 
     # Steps 18 to end: Calculate Q and create S(Q, E_t)
