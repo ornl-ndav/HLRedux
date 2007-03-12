@@ -74,7 +74,8 @@ def run(config, tim):
     else:
         b_som1 = None
 
-    inst_geom_dst.release_resource()
+    if inst_geom_dst is not None:
+        inst_geom_dst.release_resource()
         
     # Step 10: Subtract background spectrum from empty can spectrum    
     e_som2 = dr_lib.subtract_bkg_from_data(e_som1, b_som1,
@@ -126,8 +127,11 @@ if __name__ == "__main__":
     import hlr_utils
     
     # set up the options available
-    parser = hlr_utils.SNSOptions("usage: %prog [options] <datafile>",
-                                  inst="IGS")
+    parser = hlr_utils.IgsOptions("usage: %prog [options] <datafile>")
+
+    # Set defaults for imported options
+    parser.set_defaults(data_paths="/entry/bank1,1,/entry/bank2,1")
+    parser.set_defaults(mon_path="/entry/monitor,1")
 
     (options, args) = parser.parse_args()
 
@@ -137,6 +141,23 @@ if __name__ == "__main__":
     # set the verbosity
     configure.verbose = options.verbose
 
+    if len(args) == 0:
+        if options.data is None:
+            if options.norm is None:
+                parser.error("Provide normalization files as arguments or "\
+                             +"via the data or norm CLI flags.")
+            else:
+                options.data = options.norm
+            configure.data = hlr_utils.fix_filename(options.data)
+            if not hlr_utils.file_exists(configure.data):
+                parser.error("Data file [%s] does not exist" % configure.data)
+    elif len(args) == 1:
+        configure.data = args[0]
+        if not hlr_utils.file_exists(configure.data):
+            parser.error("Data file [%s] does not exist" % configure.data)
+    else:
+        parser.error("Too many data files specified")
+                
     configure.ecan = hlr_utils.fix_filename(options.ecan)
     if configure.ecan is not None:
         if not hlr_utils.file_exists(configure.ecan):
@@ -224,6 +245,9 @@ if __name__ == "__main__":
 
     # set the filter option
     configure.filter = options.filter
+
+    # set MC option
+    configure.mc = options.mc
 
     if options.timing:
         import sns_timing
