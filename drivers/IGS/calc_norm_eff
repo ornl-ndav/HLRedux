@@ -31,11 +31,98 @@ normalization efficiency on a per-pixel basis from a vanadium run file. It
 will repeat steps 
 """
 
-def run(config):
-    pass
+def run(config, tim):
+    import sys 
+    import DST
+
+    if tim is not None:
+        tim.getTime(False)
+        old_time = tim.getOldTime()
+
+    if config.data is None:
+        raise RuntimeError("Need to pass a data filename to the driver "\
+                           +"script.")
+
+    # Read in geometry if one is provided
+    if config.inst_geom is not None:
+        if config.verbose:
+            print "Reading in instrument geometry file"
+            
+        inst_geom_dst = DST.getInstance("application/x-NxsGeom",
+                                        config.inst_geom)
+    else:
+        inst_geom_dst = None
+
+    # Perform Steps 1-8 on normalization data            
+    n_som1 = dr_lib.process_igs_data(config.data, config, timer=tim,
+                                     inst_geom_dst=inst_geom_dst,
+                                     dataset_type="normalization")
+    
+    # Perform Steps 1-8 on empty can data
+    if config.ecan is not None:
+        e_som1 = dr_lib.process_igs_data(config.ecan, config, timer=tim,
+                                         inst_geom_dst=inst_geom_dst,
+                                         dataset_type="empty can")
+    else:
+        e_som1 = None
+
+    # Perform Steps 1-8 on background data
+    if config.back is not None:
+        b_som1 = dr_lib.process_igs_data(config.back, config, timer=tim,
+                                         inst_geom_dst=inst_geom_dst,
+                                         dataset_type="background")
+    else:
+        b_som1 = None
+
+    inst_geom_dst.release_resource()
+        
+    # Step 10: Subtract background spectrum from empty can spectrum    
+    e_som2 = dr_lib.subtract_bkg_from_data(e_som1, b_som1,
+                                           verbose=config.verbose,
+                                           timer=tim,
+                                           dataset1="background",
+                                           dataset2="empty can")
+
+    # Step 11: Subtract background spectrum from normalization spectrum
+    n_som2 = dr_lib.subtract_bkg_from_data(n_som1, b_som1,
+                                           verbose=config.verbose,
+                                           timer=tim,
+                                           dataset1="background",
+                                           dataset2="normalization")
+    del b_som1
+
+    # Step 13: Subtract empty can spectrum from normalization spectrum
+    n_som3 = dr_lib.subtract_bkg_from_data(n_som2, e_som2,
+                                           verbose=config.verbose,
+                                           timer=tim,
+                                           dataset1="empty can",
+                                           dataset2="normalization")    
+
+    del n_som2, e_som2
+
+    # Step 14: Integrate normalization spectra
+    if config.verbose:
+        print "Integrating normalization spectra"
+
+    norm_int = dr_lib.integrate_spectra(n_som3, start=config.norm_start,
+                                        end=config.norm_end)
+
+    n_som3.attr_list["norm_int"] = norm_int
+
+    hlr_utils.write_file(config.data, "text/num-info", n_som3,
+                         output_ext="norm",
+                         verbose=config.verbose,
+                         message="normalization values")
+
+    if tim is not None:
+        tim.setOldTime(old_time)
+        tim.getTime(msg="Total Running Time: ")
 
 if __name__ == "__main__":
-
+    import os
+    
+    import common_lib
+    import dr_lib
     import hlr_utils
     
     # set up the options available
@@ -50,5 +137,99 @@ if __name__ == "__main__":
     # set the verbosity
     configure.verbose = options.verbose
 
+    configure.ecan = hlr_utils.fix_filename(options.ecan)
+    if configure.ecan is not None:
+        if not hlr_utils.file_exists(configure.ecan):
+            parser.error("Empty can file [%s] does not exist" \
+                         % configure.ecan)            
+            
+    configure.back = hlr_utils.fix_filename(options.back)
+    if configure.back is not None:
+        if not hlr_utils.file_exists(configure.back):
+            parser.error("Background file [%s] does not exist" \
+                         % configure.back)
+
+    configure.inst_geom = hlr_utils.fix_filename(options.inst_geom)
+    if configure.inst_geom is not None:
+        if not hlr_utils.file_exists(configure.inst_geom):
+            parser.error("Instrument geometry file [%s] does not exist" \
+                         % configure.inst_geom)
+
+    configure.roi_file = hlr_utils.fix_filename(options.roi_file)
+    if configure.roi_file is not None:
+        if not hlr_utils.file_exists(configure.roi_file):
+            parser.error("Pixel roi file [%s] does not exist" \
+                         % configure.roi_file)
+
+    # set the data paths
+    configure.data_paths = hlr_utils.create_data_paths(options.data_paths)
+
+    # set the monitor path
+    configure.mon_path = hlr_utils.create_data_paths(options.mon_path)
+
+    # set the dead time
+    if options.dead_time is not None:
+        configure.dead_time = hlr_utils.split_values(options.dead_time)
+    else:
+        configure.dead_time = options.dead_time
+        
+    # set the time-independent background TOFs
+    if options.tib_tofs is not None:
+        configure.tib_tofs = options.tib_tofs.split(',')
+    else:
+        configure.tib_tofs = options.tib_tofs
+    # set the normalization start wavelength
+    configure.norm_start = options.norm_start
+    # set the normalization end wavelength
+    configure.norm_end = options.norm_end
+    # set no_mon_norm flag
+    configure.no_mon_norm = options.no_mon_norm
+    # set no_tib flag
+    configure.no_tib = options.no_tib
+
+    if not configure.no_tib and configure.tib_tofs is None:
+        parser.error("Must provide TOF channels via tib-tofs or set no-tib "
+                     +"flag.")
+
+    # set the final wavelength
+    if options.wavelength_final is not None:
+        configure.wavelength_final = hlr_utils.split_values(\
+            options.wavelength_final)
+    else:
+        configure.wavelength_final = options.wavelength_final
+
+    # set the time-zero offset
+    if options.time_zero_offset is not None:
+        configure.time_zero_offset = hlr_utils.split_values(
+            options.time_zero_offset)
+    else:
+        configure.time_zero_offset = options.time_zero_offset
+
+    # set the time-zero slope
+    if options.time_zero_slope is not None:
+        configure.time_zero_slope = hlr_utils.split_values(
+            options.time_zero_slope)
+    else:
+        configure.time_zero_slope = options.time_zero_slope
+
+    # set the ability to dump the wavelength information
+    configure.dump_wave = options.dump_wave
+
+    # set the ability to dump the monitor wavelength information
+    configure.dump_mon_wave = options.dump_mon_wave    
+
+    if options.dump_all:
+        configure.dump_wave = True
+        configure.dump_mon_wave = True
+
+    # set the filter option
+    configure.filter = options.filter
+
+    if options.timing:
+        import sns_timing
+        timer = sns_timing.DiffTime()
+    else:
+        timer = None
+    
     # run the program
-    run(configure)
+    run(configure, timer)
