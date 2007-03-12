@@ -267,40 +267,13 @@ if __name__ == "__main__":
     import hlr_utils
     
     # set up the options available
-    parser = hlr_utils.SNSOptions("usage: %prog [options] <datafile>",
-                                  inst="IGS")
+    parser = hlr_utils.IgsOptions("usage: %prog [options] <datafile>")
 
     # Set defaults for imported options
     parser.set_defaults(data_paths="/entry/bank1,1,/entry/bank2,1")
+    parser.set_defaults(mon_path="/entry/monitor,1")
     
     # Add BSS specific options
-    parser.add_option("", "--dead-time", dest="dead_time",
-                      help="Dead time with units (no spaces)")
-    
-    parser.add_option("", "--tib-tofs", dest="tib_tofs",
-                      help="Specify four TOF values bin for time-independent"\
-                      +"background estimation")
-    
-    parser.add_option("", "--no-mon-norm", action="store_true",
-                      dest="no_mon_norm",
-                      help="Flag for turning off monitor normalization")
-    
-    parser.add_option("", "--norm-start", dest="norm_start",
-                      help="Specify the starting wavelength for "\
-                      +"normalization integration")
-    
-    parser.add_option("", "--norm-end", dest="norm_end",
-                      help="Specify the ending wavelength for "\
-                      +"normalization integration")
-    
-    parser.add_option("", "--no-tib", action="store_true", dest="no_tib",
-                      help="Flag for turning off time-independent background"\
-                      +"subtraction")
-    
-    parser.add_option("", "--final-wavelength", dest="wavelength_final",
-                      help="Specify the final wavelength lambda, err^2 in "\
-                      +"Angstroms")
-    
     parser.add_option("", "--mon-eff", dest="mon_eff", metavar="TUPLE",
                       help="Specify the monitor efficiency file or an "\
                       +"efficiency tuple (efficiency,error2)")
@@ -318,27 +291,11 @@ if __name__ == "__main__":
                       +" values and the momentum transfer bin width in"\
                       +" Angstroms^-1")
     
-    parser.add_option("", "--dump-wave", action="store_true", dest="dump_wave",
-                      help="Flag to dump the wavelength information for all"\
-                      +" pixels")
-    parser.set_defaults(dump_wave=False)
-
-    parser.add_option("", "--dump-mon-wave", action="store_true",
-                      dest="dump_mon_wave",
-                      help="Flag to dump the wavelength information for the"\
-                      +" monitor")
-    parser.set_defaults(dump_mon_wave=False)    
-    
     parser.add_option("", "--dump-energy", action="store_true",
                       dest="dump_energy",
                       help="Flag to dump the energy transfer information for"\
                       +" all pixels")
     parser.set_defaults(dump_energy=False)
-    
-    parser.add_option("", "--mon-path", dest="mon_path",
-                      help="Specify the comma separated list of monitor "\
-                      +"path and signal. Default is /entry/monitor,1")
-    parser.set_defaults(mon_path="/entry/monitor,1")
     
     parser.add_option("", "--dump-ei", action="store_true",
                       dest="dump_initial_energy",
@@ -346,34 +303,6 @@ if __name__ == "__main__":
                       +" all pixels")
     parser.set_defaults(dump_ei=False)
     
-    parser.add_option("", "--dump-all", action="store_true", dest="dump_all",
-                      help="Flag to dump information for all pixels")
-    parser.set_defaults(dump_all=False)
-    
-    parser.add_option("", "--no-filter", action="store_false", dest="filter",
-                      help="Flag to turn off negative wavelength filtering.")
-
-    parser.add_option("", "--filter", action="store_true", dest="filter",
-                      help="Flag to turn on negative wavelength filtering. "\
-                      +"This is the default operation.")   
-    parser.set_defaults(filter=True)
-
-    parser.add_option("", "--roi-file", dest="roi_file",
-                      help="Specify a file that contains a list of pixel ids "\
-                      +"to be read from the data")
-
-    parser.add_option("", "--timing", action="store_true", dest="timing",
-                      help="Flag to turn on timing of code")
-    parser.set_defaults(timing=False)
-
-    parser.add_option("", "--time-zero-offset", dest="time_zero_offset",
-                      help="Specify the time zero offset, err^2 in "\
-                      +"microseconds")
-
-    parser.add_option("", "--time-zero-slope", dest="time_zero_slope",
-                      help="Specify the time zero slope, err^2 in "\
-                      +"microseconds")
-
     parser.add_option("", "--mc", action="store_true", dest="mc",
                       help="Flag to turn on MC reading")
     parser.set_defaults(mc=False)
