@@ -119,7 +119,7 @@ def process_igs_data(datalist, conf, **kwargs):
         if conf.verbose:
             print "Determining time-independent background from data"
             
-        B = determine_time_indep_bkg(conf, dp_som1)
+        B = dr_lib.determine_time_indep_bkg(dp_som1, conf.tib_tofs)
         if t is not None:
             t.getTime(msg="After determining time-independent background ")
     else:
@@ -128,8 +128,11 @@ def process_igs_data(datalist, conf, **kwargs):
     # Step 4: Subtract time-independent background
     if conf.verbose and B is not None:
         print "Subtracting time-independent background from data"
-        
-    dp_som2 = subtract_time_indep_bkg(dp_som1, B)
+
+    if B is not None:
+        dp_som2 = common_lib.sub_ncerr(dp_som1, B)
+    else:
+        dp_som2 = dp_som1
 
     if B is not None:
         if t is not None:
@@ -217,30 +220,6 @@ def process_igs_data(datalist, conf, **kwargs):
     del dm_som4, dp_som3
 
     return dp_som4
-
-def determine_time_indep_bkg(conf, data_som):
-    """Step 3. Determine the sample dependent, time independent
-    background B by fitting a line to predetermined end points of
-    ItdDXY(TOF) using function 3.43."""
-
-    kwargs = {}
-
-    if conf.TOF_start is not None:
-        kwargs["start"] = conf.TOF_start
-
-    if conf.TOF_end is not None:
-        kwargs["end"] = conf.TOF_end
-
-    return common_lib.weighted_average(data_som, **kwargs)
-
-def subtract_time_indep_bkg(data_som, B):
-    """Step 4. Subtract B from the data spectrum using function 3.2
-    with ItdDXY(TOF) as data1 and B as a. The result is ItdsDXY(TOF)."""
-
-    if B is None:
-        return data_som
-
-    return dr_lib.subtract_time_indep_bkg(data_som, B)
 
 
 
