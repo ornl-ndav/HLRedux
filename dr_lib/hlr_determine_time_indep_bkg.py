@@ -74,7 +74,7 @@ def determine_time_indep_bkg(obj, tof_vals, **kwargs):
         average = 0.0
         ave_err2 = 0.0
         for tof in tof_vals:
-            index = bisect.bisect(obj1.axis[0].val, tof) - 1
+            index = bisect.bisect(obj1.axis[0].val, float(tof)) - 1
             average += obj1.y[index]
             ave_err2 += obj1.var_y[index]
 
