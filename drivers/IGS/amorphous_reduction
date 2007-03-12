@@ -80,7 +80,8 @@ def run(config, tim=None):
     else:
         b_som1 = None
 
-    inst_geom_dst.release_resource()
+    if inst_geom_dst is not None:
+        inst_geom_dst.release_resource()
         
     # Step 9: Subtract background spectrum from sample spectrum    
     d_som2 = dr_lib.subtract_bkg_from_data(d_som1, b_som1,
@@ -303,10 +304,6 @@ if __name__ == "__main__":
                       +" all pixels")
     parser.set_defaults(dump_ei=False)
     
-    parser.add_option("", "--mc", action="store_true", dest="mc",
-                      help="Flag to turn on MC reading")
-    parser.set_defaults(mc=False)
-
     parser.add_option("", "--correct", action="store_true", dest="correct",
                       help="Flag to turn on correct calculation of Q")
     parser.set_defaults(correct=False)    
