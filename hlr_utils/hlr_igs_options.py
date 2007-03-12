@@ -117,3 +117,7 @@ class IgsOptions(hlr_options.SNSOptions):
                         help="Specify the time zero slope, err^2 in "\
                         +"microseconds")
         
+        self.add_option("", "--mc", action="store_true", dest="mc",
+                        help="Flag to turn on MC reading")
+        self.set_defaults(mc=False)
+        
