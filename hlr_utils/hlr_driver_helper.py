@@ -284,7 +284,7 @@ def write_file(filename, dst_type, data, **kwargs):
     -> filename is a string containing the name of the data file from which
                 the output is generated or the name of an output file
     -> dst_type is a string containing the MIME type of the output formatter
-    -> data is a SOM that contains the output to be written to file
+    -> data is a SOM that contains the output to be written to fil
     -> kwargs is a list of key word arguments that the function accepts:
           message=<string> This is part of the message that will be printed
                   to STDOUT if verbose keyword is set to True. The default
@@ -304,6 +304,9 @@ def write_file(filename, dst_type, data, **kwargs):
                       path on the incoming filename is replaced with the
                       directory where the driver is running. The default
                       behavior is True (replace path)
+       NOTE: Extra keyword arguments can be passed onto the DST instance via
+             calling them in the kwargs list. Those arguments will not be
+             processed by this function, but just pass them on.
     """
 
     import os
@@ -341,6 +344,11 @@ def write_file(filename, dst_type, data, **kwargs):
     except KeyError:
         replace_ext = True        
 
+    try:
+        arguments = kwargs["arguments"]
+    except KeyError:
+        arguments = None
+
     if replace_path:
         fixed_filename = os.path.join(os.getcwd(), os.path.basename(filename))
     else:
@@ -353,7 +361,7 @@ def write_file(filename, dst_type, data, **kwargs):
         pass
         
     resource = open(fixed_filename, "w")
-    output_dst = DST.getInstance(dst_type, resource)
+    output_dst = DST.getInstance(dst_type, resource, arguments, **kwargs)
     if verbose:
         print "Writing %s" % message
 
