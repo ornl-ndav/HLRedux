@@ -63,6 +63,23 @@ def ext_replace(name, ext_out, ext_in):
 
     return myre.sub("", name) + '.' + ext_in
 
+def add_tag(filename, tag):
+    """
+    This function takes a filename, splits it at the extension and appends a
+    tag in front of the extension.
+
+    Parameters:
+    ----------
+    -> filename is a string object containing the file name
+    -> tag is a string that will be placed before the file extension
+    
+    Returns:
+    -------
+    <- A string object containing the new filename
+    """
+    
+    index = filename.rfind('.')
+    return filename[0:index] + "_" + tag + filename[index:]
 
 def split_values(thing):
     """
@@ -304,6 +321,8 @@ def write_file(filename, dst_type, data, **kwargs):
                       path on the incoming filename is replaced with the
                       directory where the driver is running. The default
                       behavior is True (replace path)
+          extra_tag=<string> This is a tag that will be inserted into the file
+                             name just before the file extension.
        NOTE: Extra keyword arguments can be passed onto the DST instance via
              calling them in the kwargs list. Those arguments will not be
              processed by this function, but just pass them on.
@@ -345,6 +364,11 @@ def write_file(filename, dst_type, data, **kwargs):
         replace_ext = True        
 
     try:
+        extra_tag = kwargs["extra_tag"]
+    except KeyError:
+        extra_tag = None
+
+    try:
         arguments = kwargs["arguments"]
     except KeyError:
         arguments = None
@@ -359,6 +383,9 @@ def write_file(filename, dst_type, data, **kwargs):
                                                output_ext)
     else:
         pass
+
+    if extra_tag is not None:
+        fixed_filename = hlr_utils.add_tag(fixed_filename, extra_tag)
         
     resource = open(fixed_filename, "w")
     output_dst = DST.getInstance(dst_type, resource, arguments, **kwargs)
