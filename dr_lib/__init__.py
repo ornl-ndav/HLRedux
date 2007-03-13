@@ -32,6 +32,7 @@ from hlr_integrate_axis import *
 from hlr_integrate_spectra import *
 from hlr_process_igs_data import process_igs_data
 from hlr_rebin_efficiency import *
+from hlr_rebin_monitor import *
 from hlr_subtract_bkg_from_data import *
 from hlr_subtract_time_indep_bkg import *
 from hlr_sum_all_spectra import *
