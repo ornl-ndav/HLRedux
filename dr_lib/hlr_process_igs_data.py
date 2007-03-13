@@ -122,6 +122,23 @@ def process_igs_data(datalist, conf, **kwargs):
         B = dr_lib.determine_time_indep_bkg(dp_som1, conf.tib_tofs)
         if t is not None:
             t.getTime(msg="After determining time-independent background ")
+
+        if conf.dump_tib:
+            attr_name = "time-independent-background"
+            dp_som1.attr_list[attr_name] = B
+            file_comment = "TOFs: %s" % conf.tib_tofs
+            
+            hlr_utils.write_file(datalist, "text/num-info", dp_som1,
+                                 output_ext="tib",
+                                 extra_tag=dataset_type,
+                                 verbose=conf.verbose,
+                                 message="time-independent background "\
+                                 +"information",
+                                 arguments=attr_name,
+                                 tag="Average",
+                                 units="counts",
+                                 comments=[file_comment])
+            del dp_som1.attr_list[attr_name]
     else:
         B = None
 
