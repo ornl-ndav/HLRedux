@@ -108,12 +108,18 @@ def run(config, tim):
     norm_int = dr_lib.integrate_spectra(n_som3, start=config.norm_start,
                                         end=config.norm_end)
 
-    n_som3.attr_list["norm_int"] = norm_int
+    n_som3.attr_list["normalization_int"] = norm_int
+
+    file_comment = "Integration range: %0.3f, %0.3f" % (config.norm_start,
+                                                        config.norm_end)
 
     hlr_utils.write_file(config.data, "text/num-info", n_som3,
                          output_ext="norm",
                          verbose=config.verbose,
-                         message="normalization values")
+                         message="normalization values",
+                         arguments="normalization_int",
+                         comments=[file_comment],
+                         tag="Integral", units="counts")
 
     if tim is not None:
         tim.setOldTime(old_time)
@@ -132,6 +138,8 @@ if __name__ == "__main__":
     # Set defaults for imported options
     parser.set_defaults(data_paths="/entry/bank1,1,/entry/bank2,1")
     parser.set_defaults(mon_path="/entry/monitor,1")
+    parser.set_defaults(norm_start="6.24")
+    parser.set_defaults(norm_end="6.30")
 
     (options, args) = parser.parse_args()
 
@@ -200,9 +208,9 @@ if __name__ == "__main__":
     else:
         configure.tib_tofs = options.tib_tofs
     # set the normalization start wavelength
-    configure.norm_start = options.norm_start
+    configure.norm_start = float(options.norm_start)
     # set the normalization end wavelength
-    configure.norm_end = options.norm_end
+    configure.norm_end = float(options.norm_end)
     # set no_mon_norm flag
     configure.no_mon_norm = options.no_mon_norm
     # set no_tib flag
