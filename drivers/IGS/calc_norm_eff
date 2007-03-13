@@ -241,6 +241,9 @@ if __name__ == "__main__":
     else:
         configure.time_zero_slope = options.time_zero_slope
 
+    # set the ability to dump the time-independent background information
+    configure.dump_tib = options.dump_tib
+
     # set the ability to dump the wavelength information
     configure.dump_wave = options.dump_wave
 
@@ -248,6 +251,7 @@ if __name__ == "__main__":
     configure.dump_mon_wave = options.dump_mon_wave    
 
     if options.dump_all:
+        configure.dump_tib = True
         configure.dump_wave = True
         configure.dump_mon_wave = True
 
