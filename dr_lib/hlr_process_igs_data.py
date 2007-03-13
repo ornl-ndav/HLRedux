@@ -199,11 +199,13 @@ def process_igs_data(datalist, conf, **kwargs):
     if conf.dump_wave:
         hlr_utils.write_file(datalist, "text/Spec", dp_som3,
                              output_ext="pxl",
+                             extra_tag=dataset_type,
                              verbose=conf.verbose,
                              message="pixel wavelength information")
     if conf.dump_mon_wave:        
         hlr_utils.write_file(datalist, "text/Spec", dm_som2,
                              output_ext="mxl",
+                             extra_tag=dataset_type,
                              verbose=conf.verbose,
                              message="monitor wavelength information")
         
