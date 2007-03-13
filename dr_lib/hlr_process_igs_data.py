@@ -118,8 +118,12 @@ def process_igs_data(datalist, conf, **kwargs):
     if not conf.no_tib:
         if conf.verbose:
             print "Determining time-independent background from data"
+
+        if t is not None:
+            t.getTime(False)
             
         B = dr_lib.determine_time_indep_bkg(dp_som1, conf.tib_tofs)
+
         if t is not None:
             t.getTime(msg="After determining time-independent background ")
 
@@ -145,6 +149,9 @@ def process_igs_data(datalist, conf, **kwargs):
     # Step 4: Subtract time-independent background
     if conf.verbose and B is not None:
         print "Subtracting time-independent background from data"
+
+    if t is not None:
+            t.getTime(False)
 
     if B is not None:
         dp_som2 = common_lib.sub_ncerr(dp_som1, B)
@@ -215,15 +222,27 @@ def process_igs_data(datalist, conf, **kwargs):
     if conf.verbose and dm_som2 is not None:
         print "Efficiency correct monitor data"
 
+    if t is not None:
+        t.getTime(False)
+
     dm_som3 = dr_lib.feff_correct_mon(dm_som2)
 
+    if t is not None and dm_som2 is not None:
+        t.getTime(msg="After efficiency correcting monitor ")
+    
     del dm_som2
 
     # Step 7: Rebin monitor axis onto detector pixel axis
     if conf.verbose and dm_som3 is not None:
         print "Rebin monitor axis to detector pixel axis"
 
+    if t is not None:
+        t.getTime(False)
+
     dm_som4 = dr_lib.rebin_monitor(dm_som3, dp_som3)
+
+    if t is not None and dm_som3 is not None:
+        t.getTime(msg="After rebinning monitor ")
 
     del dm_som3
 
@@ -231,8 +250,14 @@ def process_igs_data(datalist, conf, **kwargs):
     if conf.verbose and dm_som4 is not None:
         print "Normalizing data by monitor"
 
+    if t is not None:
+        t.getTime(False)
+
     if dm_som4 is not None:
         dp_som4 = common_lib.div_ncerr(dp_som3, dm_som4)
+
+        if t is not None:
+            t.getTime(msg="After normalizing data by monitor ")
     else:
         dp_som4 = dp_som3
 
