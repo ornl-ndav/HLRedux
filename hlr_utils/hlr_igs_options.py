@@ -71,6 +71,12 @@ class IgsOptions(hlr_options.SNSOptions):
         self.add_option("", "--final-wavelength", dest="wavelength_final",
                         help="Specify the final wavelength lambda, err^2 in "\
                         +"Angstroms")
+
+        self.add_option("", "--dump-tib", action="store_true",
+                        dest="dump_tib",
+                        help="Flag to dump the time-independent background "\
+                        +"information for all pixels")
+        self.set_defaults(dump_tib=False)
         
         self.add_option("", "--dump-wave", action="store_true",
                         dest="dump_wave",
