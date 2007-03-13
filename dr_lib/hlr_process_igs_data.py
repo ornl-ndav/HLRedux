@@ -223,7 +223,7 @@ def process_igs_data(datalist, conf, **kwargs):
     if conf.verbose and dm_som3 is not None:
         print "Rebin monitor axis to detector pixel axis"
 
-    dm_som4 = dr_lib.rebin_efficiency(dm_som3, dp_som3)
+    dm_som4 = dr_lib.rebin_monitor(dm_som3, dp_som3)
 
     del dm_som3
 
