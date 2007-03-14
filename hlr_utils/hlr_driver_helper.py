@@ -523,16 +523,25 @@ def determine_files(inputlist, inst=None, **kwargs):
                                 the files. If this is set to true, it will
                                 cause the driver to crash if it cannot find
                                 any files. The default behavior is False.
+         one_file=<boolean> is a flag that tells the function that there will
+                            be only one file name associated with this call.
+                            The default value is False.
 
     Returns:
     -------
     <- A list of fully qualified file names
     """
 
+    # Check on keywords
     try:
         stop_on_none = kwargs["stop_on_none"]
     except KeyError:
         stop_on_none = False
+
+    try:
+        one_file = kwargs["one_file"]
+    except KeyError:
+        one_file = False
 
     # Kickout is inputlist is of NoneType
     if inputlist is None:
@@ -571,7 +580,10 @@ def determine_files(inputlist, inst=None, **kwargs):
         raise RuntimeError("No valid files are present. Reduction cannot "\
                            +"be run.")
     elif filelist_size > 0:
-        return filelist
+        if one_file:
+            return filelist[0]
+        else:
+            return filelist
     else:
         return None
 
