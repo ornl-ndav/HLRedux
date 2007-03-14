@@ -273,6 +273,8 @@ if __name__ == "__main__":
     # Set defaults for imported options
     parser.set_defaults(data_paths="/entry/bank1,1,/entry/bank2,1")
     parser.set_defaults(mon_path="/entry/monitor,1")
+    parser.set_defaults(norm_start="6.24")
+    parser.set_defaults(norm_end="6.30")
     
     # Add BSS specific options
     parser.add_option("", "--mon-eff", dest="mon_eff", metavar="TUPLE",
@@ -314,22 +316,20 @@ if __name__ == "__main__":
     configure = hlr_utils.Configure()
     
     # get the datafile name and check it
-    if len(args) == 1:
-        configure.data = args[0]
-        if not hlr_utils.file_exists(configure.data):
-            parser.error("Data file [%s] does not exist" % configure.data)
+    if options.data is not None:
+        configure.data = hlr_utils.determine_files(options.data, "BSS",
+                                                   stop_on_none=True)
+    elif len(args) > 0:
+        configure.data = hlr_utils.determine_files(args, "BSS",
+                                                   stop_on_none=True)
     else:
-        if options.data is not None:
-            configure.data = hlr_utils.fix_filename(options.data)
-            if not hlr_utils.file_exists(configure.data):
-                parser.error("Data file [%s] does not exist" % configure.data)
-        else:
-            parser.error("Did not specify a datafile")
+        parser.error("Did not specify a datafile")
+        
     # create the output file name if there isn't one supplied
     if options.output:
         configure.output = hlr_utils.fix_filename(options.output)
     else:
-        outfile = os.path.basename(configure.data)
+        outfile = os.path.basename(configure.data[0])
         path = os.path.join(os.getcwd(), outfile)
         configure.output = hlr_utils.ext_replace(path, "nxs", "txt")
         print "Using %s as output file" % configure.output
@@ -337,32 +337,18 @@ if __name__ == "__main__":
     # set the verbosity
     configure.verbose = options.verbose
 
-    configure.norm = hlr_utils.fix_filename(options.norm)
-    if configure.norm is not None:
-        if not hlr_utils.file_exists(configure.norm):
-            parser.error("Normalization file [%s] does not exist" \
-                         % configure.norm)
+    configure.norm = hlr_utils.determine_files(options.norm, "BSS")
 
-    configure.ecan = hlr_utils.fix_filename(options.ecan)
-    if configure.ecan is not None:
-        if not hlr_utils.file_exists(configure.ecan):
-            parser.error("Empty can file [%s] does not exist" \
-                         % configure.ecan)            
-            
-    configure.back = hlr_utils.fix_filename(options.back)
-    if configure.back is not None:
-        if not hlr_utils.file_exists(configure.back):
-            parser.error("Background file [%s] does not exist" \
-                         % configure.back)
+    configure.ecan = hlr_utils.determine_files(options.ecan, "BSS")
+
+    configure.back = hlr_utils.determine_files(options.back, "BSS")
             
     if options.mon_eff is not None:
         try:
             configure.mon_eff = hlr_utils.split_values(options.mon_eff)
         except ValueError:
-            configure.mon_eff = hlr_utils.fix_filename(options.mon_eff)
-            if not hlr_utils.file_exists(configure.mon_eff):
-                parser.error("Monitor efficiency file [%s] does not exist" \
-                             % configure.mon_eff)
+            configure.mon_eff = hlr_utils.determine_files(options.mon_eff,
+                                                          one_file=True)
     else:
         configure.mon_eff = options.mon_eff
 
@@ -370,24 +356,16 @@ if __name__ == "__main__":
         try:
             configure.det_eff = hlr_utils.split_values(options.det_eff)
         except ValueError:
-            configure.det_eff = hlr_utils.fix_filename(options.det_eff)
-            if not hlr_utils.file_exists(configure.det_eff):
-                parser.error("Detector efficiency file [%s] does not exist" \
-                             % configure.det_eff)
+            configure.det_eff = hlr_utils.determine_files(options.det_eff,
+                                                          one_file=True)
     else:
         configure.det_eff = options.det_eff
             
-    configure.inst_geom = hlr_utils.fix_filename(options.inst_geom)
-    if configure.inst_geom is not None:
-        if not hlr_utils.file_exists(configure.inst_geom):
-            parser.error("Instrument geometry file [%s] does not exist" \
-                         % configure.inst_geom)
+    configure.inst_geom = hlr_utils.determine_files(options.inst_geom,
+                                                    one_file=True)
 
-    configure.roi_file = hlr_utils.fix_filename(options.roi_file)
-    if configure.roi_file is not None:
-        if not hlr_utils.file_exists(configure.roi_file):
-            parser.error("Pixel roi file [%s] does not exist" \
-                         % configure.roi_file)
+    configure.roi_file = hlr_utils.determine_files(options.roi_file,
+                                                   one_file=True)
 
     # set the data paths
     configure.data_paths = hlr_utils.create_data_paths(options.data_paths)
