@@ -62,7 +62,7 @@ def run(config, tim):
     if config.ecan is not None:
         e_som1 = dr_lib.process_igs_data(config.ecan, config, timer=tim,
                                          inst_geom_dst=inst_geom_dst,
-                                         dataset_type="empty can")
+                                         dataset_type="empty_can")
     else:
         e_som1 = None
 
@@ -82,7 +82,7 @@ def run(config, tim):
                                            verbose=config.verbose,
                                            timer=tim,
                                            dataset1="background",
-                                           dataset2="empty can")
+                                           dataset2="empty_can")
 
     # Step 11: Subtract background spectrum from normalization spectrum
     n_som2 = dr_lib.subtract_bkg_from_data(n_som1, b_som1,
@@ -96,7 +96,7 @@ def run(config, tim):
     n_som3 = dr_lib.subtract_bkg_from_data(n_som2, e_som2,
                                            verbose=config.verbose,
                                            timer=tim,
-                                           dataset1="empty can",
+                                           dataset1="empty_can",
                                            dataset2="normalization")    
 
     del n_som2, e_som2
