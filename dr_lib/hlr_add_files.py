@@ -159,6 +159,9 @@ def add_files(filelist, **kwargs):
         if timer is not None:
             timer.getTime(msg="After resource release and DST deletion")
 
+        d_som1.attr_list["filename"] = filelist
+        if b_som1 is not None:
+            b_som1.attr_list["filename"] = filelist
 
     return (d_som1, b_som1)
 
