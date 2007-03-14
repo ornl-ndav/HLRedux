@@ -166,9 +166,11 @@ if __name__ == "__main__":
             
     configure.back = hlr_utils.determine_files(options.back, "BSS")
 
-    configure.inst_geom = hlr_utils.determine_files(options.inst_geom)
+    configure.inst_geom = hlr_utils.determine_files(options.inst_geom,
+                                                    one_file=True)
 
-    configure.roi_file = hlr_utils.determine_files(options.roi_file)
+    configure.roi_file = hlr_utils.determine_files(options.roi_file,
+                                                   one_file=True)
 
     # set the data paths
     configure.data_paths = hlr_utils.create_data_paths(options.data_paths)
