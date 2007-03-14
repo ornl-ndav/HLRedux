@@ -83,10 +83,11 @@ def process_igs_data(datalist, conf, **kwargs):
     if conf.verbose:
         print "Reading %s file" % dataset_type
 
+    # The [0] is to get the data SOM and ignore the None background SOM
     dp_som1 = dr_lib.add_files(datalist, Data_Paths=conf.data_paths,
                                SO_Axis=so_axis, Signal_ROI=conf.roi_file,
-                               Verbose=conf.verbose, Timer=t)
-    print "VL:",dp_som1.attr_list
+                               Verbose=conf.verbose, Timer=t)[0]
+
     if t is not None:
         t.getTime(msg="After reading %s " % dataset_type)
 
@@ -98,10 +99,12 @@ def process_igs_data(datalist, conf, **kwargs):
     else:
         if conf.verbose:
             print "Reading in monitor data from %s file" % dataset_type
+
+        # The [0] is to get the data SOM and ignore the None background SOM
         dm_som1 = dr_lib.add_files(datalist, Data_Paths=conf.mon_path,
                                    SO_Axis=so_axis,
                                    Verbose=conf.verbose,
-                                   Timer=t)
+                                   Timer=t)[0]
         
         if t is not None:
             t.getTime(msg="After reading monitor data ")
