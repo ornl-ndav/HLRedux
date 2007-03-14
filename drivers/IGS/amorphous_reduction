@@ -174,7 +174,7 @@ def run(config, tim=None):
         tim.getTime(msg="After converting initial wavelength to E_initial ")
 
     if config.dump_initial_energy:
-        hlr_utils.write_file(config.data, "text/Spec", d_som6,
+        hlr_utils.write_file(config.data[0], "text/Spec", d_som6,
                              output_ext="ixl",
                              verbose=config.verbose,
                              message="pixel initial energy information")
@@ -196,14 +196,14 @@ def run(config, tim=None):
     del d_som6
 
     if config.dump_energy:
-        hlr_utils.write_file(config.data, "text/Spec", d_som7,
+        hlr_utils.write_file(config.data[0], "text/Spec", d_som7,
                              output_ext="exl",
                              verbose=config.verbose,
                              message="pixel energy transfer information")
 
     # Write 3-columna ASCII file for E_t
     d_som7_1 = dr_lib.sum_all_spectra(d_som7, rebin_axis=config.E_bins)
-    hlr_utils.write_file(config.data, "text/Spec", d_som7_1,
+    hlr_utils.write_file(config.data[0], "text/Spec", d_som7_1,
                          output_ext="etr",
                          verbose=config.verbose,
                          message="combined energy transfer information") 
@@ -251,7 +251,7 @@ def run(config, tim=None):
 
     d_som8.attr_list["config"] = config
 
-    hlr_utils.write_file(config.data, "text/rmd", d_som8,
+    hlr_utils.write_file(config.data[0], "text/rmd", d_som8,
                          output_ext="rmd",
                          verbose=config.verbose,
                          message="metadata")
