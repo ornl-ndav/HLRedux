@@ -70,14 +70,11 @@ def process_igs_data(datalist, conf, **kwargs):
         i_geom_dst = kwargs["inst_geom_dst"]
     except KeyError:
         i_geom_dst = None
+
+    # Set output file names based on first file in list
+    main_data = datalist[0]
         
     # Step 1: Open appropriate data files
-    try:
-        data_dst = DST.getInstance("application/x-NeXus", datalist)
-    except SystemError:
-        print "ERROR: Failed to read file %s" % datalist
-        sys.exit(-1)
-
     if not conf.mc:
         so_axis = "time_of_flight"
     else:
@@ -86,8 +83,9 @@ def process_igs_data(datalist, conf, **kwargs):
     if conf.verbose:
         print "Reading %s file" % dataset_type
 
-    dp_som1 = data_dst.getSOM(conf.data_paths, so_axis,
-                              roi_file=conf.roi_file)
+    dp_som1 = dr_lib.add_files(datalist, Data_Paths=conf.data_paths,
+                               SO_Axis=so_axis, Signal_ROI=conf.roi_file,
+                               Verbose=conf.verbose, Timer=t)
 
     if t is not None:
         t.getTime(msg="After reading %s " % dataset_type)
@@ -100,8 +98,11 @@ def process_igs_data(datalist, conf, **kwargs):
     else:
         if conf.verbose:
             print "Reading in monitor data from %s file" % dataset_type
-        som_id = conf.mon_path
-        dm_som1 = data_dst.getSOM(som_id, so_axis)
+        dm_som1 = dr_lib.add_files(datalist, Data_Paths=conf.mon_path,
+                                   SO_Axis=so_axis,
+                                   Signal_ROI=conf.roi_file,
+                                   Verbose=conf.verbose,
+                                   Timer=t)
         
         if t is not None:
             t.getTime(msg="After reading monitor data ")
@@ -132,7 +133,7 @@ def process_igs_data(datalist, conf, **kwargs):
             dp_som1.attr_list[attr_name] = B
             file_comment = "TOFs: %s" % conf.tib_tofs
             
-            hlr_utils.write_file(datalist, "text/num-info", dp_som1,
+            hlr_utils.write_file(main_data, "text/num-info", dp_som1,
                                  output_ext="tib",
                                  extra_tag=dataset_type,
                                  verbose=conf.verbose,
@@ -204,13 +205,13 @@ def process_igs_data(datalist, conf, **kwargs):
         t.getTime(msg="After converting TOF to wavelength ")
 
     if conf.dump_wave:
-        hlr_utils.write_file(datalist, "text/Spec", dp_som3,
+        hlr_utils.write_file(main_data, "text/Spec", dp_som3,
                              output_ext="pxl",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
                              message="pixel wavelength information")
     if conf.dump_mon_wave:        
-        hlr_utils.write_file(datalist, "text/Spec", dm_som2,
+        hlr_utils.write_file(main_data, "text/Spec", dm_som2,
                              output_ext="mxl",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
