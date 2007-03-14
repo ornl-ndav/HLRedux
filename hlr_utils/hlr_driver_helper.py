@@ -503,3 +503,118 @@ def create_pixel_id(thing):
         pass
 
     return (mylist[0], (int(mylist[1]), int(mylist[2])))
+
+def determine_files(inputlist, inst=None, **kwargs):
+    """
+    This function takes either a list of comma-separated file names or a list
+    of runs in the syntax of findnexus. If the input list begins with /, ~, $
+    or ., it will assume that this is a list of full file path names and will
+    not use the findnexus utility. If the input list begins with a number, it
+    will use the findnexus utility to locate the data files. Files not found
+    by the system will be removed from the list.
+
+    Parameters:
+    ----------
+    -> inputlist is a string containing either fully qualified filenames or
+       run numbers
+    -> inst is a string containing the name of the instrument for file lookup
+    -> kwargs is a list of keyword arguments that the function accepts:
+         stop_on_none=<boolean> is a flag that sets the priority for examining
+                                the files. If this is set to true, it will
+                                cause the driver to crash if it cannot find
+                                any files. The default behavior is False.
+
+    Returns:
+    -------
+    <- A list of fully qualified file names
+    """
+
+    try:
+        stop_on_none = kwargs["stop_on_none"]
+    except KeyError:
+        stop_on_none = False
+
+    # Kickout is inputlist is of NoneType
+    if inputlist is None:
+        return None
+
+    try:
+        if __check_for_path(inputlist):
+            filelist = inputlist.split(',')
+        elif __check_for_digit(inputlist):
+            filelist = __run_findnexus(inputlist, inst)
+        else:
+            raise RuntimeError("Do not know how to interpret %s" % inputlist)
+    except AttributeError:
+        if __check_for_path(inputlist[0]):
+            filelist = inputlist
+        elif __check_for_digit(inputlist[0]):
+            filelist = []
+            for number in inputlist:
+                filelist.extend(__run_findnexus(number, inst))
+        else:
+            raise RuntimeError("Do not know how to interpret %s" % inputlist)
+
+    import copy
+    tmplist = copy.deepcopy(filelist)
+    for infile in tmplist:
+        if not file_exists(infile):
+            print "Data file [%s] does not exist, removing from list" % \
+                  infile
+            filelist.remove(infile)
+        else:
+            pass
+    del tmplist
+
+    filelist_size = len(filelist)
+    if filelist_size == 0 and stop_on_none:
+        raise RuntimeError("No valid files are present. Reduction cannot "\
+                           +"be run.")
+    elif filelist_size > 0:
+        return filelist
+    else:
+        return None
+
+# Private Helper functions for determine_files function
+     
+def __check_for_digit(nums):
+    """
+    This function checks a string to see if the first value is a number.
+    """
+    return nums[0].isdigit()
+
+def __check_for_path(path):
+    """
+    This function checks a string for full file path identifiers.
+    """
+    return path.startswith("/") or path.startswith("$") or \
+           path.startswith(".") or path.startswith("~")
+
+def __clean_str(string):
+    """
+    This function strips whitespace and line breaks from the right side of a
+    string
+    """
+    import os
+    return string.rstrip().rstrip(os.linesep)
+
+def __run_cmd(cmd, lines=True):
+    """
+    This function runs a command and provides the output back. Commands
+    returning single lines of output need to set the second argument to False.
+    """
+    import os
+    fin, fout = os.popen4(cmd)
+    if lines:
+        return fout.readlines()
+    else:
+        return fout.read()
+        
+def __run_findnexus(nums, inst):
+    """
+    This function runs the findnexus command and returns the discovered files.
+    """
+    cmd = "findnexus -s -i %s %s" % (inst, nums)
+    filestring = __clean_str(__run_cmd(cmd, False))
+    return filestring.split(' ')
+    
