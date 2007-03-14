@@ -28,7 +28,7 @@
 This driver repeats the procedures found in 
 http://www.sns.gov/asg/project/SCL/reqspec/DR_Lib_RS.doc to find the 
 normalization efficiency on a per-pixel basis from a vanadium run file. It 
-will repeat steps 
+will repeat steps 1-8,10,11,13,14.
 """
 
 def run(config, tim):
