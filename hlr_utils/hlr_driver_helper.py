@@ -566,13 +566,15 @@ def determine_files(inputlist, inst=None, **kwargs):
 
     import copy
     tmplist = copy.deepcopy(filelist)
+    counter = 0
     for infile in tmplist:
         if not file_exists(infile):
             print "Data file [%s] does not exist, removing from list" % \
                   infile
             filelist.remove(infile)
         else:
-            pass
+            filelist[counter] = fix_filename(infile)
+        counter += 1
     del tmplist
 
     filelist_size = len(filelist)
