@@ -86,7 +86,7 @@ def process_igs_data(datalist, conf, **kwargs):
     dp_som1 = dr_lib.add_files(datalist, Data_Paths=conf.data_paths,
                                SO_Axis=so_axis, Signal_ROI=conf.roi_file,
                                Verbose=conf.verbose, Timer=t)
-
+    print "VL:",dp_som1.attr_list
     if t is not None:
         t.getTime(msg="After reading %s " % dataset_type)
 
