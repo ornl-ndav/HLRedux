@@ -100,7 +100,6 @@ def process_igs_data(datalist, conf, **kwargs):
             print "Reading in monitor data from %s file" % dataset_type
         dm_som1 = dr_lib.add_files(datalist, Data_Paths=conf.mon_path,
                                    SO_Axis=so_axis,
-                                   Signal_ROI=conf.roi_file,
                                    Verbose=conf.verbose,
                                    Timer=t)
         
@@ -109,8 +108,6 @@ def process_igs_data(datalist, conf, **kwargs):
 
         if conf.inst_geom is not None:
             i_geom_dst.setGeometry(conf.mon_path, dm_som1)
-
-    data_dst.release_resource()
 
     # Step 2: Dead Time Correction
     # No dead time correction is being applied to the data yet
