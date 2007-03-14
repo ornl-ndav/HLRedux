@@ -149,6 +149,7 @@ if __name__ == "__main__":
     # set the verbosity
     configure.verbose = options.verbose
 
+
     if len(args) == 0:
         if options.data is None:
             if options.norm is None:
@@ -156,39 +157,18 @@ if __name__ == "__main__":
                              +"via the data or norm CLI flags.")
             else:
                 options.data = options.norm
-            configure.data = hlr_utils.fix_filename(options.data)
-            if not hlr_utils.file_exists(configure.data):
-                parser.error("Data file [%s] does not exist" % configure.data)
-    elif len(args) == 1:
-        configure.data = args[0]
-        if not hlr_utils.file_exists(configure.data):
-            parser.error("Data file [%s] does not exist" % configure.data)
+            configure.data = hlr_utils.determine_files(options.data, "BSS",
+                                                       stop_on_none=True)
     else:
-        parser.error("Too many data files specified")
-                
-    configure.ecan = hlr_utils.fix_filename(options.ecan)
-    if configure.ecan is not None:
-        if not hlr_utils.file_exists(configure.ecan):
-            parser.error("Empty can file [%s] does not exist" \
-                         % configure.ecan)            
+        configure.data = hlr_utils.determine_files(args, "BSS",
+                                                   stop_on_none=True)
+    configure.ecan = hlr_utils.determine_files(options.ecan, "BSS")
             
-    configure.back = hlr_utils.fix_filename(options.back)
-    if configure.back is not None:
-        if not hlr_utils.file_exists(configure.back):
-            parser.error("Background file [%s] does not exist" \
-                         % configure.back)
+    configure.back = hlr_utils.determine_files(options.back, "BSS")
 
-    configure.inst_geom = hlr_utils.fix_filename(options.inst_geom)
-    if configure.inst_geom is not None:
-        if not hlr_utils.file_exists(configure.inst_geom):
-            parser.error("Instrument geometry file [%s] does not exist" \
-                         % configure.inst_geom)
+    configure.inst_geom = hlr_utils.determine_files(options.inst_geom)
 
-    configure.roi_file = hlr_utils.fix_filename(options.roi_file)
-    if configure.roi_file is not None:
-        if not hlr_utils.file_exists(configure.roi_file):
-            parser.error("Pixel roi file [%s] does not exist" \
-                         % configure.roi_file)
+    configure.roi_file = hlr_utils.determine_files(options.roi_file)
 
     # set the data paths
     configure.data_paths = hlr_utils.create_data_paths(options.data_paths)
