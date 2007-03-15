@@ -55,7 +55,12 @@ class IgsOptions(hlr_options.SNSOptions):
         self.add_option("", "--no-mon-norm", action="store_true",
                         dest="no_mon_norm",
                         help="Flag for turning off monitor normalization")
-        
+
+        self.add_option("", "--no-mon-effc", action="store_true",
+                        dest="no_mon_effc",
+                        help="Flag for turning off monitor efficiency "\
+                        +"correction")
+
         self.add_option("", "--norm-start", dest="norm_start",
                         help="Specify the starting wavelength for "\
                         +"normalization integration")
@@ -88,9 +93,27 @@ class IgsOptions(hlr_options.SNSOptions):
                         dest="dump_mon_wave",
                         help="Flag to dump the wavelength information for the"\
                         +" monitor")
-        
         self.set_defaults(dump_mon_wave=False)    
+
+        self.add_option("", "--dump-mon-rebin", action="store_true",
+                        dest="dump_mon_rebin",
+                        help="Flag to dump the wavelength information for the"\
+                        +" rebinned monitor")
+        self.set_defaults(dump_mon_rebin=False)
+
+        self.add_option("", "--dump-mon-effc", action="store_true",
+                        dest="dump_mon_effc",
+                        help="Flag to dump the wavelength information for the"\
+                        +" efficiency corrected monitor")
+        self.set_defaults(dump_mon_rebin=False)            
         
+        self.add_option("", "--dump-wave-mnorm", action="store_true",
+                        dest="dump_wave_mnorm",
+                        help="Flag to dump the combined wavelength "\
+                        +"information for all pixels after monitor "\
+                        +"normalization")
+        self.set_defaults(dump_wave_mnorm=False)
+ 
         self.add_option("", "--mon-path", dest="mon_path",
                         help="Specify the comma separated list of monitor "\
                         +"path and signal.")
@@ -126,4 +149,8 @@ class IgsOptions(hlr_options.SNSOptions):
         self.add_option("", "--mc", action="store_true", dest="mc",
                         help="Flag to turn on MC reading")
         self.set_defaults(mc=False)
-        
+
+        self.add_option("", "--lambda-bins", dest="lambda_bins",
+                        help="Specify the minimum and maximum wavelength "\
+                        +"values and the wavelength bin width in Angstroms")
+        self.set_defaults(lambda_bins="0,10,0.1")
