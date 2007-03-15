@@ -385,9 +385,9 @@ if __name__ == "__main__":
     else:
         configure.tib_tofs = options.tib_tofs
     # set the normalization start wavelength
-    configure.norm_start = options.norm_start
+    configure.norm_start = float(options.norm_start)
     # set the normalization end wavelength
-    configure.norm_end = options.norm_end
+    configure.norm_end = float(options.norm_end)
     # set no_mon_norm flag
     configure.no_mon_norm = options.no_mon_norm
     # set no_tib flag
