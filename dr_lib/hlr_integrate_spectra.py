@@ -25,7 +25,10 @@
 def integrate_spectra(obj, **kwargs):
     """
     This function takes a SOM or SO and calculates the integration for the
-    primary axis.
+    primary axis. If the integration range for a pixel cannot be found, an
+    error report will be generated with the following information:
+       Range not found: pixel ID, start bin, end bin, length of data array
+    A failing pixel will have the integration tuple set to (nan, nan).
 
     Parameters:
     ----------
@@ -77,7 +80,7 @@ def integrate_spectra(obj, **kwargs):
     import bisect
     
     import dr_lib
-    
+
     for i in xrange(hlr_utils.get_length(obj)):
         obj1 = hlr_utils.get_value(obj, i, o_descr, "all")
 
@@ -92,8 +95,12 @@ def integrate_spectra(obj, **kwargs):
             b_end = bisect.bisect(obj1.axis[0].val, i_end) - 1
         else:
             b_end = i_end
-            
-        value = dr_lib.integrate_axis(obj1, start=b_start, end=b_end)
+
+        try:
+            value = dr_lib.integrate_axis(obj1, start=b_start, end=b_end)
+        except IndexError:
+            print "Range not found:", obj1.id, b_start, b_end, len(obj1)
+            value = (float('nan'), float('nan'))
 
         hlr_utils.result_insert(result, res_descr, value, None, "all")
 
