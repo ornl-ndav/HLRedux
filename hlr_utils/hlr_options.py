@@ -101,6 +101,9 @@ class SNSOptions(BasicOptions):
                         help="Specify the comma separated list of detector "\
                         +"data paths and signals.")
 
+        self.add_option("", "--inst", dest="inst",
+                        help="Specify the short name for the instrument.")
+
         # Instrument characterization file options
         self.add_option("", "--norm", help="Specify the normalization file")
         
