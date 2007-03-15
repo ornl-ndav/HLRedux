@@ -392,6 +392,8 @@ if __name__ == "__main__":
     configure.no_mon_norm = options.no_mon_norm
     # set no_tib flag
     configure.no_tib = options.no_tib
+    # set no_mon_effc flag
+    configure.no_mon_effc = options.no_mon_effc
 
     if not configure.no_tib and configure.tib_tofs is None:
         parser.error("Must provide TOF channels via tib-tofs or set no-tib "
@@ -436,6 +438,15 @@ if __name__ == "__main__":
     else:
         configure.Q_bins = options.Q_bins
 
+    # set the lambda bins
+    if options.lambda_bins is not None:
+        lfacts = options.lambda_bins.split(',')
+        configure.lambda_bins = hlr_utils.make_axis(float(lfacts[0]),
+                                                    float(lfacts[1]),
+                                                    float(lfacts[2]))
+    else:
+        configure.lambda_bins = options.lambda_bins        
+
     # set the ability to dump the time-independent background information
     configure.dump_tib = options.dump_tib
 
@@ -443,7 +454,17 @@ if __name__ == "__main__":
     configure.dump_wave = options.dump_wave
 
     # set the ability to dump the monitor wavelength information
-    configure.dump_mon_wave = options.dump_mon_wave    
+    configure.dump_mon_wave = options.dump_mon_wave
+
+    # set the ability to dump the rebinned monitor wavelength information
+    configure.dump_mon_rebin = options.dump_mon_rebin
+
+    # set the ability to dump the efficiency corrected monitor wavelength
+    # information
+    configure.dump_mon_effc = options.dump_mon_effc        
+
+    # set the ability to dump the wavelength information
+    configure.dump_wave_mnorm = options.dump_wave_mnorm
 
     # set the ability to dump the energy transfer information
     configure.dump_energy = options.dump_energy
@@ -455,6 +476,9 @@ if __name__ == "__main__":
         configure.dump_tib = True
         configure.dump_wave = True
         configure.dump_mon_wave = True
+        configure.dump_mon_effc = True
+        configure.dump_mon_rebin = True
+        configure.dump_wave_mnorm = True        
         configure.dump_energy = True
         configure.dump_initial_energy = True
 
