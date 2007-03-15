@@ -145,7 +145,7 @@ def igs_energy_transfer(obj, **kwargs):
         else:
             E_f_new = (E_f, E_f_err2)
 
-        value = axis_manip.energy_transfer(val, err2, E_f_new[0], E_f_new[1])
+        value = array_manip.sub_ncerr(val, err2, E_f_new[0], E_f_new[1])
 
         # Convert from meV to ueV
         value2 = array_manip.mult_ncerr(value[0], value[1], 1000.0, 0.0)
