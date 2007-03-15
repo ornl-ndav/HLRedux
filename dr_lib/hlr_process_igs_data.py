@@ -220,17 +220,28 @@ def process_igs_data(datalist, conf, **kwargs):
     del dp_som2, dm_som1
 
     # Step 6: Efficiency correct monitor
-    if conf.verbose and dm_som2 is not None:
+    if conf.verbose and dm_som2 is not None and not conf.no_mon_effc:
         print "Efficiency correct monitor data"
 
     if t is not None:
         t.getTime(False)
 
-    dm_som3 = dr_lib.feff_correct_mon(dm_som2)
+    if not conf.no_mon_effc:
+        dm_som3 = dr_lib.feff_correct_mon(dm_som2)
+    else:
+        dm_som3 = dm_som2
 
-    if t is not None and dm_som2 is not None:
+    if t is not None and dm_som2 is not None and not conf.no_mon_effc:
         t.getTime(msg="After efficiency correcting monitor ")
-    
+
+    if conf.dump_mon_effc and not conf.no_mon_effc:        
+        hlr_utils.write_file(main_data, "text/Spec", dm_som3,
+                             output_ext="mel",
+                             extra_tag=dataset_type,
+                             verbose=conf.verbose,
+                             message="monitor wavelength information "\
+                             +"(efficiency)")
+
     del dm_som2
 
     # Step 7: Rebin monitor axis onto detector pixel axis
@@ -247,6 +258,14 @@ def process_igs_data(datalist, conf, **kwargs):
 
     del dm_som3
 
+    if conf.dump_mon_rebin:        
+        hlr_utils.write_file(main_data, "text/Spec", dm_som4,
+                             output_ext="mrl",
+                             extra_tag=dataset_type,
+                             verbose=conf.verbose,
+                             message="monitor wavelength information "\
+                             +"(rebinned)")
+
     # Step 8: Normalize data by monitor
     if conf.verbose and dm_som4 is not None:
         print "Normalizing data by monitor"
@@ -261,6 +280,17 @@ def process_igs_data(datalist, conf, **kwargs):
             t.getTime(msg="After normalizing data by monitor ")
     else:
         dp_som4 = dp_som3
+
+    if conf.dump_wave_mnorm:
+        dp_som4_1 = dr_lib.sum_all_spectra(dp_som4,
+                                           rebin_axis=conf.lambda_bins)
+        hlr_utils.write_file(main_data, "text/Spec", dp_som4_1,
+                             output_ext="pml",
+                             extra_tag=dataset_type,
+                             verbose=conf.verbose,
+                             message="combined pixel wavelength information "\
+                             +"(monitor normalized)")
+        del dp_som4_1
 
     del dm_som4, dp_som3
 
