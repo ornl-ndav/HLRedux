@@ -49,6 +49,10 @@ def subtract_bkg_from_data(data_som, bkg_som, **kwargs):
     <- TypeError is raised if if both objects are not SOMs
     """
 
+    # Kickout if data SOM is NoneType
+    if data_som is None:
+        return None
+
     # Kickout if background object is NoneType
     if bkg_som is None:
         return data_som
