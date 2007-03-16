@@ -149,7 +149,7 @@ if __name__ == "__main__":
     # set the verbosity
     configure.verbose = options.verbose
 
-
+   # get the datafiles and check them
     if len(args) == 0:
         if options.data is None:
             if options.norm is None:
@@ -162,6 +162,7 @@ if __name__ == "__main__":
     else:
         configure.data = hlr_utils.determine_files(args, "BSS",
                                                    stop_on_none=True)
+
     configure.ecan = hlr_utils.determine_files(options.ecan, "BSS")
             
     configure.back = hlr_utils.determine_files(options.back, "BSS")
@@ -197,6 +198,8 @@ if __name__ == "__main__":
     configure.no_mon_norm = options.no_mon_norm
     # set no_tib flag
     configure.no_tib = options.no_tib
+    # set no_mon_effc flag
+    configure.no_mon_effc = options.no_mon_effc
 
     if not configure.no_tib and configure.tib_tofs is None:
         parser.error("Must provide TOF channels via tib-tofs or set no-tib "
@@ -232,10 +235,24 @@ if __name__ == "__main__":
     # set the ability to dump the monitor wavelength information
     configure.dump_mon_wave = options.dump_mon_wave    
 
+    # set the ability to dump the rebinned monitor wavelength information
+    configure.dump_mon_rebin = options.dump_mon_rebin
+
+    # set the ability to dump the efficiency corrected monitor wavelength
+    # information
+    configure.dump_mon_effc = options.dump_mon_effc        
+
+    # set the ability to dump the wavelength information
+    configure.dump_wave_mnorm = options.dump_wave_mnorm
+
     if options.dump_all:
         configure.dump_tib = True
         configure.dump_wave = True
         configure.dump_mon_wave = True
+        configure.dump_mon_wave = True
+        configure.dump_mon_effc = True
+        configure.dump_mon_rebin = True
+        configure.dump_wave_mnorm = True        
 
     # set the filter option
     configure.filter = options.filter
