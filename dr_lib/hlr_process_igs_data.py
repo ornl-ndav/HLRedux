@@ -169,15 +169,15 @@ def process_igs_data(datalist, conf, **kwargs):
     # time-zero offset
 
     if conf.wavelength_final is not None:
-        dp_som1.attr_list["Wavelength_final"] = conf.wavelength_final
+        dp_som2.attr_list["Wavelength_final"] = conf.wavelength_final
 
     # Note: time_zero_slope MUST be a tuple
     if conf.time_zero_slope is not None:
-        dp_som1.attr_list["Time_zero_slope"] = conf.time_zero_slope
+        dp_som2.attr_list["Time_zero_slope"] = conf.time_zero_slope
 
     # Note: time_zero_offset MUST be a tuple
     if conf.time_zero_offset is not None:
-        dp_som1.attr_list["Time_zero_offset"] = conf.time_zero_offset
+        dp_som2.attr_list["Time_zero_offset"] = conf.time_zero_offset
 
 
     # Step 5: Convert TOF to wavelength for data and monitor
