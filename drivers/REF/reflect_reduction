@@ -35,7 +35,8 @@ def convert_data_tof_to_wavelength(data_som):
     if data_som is None:
         return None
     else:
-        return common_lib.tof_to_wavelength(data_som, units="microsecond")
+        return common_lib.tof_to_wavelength(data_som, inst_param="total",
+                                            units="microsecond")
 
 def rebin_det_eff(data_som, det_eff):
     """Step 2. Rebin IDXY(lambda) and epsilonDXY(lambda) with input
