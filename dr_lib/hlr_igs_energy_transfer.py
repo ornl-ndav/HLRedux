@@ -41,6 +41,9 @@ def igs_energy_transfer(obj, **kwargs):
                     containing the final wavelength information
           offset= a SOM.Information or SOM.CompositeInformation containing
                   the final energy offsets
+          scale=<boolean> is a flag that determines if the energy transfer
+                          results are scaled by the ratio of lambda_f/lambda_i.
+                          The default is False
 
     Returns:
     -------
@@ -83,6 +86,11 @@ def igs_energy_transfer(obj, **kwargs):
     except KeyError:
         offset = None
 
+    try:
+        scale = kwargs["scale"]
+    except KeyError:
+        scale = False
+
         
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
@@ -117,6 +125,7 @@ def igs_energy_transfer(obj, **kwargs):
     # iterate through the values
     import array_manip
     import axis_manip
+    import utils
 
     for i in xrange(hlr_utils.get_length(obj)):
         val = hlr_utils.get_value(obj, i, o_descr, "x", axis)
@@ -145,11 +154,25 @@ def igs_energy_transfer(obj, **kwargs):
         else:
             E_f_new = (E_f, E_f_err2)
 
-        value = array_manip.sub_ncerr(val, err2, E_f_new[0], E_f_new[1])
+        # Scale counts by lambda_f / lambda_i
+        if scale:
+            l_i = axis_manip.energy_to_wavelength(val, err2)
 
+            l_i_bc = utils.calc_bin_centers(l_i[0], l_i[1])
+
+            ratio = array_manip.div_ncerr(l_f[0], l_f[1],
+                                          l_i_bc[0], l_i_bc[1])
+
+            scale_y = array_manip.mult_ncerr(y_val, y_err2, ratio[0], ratio[1])
+        else:
+            scale_y = (y_val, y_err2)
+
+        value = array_manip.sub_ncerr(val, err2, E_f_new[0], E_f_new[1])
+            
         # Convert from meV to ueV
         value2 = array_manip.mult_ncerr(value[0], value[1], 1000.0, 0.0)
-        value3 = array_manip.mult_ncerr(y_val, y_err2, 1.0/1000.0, 0.0)
+        value3 = array_manip.mult_ncerr(scale_y[0], scale_y[1],
+                                        1.0/1000.0, 0.0)
 
         hlr_utils.result_insert(result, res_descr, value3, map_so, "all",
                                 0, [value2[0]])
@@ -171,8 +194,9 @@ if __name__ == "__main__":
     print "* ", som1[1]
 
     print "********** igs_energy_transfer"
-    print "* som:", igs_energy_transfer(som1)
-    print "* so:", igs_energy_transfer(som1[0], lambda_f=l_f)
+    print "* som        :", igs_energy_transfer(som1)
+    print "* som (scale):", igs_energy_transfer(som1, scale=True)
+    print "* so         :", igs_energy_transfer(som1[0], lambda_f=l_f)
 
 
    

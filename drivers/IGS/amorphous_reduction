@@ -181,7 +181,7 @@ def run(config, tim=None):
 
     del d_som4
 
-    # Step 17: Calculate energy transfer
+    # Steps 18-19: Calculate energy transfer
     if config.verbose:
         print "Calculating energy transfer"
 
@@ -193,15 +193,13 @@ def run(config, tim=None):
     if tim is not None:
         tim.getTime(msg="After calculating energy transfer ")
 
-    del d_som6
-
     if config.dump_energy:
         hlr_utils.write_file(config.data[0], "text/Spec", d_som7,
                              output_ext="exl",
                              verbose=config.verbose,
                              message="pixel energy transfer information")
 
-    # Write 3-columna ASCII file for E_t
+    # Write 3-column ASCII file for E_t
     d_som7_1 = dr_lib.sum_all_spectra(d_som7, rebin_axis=config.E_bins)
     hlr_utils.write_file(config.data[0], "text/Spec", d_som7_1,
                          output_ext="etr",
@@ -210,7 +208,35 @@ def run(config, tim=None):
     
     del d_som7_1
 
-    # Steps 18 to end: Calculate Q and create S(Q, E_t)
+    # Steps 17-19: Calculate scaled energy transfer
+    if config.verbose:
+        print "Calculating scaled energy transfer"
+
+    d_som9 = dr_lib.igs_energy_transfer(d_som6, scale=True)
+
+    if tim is not None:
+        tim.getTime(msg="After calculating scaled energy transfer ")
+
+    if config.dump_energy:
+        hlr_utils.write_file(config.data[0], "text/Spec", d_som9,
+                             output_ext="sexl",
+                             verbose=config.verbose,
+                             message="pixel scaled energy transfer "\
+                             +"information")
+
+    # Write 3-column ASCII file for scaled E_t
+    d_som9_1 = dr_lib.sum_all_spectra(d_som9, rebin_axis=config.E_bins)
+    hlr_utils.write_file(config.data[0], "text/Spec", d_som9_1,
+                         output_ext="setr",
+                         verbose=config.verbose,
+                         message="combined scaled energy transfer "\
+                         +"information") 
+    
+    del d_som9_1
+
+    del d_som6, d_som7
+
+    # Steps 20 to end: Calculate Q and create S(Q, E_t)
     if config.verbose:
         print "Creating 2D spectrum"
 
@@ -218,7 +244,7 @@ def run(config, tim=None):
         tim.getTime(False)
 
     if config.correct:
-        d_som8 = dr_lib.create_E_vs_Q_igs(d_som7, d_som5,
+        d_som8 = dr_lib.create_E_vs_Q_igs(d_som9, d_som5,
                                           config.E_bins, config.Q_bins,
                                           so_id="Full Detector",
                                           y_label="counts",
@@ -227,7 +253,7 @@ def run(config, tim=None):
                                                     "energy transfer"],
                                           x_units=["1/Angstroms","ueV"])
     else:
-        d_som8 = dr_lib.create_2D_dist(d_som7, config.E_bins, config.Q_bins,
+        d_som8 = dr_lib.create_2D_dist(d_som9, config.E_bins, config.Q_bins,
                                        so_id="Full Detector",
                                        y_label="counts",
                                        y_units="counts / (ueV * A^-1)",
@@ -238,7 +264,7 @@ def run(config, tim=None):
     if tim is not None:
         tim.getTime(msg="After creation of final spectrum ")
 
-    del d_som7
+    del d_som9
     if config.correct:
         del d_som5
 

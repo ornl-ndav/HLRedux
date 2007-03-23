@@ -23,6 +23,7 @@
 from hlr_add_ncerr import *
 from hlr_div_ncerr import *
 from hlr_d_spacing_to_tof_focused_det import *
+from hlr_energy_to_wavelength import *
 from hlr_energy_transfer import *
 from hlr_frequency_to_energy import *
 from hlr_init_scatt_wavevector_to_scalar_Q import *
