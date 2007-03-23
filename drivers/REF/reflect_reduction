@@ -198,14 +198,14 @@ def run(config, tim):
     d_som2_B = None
     del d_som2_D, d_som2_B
 
-    if config.det_geom is not None:
+    if config.inst_geom is not None:
         if config.verbose:
             print "Reading in detector geometry file"
 
-        det_geom_dst = DST.getInstance("application/x-NxsGeom",
-                                       config.det_geom)
-        det_geom_dst.setGeometry(config.data_paths, d_som3)
-        det_geom_dst.release_resource()
+        inst_geom_dst = DST.getInstance("application/x-NxsGeom",
+                                       config.inst_geom)
+        inst_geom_dst.setGeometry(config.data_paths, d_som3)
+        inst_geom_dst.release_resource()
         
     if config.verbose:
         print "Converting TOF to wavelength"
@@ -402,16 +402,14 @@ if __name__ == "__main__":
     parser = hlr_utils.SNSOptions("usage: %prog [options] <datafile>",
                                   inst="REF")
 
+    # Defaults for REF
+    parser.set_defaults(data_paths="/entry/bank1,1")
+
     # Add REF specific options
     parser.add_option("", "--det-eff", dest="det_eff",
                       help="Specify the detector efficiency file or an "\
                       +"efficiency tuple (efficiency,error^2)")
     
-    parser.add_option("", "--data-paths", dest="data_paths",
-                      help="Specify the comma separated list of detector data"\
-                      +"paths and signals. Default is /entry/bank1,1")
-    parser.set_defaults(data_paths="/entry/bank1,1")
-
     parser.add_option("", "--geom-factor", dest="geom_factor",
                       help="Specify the geometry factor G, err^2")
     
@@ -459,9 +457,6 @@ if __name__ == "__main__":
                       help="Flag to turn off background estimation and "\
                       +"subtraction")
     parser.set_defaults(no_bkg=False)
-
-    parser.add_option("", "--det-geom", dest="det_geom",
-                      help="Specify the detector geometry file")
 
     parser.add_option("", "--signal-roi-file", dest="signal_roi_file",
                       help="Specify the file containing the list pixel IDs "
@@ -544,11 +539,11 @@ if __name__ == "__main__":
     else:
         configure.det_eff = options.det_eff
 
-    configure.det_geom = hlr_utils.fix_filename(options.det_geom)
-    if configure.det_geom is not None:
-        if not hlr_utils.file_exists(configure.det_geom):
+    configure.inst_geom = hlr_utils.fix_filename(options.inst_geom)
+    if configure.inst_geom is not None:
+        if not hlr_utils.file_exists(configure.inst_geom):
             parser.error("Detector geometry file [%s] does not exist" \
-                         % configure.det_geom)
+                         % configure.inst_geom)
         else:
             pass
     else:
