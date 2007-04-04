@@ -31,7 +31,8 @@ class BasicOptions(optparse.OptionParser):
     to the program and providing output from the program.
     """
     
-    def __init__(self, usage=None, option_list=None):
+    def __init__(self, usage=None, option_list=None, option_class=None,
+                 version=None, **kwarg):
         """
         Constructor for BasicOptions
 
@@ -43,7 +44,8 @@ class BasicOptions(optparse.OptionParser):
                        of providing options
         """
         # parent constructor
-        optparse.OptionParser.__init__(self, usage, option_list)
+        optparse.OptionParser.__init__(self, usage, option_list,
+                                       optparse.Option, version)
 
         # options for debug printing
         self.add_option("-v", "--verbose", action="store_true", dest="verbose",
@@ -67,7 +69,8 @@ class SNSOptions(BasicOptions):
     tailored to the various instrument classes by using keyword arguments.
     """
     
-    def __init__(self, usage=None, option_list=None, **kwargs):
+    def __init__(self, usage=None, option_list=None, option_class=None,
+                 version=None, **kwargs):
         """
         Constructor for SNSOptions
 
@@ -83,7 +86,8 @@ class SNSOptions(BasicOptions):
                          SCD.
         """
         # parent constructor
-        BasicOptions.__init__(self, usage, option_list)
+        BasicOptions.__init__(self, usage, option_list, optparse.Option,
+                              version)
 
         # check for keywords
         try:

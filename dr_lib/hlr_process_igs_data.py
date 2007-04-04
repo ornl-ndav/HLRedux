@@ -45,6 +45,8 @@ def process_igs_data(datalist, conf, **kwargs):
                               geometry information
           dataset_type=<string> is the practical name of the dataset being
                                 processed. The default value is data.
+          tib_const=<tuple> is a tuple providing the time-independent
+                            background constant to subtract
           timer=<DiffTime> provides a DiffTime object so the function can
                            perform timing estimates
 
@@ -65,6 +67,11 @@ def process_igs_data(datalist, conf, **kwargs):
         t = kwargs["timer"]
     except KeyError:
         t = None
+
+    try:
+        tib_const = kwargs["tib_const"]
+    except KeyError:
+        tib_const = None
 
     try:
         i_geom_dst = kwargs["inst_geom_dst"]
@@ -116,71 +123,84 @@ def process_igs_data(datalist, conf, **kwargs):
     # No dead time correction is being applied to the data yet
 
     # Step 3: Time-independent background determination
-    if not conf.no_tib:
-        if conf.verbose:
-            print "Determining time-independent background from data"
+    if conf.verbose and conf.tib_tofs is not None:
+        print "Determining time-independent background from data"
 
-        if t is not None:
-            t.getTime(False)
+    if t is not None and conf.tib_tofs is not None:
+        t.getTime(False)
             
-        B = dr_lib.determine_time_indep_bkg(dp_som1, conf.tib_tofs)
+    B = dr_lib.determine_time_indep_bkg(dp_som1, conf.tib_tofs)
 
-        if t is not None:
-            t.getTime(msg="After determining time-independent background ")
+    if t is not None and B is not None:
+        t.getTime(msg="After determining time-independent background ")
 
-        if conf.dump_tib:
-            attr_name = "time-independent-background"
-            dp_som1.attr_list[attr_name] = B
-            file_comment = "TOFs: %s" % conf.tib_tofs
-            
-            hlr_utils.write_file(main_data, "text/num-info", dp_som1,
-                                 output_ext="tib",
-                                 extra_tag=dataset_type,
-                                 verbose=conf.verbose,
-                                 message="time-independent background "\
-                                 +"information",
-                                 arguments=attr_name,
-                                 tag="Average",
-                                 units="counts",
-                                 comments=[file_comment])
-            del dp_som1.attr_list[attr_name]
-    else:
-        B = None
+    if conf.dump_tib:
+        attr_name = "time-independent-background"
+        dp_som1.attr_list[attr_name] = B
+        file_comment = "TOFs: %s" % conf.tib_tofs
+        
+        hlr_utils.write_file(main_data, "text/num-info", dp_som1,
+                             output_ext="tib",
+                             extra_tag=dataset_type,
+                             verbose=conf.verbose,
+                             message="time-independent background "\
+                             +"information",
+                             arguments=attr_name,
+                             tag="Average",
+                             units="counts",
+                             comments=[file_comment])
+        del dp_som1.attr_list[attr_name]
 
     # Step 4: Subtract time-independent background
     if conf.verbose and B is not None:
         print "Subtracting time-independent background from data"
 
     if t is not None:
-            t.getTime(False)
-
+        t.getTime(False)
+            
     if B is not None:
         dp_som2 = common_lib.sub_ncerr(dp_som1, B)
     else:
         dp_som2 = dp_som1
 
-    if B is not None:
-        if t is not None:
-            t.getTime(msg="After subtracting time-independent background ")
+    if B is not None and t is not None:
+        t.getTime(msg="After subtracting time-independent background ")
 
     del dp_som1, B
+
+    # Step 5: Subtract time-independent background constant
+    if conf.verbose and tib_const is not None:
+        print "Subtracting time-independent background constant from data"
+            
+    if t is not None and tib_const is not None:
+        t.getTime(False)
+                
+    if tib_const is not None:
+        dp_som3 = common_lib.sub_ncerr(dp_som2, tib_const)
+    else:
+        dp_som3 = dp_som2
+
+    if t is not None and tib_const is not None:
+        t.getTime(msg="After subtracting time-independent background "\
+                  +"constant ")
+
+    del dp_som2
 
     # Provide override capability for final wavelength, time-zero slope and
     # time-zero offset
 
     if conf.wavelength_final is not None:
-        dp_som2.attr_list["Wavelength_final"] = conf.wavelength_final
+        dp_som3.attr_list["Wavelength_final"] = conf.wavelength_final
 
     # Note: time_zero_slope MUST be a tuple
     if conf.time_zero_slope is not None:
-        dp_som2.attr_list["Time_zero_slope"] = conf.time_zero_slope
+        dp_som3.attr_list["Time_zero_slope"] = conf.time_zero_slope
 
     # Note: time_zero_offset MUST be a tuple
     if conf.time_zero_offset is not None:
-        dp_som2.attr_list["Time_zero_offset"] = conf.time_zero_offset
+        dp_som3.attr_list["Time_zero_offset"] = conf.time_zero_offset
 
-
-    # Step 5: Convert TOF to wavelength for data and monitor
+    # Step 6: Convert TOF to wavelength for data and monitor
     if conf.verbose:
         print "Converting TOF to wavelength"
 
@@ -196,8 +216,8 @@ def process_igs_data(datalist, conf, **kwargs):
         dm_som2 = None
 
     # Convert detector pixels
-    dp_som3 = common_lib.tof_to_initial_wavelength_igs_lin_time_zero(
-        dp_som2,
+    dp_som4 = common_lib.tof_to_initial_wavelength_igs_lin_time_zero(
+        dp_som3,
         units="microsecond",
         run_filter=conf.filter)
 
@@ -205,7 +225,7 @@ def process_igs_data(datalist, conf, **kwargs):
         t.getTime(msg="After converting TOF to wavelength ")
 
     if conf.dump_wave:
-        hlr_utils.write_file(main_data, "text/Spec", dp_som3,
+        hlr_utils.write_file(main_data, "text/Spec", dp_som4,
                              output_ext="pxl",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
@@ -217,9 +237,9 @@ def process_igs_data(datalist, conf, **kwargs):
                              verbose=conf.verbose,
                              message="monitor wavelength information")
         
-    del dp_som2, dm_som1
+    del dp_som3, dm_som1
 
-    # Step 6: Efficiency correct monitor
+    # Step 7: Efficiency correct monitor
     if conf.verbose and dm_som2 is not None and not conf.no_mon_effc:
         print "Efficiency correct monitor data"
 
@@ -244,14 +264,14 @@ def process_igs_data(datalist, conf, **kwargs):
 
     del dm_som2
 
-    # Step 7: Rebin monitor axis onto detector pixel axis
+    # Step 8: Rebin monitor axis onto detector pixel axis
     if conf.verbose and dm_som3 is not None:
         print "Rebin monitor axis to detector pixel axis"
 
     if t is not None:
         t.getTime(False)
 
-    dm_som4 = dr_lib.rebin_monitor(dm_som3, dp_som3)
+    dm_som4 = dr_lib.rebin_monitor(dm_som3, dp_som4)
 
     if t is not None and dm_som3 is not None:
         t.getTime(msg="After rebinning monitor ")
@@ -266,7 +286,7 @@ def process_igs_data(datalist, conf, **kwargs):
                              message="monitor wavelength information "\
                              +"(rebinned)")
 
-    # Step 8: Normalize data by monitor
+    # Step 9: Normalize data by monitor
     if conf.verbose and dm_som4 is not None:
         print "Normalizing data by monitor"
 
@@ -274,27 +294,27 @@ def process_igs_data(datalist, conf, **kwargs):
         t.getTime(False)
 
     if dm_som4 is not None:
-        dp_som4 = common_lib.div_ncerr(dp_som3, dm_som4)
+        dp_som5 = common_lib.div_ncerr(dp_som4, dm_som4)
 
         if t is not None:
             t.getTime(msg="After normalizing data by monitor ")
     else:
-        dp_som4 = dp_som3
+        dp_som5 = dp_som4
 
     if conf.dump_wave_mnorm:
-        dp_som4_1 = dr_lib.sum_all_spectra(dp_som4,
+        dp_som5_1 = dr_lib.sum_all_spectra(dp_som5,
                                            rebin_axis=conf.lambda_bins)
-        hlr_utils.write_file(main_data, "text/Spec", dp_som4_1,
+        hlr_utils.write_file(main_data, "text/Spec", dp_som5_1,
                              output_ext="pml",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
                              message="combined pixel wavelength information "\
                              +"(monitor normalized)")
-        del dp_som4_1
+        del dp_som5_1
 
-    del dm_som4, dp_som3
+    del dm_som4, dp_som4
 
-    return dp_som4
+    return dp_som5
 
 
 

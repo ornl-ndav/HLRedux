@@ -110,8 +110,11 @@ def my_main(opts, filename_SOM12, filename_SOM3):
 if __name__ == "__main__":
     import optparse
 
+    import hlr_utils
+
     parser = optparse.OptionParser("usage: %prog [options] <datafile> "\
-                                   +"<outfile>")
+                                   +"<outfile>", None, optparse.Option,
+                                   hlr_utils.program_version())
     parser.add_option("", "--timing", action="store_true",
                       help="Enable timing statements")
     parser.set_defaults(timing=False)

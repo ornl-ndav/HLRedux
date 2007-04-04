@@ -86,8 +86,11 @@ if __name__ == "__main__":
 
     import common_lib
     import DST
+    import hlr_utils
 
-    parser = optparse.OptionParser("usage: %prog [options] <datafile>")
+    parser = optparse.OptionParser("usage: %prog [options] <datafile>", None,
+                                   optparse.Option,
+                                   hlr_utils.program_version())
 
     parser.add_option("", "--full", action="store_true", default=False,
                       help="Read in full data file.")

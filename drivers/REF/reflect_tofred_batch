@@ -43,7 +43,11 @@ if __name__ == "__main__":
     import optparse
     import sys
 
-    parser = optparse.OptionParser("usage: %prog [options] <runnumber>")
+    import hlr_utils
+
+    parser = optparse.OptionParser("usage: %prog [options] <runnumber>", None,
+                                   optparse.Option,
+                                   hlr_utils.program_version())
     parser.add_option("-i", "--inst" , dest="inst",
                       help="Specify the instrument name. Default is REF_L.")
     parser.set_defaults(inst="REF_L")

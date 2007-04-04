@@ -52,52 +52,56 @@ def run(config, tim=None):
     else:
         inst_geom_dst = None
 
-    # Perform Steps 1-8 on sample data
+    # Perform Steps 1-9 on sample data
     d_som1 = dr_lib.process_igs_data(config.data, config, timer=tim,
-                                     inst_geom_dst=inst_geom_dst)
+                                     inst_geom_dst=inst_geom_dst,
+                                     tib_const=config.tib_data_const)
 
-    # Perform Steps 1-8 on empty can data
+    # Perform Steps 1-9 on empty can data
     if config.ecan is not None:
         e_som1 = dr_lib.process_igs_data(config.ecan, config, timer=tim,
                                          inst_geom_dst=inst_geom_dst,
-                                         dataset_type="empty_can")
+                                         dataset_type="empty_can",
+                                         tib_const=config.tib_ecan_const)
     else:
         e_som1 = None
 
-    # Perform Steps 1-8 on normalization data            
+    # Perform Steps 1-9 on normalization data            
     if config.norm is not None:
         n_som1 = dr_lib.process_igs_data(config.norm, config, timer=tim,
                                          inst_geom_dst=inst_geom_dst,
-                                         dataset_type="normalization")
+                                         dataset_type="normalization",
+                                         tib_const=config.tib_norm_const)
     else:
         n_som1 = None
 
-    # Perform Steps 1-8 on background data
+    # Perform Steps 1-9 on background data
     if config.back is not None:
         b_som1 = dr_lib.process_igs_data(config.back, config, timer=tim,
                                          inst_geom_dst=inst_geom_dst,
-                                         dataset_type="background")
+                                         dataset_type="background",
+                                         tib_const=config.tib_back_const)
     else:
         b_som1 = None
 
     if inst_geom_dst is not None:
         inst_geom_dst.release_resource()
         
-    # Step 9: Subtract background spectrum from sample spectrum    
+    # Step 10: Subtract background spectrum from sample spectrum    
     d_som2 = dr_lib.subtract_bkg_from_data(d_som1, b_som1,
                                            verbose=config.verbose,
                                            timer=tim,
                                            dataset1="background",
                                            dataset2="data")
 
-    # Step 10: Subtract background spectrum from empty can spectrum    
+    # Step 11: Subtract background spectrum from empty can spectrum    
     e_som2 = dr_lib.subtract_bkg_from_data(e_som1, b_som1,
                                            verbose=config.verbose,
                                            timer=tim,
                                            dataset1="background",
                                            dataset2="empty_can")
 
-    # Step 11: Subtract background spectrum from normalization spectrum
+    # Step 12: Subtract background spectrum from normalization spectrum
     n_som2 = dr_lib.subtract_bkg_from_data(n_som1, b_som1,
                                            verbose=config.verbose,
                                            timer=tim,
@@ -105,7 +109,7 @@ def run(config, tim=None):
                                            dataset2="normalization")
     del b_som1
 
-    # Step 12: Subtract empty can spectrum from sample spectrum    
+    # Step 13: Subtract empty can spectrum from sample spectrum    
     d_som3 = dr_lib.subtract_bkg_from_data(d_som2, e_som2,
                                            verbose=config.verbose,
                                            timer=tim,
@@ -114,7 +118,7 @@ def run(config, tim=None):
 
     del d_som2
     
-    # Step 13: Subtract empty can spectrum from normalization spectrum
+    # Step 14: Subtract empty can spectrum from normalization spectrum
     n_som3 = dr_lib.subtract_bkg_from_data(n_som2, e_som2,
                                            verbose=config.verbose,
                                            timer=tim,
@@ -123,7 +127,7 @@ def run(config, tim=None):
 
     del n_som2, e_som2
 
-    # Step 14: Integrate normalization spectra
+    # Step 15: Integrate normalization spectra
     if config.verbose and n_som3 is not None:
         print "Integrating normalization spectra"
 
@@ -146,7 +150,7 @@ def run(config, tim=None):
 
     del d_som3, norm_int
 
-    # Step 15: Convert initial wavelength to k_initial
+    # Step 16: Convert initial wavelength to k_initial
     if config.verbose and config.correct:
         print "Converting initial wavelength to k_initial"
 
@@ -161,7 +165,7 @@ def run(config, tim=None):
     if tim is not None and config.correct:
         tim.getTime(msg="After converting initial wavelength to k_initial ")
 
-    # Step 16: Convert initial wavelength to E_initial
+    # Step 17: Convert initial wavelength to E_initial
     if config.verbose:
         print "Converting initial wavelength to E_initial"
 
@@ -181,7 +185,7 @@ def run(config, tim=None):
 
     del d_som4
 
-    # Steps 18-19: Calculate energy transfer
+    # Steps 19-20: Calculate energy transfer
     if config.verbose:
         print "Calculating energy transfer"
 
@@ -208,7 +212,7 @@ def run(config, tim=None):
     
     del d_som7_1
 
-    # Steps 17-19: Calculate scaled energy transfer
+    # Steps 18-20: Calculate scaled energy transfer
     if config.verbose:
         print "Calculating scaled energy transfer"
 
@@ -236,7 +240,7 @@ def run(config, tim=None):
 
     del d_som6, d_som7
 
-    # Steps 20 to end: Calculate Q and create S(Q, E_t)
+    # Steps 21 to end: Calculate Q and create S(Q, E_t)
     if config.verbose:
         print "Creating 2D spectrum"
 
@@ -292,9 +296,10 @@ if __name__ == "__main__":
     import common_lib
     import dr_lib
     import hlr_utils
-    
+ 
     # set up the options available
-    parser = hlr_utils.IgsOptions("usage: %prog [options] <datafile>")
+    parser = hlr_utils.IgsOptions("usage: %prog [options] <datafile>", None,
+                                  hlr_utils.program_version())
 
     # Set defaults for imported options
     parser.set_defaults(data_paths="/entry/bank1,1,/entry/bank2,1")
@@ -404,26 +409,52 @@ if __name__ == "__main__":
         configure.dead_time = hlr_utils.split_values(options.dead_time)
     else:
         configure.dead_time = options.dead_time
-        
+
     # set the time-independent background TOFs
     if options.tib_tofs is not None:
         configure.tib_tofs = options.tib_tofs.split(',')
     else:
         configure.tib_tofs = options.tib_tofs
+
+    # set the time-independent background constant for data
+    if options.tib_data_const is not None:
+        configure.tib_data_const = hlr_utils.split_values(\
+            options.tib_data_const)
+    else:
+        configure.tib_data_const = options.tib_data_const
+
+    # set the time-independent background constant for ecan
+    if options.tib_ecan_const is not None:
+        configure.tib_ecan_const = hlr_utils.split_values(\
+            options.tib_ecan_const)
+    else:
+        configure.tib_ecan_const = options.tib_ecan_const
+
+    # set the time-independent background constant for back
+    if options.tib_back_const is not None:
+        configure.tib_back_const = hlr_utils.split_values(\
+            options.tib_back_const)
+    else:
+        configure.tib_back_const = options.tib_back_const
+
+    # set the time-independent background constant for norm
+    if options.tib_norm_const is not None:
+        configure.tib_norm_const = hlr_utils.split_values(\
+            options.tib_norm_const)
+    else:
+        configure.tib_norm_const = options.tib_norm_const        
+
     # set the normalization start wavelength
     configure.norm_start = float(options.norm_start)
+
     # set the normalization end wavelength
     configure.norm_end = float(options.norm_end)
+
     # set no_mon_norm flag
     configure.no_mon_norm = options.no_mon_norm
-    # set no_tib flag
-    configure.no_tib = options.no_tib
+
     # set no_mon_effc flag
     configure.no_mon_effc = options.no_mon_effc
-
-    if not configure.no_tib and configure.tib_tofs is None:
-        parser.error("Must provide TOF channels via tib-tofs or set no-tib "
-                     +"flag.")
 
     # set the final wavelength
     if options.wavelength_final is not None:

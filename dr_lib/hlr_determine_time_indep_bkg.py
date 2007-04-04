@@ -42,7 +42,7 @@ def determine_time_indep_bkg(obj, tof_vals, **kwargs):
 
     # Kickout if tof_vals is NoneType
     if tof_vals is None:
-        return obj
+        return None
 
     # import the helper functions
     import hlr_utils

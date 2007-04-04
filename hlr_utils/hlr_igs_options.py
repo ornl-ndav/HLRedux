@@ -22,6 +22,7 @@
 
 # $Id$
 
+from optparse import Option
 import hlr_options
 
 class IgsOptions(hlr_options.SNSOptions):
@@ -30,7 +31,7 @@ class IgsOptions(hlr_options.SNSOptions):
     reducing neutron scattering data with the data reduction drivers.
     """
 
-    def __init__(self, usage=None, option_list=None, **kwargs):
+    def __init__(self, usage=None, option_list=None, version=None, **kwargs):
         """
         Constructor for IgsOptions
 
@@ -43,7 +44,8 @@ class IgsOptions(hlr_options.SNSOptions):
         -> kwargs is a list of keyword arguments that the function accepts
         """
         # parent constructor
-        hlr_options.SNSOptions.__init__(self, usage, option_list, inst="IGS")
+        hlr_options.SNSOptions.__init__(self, usage, option_list,
+                                        Option, version, inst="IGS")
 
         self.add_option("", "--dead-time", dest="dead_time",
                         help="Dead time with units (no spaces)")
@@ -51,6 +53,22 @@ class IgsOptions(hlr_options.SNSOptions):
         self.add_option("", "--tib-tofs", dest="tib_tofs",
                         help="Specify four TOF values bin for "\
                         +"time-independent background estimation")
+
+        self.add_option("", "--tib-data-const", dest="tib_data_const",
+                        help="Specify constant to subtract from sample data "\
+                        +"spectra: value, err^2")
+        
+        self.add_option("", "--tib-ecan-const", dest="tib_ecan_const",
+                        help="Specify constant to subtract from empty can "\
+                        +"spectra: value, err^2")
+
+        self.add_option("", "--tib-back-const", dest="tib_back_const",
+                        help="Specify constant to subtract from background "\
+                        +"spectra: value, err^2")
+
+        self.add_option("", "--tib-norm-const", dest="tib_norm_const",
+                        help="Specify constant to subtract from "\
+                        +"normalization spectra: value, err^2")        
         
         self.add_option("", "--no-mon-norm", action="store_true",
                         dest="no_mon_norm",
@@ -68,10 +86,6 @@ class IgsOptions(hlr_options.SNSOptions):
         self.add_option("", "--norm-end", dest="norm_end",
                         help="Specify the ending wavelength for "\
                         +"normalization integration")
-        
-        self.add_option("", "--no-tib", action="store_true", dest="no_tib",
-                        help="Flag for turning off time-independent "\
-                        +"background subtraction")
         
         self.add_option("", "--final-wavelength", dest="wavelength_final",
                         help="Specify the final wavelength lambda, err^2 in "\

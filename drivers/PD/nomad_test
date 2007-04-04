@@ -243,7 +243,11 @@ if __name__ == "__main__":
     import hlr_utils
 
     # set up the options available
-    parser = hlr_utils.SNSOptions("usage: %prog [options] <datafile>")
+    parser = hlr_utils.SNSOptions("usage: %prog [options] <datafile>", None,
+                                  None, hlr_utils.program_version())
+
+    # Set defaults for imported options
+    parser.set_defaults(data_paths="/entry/bank1,1,/entry/bank2,1")
 
     parser.add_option("", "--det-geom", dest="det_geom",
                       help="Specify the detector geometry file")
@@ -263,12 +267,6 @@ if __name__ == "__main__":
                       help="Specify the minimum and maximum d-spacing values"\
                       +" and the d-spacing bin width in Angstroms")
     parser.set_defaults(d_bins="0,10,0.005")
-
-    parser.add_option("", "--data-paths", dest="data_paths",
-                      help="Specify the comma separated list of detector data"\
-                      +"paths and signals. Defaults is "\
-                      +"/entry/bank1,1/entry/bank2,1")
-    parser.set_defaults(data_paths="/entry/bank1,1,/entry/bank2,1")
 
     parser.add_option("", "--dump-wave", action="store_true", dest="dump_wave",
                       help="Flag to dump the wavelength information for all"\

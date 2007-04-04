@@ -602,7 +602,8 @@ def __check_for_path(path):
     This function checks a string for full file path identifiers.
     """
     return path.startswith("/") or path.startswith("$") or \
-           path.startswith(".") or path.startswith("~")
+           path.startswith(".") or path.startswith("~") or \
+           path[0].isalpha()
 
 def __clean_str(string):
     """
@@ -632,3 +633,19 @@ def __run_findnexus(nums, inst):
     filestring = __clean_str(__run_cmd(cmd, False))
     return filestring.split(' ')
     
+def program_version():
+    """
+    This function returns a version string for an option parser.
+
+    Returns:
+    -------
+    <- A string containing a place holder for the program name and the
+       version string
+    """
+    from version import version as __version__
+    
+    ver_tag = []
+    ver_tag.append("%prog")
+    ver_tag.append(__version__)
+    
+    return " ".join(ver_tag)

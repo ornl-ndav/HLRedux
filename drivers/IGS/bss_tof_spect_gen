@@ -133,7 +133,8 @@ if __name__ == "__main__":
     import sns_inst_util
 
     # set up the options available
-    parser = hlr_utils.BasicOptions("usage: %prog [options] <datafile>")
+    parser = hlr_utils.BasicOptions("usage: %prog [options] <datafile>", None,
+                                    None, hlr_utils.program_version())
 
     parser.add_option("-u", "--vertical", action="store_true", dest="vertical",
                       help="Flag to slice and sum pixels in the vertical "\

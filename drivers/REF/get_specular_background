@@ -123,7 +123,8 @@ if __name__ == "__main__":
     import hlr_utils
     
     # set up the options available
-    parser = hlr_utils.BasicOptions("usage: %prog [options] <datafile>")
+    parser = hlr_utils.BasicOptions("usage: %prog [options] <datafile>", None,
+                                    None, hlr_utils.program_version())
 
     # Add REF specific options
     parser.add_option("", "--det-eff", dest="det_eff",
