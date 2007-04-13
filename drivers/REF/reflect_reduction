@@ -29,7 +29,7 @@ This program covers the functionality outlined in 2.4 Area detector
 measurement of specular reflectivity in <CHANGE:DR_Lib_RS.doc>.
 """
 
-def determine_background(conf, bkg_som, num_data_pixels, btype="sample"):
+def determine_background(conf, bkg_som, btype="sample"):
 
     if conf.no_bkg and btype == "sample":
         return None
@@ -75,7 +75,7 @@ def run(config, tim):
     if config.verbose and not config.no_bkg:
         print "Determining background"
 
-    B = determine_background(config, b_som1, len(d_som1))
+    B = determine_background(config, b_som1)
 
     if tim is not None:
         tim.getTime(msg="After background determination")
@@ -151,7 +151,7 @@ def run(config, tim):
         tim.getTime(False)
 
     if config.norm is not None:
-        B_n = determine_background(config, nb_som1, len(nd_som1), "norm")
+        B_n = determine_background(config, nb_som1, "norm")
     else:
         B_n = None
 
