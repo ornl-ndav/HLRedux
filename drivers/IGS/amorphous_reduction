@@ -31,7 +31,6 @@ http://www.sns.gov/asg/projects/SCL/reqspec/DR_Lib_RS.doc
 """
 
 def run(config, tim=None):
-    import sys 
     import DST
 
     if tim is not None:
