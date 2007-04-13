@@ -84,7 +84,7 @@ def feff_correct_mon(obj, **kwargs):
         eff_err2 = nessi_list.NessiList(len(eff))
 
         y_val = hlr_utils.get_value(obj, i, o_descr, "y")
-        y_err2 = hlr_utils.get_value(obj, i, o_descr, "y")
+        y_err2 = hlr_utils.get_err2(obj, i, o_descr, "y")
 
         value = array_manip.div_ncerr(y_val, y_err2, eff, eff_err2)
 
