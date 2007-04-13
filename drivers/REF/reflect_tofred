@@ -88,11 +88,14 @@ def run(config, tim):
                              output_ext="bkg", verbose=config.verbose,
                              message="combined background TOF information")
 
-    d_som2 = dr_lib.subtract_bkg_from_data(d_som1, B[0],
-                                           verbose=config.verbose,
-                                           timer=tim,
-                                           dataset1="data",
-                                           dataset2="background")
+    if not config.no_bkg:
+        d_som2 = dr_lib.subtract_bkg_from_data(d_som1, B[0],
+                                               verbose=config.verbose,
+                                               timer=tim,
+                                               dataset1="data",
+                                               dataset2="background")
+    else:
+        d_som2 = d_som1
 
     del d_som1
 
@@ -160,11 +163,14 @@ def run(config, tim):
     del nb_som1
 
     if config.norm is not None:
-        nd_som2 = dr_lib.subtract_bkg_from_data(nd_som1, B_n[0],
-                                                verbose=config.verbose,
-                                                timer=tim,
-                                                dataset1="normalization",
-                                                dataset2="background")
+        if not config.no_norm_bkg:
+            nd_som2 = dr_lib.subtract_bkg_from_data(nd_som1, B_n[0],
+                                                    verbose=config.verbose,
+                                                    timer=tim,
+                                                    dataset1="normalization",
+                                                    dataset2="background")
+        else:
+            nd_som2 = nd_som1
     else:
         nd_som2 = None
 
