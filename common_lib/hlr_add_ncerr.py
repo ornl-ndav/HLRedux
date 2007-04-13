@@ -37,6 +37,15 @@ def add_ncerr(left, right, **kwargs):
                argument is given the default value is y
          axis_pos=<number> This is position of the axis in the axis array. If
                   no argument is given, the default value is 0
+         length_one_som=<boolean> This is a flag that lets the function know
+                                  it is dealing with a length 1 SOM so that
+                                  attributes may be passed along. The length
+                                  1 SOM will be turned into a SO. The default
+                                  value is False.
+         length_one_som_pos=<1 or 2> This is the argument position of the
+                                     length 1 SOM since the check is done
+                                     before the arguments are swapped. The
+                                     default value is 2.
 
     Returns:
     -------
@@ -54,6 +63,31 @@ def add_ncerr(left, right, **kwargs):
     
     # import the helper functions
     import hlr_utils
+
+    # Check to see if we are working with a length 1 SOM
+    try:
+        length_one_som = kwargs["length_one_som"]
+    except KeyError:
+        length_one_som = False
+
+    try:
+        length_one_som_pos = kwargs["length_one_som_pos"]
+        if length_one_som_pos != 1 or length_one_som_pos != 2:
+            raise RuntimeError("length_one_som_pos must be either 1 or 2 and "\
+                               +"%d" % length_one_som_pos)
+    except KeyError:
+        length_one_som_pos = 2
+
+    if length_one_som:
+        if length_one_som_pos == 1:
+            som_copy = left
+            left = left[0]
+        else:
+            som_copy = right
+            right = right[0]
+    else:
+        # Not working with a length 1 SOM, do nothing
+        pass
 
     # set up for working through data
     (result, res_descr) = hlr_utils.empty_result(left, right)
@@ -83,8 +117,17 @@ def add_ncerr(left, right, **kwargs):
     except KeyError:
         axis_pos = 0
 
-    result = hlr_utils.copy_som_attr(result, res_descr, left, l_descr,
-                                     right, r_descr)
+    if length_one_som:
+        if length_one_som_pos == 1:
+            result = hlr_utils.copy_som_attr(result, res_descr,
+                                             som_copy, "SOM",
+                                             right, r_descr)
+        else:
+            result = hlr_utils.copy_som_attr(result, res_descr, left, l_descr,
+                                             som_copy, "SOM")            
+    else:
+        result = hlr_utils.copy_som_attr(result, res_descr, left, l_descr,
+                                         right, r_descr)
 
     # iterate through the values
     import array_manip

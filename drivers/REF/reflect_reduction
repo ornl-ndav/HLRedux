@@ -29,44 +29,6 @@ This program covers the functionality outlined in 2.4 Area detector
 measurement of specular reflectivity in <CHANGE:DR_Lib_RS.doc>.
 """
 
-def convert_data_tof_to_wavelength(data_som):
-    """Step 1. Convert IDXY(TOF) to wavelength using function 3.15."""
-
-    if data_som is None:
-        return None
-    else:
-        return common_lib.tof_to_wavelength(data_som, inst_param="total",
-                                            units="microsecond")
-
-def rebin_det_eff(data_som, det_eff):
-    """Step 2. Rebin IDXY(lambda) and epsilonDXY(lambda) with input
-    binning strategy by using function 3.12."""
-
-    if det_eff is None:
-        return data_som
-    else:
-        return dr_lib.rebin_efficiency(data_som, det_eff)
-
-def eff_correct_det(data_som, det_eff):
-    """Step 3. Correct IDXY(lambda) for detector efficiency by using
-    the function in 3.9 using IDXY(lambda) as data1 and
-    epsilonDXY(lambda) as data2. The result is IeDXY(lambda)."""
-
-    if det_eff is None:
-        return data_som
-    else:
-        return common_lib.div_ncerr(data_som, det_eff)
-
-def filter_pixels(conf, data_som, btype="sample"):
-
-    if btype == "sample":
-        return dr_lib.filter_pixels(data_som, conf.data_paths,
-                                    conf.starting_ids, conf.ending_ids)
-    elif btype == "norm":
-        return dr_lib.filter_pixels(data_som, conf.data_paths,
-                                    conf.norm_starting_ids,
-                                    conf.norm_ending_ids)
-
 def determine_background(conf, bkg_som, num_data_pixels, btype="sample"):
 
     if conf.no_bkg and btype == "sample":
@@ -78,51 +40,7 @@ def determine_background(conf, bkg_som, num_data_pixels, btype="sample"):
         ratio = (1.0 / float(len(bkg_som)), 0.0)
         return common_lib.mult_ncerr(bkg_som1, ratio)
 
-def subtract_bkg_from_data(data_som, bkg_som):
-    """Step 4. Subtract the background using function 3.7 with
-    IeDXY(lambda) as data1 and IeBXY(lambda) as data2. The result is
-    IebDXY(lambda)."""
-
-    if bkg_som is None:
-        return data_som
-    else:
-        return common_lib.sub_ncerr(data_som, bkg_som[0])
-
-def scale_inc_spec_factor(conf, isf_som):
-    """Step 6. Scale the incident spectrum by the geometry factor
-    using function 3.1 with 1/IeM2(lambda) as data1 and G as a. The
-    result is the effective incident spectrum factor,
-    Iinc(lambda). Note: Iinc(lambda) in not a raw spectrum as noted by
-    section 0."""
-
-    if isf_som is None:
-        return None
-    elif conf.geom_factor is None:
-        return isf_som
-    else:
-        return common_lib.div_ncerr(isf_som, conf.geom_factor)
-
-def norm_data_by_inc_spec_factor(data_som, isf_som):
-    """Step 8. Normalize using the incident spectrum factor using
-    function 3.9 with IebDXY(lambda) as data1 and Iinc(lambda) as
-    data2. The result is the reflectivity, R(lambda)."""
-    
-    if isf_som is None:
-        return data_som
-    else:
-        return common_lib.div_ncerr(data_som, isf_som)
-
-def combine_spectra(conf, data_som):
-
-    data_som1 = common_lib.rebin_axis_1D(data_som, conf.l_bins)
-    data_som2 = dr_lib.sum_all_spectra(data_som1)
-    data_som2[0].id = ("bank1", (0, 0))
-
-    return data_som2
-
 def run(config, tim):
-    import sys
-
     import DST
     
     if config.data is None:
@@ -131,73 +49,51 @@ def run(config, tim):
     if tim is not None:
         old_time = tim.getOldTime()
 
-    try:
-        data_dst = DST.getInstance("application/x-NeXus", config.data,
-                                   noinst=True) 
-    except SystemError:
-        print "ERROR: Failed to data read file %s" % config.data
-        sys.exit(-1)
-
     so_axis = "time_of_flight"
 
     if config.verbose:
         print "Reading data file"
 
-    if config.use_roi_file:
-        d_som1 = data_dst.getSOM(config.data_paths, so_axis,
-                                 roi_file=config.signal_roi_file)
-        b_som1 = data_dst.getSOM(config.data_paths, so_axis,
-                                 roi_file=config.bkg_roi_file)
-    else:
-        d_som1 = data_dst.getSOM(config.data_paths, so_axis)
-    d_som1.attr_list["proton_charge"] = data_dst.getParameter("proton_charge")
+    (d_som1, b_som1) = dr_lib.add_files(config.data,
+                                        Data_Paths=config.data_paths,
+                                        SO_Axis=so_axis,
+                                        Signal_ROI=config.signal_roi_file,
+                                        Bkg_ROI=config.bkg_roi_file,
+                                        Verbose=config.verbose,
+                                        Timer=tim)
 
     if tim is not None:
         tim.getTime(msg="After reading data")
 
-    if config.verbose and not config.use_roi_file:
-        print "Filtering specular and background pixels"
-
-    if config.use_roi_file:
-        d_som2_D = d_som1
-        d_som2_B = b_som1
-        del b_som1, d_som1
-    else:
-        (d_som2_D, d_som2_B) = filter_pixels(config, d_som1)
-
     if config.dump_specular:
-        d_som2_D1 = dr_lib.sum_all_spectra(d_som2_D)
-        d_som2_D1[0].id = ("bank1", (0, 0))
-        hlr_utils.write_file(config.data, "text/Spec", d_som2_D1,
+        d_som1_1 = dr_lib.sum_all_spectra(d_som1)
+        hlr_utils.write_file(config.data[0], "text/Spec", d_som1_1,
                              output_ext="sdc", verbose=config.verbose,
                              message="combined specular TOF information")
-        d_som2_D1 = None
-        del d_som2_D1
+        del d_som1_1
 
     if config.verbose and not config.no_bkg:
         print "Determining background"
 
-    B = determine_background(config, d_som2_B, len(d_som2_D))
+    B = determine_background(config, b_som1, len(d_som1))
 
     if tim is not None:
         tim.getTime(msg="After background determination")
 
-    if not config.no_bkg:
-        hlr_utils.write_file(config.data, "text/Spec", B,
+    if not config.no_bkg and config.dump_bkg:
+        hlr_utils.write_file(config.data[0], "text/Spec", B,
                              output_ext="bkg", verbose=config.verbose,
                              message="combined background TOF information")
 
-    if config.verbose and not config.no_bkg:
-        print "Subtracting background"
+    del b_som1
 
-    d_som3 = subtract_bkg_from_data(d_som2_D, B)
+    d_som2 = dr_lib.subtract_bkg_from_data(d_som1, B[0],
+                                           verbose=config.verbose,
+                                           timer=tim,
+                                           dataset1="data",
+                                           dataset2="background")
 
-    if tim is not None:
-        tim.getTime(msg="After subtracting background")
-
-    d_som2_D = None
-    d_som2_B = None
-    del d_som2_D, d_som2_B
+    del d_som1
 
     if config.inst_geom is not None:
         if config.verbose:
@@ -205,47 +101,17 @@ def run(config, tim):
 
         inst_geom_dst = DST.getInstance("application/x-NxsGeom",
                                        config.inst_geom)
-        inst_geom_dst.setGeometry(config.data_paths, d_som3)
+        inst_geom_dst.setGeometry(config.data_paths, d_som2)
         inst_geom_dst.release_resource()
         
     if config.verbose:
         print "Converting TOF to wavelength"
 
-    d_som4 = convert_data_tof_to_wavelength(d_som3)
+    d_som3 = common_lib.tof_to_wavelength(d_som2, inst_param="total",
+                                          units="microsecond")
 
-    d_som3 = None
-    del d_som3
+    del d_som2
     
-    if config.det_eff is None:
-        d_eff2 = None
-    else:
-        try:
-            config.det_eff.title()
-            if config.verbose:
-                print "Reading detector efficiency file"
-                
-            det_eff_dst = DST.getInstance("text/xml", config.det_eff)
-            d_eff1 = det_eff_dst.getSOM(config.data_paths)
-            det_eff_dst.release_resource()
-            if config.verbose:
-                print "Rebinning detector efficiency"
-
-            d_eff2 = rebin_det_eff(d_som4, d_eff1)
-
-            d_eff1 = None
-            del d_eff1
-                    
-        except AttributeError:
-            d_eff2 = config.det_eff
-
-    if config.verbose and d_eff2 is not None:
-        print "Correcting detector data for efficiency"
-        
-    d_som5 = eff_correct_det(d_som4, d_eff2)
-    
-    d_som4 = None
-    del d_som4
-
     if config.norm is not None:
         if config.verbose:
             print "Reading normalization file"
@@ -253,54 +119,30 @@ def run(config, tim):
         if tim is not None:
             tim.getTime(False)
 
-        norm_dst = DST.getInstance("application/x-NeXus", config.norm)
-        if config.use_roi_file:
-            n_som1 = norm_dst.getSOM(config.data_paths, so_axis,
-                                     roi_file=config.norm_signal_roi_file)
-            if not config.no_norm_bkg:
-                n_som1_b = norm_dst.getSOM(config.data_paths, so_axis,
-                                           roi_file=config.bkg_roi_file)
-            else:
-                n_som1_b = None
-
-        else:
-            n_som1 = norm_dst.getSOM(config.data_paths, so_axis)
-        norm_dst.release_resource()
-
+        (nd_som1, nb_som1) = dr_lib.add_files(config.norm,
+                                        Data_Paths=config.data_paths,
+                                        SO_Axis=so_axis,
+                                        Signal_ROI=config.norm_signal_roi_file,
+                                        Bkg_ROI=config.norm_bkg_roi_file,
+                                        dataset_type="norm",      
+                                        Verbose=config.verbose,
+                                        Timer=tim)
+        
         if tim is not None:
             tim.getTime(msg="After reading normalization file")
     else:
-        n_som1 = None
-        n_som1_b = None
+        nd_som1 = None
+        nb_som1 = None
 
     if config.verbose and config.norm is not None:
         print "Scale normalization spectra"
 
-    n_som2 = scale_inc_spec_factor(config, n_som1)
-    del n_som1
-    
-    if config.use_roi_file:
-        n_som2_b = scale_inc_spec_factor(config, n_som1_b)
-        del n_som1_b
-
-    if config.dump_norm and n_som2 is not None:
-        n_som2_1 = dr_lib.sum_all_spectra(n_som2)
-        n_som2_1[0].id = ("bank1", (0, 0))
-        hlr_utils.write_file(config.data, "text/Spec", n_som2_1,
+    if config.dump_norm and nd_som1 is not None:
+        nd_som1_1 = dr_lib.sum_all_spectra(nd_som1)
+        hlr_utils.write_file(config.data[0], "text/Spec", nd_som1_1,
                              output_ext="nom", verbose=config.verbose,
                              message="combined normalization TOF information")
-        del n_som2_1
-
-    if config.norm is not None:
-        if config.use_roi_file:
-            n_som3_D = n_som2
-            n_som3_B = n_som2_b
-            del n_som2, n_som2_b
-        else:
-            (n_som3_D, n_som3_B) = filter_pixels(config, n_som2, "norm")
-    else:
-        n_som3_D = None
-        n_som3_B = None
+        del nd_som1_1
 
     if config.verbose and not config.no_norm_bkg and config.norm is not None:
         print "Determining normalization background"
@@ -309,82 +151,94 @@ def run(config, tim):
         tim.getTime(False)
 
     if config.norm is not None:
-        B_n = determine_background(config, n_som3_B, len(n_som3_D), "norm")
+        B_n = determine_background(config, nb_som1, len(nd_som1), "norm")
     else:
         B_n = None
+
+    del nb_som1
 
     if tim is not None and not config.no_norm_bkg and config.norm is not None:
         tim.getTime(msg="After normalization background determination")
 
     if not config.no_norm_bkg and B_n is not None and config.dump_norm_bkg:
-        hlr_utils.write_file(config.data, "text/Spec", B_n,
+        hlr_utils.write_file(config.data[0], "text/Spec", B_n,
                              output_ext="bnm", verbose=config.verbose,
                              message="combined normalization background TOF "\
                              +"information")
-        
-    if config.verbose and not config.no_norm_bkg and config.norm is not None:
-        print "Subtracting normalization background"
-
-    if tim is not None:
-        tim.getTime(False)
 
     if config.norm is not None:
-        n_som4 = subtract_bkg_from_data(n_som3_D, B_n)
+        nd_som2 = dr_lib.subtract_bkg_from_data(nd_som1, B_n[0],
+                                                verbose=config.verbose,
+                                                timer=tim,
+                                                dataset1="normalization",
+                                                dataset2="background")
     else:
-        n_som4 = None
-
-    if tim is not None and not config.no_norm_bkg and config.norm is not None:
-        tim.getTime(msg="After subtracting normalization background")
-
-    del n_som3_D, n_som3_B
+        nd_som2 = None
+        
+    del nd_som1
 
     if config.verbose and config.norm is not None:
         print "Converting TOF to wavelength (norm)"
 
+    if config.inst_geom is not None:
+        if config.verbose:
+            print "Reading in detector geometry file"
+
+        inst_geom_dst = DST.getInstance("application/x-NxsGeom",
+                                       config.inst_geom)
+        inst_geom_dst.setGeometry(config.data_paths, nd_som2)
+        inst_geom_dst.release_resource()
+
     if tim is not None:
         tim.getTime(False)
 
-    n_som5 = convert_data_tof_to_wavelength(n_som4)
+    if config.norm is not None:
+        nd_som3 = common_lib.tof_to_wavelength(nd_som2, inst_param="total",
+                                               units="microsecond")
+    else:
+        nd_som3 = None
 
     if tim is not None:
         tim.getTime(msg="After wavelength conversion")
 
-    del n_som4
+    del nd_som2
 
     if config.verbose:
         print "Combining spectra"
 
-    d_som6 = combine_spectra(config, d_som5)
+    d_som4 = dr_lib.sum_all_spectra(d_som3, rebin_axis=config.l_bins)
     if config.norm is not None:
-        n_som6 = combine_spectra(config, n_som5)
+        nd_som4 = dr_lib.sum_all_spectra(nd_som3, rebin_axis=config.l_bins)
     else:
-        n_som6 = None
+        nd_som4 = None
 
-    del d_som5, n_som5
+    del d_som3, nd_som3
 
-    if config.verbose and config.norm is not None \
-           and config.geom_factor is not None:
+    if config.verbose and config.norm is not None:
         print "Scale data by normalization"
 
-    d_som7 = norm_data_by_inc_spec_factor(d_som6, n_som6)
+    if config.norm is not None:
+        d_som5 = common_lib.div_ncerr(d_som4, nd_som4)
+    else:
+        d_som5 = d_som4
 
     if tim is not None and config.norm is not None:
         tim.getTime(msg="After normalizing signal spectra")
 
-    del d_som6, n_som6
+    del d_som4, nd_som4
 
     if config.det_angle is None:
-        d_som7.attr_list["detector_angle"] = (0.0, "degree")
+        d_som5.attr_list["detector_angle"] = (0.0, "degree")
     else:
-        d_som7.attr_list["detector_angle"] = config.det_angle
+        d_som5.attr_list["detector_angle"] = config.det_angle
 
-    hlr_utils.write_file(config.output, "text/Spec", d_som7, replace_ext=False,
+    hlr_utils.write_file(config.output, "text/Spec", d_som5, replace_ext=False,
                          verbose=config.verbose,
                          message="combined Reflectivity information")
 
-    d_som7.attr_list["config"] = config
+    d_som5.attr_list["config"] = config
 
-    hlr_utils.write_file(config.data, "text/rmd", d_som7,
+    hlr_utils.write_file(config.data[0], "text/rmd", d_som5,
                          output_ext="rmd", verbose=config.verbose,
                          message="metadata")
 
@@ -408,32 +262,9 @@ if __name__ == "__main__":
     parser.set_defaults(data_paths="/entry/bank1,1")
 
     # Add REF specific options
-    parser.add_option("", "--det-eff", dest="det_eff",
-                      help="Specify the detector efficiency file or an "\
-                      +"efficiency tuple (efficiency,error^2)")
-    
-    parser.add_option("", "--geom-factor", dest="geom_factor",
-                      help="Specify the geometry factor G, err^2")
-    
     parser.add_option("", "--det-angle", dest="det_angle",
                       help="Specify the detector inclination angle, err^2, "\
                       +"and units")
-
-    parser.add_option("", "--starting-ids", dest="starting_ids",
-                      help="Specify the comma separated list of i and j pixel"\
-                      +" locations on the detector. This is inclusive.")
-
-    parser.add_option("", "--ending-ids", dest="ending_ids",
-                      help="Specify the comma separated list of i and j pixel"\
-                      +" locations on the detector. This is inclusive.")
-
-    parser.add_option("", "--norm-starting-ids", dest="norm_starting_ids",
-                      help="Specify the comma separated list of i and j pixel"\
-                      +" locations on the detector. This is inclusive.")
-
-    parser.add_option("", "--norm-ending-ids", dest="norm_ending_ids",
-                      help="Specify the comma separated list of i and j pixel"\
-                      +" locations on the detector. This is inclusive.")
 
     parser.add_option("", "--l-bins", dest="l_bins",
                       help="Specify the minimum and maximum wavelength values"\
@@ -459,6 +290,11 @@ if __name__ == "__main__":
                       help="Flag to turn off background estimation and "\
                       +"subtraction")
     parser.set_defaults(no_bkg=False)
+
+    parser.add_option("", "--dump-bkg", action="store_true", dest="dump_bkg",
+                      help="Flag to dump the combined background TOF "\
+                      +"information")
+    parser.set_defaults(dump_bkg=False)
 
     parser.add_option("", "--signal-roi-file", dest="signal_roi_file",
                       help="Specify the file containing the list pixel IDs "
@@ -499,10 +335,12 @@ if __name__ == "__main__":
     configure = hlr_utils.Configure()
     
     # get the datafile name and check it
-    if len(args) == 1:
-        configure.data = args[0]
-        if not hlr_utils.file_exists(configure.data):
-            parser.error("Data file [%s] does not exist" % configure.data)
+    if options.data is not None:
+        configure.data = hlr_utils.determine_files(options.data, "REF_M",
+                                                   stop_on_none=True)
+    elif len(args) > 0:
+        configure.data = hlr_utils.determine_files(args, "REF_M",
+                                                   stop_on_none=True)
     else:
         parser.error("Did not specify a datafile")
 
@@ -510,7 +348,7 @@ if __name__ == "__main__":
     if options.output is not None:
         configure.output = options.output
     else:
-        outfile = os.path.basename(configure.data)
+        outfile = os.path.basename(configure.data[0])
         path = os.path.join(os.getcwd(), outfile)
         configure.output = hlr_utils.ext_replace(path, "nxs", "txt")
         print "Using %s as output file" % configure.output
@@ -518,143 +356,45 @@ if __name__ == "__main__":
     # set the verbosity
     configure.verbose = options.verbose
 
-    configure.norm = hlr_utils.fix_filename(options.norm)
-    if configure.norm is not None:
-        if not hlr_utils.file_exists(configure.norm):
-            parser.error("Normalization file [%s] does not exist" \
-                         % configure.norm)
-        else:
-            pass
-    else:
-        pass
+    # get normalization files
+    configure.norm = hlr_utils.determine_files(options.norm, "REF_M")    
 
-    if options.det_eff is not None:
-        try:
-            configure.det_eff = hlr_utils.split_values(options.det_eff)
-        except ValueError:
-            configure.det_eff = options.det_eff
-            if not hlr_utils.file_exists(configure.det_eff):
-                parser.error("Detector efficiency file [%s] does not exist" \
-                             % configure.det_eff)
-            else:
-                pass
-    else:
-        configure.det_eff = options.det_eff
-
-    configure.inst_geom = hlr_utils.fix_filename(options.inst_geom)
-    if configure.inst_geom is not None:
-        if not hlr_utils.file_exists(configure.inst_geom):
-            parser.error("Detector geometry file [%s] does not exist" \
-                         % configure.inst_geom)
-        else:
-            pass
-    else:
-        pass
+    configure.inst_geom = hlr_utils.determine_files(options.inst_geom,
+                                                    one_file=True)
 
     # get the data path for the signal ROI file
-    configure.signal_roi_file = hlr_utils.fix_filename(options.signal_roi_file)
-    if configure.signal_roi_file is not None:
-        if not hlr_utils.file_exists(configure.signal_roi_file):
-            parser.error("Signal ROI file [%s] does not exist" \
-                         % configure.signal_roi_file)
-        else:
-            pass
-    else:
-        pass
-
+    configure.signal_roi_file = hlr_utils.determine_files(\
+       options.signal_roi_file,
+       one_file=True)
+    
     # get the data path for the background ROI file
-    configure.bkg_roi_file = hlr_utils.fix_filename(options.bkg_roi_file)
-    if configure.bkg_roi_file is not None:
-        if not hlr_utils.file_exists(configure.bkg_roi_file):
-            parser.error("Background ROI file [%s] does not exist" \
-                         % configure.bkg_roi_file)
-        else:
-            pass
-    else:
-        pass
-
+    configure.bkg_roi_file = hlr_utils.determine_files(\
+       options.bkg_roi_file,
+       one_file=True)
+    
     # get the data path for the normalization signal ROI file
-    configure.norm_signal_roi_file = hlr_utils.fix_filename(\
-        options.norm_signal_roi_file)
-    if configure.norm_signal_roi_file is not None:
-        if not hlr_utils.file_exists(configure.norm_signal_roi_file):
-            parser.error("Normalization Signal ROI file [%s] does not exist" \
-                         % configure.norm_signal_roi_file)
-        else:
-            pass
+    if options.norm_signal_roi_file is not None:
+        configure.norm_signal_roi_file = hlr_utils.determine_files(\
+       options.norm_signal_roi_file,
+       one_file=True)
     else:
         configure.norm_signal_roi_file = configure.signal_roi_file
     
     # get the data path for the normalization background ROI file
-    configure.norm_bkg_roi_file = hlr_utils.fix_filename(\
-        options.norm_bkg_roi_file)
-    if configure.norm_bkg_roi_file is not None:
-        if not hlr_utils.file_exists(configure.norm_bkg_roi_file):
-            parser.error("Normalization Background ROI file [%s] does not "\
-                         +"exist" % configure.norm_bkg_roi_file)
-        else:
-            pass
+    if options.norm_bkg_roi_file is not None:
+        configure.norm_bkg_roi_file = hlr_utils.determine_files(\
+       options.norm_bkg_roi_file,
+       one_file=True)
     else:
         configure.norm_bkg_roi_file = configure.bkg_roi_file
 
     # set the data paths
     configure.data_paths = hlr_utils.create_data_paths(options.data_paths)
 
-    if options.geom_factor is not None:
-        configure.geom_factor = hlr_utils.split_values(options.geom_factor)
-    else:
-        configure.geom_factor = options.geom_factor
-
     if options.det_angle is not None:
         configure.det_angle = hlr_utils.split_values(options.det_angle)
     else:
         configure.det_angle = options.det_angle
-
-    # set the starting ids
-    if options.starting_ids is not None:
-        configure.starting_ids = hlr_utils.create_id_pairs(\
-            options.starting_ids,\
-            options.data_paths)
-    else:
-        configure.starting_ids = options.starting_ids
-
-    # set the ending ids
-    if options.ending_ids is not None:
-        configure.ending_ids = hlr_utils.create_id_pairs(options.ending_ids,
-                                                         options.data_paths,
-                                                         inc=True)
-    else:
-        configure.ending_ids = options.ending_ids
-
-    # set the norm_starting ids
-    if options.norm_starting_ids is not None:
-        configure.norm_starting_ids = hlr_utils.create_id_pairs(\
-            options.norm_starting_ids,\
-            options.data_paths)
-    else:
-        configure.norm_starting_ids = configure.starting_ids
-
-    # set the norm_ending ids
-    if options.norm_ending_ids is not None:
-        configure.norm_ending_ids = hlr_utils.create_id_pairs(\
-            options.norm_ending_ids,
-            options.data_paths,
-            inc=True)
-    else:
-        configure.norm_ending_ids = configure.ending_ids
-
-    # check if PID files are being used
-    if configure.signal_roi_file:
-        configure.use_roi_file = True
-    else:
-        configure.use_roi_file = False
-
-    if not configure.use_roi_file and (configure.starting_ids is None \
-                                       and configure.ending_ids is None):
-        parser.error("Starting and ending ID flags must be used if signal "\
-                     +"and background ROI file flags are not used.")
-    else:
-        pass
 
     # set the wavelength bins
     if options.l_bins is not None:
@@ -667,21 +407,22 @@ if __name__ == "__main__":
 
     # set the ability to turn off background estimation and subtraction
     configure.no_bkg = options.no_bkg
-    if configure.use_roi_file:
-        if configure.bkg_roi_file is None and not configure.no_bkg:
-            print "Shutting off background subtraction"
-            configure.no_bkg = True
+    if configure.bkg_roi_file is None and not configure.no_bkg:
+        print "Shutting off background subtraction"
+        configure.no_bkg = True
 
     # set the ability to turn off normalization background estimation
     # and subtraction
     configure.no_norm_bkg = options.no_norm_bkg
-    if configure.use_roi_file:
-        if configure.norm_bkg_roi_file is None and not configure.no_norm_bkg:
-            configure.no_norm_bkg = True
+    if configure.norm_bkg_roi_file is None and not configure.no_norm_bkg:
+        configure.no_norm_bkg = True
             
     # set the ability to dump the combined specular TOF information
     configure.dump_specular = options.dump_specular
 
+    # set the ability to dump the combined background TOF information
+    configure.dump_bkg = options.dump_bkg
+    
     # set the ability to dump the combined normalization TOF information
     configure.dump_norm = options.dump_norm
 
@@ -691,6 +432,7 @@ if __name__ == "__main__":
 
     if options.dump_all:
         configure.dump_specular = True
+        configure.dump_bkg = True        
         configure.dump_norm = True
         configure.dump_norm_bkg = True
 

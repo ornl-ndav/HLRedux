@@ -98,6 +98,9 @@ def split_values(thing):
     <- A tuple of (value,err^2,units)
     """
 
+    if thing is None:
+        return thing
+    
     mylist = thing.split(',')
     try:
         return (float(mylist[0]), float(mylist[1]), mylist[2])

@@ -93,6 +93,7 @@ def process_igs_data(datalist, conf, **kwargs):
     # The [0] is to get the data SOM and ignore the None background SOM
     dp_som1 = dr_lib.add_files(datalist, Data_Paths=conf.data_paths,
                                SO_Axis=so_axis, Signal_ROI=conf.roi_file,
+                               dataset_type=dataset_type,
                                Verbose=conf.verbose, Timer=t)[0]
 
     if t is not None:
@@ -110,6 +111,7 @@ def process_igs_data(datalist, conf, **kwargs):
         # The [0] is to get the data SOM and ignore the None background SOM
         dm_som1 = dr_lib.add_files(datalist, Data_Paths=conf.mon_path,
                                    SO_Axis=so_axis,
+                                   dataset_type=dataset_type,
                                    Verbose=conf.verbose,
                                    Timer=t)[0]
         

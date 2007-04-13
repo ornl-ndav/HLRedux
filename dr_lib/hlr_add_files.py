@@ -44,6 +44,8 @@ def add_files(filelist, **kwargs):
        Bkg_ROI=<filename> This is the name of a file that contains a list
                           of pixel IDs that will be read from the data file
                           and stored as a background SOM
+       dataset_type=<string> is the practical name of the dataset being
+                             processed. The default value is data.
        Verbose=<boolean> This is a flag to turn on print statments. The
                          default is False
        Timer=<timer object> This is an SNS Timer object used for showing the
@@ -81,6 +83,11 @@ def add_files(filelist, **kwargs):
         bkg_roi = kwargs["Bkg_ROI"]
     except KeyError:
         bkg_roi = None        
+
+    try:
+        dataset_type = kwargs["dataset_type"]
+    except KeyError:
+        dataset_type = "data"
 
     try:
         verbose = kwargs["Verbose"]
@@ -159,9 +166,12 @@ def add_files(filelist, **kwargs):
         if timer is not None:
             timer.getTime(msg="After resource release and DST deletion")
 
-        d_som1.attr_list["filename"] = filelist
+        som_key_parts = [dataset_type, "filename"]
+        som_key = "-".join(som_key_parts)
+
+        d_som1.attr_list[som_key] = filelist
         if b_som1 is not None:
-            b_som1.attr_list["filename"] = filelist
+            b_som1.attr_list[som_key] = filelist
 
     return (d_som1, b_som1)
 

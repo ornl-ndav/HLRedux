@@ -38,6 +38,14 @@ def sum_all_spectra(obj, **kwargs):
                            the axes to rebin the spectra onto.
        rebin_axis_dim=<int> is the dimension on the spectra being rebinned.
                             The default value is 1.
+       y_sort=<boolean> is a flag that will sort the SO IDs by y. The default
+                        behavior is False and this maintains the original x
+                        ordering.
+       stripe=<boolean> is a flag that will combine spectra in either the x or
+                        or y direction at a given y or x. The integration
+                        direction is based on the setting of y_sort. The
+                        default behavior is False and corresponds to summing
+                        all spectra into one.
 
     Returns:
     -------
@@ -74,6 +82,16 @@ def sum_all_spectra(obj, **kwargs):
     except KeyError:
         rebin_axis_dim = 1
 
+    try:
+        y_sort = kwargs["y_sort"]
+    except KeyError:
+        y_sort = False
+
+    try:
+        stripe = kwargs["stripe"]
+    except KeyError:
+        stripe = False        
+
     import common_lib
 
     if rebin_axis is not None:
@@ -89,28 +107,78 @@ def sum_all_spectra(obj, **kwargs):
 
     del obj
 
+    # Sort SO IDs by y value
+    if y_sort:
+        obj1.sort(lambda x, y: cmp(x.id[1][1], y.id[1][1]))
+    # SO IDs are already sorted by x value
+    else:
+        pass
+
     (result, res_descr) = hlr_utils.empty_result(obj1)
 
     result = hlr_utils.copy_som_attr(result, res_descr, obj1, o_descr)
 
-    # iterate through the values
-    so_id_list = []
-
-    val1 = hlr_utils.get_value(obj1, 0, o_descr, "all")
-    val2 = hlr_utils.get_value(obj1, 1, o_descr, "all")
-    value = common_lib.add_ncerr(val1, val2)
-    so_id_list.append(val1.id)
-    so_id_list.append(val2.id)
-
-    for i in xrange(2, hlr_utils.get_length(obj1)):
-        val = hlr_utils.get_value(obj1, i, o_descr, "all")
-        value = common_lib.add_ncerr(val, value)
-        so_id_list.append(val.id)
-
-    hlr_utils.result_insert( result, res_descr, value, None, "all")
-    result.attr_list["Summed IDs"] = so_id_list
-    result[0].id = so_id_list[0]
+    if not stripe:
+        # iterate through the values
+        so_id_list = []
+        
+        val1 = hlr_utils.get_value(obj1, 0, o_descr, "all")
+        val2 = hlr_utils.get_value(obj1, 1, o_descr, "all")
+        value = common_lib.add_ncerr(val1, val2)
+        so_id_list.append(val1.id)
+        so_id_list.append(val2.id)
+        
+        for i in xrange(2, hlr_utils.get_length(obj1)):
+            val = hlr_utils.get_value(obj1, i, o_descr, "all")
+            value = common_lib.add_ncerr(val, value)
+            so_id_list.append(val.id)
             
+        hlr_utils.result_insert(result, res_descr, value, None, "all")
+        result.attr_list["Summed IDs"] = so_id_list
+        result[0].id = so_id_list[0]
+
+    else:
+        # iterate through the values        
+        so_id_list = []
+        i_start = 0
+        stripe_count = 0
+        total_size = hlr_utils.get_length(obj1) - 1
+        while i_start < total_size:
+            stripe_list = []
+            counted = 2
+            val1 = hlr_utils.get_value(obj1, i_start, o_descr, "all")
+            val2 = hlr_utils.get_value(obj1, i_start+1, o_descr, "all")
+            value = common_lib.add_ncerr(val1, val2)
+            stripe_list.append(val1.id)
+            stripe_list.append(val2.id)
+
+            if y_sort:
+                comp_id = val2.id[1][1]
+            else:
+                comp_id = val2.id[1][0]
+            
+            for i in xrange(i_start+2, hlr_utils.get_length(obj1)):
+                val = hlr_utils.get_value(obj1, i, o_descr, "all")
+                if y_sort:
+                    new_id = val.id[1][1]
+                else:
+                    new_id = val.id[1][0]
+
+                if new_id > comp_id:
+                    break
+                
+                value = common_lib.add_ncerr(val, value)
+                stripe_list.append(val.id)
+                counted += 1
+
+            i_start = i
+            so_id_list.append(stripe_list)
+            hlr_utils.result_insert(result, res_descr, value, None, "all")
+            result[stripe_count].id = stripe_list[0]
+            stripe_count += 1
+
+        result.attr_list["summed_ids"] = so_id_list            
+
     return result
 
 if __name__ == "__main__":

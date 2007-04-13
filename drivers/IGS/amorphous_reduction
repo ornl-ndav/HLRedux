@@ -91,30 +91,30 @@ def run(config, tim=None):
     d_som2 = dr_lib.subtract_bkg_from_data(d_som1, b_som1,
                                            verbose=config.verbose,
                                            timer=tim,
-                                           dataset1="background",
-                                           dataset2="data")
+                                           dataset1="data",
+                                           dataset2="background")
 
     # Step 11: Subtract background spectrum from empty can spectrum    
     e_som2 = dr_lib.subtract_bkg_from_data(e_som1, b_som1,
                                            verbose=config.verbose,
                                            timer=tim,
-                                           dataset1="background",
-                                           dataset2="empty_can")
+                                           dataset1="empty_can",
+                                           dataset2="background")
 
     # Step 12: Subtract background spectrum from normalization spectrum
     n_som2 = dr_lib.subtract_bkg_from_data(n_som1, b_som1,
                                            verbose=config.verbose,
                                            timer=tim,
-                                           dataset1="background",
-                                           dataset2="normalization")
+                                           dataset1="normalization",
+                                           dataset2="background")
     del b_som1
 
     # Step 13: Subtract empty can spectrum from sample spectrum    
     d_som3 = dr_lib.subtract_bkg_from_data(d_som2, e_som2,
                                            verbose=config.verbose,
                                            timer=tim,
-                                           dataset1="empty_can",
-                                           dataset2="data")
+                                           dataset1="data",
+                                           dataset2="empty_can")
 
     del d_som2
     
@@ -122,8 +122,8 @@ def run(config, tim=None):
     n_som3 = dr_lib.subtract_bkg_from_data(n_som2, e_som2,
                                            verbose=config.verbose,
                                            timer=tim,
-                                           dataset1="empty_can",
-                                           dataset2="normalization")    
+                                           dataset1="normalization",
+                                           dataset2="empty_can")    
 
     del n_som2, e_som2
 
