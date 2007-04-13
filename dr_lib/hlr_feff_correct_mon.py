@@ -72,7 +72,7 @@ def feff_correct_mon(obj, **kwargs):
     constant = 0.00000085 / 1.8 # A^-1
     
     for i in xrange(hlr_utils.get_length(obj)):
-        val = hlr_utils.get_value(obj, i, o_descr, "x")
+        val = hlr_utils.get_value(obj, i, o_descr, "x", axis)
         map_so = hlr_utils.get_map_so(obj, None, i)
 
         eff = nessi_list.NessiList()
@@ -86,7 +86,7 @@ def feff_correct_mon(obj, **kwargs):
         y_val = hlr_utils.get_value(obj, i, o_descr, "y")
         y_err2 = hlr_utils.get_value(obj, i, o_descr, "y")
 
-        value = array_manip.div_ncerr(y_val, y_err2, eff, eff_err2);
+        value = array_manip.div_ncerr(y_val, y_err2, eff, eff_err2)
 
         hlr_utils.result_insert(result, res_descr, value, map_so, "y")
 
