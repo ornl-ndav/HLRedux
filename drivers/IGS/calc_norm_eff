@@ -32,7 +32,6 @@ will repeat steps 1-8,10,11,13,14.
 """
 
 def run(config, tim):
-    import sys 
     import DST
 
     if tim is not None:
@@ -129,9 +128,6 @@ def run(config, tim):
         tim.getTime(msg="Total Running Time: ")
 
 if __name__ == "__main__":
-    import os
-    
-    import common_lib
     import dr_lib
     import hlr_utils
     
