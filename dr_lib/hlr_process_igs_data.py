@@ -136,7 +136,7 @@ def process_igs_data(datalist, conf, **kwargs):
     if t is not None and B is not None:
         t.getTime(msg="After determining time-independent background ")
 
-    if conf.dump_tib:
+    if conf.dump_tib and B is not None:
         attr_name = "time-independent-background"
         dp_som1.attr_list[attr_name] = B
         file_comment = "TOFs: %s" % conf.tib_tofs
