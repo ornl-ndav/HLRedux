@@ -161,7 +161,6 @@ def tof_to_initial_wavelength_igs(obj, **kwargs):
     else:
         if o_descr == "SOM":
             try:
-                obj.attr_list["Time_zero"]
                 t_0 = obj.attr_list["Time_zero"][0]
                 t_0_err2 = obj.attr_list["Time_zero"][1]
             except KeyError:
