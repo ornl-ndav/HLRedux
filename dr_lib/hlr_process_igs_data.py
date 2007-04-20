@@ -54,7 +54,6 @@ def process_igs_data(datalist, conf, **kwargs):
     -------
     <- A data SOM that has undergone all requested processing steps
     """
-    import DST
     import hlr_utils
 
     # Check keywords

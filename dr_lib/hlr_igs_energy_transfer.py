@@ -186,8 +186,8 @@ if __name__ == "__main__":
     som1 = hlr_test.generate_som()
     som1.setAllAxisUnits(["meV"])
 
-    l_f = SOM.Information([7.0], [0.1], "Angstroms", "ZSelector")
-    som1.attr_list["Wavelength_final"] = l_f
+    la_f = SOM.Information([7.0], [0.1], "Angstroms", "ZSelector")
+    som1.attr_list["Wavelength_final"] = la_f
     
     print "********** SOM1"
     print "* ", som1[0]
@@ -196,7 +196,7 @@ if __name__ == "__main__":
     print "********** igs_energy_transfer"
     print "* som        :", igs_energy_transfer(som1)
     print "* som (scale):", igs_energy_transfer(som1, scale=True)
-    print "* so         :", igs_energy_transfer(som1[0], lambda_f=l_f)
+    print "* so         :", igs_energy_transfer(som1[0], lambda_f=la_f)
 
 
    

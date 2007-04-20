@@ -135,6 +135,7 @@ def run(config, tim=None):
 
     del n_som3
         
+    # Step 16: Normalize data by integrated values
     if config.verbose and norm_int is not None:
         print "Normalizing data by normalization data"
 
@@ -148,21 +149,6 @@ def run(config, tim=None):
             tim.getTime(msg="After normalizing data ")
 
     del d_som3, norm_int
-
-    # Step 16: Convert initial wavelength to k_initial
-    if config.verbose and config.correct:
-        print "Converting initial wavelength to k_initial"
-
-    if tim is not None and config.correct:
-        tim.getTime(False)
-
-    if config.correct:
-        d_som5 = common_lib.wavelength_to_scalar_k(d_som4)
-    else:
-        d_som5 = None
-
-    if tim is not None and config.correct:
-        tim.getTime(msg="After converting initial wavelength to k_initial ")
 
     # Step 17: Convert initial wavelength to E_initial
     if config.verbose:
@@ -239,7 +225,7 @@ def run(config, tim=None):
 
     del d_som6, d_som7
 
-    # Steps 21 to end: Calculate Q and create S(Q, E_t)
+    # Steps 21-25: Calculate Q and create S(Q, E_t)
     if config.verbose:
         print "Creating 2D spectrum"
 
@@ -247,7 +233,7 @@ def run(config, tim=None):
         tim.getTime(False)
 
     if config.correct:
-        d_som8 = dr_lib.create_E_vs_Q_igs(d_som9, d_som5,
+        d_som8 = dr_lib.create_E_vs_Q_igs(d_som9,
                                           config.E_bins, config.Q_bins,
                                           so_id="Full Detector",
                                           y_label="counts",
@@ -268,8 +254,6 @@ def run(config, tim=None):
         tim.getTime(msg="After creation of final spectrum ")
 
     del d_som9
-    if config.correct:
-        del d_som5
 
     # Writing 2D DAVE file
 
@@ -291,23 +275,34 @@ def run(config, tim=None):
         tim.getTime(msg="Total Running Time: ")
 
 if __name__ == "__main__":
-    import os
-    
     import common_lib
     import dr_lib
     import hlr_utils
+
+    # Make description for driver
+    result = []
+    result.append("This driver runs the data reduction for the inelastic")
+    result.append("banks for the BSS instrument. The standard output is a")
+    result.append("*.txt file (DAVE Grouped ASCII) for S(Q,E), a *.setr file")
+    result.append("(3-column ASCII) for S(E) and a *.etr file (3-column")
+    result.append("ASCII) for sigma(E). Other intermediate files can be")
+    result.append("produced by using the appropriate dump-X flag described in")
+    result.append("this help. The file extensions are described in the option")
+    result.append("documentation.")
  
-    # set up the options available
+    # Set up the options available
     parser = hlr_utils.IgsOptions("usage: %prog [options] <datafile>", None,
-                                  hlr_utils.program_version())
+                                  hlr_utils.program_version(), 'error',
+                                  " ".join(result))
 
     # Set defaults for imported options
+    parser.set_defaults(inst="BSS")
     parser.set_defaults(data_paths="/entry/bank1,1,/entry/bank2,1")
     parser.set_defaults(mon_path="/entry/monitor,1")
     parser.set_defaults(norm_start="6.24")
     parser.set_defaults(norm_end="6.30")
     
-    # Add BSS specific options
+    # Add amorphous_reduction specific options
     parser.add_option("", "--mon-eff", dest="mon_eff", metavar="TUPLE",
                       help="Specify the monitor efficiency file or an "\
                       +"efficiency tuple (efficiency,error2)")
@@ -328,231 +323,81 @@ if __name__ == "__main__":
     parser.add_option("", "--dump-energy", action="store_true",
                       dest="dump_energy",
                       help="Flag to dump the energy transfer information for"\
-                      +" all pixels")
+                      +" all pixels. Creates a *.exl file.")
     parser.set_defaults(dump_energy=False)
     
     parser.add_option("", "--dump-ei", action="store_true",
                       dest="dump_initial_energy",
                       help="Flag to dump the initial energy information for"\
-                      +" all pixels")
+                      +" all pixels. Creates a *.ixl file.")
     parser.set_defaults(dump_ei=False)
     
     parser.add_option("", "--correct", action="store_true", dest="correct",
                       help="Flag to turn on correct calculation of Q")
-    parser.set_defaults(correct=False)    
+    parser.set_defaults(correct=False)
 
+    parser.add_option("", "--timing", action="store_true", dest="timing",
+                      help="Flag to turn on timing of code")
+    parser.set_defaults(timing=False)
+    
     (options, args) = parser.parse_args()
 
-    # set up the configuration
+    # Set up the configuration
     configure = hlr_utils.Configure()
-    
-    # get the datafile name and check it
-    if options.data is not None:
-        configure.data = hlr_utils.determine_files(options.data, "BSS",
-                                                   stop_on_none=True)
-    elif len(args) > 0:
-        configure.data = hlr_utils.determine_files(args, "BSS",
-                                                   stop_on_none=True)
-    else:
-        parser.error("Did not specify a datafile")
-        
-    # create the output file name if there isn't one supplied
-    if options.output:
-        configure.output = hlr_utils.fix_filename(options.output)
-    else:
-        outfile = os.path.basename(configure.data[0])
-        path = os.path.join(os.getcwd(), outfile)
-        configure.output = hlr_utils.ext_replace(path, "nxs", "txt")
-        print "Using %s as output file" % configure.output
 
-    # set the verbosity
-    configure.verbose = options.verbose
+    # Call the configuration setter for IgsOptions
+    hlr_utils.IgsConfiguration(parser, configure, options, args)
 
-    configure.norm = hlr_utils.determine_files(options.norm, "BSS")
+    # Set the monitor efficiency (tuple)
+    configure.mon_eff = hlr_utils.split_values(options.mon_eff)
 
-    configure.ecan = hlr_utils.determine_files(options.ecan, "BSS")
-
-    configure.back = hlr_utils.determine_files(options.back, "BSS")
+    # Set the detector efficiency. This can be a tuple (one number for all
+    # pixels) or a file containing numbers for all pixels.
+    try:
+        configure.det_eff = hlr_utils.split_values(options.det_eff)
+    except ValueError:
+        configure.det_eff = hlr_utils.determine_files(options.det_eff,
+                                                      one_file=True)
             
-    if options.mon_eff is not None:
-        try:
-            configure.mon_eff = hlr_utils.split_values(options.mon_eff)
-        except ValueError:
-            configure.mon_eff = hlr_utils.determine_files(options.mon_eff,
-                                                          one_file=True)
-    else:
-        configure.mon_eff = options.mon_eff
-
-    if options.det_eff is not None:
-        try:
-            configure.det_eff = hlr_utils.split_values(options.det_eff)
-        except ValueError:
-            configure.det_eff = hlr_utils.determine_files(options.det_eff,
-                                                          one_file=True)
-    else:
-        configure.det_eff = options.det_eff
-            
-    configure.inst_geom = hlr_utils.determine_files(options.inst_geom,
-                                                    one_file=True)
-
-    configure.roi_file = hlr_utils.determine_files(options.roi_file,
-                                                   one_file=True)
-
-    # set the data paths
-    configure.data_paths = hlr_utils.create_data_paths(options.data_paths)
-
-    # set the monitor path
-    configure.mon_path = hlr_utils.create_data_paths(options.mon_path)
-
-    # set the dead time
-    if options.dead_time is not None:
-        configure.dead_time = hlr_utils.split_values(options.dead_time)
-    else:
-        configure.dead_time = options.dead_time
-
-    # set the time-independent background TOFs
-    if options.tib_tofs is not None:
-        configure.tib_tofs = options.tib_tofs.split(',')
-    else:
-        configure.tib_tofs = options.tib_tofs
-
-    # set the time-independent background constant for data
-    if options.tib_data_const is not None:
-        configure.tib_data_const = hlr_utils.split_values(\
-            options.tib_data_const)
-    else:
-        configure.tib_data_const = options.tib_data_const
-
-    # set the time-independent background constant for ecan
-    if options.tib_ecan_const is not None:
-        configure.tib_ecan_const = hlr_utils.split_values(\
-            options.tib_ecan_const)
-    else:
-        configure.tib_ecan_const = options.tib_ecan_const
-
-    # set the time-independent background constant for back
-    if options.tib_back_const is not None:
-        configure.tib_back_const = hlr_utils.split_values(\
-            options.tib_back_const)
-    else:
-        configure.tib_back_const = options.tib_back_const
-
-    # set the time-independent background constant for norm
-    if options.tib_norm_const is not None:
-        configure.tib_norm_const = hlr_utils.split_values(\
-            options.tib_norm_const)
-    else:
-        configure.tib_norm_const = options.tib_norm_const        
-
-    # set the normalization start wavelength
-    configure.norm_start = float(options.norm_start)
-
-    # set the normalization end wavelength
-    configure.norm_end = float(options.norm_end)
-
-    # set no_mon_norm flag
-    configure.no_mon_norm = options.no_mon_norm
-
-    # set no_mon_effc flag
-    configure.no_mon_effc = options.no_mon_effc
-
-    # set the final wavelength
-    if options.wavelength_final is not None:
-        configure.wavelength_final = hlr_utils.split_values(\
-            options.wavelength_final)
-    else:
-        configure.wavelength_final = options.wavelength_final
-
-    # set the time-zero offset
-    if options.time_zero_offset is not None:
-        configure.time_zero_offset = hlr_utils.split_values(
-            options.time_zero_offset)
-    else:
-        configure.time_zero_offset = options.time_zero_offset
-
-    # set the time-zero slope
-    if options.time_zero_slope is not None:
-        configure.time_zero_slope = hlr_utils.split_values(
-            options.time_zero_slope)
-    else:
-        configure.time_zero_slope = options.time_zero_slope
-
-    # set the E bins
+    # Set the E bins
     if options.E_bins is not None:
         efacts = options.E_bins.split(',')
         configure.E_bins = hlr_utils.make_axis(float(efacts[0]),
                                                float(efacts[1]),
                                                float(efacts[2]))
     else:
-        configure.E_bins = options.E_bins
+        parser.error("You must provide energy transfer binning via the "\
+                     +"energy-bins option")        
 
-    # set the Q bins
+    # Set the Q bins
     if options.Q_bins is not None:
         qfacts = options.Q_bins.split(',')
         configure.Q_bins = hlr_utils.make_axis(float(qfacts[0]),
                                                float(qfacts[1]),
                                                float(qfacts[2]))
     else:
-        configure.Q_bins = options.Q_bins
+        parser.error("You must provide Q binning via the mom-trans-bins "\
+                     +"option")
 
-    # set the lambda bins
-    if options.lambda_bins is not None:
-        lfacts = options.lambda_bins.split(',')
-        configure.lambda_bins = hlr_utils.make_axis(float(lfacts[0]),
-                                                    float(lfacts[1]),
-                                                    float(lfacts[2]))
-    else:
-        configure.lambda_bins = options.lambda_bins        
-
-    # set the ability to dump the time-independent background information
-    configure.dump_tib = options.dump_tib
-
-    # set the ability to dump the wavelength information
-    configure.dump_wave = options.dump_wave
-
-    # set the ability to dump the monitor wavelength information
-    configure.dump_mon_wave = options.dump_mon_wave
-
-    # set the ability to dump the rebinned monitor wavelength information
-    configure.dump_mon_rebin = options.dump_mon_rebin
-
-    # set the ability to dump the efficiency corrected monitor wavelength
-    # information
-    configure.dump_mon_effc = options.dump_mon_effc        
-
-    # set the ability to dump the wavelength information
-    configure.dump_wave_mnorm = options.dump_wave_mnorm
-
-    # set the ability to dump the energy transfer information
+    # Set the ability to dump the energy transfer information
     configure.dump_energy = options.dump_energy
     
-    # set the ability to dump the initial energy information
+    # Set the ability to dump the initial energy information
     configure.dump_initial_energy = options.dump_initial_energy
 
     if options.dump_all:
-        configure.dump_tib = True
-        configure.dump_wave = True
-        configure.dump_mon_wave = True
-        configure.dump_mon_effc = True
-        configure.dump_mon_rebin = True
-        configure.dump_wave_mnorm = True        
         configure.dump_energy = True
         configure.dump_initial_energy = True
 
-    # set the filter option
-    configure.filter = options.filter
-
-    # set MC option
-    configure.mc = options.mc
-
-    # set Correct Q calculation flag
+    # Set Correct Q calculation flag
     configure.correct = options.correct
 
+    # Set timer object if timing option is used
     if options.timing:
         import sns_timing
         timer = sns_timing.DiffTime()
     else:
         timer = None
     
-    # run the program
+    # Run the program
     run(configure, timer)

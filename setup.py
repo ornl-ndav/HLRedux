@@ -72,7 +72,6 @@ instrument_scripts = {
     'incident_spectrum_ratio',
     'reflect_reduction',
     'reflect_tofred',
-    'reflect_tofred_batch',
     'rocking_curve',
     'specular_area',
     'specular_point'
@@ -129,9 +128,13 @@ def parseCommandLine():
     if options.get('--inst'):
         instruments = options['--inst'].split(',')
         try:
-            index = instruments.index("GEN")
+            index = instruments.index("All")
+            instruments = ["All"]
         except ValueError:
-            instruments.append("GEN")
+            try:
+                index = instruments.index("GEN")
+            except ValueError:
+                instruments.append("GEN")
     else:
         instruments = ["All"]
 

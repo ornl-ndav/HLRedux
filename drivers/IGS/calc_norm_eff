@@ -131,159 +131,42 @@ if __name__ == "__main__":
     import dr_lib
     import hlr_utils
     
-    # set up the options available
+    # Set up the options available
     parser = hlr_utils.IgsOptions("usage: %prog [options] <datafile>", None,
                                   hlr_utils.program_version())
 
     # Set defaults for imported options
+    parser.set_defaults(inst="BSS")
     parser.set_defaults(data_paths="/entry/bank1,1,/entry/bank2,1")
     parser.set_defaults(mon_path="/entry/monitor,1")
     parser.set_defaults(norm_start="6.24")
     parser.set_defaults(norm_end="6.30")
 
+    parser.add_option("", "--timing", action="store_true", dest="timing",
+                      help="Flag to turn on timing of code")
+    parser.set_defaults(timing=False)
+    
     (options, args) = parser.parse_args()
 
-    # set up the configuration
+    # Set up the configuration
     configure = hlr_utils.Configure()
 
-    # set the verbosity
-    configure.verbose = options.verbose
-
-   # get the datafiles and check them
+    # Assume the data is in norm option and set into data option. Clear out
+    # the norm option
     if len(args) == 0:
         if options.data is None:
-            if options.norm is None:
-                parser.error("Provide normalization files as arguments or "\
-                             +"via the data or norm CLI flags.")
-            else:
-                options.data = options.norm
-            configure.data = hlr_utils.determine_files(options.data, "BSS",
-                                                       stop_on_none=True)
-    else:
-        configure.data = hlr_utils.determine_files(args, "BSS",
-                                                   stop_on_none=True)
+            options.data = options.norm
+            options.norm = None
 
-    configure.ecan = hlr_utils.determine_files(options.ecan, "BSS")
-            
-    configure.back = hlr_utils.determine_files(options.back, "BSS")
+    # Call the configuration setter for IgsOptions
+    hlr_utils.IgsConfiguration(parser, configure, options, args)
 
-    configure.inst_geom = hlr_utils.determine_files(options.inst_geom,
-                                                    one_file=True)
-
-    configure.roi_file = hlr_utils.determine_files(options.roi_file,
-                                                   one_file=True)
-
-    # set the data paths
-    configure.data_paths = hlr_utils.create_data_paths(options.data_paths)
-
-    # set the monitor path
-    configure.mon_path = hlr_utils.create_data_paths(options.mon_path)
-
-    # set the dead time
-    if options.dead_time is not None:
-        configure.dead_time = hlr_utils.split_values(options.dead_time)
-    else:
-        configure.dead_time = options.dead_time
-
-    # set the time-independent background TOFs
-    if options.tib_tofs is not None:
-        configure.tib_tofs = options.tib_tofs.split(',')
-    else:
-        configure.tib_tofs = options.tib_tofs
-
-    # set the time-independent background constant for ecan
-    if options.tib_ecan_const is not None:
-        configure.tib_ecan_const = hlr_utils.split_values(\
-            options.tib_ecan_const)
-    else:
-        configure.tib_ecan_const = options.tib_ecan_const
-
-    # set the time-independent background constant for back
-    if options.tib_back_const is not None:
-        configure.tib_back_const = hlr_utils.split_values(\
-            options.tib_back_const)
-    else:
-        configure.tib_back_const = options.tib_back_const
-
-    # set the time-independent background constant for norm
-    if options.tib_norm_const is not None:
-        configure.tib_norm_const = hlr_utils.split_values(\
-            options.tib_norm_const)
-    else:
-        configure.tib_norm_const = options.tib_norm_const        
-
-    # set the normalization start wavelength
-    configure.norm_start = float(options.norm_start)
-
-    # set the normalization end wavelength
-    configure.norm_end = float(options.norm_end)
-
-    # set no_mon_norm flag
-    configure.no_mon_norm = options.no_mon_norm
-
-    # set no_mon_effc flag
-    configure.no_mon_effc = options.no_mon_effc
-
-    # set the final wavelength
-    if options.wavelength_final is not None:
-        configure.wavelength_final = hlr_utils.split_values(\
-            options.wavelength_final)
-    else:
-        configure.wavelength_final = options.wavelength_final
-
-    # set the time-zero offset
-    if options.time_zero_offset is not None:
-        configure.time_zero_offset = hlr_utils.split_values(
-            options.time_zero_offset)
-    else:
-        configure.time_zero_offset = options.time_zero_offset
-
-    # set the time-zero slope
-    if options.time_zero_slope is not None:
-        configure.time_zero_slope = hlr_utils.split_values(
-            options.time_zero_slope)
-    else:
-        configure.time_zero_slope = options.time_zero_slope
-
-    # set the ability to dump the time-independent background information
-    configure.dump_tib = options.dump_tib
-
-    # set the ability to dump the wavelength information
-    configure.dump_wave = options.dump_wave
-
-    # set the ability to dump the monitor wavelength information
-    configure.dump_mon_wave = options.dump_mon_wave    
-
-    # set the ability to dump the rebinned monitor wavelength information
-    configure.dump_mon_rebin = options.dump_mon_rebin
-
-    # set the ability to dump the efficiency corrected monitor wavelength
-    # information
-    configure.dump_mon_effc = options.dump_mon_effc        
-
-    # set the ability to dump the wavelength information
-    configure.dump_wave_mnorm = options.dump_wave_mnorm
-
-    if options.dump_all:
-        configure.dump_tib = True
-        configure.dump_wave = True
-        configure.dump_mon_wave = True
-        configure.dump_mon_wave = True
-        configure.dump_mon_effc = True
-        configure.dump_mon_rebin = True
-        configure.dump_wave_mnorm = True        
-
-    # set the filter option
-    configure.filter = options.filter
-
-    # set MC option
-    configure.mc = options.mc
-
+    # Set timer object if timing option is used
     if options.timing:
         import sns_timing
         timer = sns_timing.DiffTime()
     else:
         timer = None
     
-    # run the program
+    # Run the program
     run(configure, timer)

@@ -60,6 +60,7 @@ def add_files(filelist, **kwargs):
     ----------
     <- System exit if any file cannot be read
     """
+    import sys
 
     import common_lib
     import DST

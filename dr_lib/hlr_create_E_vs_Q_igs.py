@@ -22,19 +22,18 @@
 
 # $Id$
 
+import axis_manip
 import hlr_utils
 import SOM
 
-def create_E_vs_Q_igs(E_t_som, k_i_som, *args, **kwargs):
+def create_E_vs_Q_igs(E_t_som, *args, **kwargs):
     """
-    This functions takes a SOM with an energy transfer axis, a SOM with a
-    wavevector axis and turns the SOs contained in the SOM to 2D SOs with E
-    and Q axes.
+    This functions takes a SOM with an energy transfer axis and turns the SOs
+    contained in the SOM to 2D a SO with E and Q axes.
 
     Parameters:
     ----------
     -> E_t_som is the input SOM with energy transfer axis
-    -> k_i_som is the input SOM with wavevector axis
     -> *args is a mandatory list of axes for rebinning.  There is a particular
        order to them. They should be present in the following order:
        Without errors
@@ -66,7 +65,7 @@ def create_E_vs_Q_igs(E_t_som, k_i_som, *args, **kwargs):
 
     Returns:
     -------
-    <- A SOM containing 2D SOs with E and Q axes
+    <- A SOM containing a 2D SO with E and Q axes
 
     Exceptions:
     ----------
@@ -74,7 +73,6 @@ def create_E_vs_Q_igs(E_t_som, k_i_som, *args, **kwargs):
        function
     <- RuntimeError is raised if an instrument is not contained in the SOM
     """
-    import common_lib
     import nessi_list
 
     # Setup some variables 
@@ -84,8 +82,7 @@ def create_E_vs_Q_igs(E_t_som, k_i_som, *args, **kwargs):
     N_args = len(args)
 
     # Check withXVar keyword argument and also check number of given args.
-    # Set xvar and Q_pos (position of the momentum transfer axis in the args
-    # list) to the appropriate values
+    # Set xvar to the appropriate value
     try:
         value = kwargs["withXVar"]
         if value.lower() == "true":
@@ -94,14 +91,12 @@ def create_E_vs_Q_igs(E_t_som, k_i_som, *args, **kwargs):
                                    +"axes must be provided.")
             else:
                 xvar = True
-                Q_pos = 2
         elif value.lower() == "false":
             if N_args != 2:
                 raise RuntimeError("Since you did not requested x errors, 2 "\
                                    +"x axes must be provided.")
             else:
                 xvar = False
-                Q_pos = 1
         else:
             raise RuntimeError("Do not understand given parameter %s" % \
                                value)
@@ -111,7 +106,6 @@ def create_E_vs_Q_igs(E_t_som, k_i_som, *args, **kwargs):
                                +"x axes must be provided.")
         else:
             xvar = False
-            Q_pos = 1
 
     # Check dataType keyword argument. An offset will be set to 1 for the
     # histogram type and 0 for either density or coordinate
@@ -135,6 +129,7 @@ def create_E_vs_Q_igs(E_t_som, k_i_som, *args, **kwargs):
         run_fast = True
 
     so_dim = SOM.SO(dim)
+
 
     for i in range(dim):
         # Set the x-axis arguments from the *args list into the new SO
@@ -162,7 +157,7 @@ def create_E_vs_Q_igs(E_t_som, k_i_som, *args, **kwargs):
     lambda_final = E_t_som.attr_list["Wavelength_final"]
 
     import array_manip
-    import axis_manip
+    import utils
     
     # Length of 2D data block
     y_len = len(E_t_som[0])
@@ -171,59 +166,72 @@ def create_E_vs_Q_igs(E_t_som, k_i_som, *args, **kwargs):
     for j in xrange(hlr_utils.get_length(E_t_som)):
         # Get lambda_f from instrument information
         map_so = hlr_utils.get_map_so(E_t_som, None, j)
-        #print "A:",map_so.id
+
         (angle, angle_err2) = hlr_utils.get_parameter("polar", map_so, inst)
-        #print "polar:",angle
+
         l_f = hlr_utils.get_special(lambda_final, map_so)
+
+        E_f = axis_manip.wavelength_to_energy(l_f[0], l_f[1])
+
+        # Get E_t axis
+        E_t = hlr_utils.get_value(E_t_som, j, "SOM", "x")
+        E_t_err2 = hlr_utils.get_err2(E_t_som, j, "SOM", "x")
+
+        E_i = array_manip.add_ncerr(E_t, E_t_err2,
+                                    E_f[0]*1000.0, E_f[1]*1000.0)
+
+        E_i = array_manip.mult_ncerr(E_i[0], E_i[1], 1.0/1000.0, 0.0)
+        # Get lambda_i
+        l_i = axis_manip.energy_to_wavelength(E_i[0], E_i[1])
+
+        # Convert lambda_i to k_i
+        k_i = axis_manip.wavelength_to_scalar_k(l_i[0], l_i[1])
 
         # Convert lambda_f to k_f
         k_f = axis_manip.wavelength_to_scalar_k(l_f[0], l_f[1])
 
-        # Get k_i axis
-        k_i_val = hlr_utils.get_value(k_i_som, j, "SOM", "x")
-        k_i_err2 = hlr_utils.get_err2(k_i_som, j, "SOM", "x")
-
         # Convert k_i and k_f to Q
-        Q = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i_val, k_i_err2,
+        Q = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0], k_i[1],
                                                          k_f[0], k_f[1],
                                                          angle, angle_err2)
-
-        del k_i_val, k_i_err2
-
-        # Get E_t axis
-        E_t = hlr_utils.get_value(E_t_som, j, "SOM", "x")
 
         yval = hlr_utils.get_value(E_t_som, j, "SOM", "y")
         yerr2 = hlr_utils.get_err2(E_t_som, j, "SOM", "y")
 
-        yval = axis_manip.reverse_array_nc(yval)
-        yerr2 = axis_manip.reverse_array_nc(yerr2)
+        (yval, yerr2) = utils.linear_order_jacobian(l_i[0], Q[0],
+                                                    yval, yerr2)
 
         if run_fast:
-            common_lib.rebin_diagonal((yval, yerr2), (so_dim.y, so_dim.var_y),
-                                      Q[0], E_t,
-                                      so_dim.axis[0].val,
-                                      so_dim.axis[1].val)
+            y_2d = axis_manip.rebin_diagonal(Q[0], E_t, yval, yerr2,
+                                             so_dim.axis[0].val,
+                                             so_dim.axis[1].val)
+            
+            (so_dim.y, so_dim.var_y) = array_manip.add_ncerr(so_dim.y,
+                                                             so_dim.var_y,
+                                                             y_2d[0],
+                                                             y_2d[1])
+            
         else:
             y_2d = nessi_list.NessiList(y2d_len)
-            var_y_2d= nessi_list.NessiList(y2d_len)
+            var_y_2d = nessi_list.NessiList(y2d_len)
             
             for m in xrange(y_len):
                 y_2d[m * (y_len + 1)] = yval[m]
                 var_y_2d[m * (y_len + 1)] = yerr2[m]
                 
-                # Rebin both axes
-                y_2d_new = axis_manip.rebin_axis_2D(Q[0], E_t,
-                                                    y_2d, var_y_2d,
-                                                    so_dim.axis[0].val,
-                                                    so_dim.axis[1].val)
-                del y_2d, var_y_2d
-
-                # Add data 
-                (so_dim.y, so_dim.var_y) = array_manip.add_ncerr(so_dim.y,
-                                                                 so_dim.var_y,
-                                                                 y_2d_new[0],
-                                                                 y_2d_new[1])
+            # Rebin both axes
+            y_2d_new = axis_manip.rebin_axis_2D(Q[0], E_t,
+                                                y_2d, var_y_2d,
+                                                so_dim.axis[0].val,
+                                                so_dim.axis[1].val)
+            del y_2d, var_y_2d
+            
+            # Add data
+                
+            (so_dim.y, so_dim.var_y) = array_manip.add_ncerr(so_dim.y,
+                                                             so_dim.var_y,
+                                                             y_2d_new[0],
+                                                             y_2d_new[1])
 
     # Check for so_id keyword argument
     if kwargs.has_key("so_id"):
@@ -266,7 +274,6 @@ def create_E_vs_Q_igs(E_t_som, k_i_som, *args, **kwargs):
 
 if __name__ == "__main__":
     import hlr_test
-    import axis_manip
 
     som1 = hlr_test.generate_som("histogram", 1, 3)
     som1.attr_list["Wavelength_final"] = (1, 1)
@@ -292,6 +299,6 @@ if __name__ == "__main__":
     print "* ", som2[2]    
 
     print "********** create_E_vs_Q_igs"
-    print "* som: ", create_E_vs_Q_igs(som1, som2, som1[0].axis[0].val,
+    print "* som: ", create_E_vs_Q_igs(som1, som1[0].axis[0].val,
                                        x_axis_err, Q_axis, x_axis_err,
-                                       withXVar="True")
+                                       withXVar="True", fast=False)

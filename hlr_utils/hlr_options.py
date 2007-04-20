@@ -24,6 +24,8 @@
 
 import optparse
 
+import hlr_utils
+
 class BasicOptions(optparse.OptionParser):
     """
     This class provides a basic set of options for programs. It provides the
@@ -32,7 +34,8 @@ class BasicOptions(optparse.OptionParser):
     """
     
     def __init__(self, usage=None, option_list=None, option_class=None,
-                 version=None, **kwarg):
+                 version=None, conflict_handler='error', description=None,
+                 **kwarg):
         """
         Constructor for BasicOptions
 
@@ -45,7 +48,8 @@ class BasicOptions(optparse.OptionParser):
         """
         # parent constructor
         optparse.OptionParser.__init__(self, usage, option_list,
-                                       optparse.Option, version)
+                                       optparse.Option, version,
+                                       conflict_handler, description)
 
         # options for debug printing
         self.add_option("-v", "--verbose", action="store_true", dest="verbose",
@@ -61,6 +65,42 @@ class BasicOptions(optparse.OptionParser):
         # specifying data sets
         self.add_option("", "--data", help="Specify the data file")
 
+def BasicConfiguration(parser, configure, options, args):
+    """
+    This function sets the incoming Configure object with all the options that
+    have been specified via the BasicOptions object.
+
+    Parameters:
+    ----------
+    -> parser is the BasicOptions parser object unless from inherited class
+    -> configure is the Configure object
+    -> options is the parsed options from BasicOptions
+    -> args is the parsed arguments from BasicOptions
+    """
+
+    # Set the verbosity
+    configure.verbose = options.verbose
+
+    # Get the datafile name and check it
+    if options.data is not None:
+        configure.data = hlr_utils.determine_files(options.data,
+                                                   configure.inst,
+                                                   stop_on_none=True)
+    elif len(args) > 0:
+        configure.data = hlr_utils.determine_files(args, configure.inst,
+                                                   stop_on_none=True)
+    else:
+        parser.error("Did not specify a datafile")
+        
+    # Create the output file name if there isn't one supplied
+    if options.output:
+        configure.output = hlr_utils.fix_filename(options.output)
+    else:
+        import os
+        outfile = os.path.basename(configure.data[0])
+        path = os.path.join(os.getcwd(), outfile)
+        configure.output = hlr_utils.ext_replace(path, "nxs", "txt")
+        print "Using %s as output file" % configure.output
 
 class SNSOptions(BasicOptions):
     """
@@ -70,7 +110,8 @@ class SNSOptions(BasicOptions):
     """
     
     def __init__(self, usage=None, option_list=None, option_class=None,
-                 version=None, **kwargs):
+                 version=None, conflict_handler='error', description=None,
+                 **kwargs):
         """
         Constructor for SNSOptions
 
@@ -87,7 +128,7 @@ class SNSOptions(BasicOptions):
         """
         # parent constructor
         BasicOptions.__init__(self, usage, option_list, optparse.Option,
-                              version)
+                              version, conflict_handler, description)
 
         # check for keywords
         try:
@@ -121,3 +162,53 @@ class SNSOptions(BasicOptions):
 
         else:
             pass
+
+def SnsConfiguration(parser, configure, options, args, **kwargs):
+    """
+    This function sets the incoming Configure object with all the options that
+    have been specified via the SNSOptions object.
+
+    Parameters:
+    ----------
+    -> parser is the SNSOptions parser object unless from inherited class
+    -> configure is the Configure object
+    -> options is the parsed options from SNSOptions
+    -> args is the parsed arguments from SNSOptions
+    """
+
+    # Check for keywords
+    try:
+        instrument = kwargs["inst"]
+    except KeyError:
+        instrument = ""
+
+    # Define instrument short name first as stuff below depends on it
+    if options.inst is None:
+        import sns_inst_utils
+        configure.inst = sns_inst_utils.getInstrument()
+    else:
+        configure.inst = options.inst
+
+    # Call the configuration setter for BasicOptions
+    BasicConfiguration(parser, configure, options, args)
+
+    # Set the instrument geometry file
+    configure.inst_geom = hlr_utils.determine_files(options.inst_geom,
+                                                    one_file=True)
+
+    # Set the data paths
+    configure.data_paths = hlr_utils.create_data_paths(options.data_paths)
+
+    # Set the normalization file list
+    configure.norm = hlr_utils.determine_files(options.norm, configure.inst)
+
+    if instrument == "IGS":
+        # Set the empty can file list
+        configure.ecan = hlr_utils.determine_files(options.ecan,
+                                                   configure.inst)
+        # Set the background file list
+        configure.back = hlr_utils.determine_files(options.back,
+                                                   configure.inst)
+    else:
+        pass
+
