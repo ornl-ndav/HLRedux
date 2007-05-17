@@ -84,7 +84,7 @@ def process_igs_data(datalist, conf, **kwargs):
     if not conf.mc:
         so_axis = "time_of_flight"
     else:
-        so_axis = "Time_of_Flight__us_"
+        so_axis = "Time_of_Flight"
 
     if conf.verbose:
         print "Reading %s file" % dataset_type
