@@ -455,7 +455,7 @@ def get_map_so(obj1, obj2, index):
         return None
 
 def copy_som_attr(result, res_descr, obj1, obj1_descr,
-                  obj2=None, obj2_descr=None, force=1):
+                  obj2=None, obj2_descr=None, force=1, add_nxpars=False):
     """
     This function takes a result object and one or two other arbitrary
     objects and copies the attributes from the objects to the result object if
@@ -470,6 +470,8 @@ def copy_som_attr(result, res_descr, obj1, obj1_descr,
     -> obj2 (OPTIONAL) is SOM, SO or tuple
     -> obj2_descr (OPTIONAL) is the descriptor for the obj2 object
     -> force (OPTIONAL) is a flag that says which object to copy last
+    -> add_nxpars (OPTIONAL) is a flag that determines if NxParameters in the
+                             attribute list are added
 
     Returns:
     -------
@@ -481,14 +483,14 @@ def copy_som_attr(result, res_descr, obj1, obj1_descr,
 
     if force == 1:
         if obj2 is not None and obj2_descr == SOM_type:
-            result.copyAttributes(obj2)
+            result.copyAttributes(obj2, add_nxpars)
         if obj1_descr == SOM_type:
-            result.copyAttributes(obj1)
+            result.copyAttributes(obj1, add_nxpars)
     else:
         if obj1_descr == SOM_type:
-            result.copyAttributes(obj1)
+            result.copyAttributes(obj1, add_nxpars)
         if obj2 is not None and obj2_descr == SOM_type:
-            result.copyAttributes(obj2)
+            result.copyAttributes(obj2, add_nxpars)
 
     return result
 

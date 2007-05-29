@@ -46,6 +46,8 @@ def add_ncerr(left, right, **kwargs):
                                      length 1 SOM since the check is done
                                      before the arguments are swapped. The
                                      default value is 2.
+         add_nxpars=<boolean> This is a flag that will turn on code to add
+                              NxParameters in the two SOM's attribut lists.
 
     Returns:
     -------
@@ -117,6 +119,12 @@ def add_ncerr(left, right, **kwargs):
     except KeyError:
         axis_pos = 0
 
+    # Check for add_nxpars keyword argument
+    try:
+        add_nxpars_val = kwargs["add_nxpars"]
+    except KeyError:
+        add_nxpars_val = False
+
     if length_one_som:
         if length_one_som_pos == 1:
             result = hlr_utils.copy_som_attr(result, res_descr,
@@ -127,7 +135,8 @@ def add_ncerr(left, right, **kwargs):
                                              som_copy, "SOM")            
     else:
         result = hlr_utils.copy_som_attr(result, res_descr, left, l_descr,
-                                         right, r_descr)
+                                         right, r_descr,
+                                         add_nxpars=add_nxpars_val)
 
     # iterate through the values
     import array_manip

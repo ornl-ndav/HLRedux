@@ -77,9 +77,6 @@ def process_igs_data(datalist, conf, **kwargs):
     except KeyError:
         i_geom_dst = None
 
-    # Set output file names based on first file in list
-    main_data = datalist[0]
-        
     # Step 1: Open appropriate data files
     if not conf.mc:
         so_axis = "time_of_flight"
@@ -140,10 +137,12 @@ def process_igs_data(datalist, conf, **kwargs):
         dp_som1.attr_list[attr_name] = B
         file_comment = "TOFs: %s" % conf.tib_tofs
         
-        hlr_utils.write_file(main_data, "text/num-info", dp_som1,
+        hlr_utils.write_file(conf.output, "text/num-info", dp_som1,
                              output_ext="tib",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
+                             data_ext=conf.ext_replacement,
+                             path_replacement=conf.path_replacement,
                              message="time-independent background "\
                              +"information",
                              arguments=attr_name,
@@ -226,16 +225,20 @@ def process_igs_data(datalist, conf, **kwargs):
         t.getTime(msg="After converting TOF to wavelength ")
 
     if conf.dump_wave:
-        hlr_utils.write_file(main_data, "text/Spec", dp_som4,
+        hlr_utils.write_file(conf.output, "text/Spec", dp_som4,
                              output_ext="pxl",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
+                             data_ext=conf.ext_replacement,
+                             path_replacement=conf.path_replacement,
                              message="pixel wavelength information")
     if conf.dump_mon_wave:        
-        hlr_utils.write_file(main_data, "text/Spec", dm_som2,
+        hlr_utils.write_file(conf.output, "text/Spec", dm_som2,
                              output_ext="mxl",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
+                             data_ext=conf.ext_replacement,
+                             path_replacement=conf.path_replacement,
                              message="monitor wavelength information")
         
     del dp_som3, dm_som1
@@ -256,10 +259,12 @@ def process_igs_data(datalist, conf, **kwargs):
         t.getTime(msg="After efficiency correcting monitor ")
 
     if conf.dump_mon_effc and not conf.no_mon_effc:        
-        hlr_utils.write_file(main_data, "text/Spec", dm_som3,
+        hlr_utils.write_file(conf.output, "text/Spec", dm_som3,
                              output_ext="mel",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
+                             data_ext=conf.ext_replacement,
+                             path_replacement=conf.path_replacement,
                              message="monitor wavelength information "\
                              +"(efficiency)")
 
@@ -280,10 +285,12 @@ def process_igs_data(datalist, conf, **kwargs):
     del dm_som3
 
     if conf.dump_mon_rebin:        
-        hlr_utils.write_file(main_data, "text/Spec", dm_som4,
+        hlr_utils.write_file(conf.output, "text/Spec", dm_som4,
                              output_ext="mrl",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
+                             data_ext=conf.ext_replacement,
+                             path_replacement=conf.path_replacement,
                              message="monitor wavelength information "\
                              +"(rebinned)")
 
@@ -305,10 +312,12 @@ def process_igs_data(datalist, conf, **kwargs):
     if conf.dump_wave_mnorm:
         dp_som5_1 = dr_lib.sum_all_spectra(dp_som5,
                                            rebin_axis=conf.lambda_bins)
-        hlr_utils.write_file(main_data, "text/Spec", dp_som5_1,
+        hlr_utils.write_file(conf.output, "text/Spec", dp_som5_1,
                              output_ext="pml",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
+                             data_ext=conf.ext_replacement,
+                             path_replacement=conf.path_replacement,
                              message="combined pixel wavelength information "\
                              +"(monitor normalized)")
         del dp_som5_1

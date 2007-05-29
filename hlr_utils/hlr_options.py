@@ -60,7 +60,13 @@ class BasicOptions(optparse.OptionParser):
                         help="Disable verbose print statements")
         
         # output options
-        self.add_option("-o", "--output", help="Specify the output file name")
+        self.add_option("-o", "--output", help="Specify a new output file "\
+                        +"name, a new data directory or a new directory plus "\
+                        +"output file name. The new directory must exist. "\
+                        +"All intermediate files will be based off of the "\
+                        +"provided file name. The default is to use the "\
+                        +"current working directory and the first data file "\
+                        +"as the basis for the output file names.")
 
         # specifying data sets
         self.add_option("", "--data", help="Specify the data file")
@@ -92,14 +98,50 @@ def BasicConfiguration(parser, configure, options, args):
     else:
         parser.error("Did not specify a datafile")
         
-    # Create the output file name if there isn't one supplied
+
+    import os
+    # Deal with file or directory from output option
     if options.output:
-        configure.output = hlr_utils.fix_filename(options.output)
+        filepath = hlr_utils.fix_filename(options.output)
+        if os.path.exists(filepath):
+            if os.path.isdir(filepath):
+                outfile = os.path.basename(configure.data[0])
+                path = os.path.join(filepath, outfile)
+                configure.output = hlr_utils.ext_replace(path, "nxs", "txt")
+                configure.path_replacement = filepath
+                configure.ext_replacement = "txt"
+
+            elif os.path.isfile(filepath):
+                configure.output = filepath
+                configure.path_replacement = os.path.dirname(filepath)
+                configure.ext_replacement = filepath.split('.')[-1]
+
+            else:
+                parser.error("Cannot handle %s in output option" % filepath)
+        else:
+            # Assume that this is a file and hope that the directory exists
+            directory = os.path.dirname(filepath)
+            if directory != "":
+                if not os.path.exists(directory):
+                    raise RuntimeError("The directory %s must exist!" \
+                                       % directory)
+                else:
+                    pass
+            else:
+                directory = None
+            configure.output = filepath
+            configure.path_replacement = directory
+            configure.ext_replacement = filepath.split('.')[-1]
+            
+    # Create the output file name if there isn't one supplied
     else:
-        import os
         outfile = os.path.basename(configure.data[0])
         path = os.path.join(os.getcwd(), outfile)
         configure.output = hlr_utils.ext_replace(path, "nxs", "txt")
+        configure.path_replacement = None
+        configure.ext_replacement = "txt"
+
+    if configure.verbose:
         print "Using %s as output file" % configure.output
 
 class SNSOptions(BasicOptions):

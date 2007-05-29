@@ -37,7 +37,7 @@ from hlr_subtract_bkg_from_data import *
 from hlr_subtract_time_indep_bkg import *
 from hlr_sum_all_spectra import *
 
-from version import version as __version__
+from HLR_version import version as __version__
 
 #version
 __id__ = "$Id$"

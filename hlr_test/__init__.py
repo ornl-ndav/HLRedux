@@ -22,6 +22,6 @@
 
 from test_helpers import *
 
-from version import version as __version__
+from HLR_version import version as __version__
 
 __id__ = "$Id$"

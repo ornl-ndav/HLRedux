@@ -67,8 +67,10 @@ def run(config, tim):
 
     if config.dump_specular:
         d_som1_1 = dr_lib.sum_all_spectra(d_som1)
-        hlr_utils.write_file(config.data[0], "text/Spec", d_som1_1,
+        hlr_utils.write_file(config.output, "text/Spec", d_som1_1,
                              output_ext="sdc", verbose=config.verbose,
+                             data_ext=config.ext_replacement,
+                             path_replacement=config.path_replacement,
                              message="combined specular TOF information")
         del d_som1_1
 
@@ -81,8 +83,10 @@ def run(config, tim):
         tim.getTime(msg="After background determination")
 
     if not config.no_bkg and config.dump_bkg:
-        hlr_utils.write_file(config.data[0], "text/Spec", B,
+        hlr_utils.write_file(config.output, "text/Spec", B,
                              output_ext="bkg", verbose=config.verbose,
+                             data_ext=config.ext_replacement,
+                             path_replacement=config.path_replacement,
                              message="combined background TOF information")
 
     del b_som1
@@ -142,8 +146,10 @@ def run(config, tim):
 
     if config.dump_norm and nd_som1 is not None:
         nd_som1_1 = dr_lib.sum_all_spectra(nd_som1)
-        hlr_utils.write_file(config.data[0], "text/Spec", nd_som1_1,
+        hlr_utils.write_file(config.output, "text/Spec", nd_som1_1,
                              output_ext="nom", verbose=config.verbose,
+                             data_ext=config.ext_replacement,
+                             path_replacement=config.path_replacement,
                              message="combined normalization TOF information")
         del nd_som1_1
 
@@ -164,8 +170,10 @@ def run(config, tim):
         tim.getTime(msg="After normalization background determination")
 
     if not config.no_norm_bkg and B_n is not None and config.dump_norm_bkg:
-        hlr_utils.write_file(config.data[0], "text/Spec", B_n,
+        hlr_utils.write_file(config.output, "text/Spec", B_n,
                              output_ext="bnm", verbose=config.verbose,
+                             data_ext=config.ext_replacement,
+                             path_replacement=config.path_replacement,
                              message="combined normalization background TOF "\
                              +"information")
 
@@ -239,13 +247,16 @@ def run(config, tim):
         d_som5.attr_list["detector_angle"] = config.det_angle
 
     hlr_utils.write_file(config.output, "text/Spec", d_som5, replace_ext=False,
+                         replace_path=False,
                          verbose=config.verbose,
                          message="combined Reflectivity information")
 
     d_som5.attr_list["config"] = config
 
-    hlr_utils.write_file(config.data[0], "text/rmd", d_som5,
+    hlr_utils.write_file(config.output, "text/rmd", d_som5,
                          output_ext="rmd", verbose=config.verbose,
+                         data_ext=config.ext_replacement,
+                         path_replacement=config.path_replacement,
                          message="metadata")
 
     if tim is not None:
@@ -265,6 +276,7 @@ if __name__ == "__main__":
                                   inst="REF")
 
     # Defaults for REF
+    parser.set_defaults(inst="REF_M")
     parser.set_defaults(data_paths="/entry/bank1,1")
 
     # Add REF specific options
@@ -339,35 +351,10 @@ if __name__ == "__main__":
     
     # set up the configuration
     configure = hlr_utils.Configure()
+
+    # Call the configuration setter for SNSOptions
+    hlr_utils.SnsConfiguration(parser, configure, options, args)
     
-    # get the datafile name and check it
-    if options.data is not None:
-        configure.data = hlr_utils.determine_files(options.data, "REF_M",
-                                                   stop_on_none=True)
-    elif len(args) > 0:
-        configure.data = hlr_utils.determine_files(args, "REF_M",
-                                                   stop_on_none=True)
-    else:
-        parser.error("Did not specify a datafile")
-
-    # create the output file name if there isn't one supplied
-    if options.output is not None:
-        configure.output = options.output
-    else:
-        outfile = os.path.basename(configure.data[0])
-        path = os.path.join(os.getcwd(), outfile)
-        configure.output = hlr_utils.ext_replace(path, "nxs", "txt")
-        print "Using %s as output file" % configure.output
-
-    # set the verbosity
-    configure.verbose = options.verbose
-
-    # get normalization files
-    configure.norm = hlr_utils.determine_files(options.norm, "REF_M")    
-
-    configure.inst_geom = hlr_utils.determine_files(options.inst_geom,
-                                                    one_file=True)
-
     # get the data path for the signal ROI file
     configure.signal_roi_file = hlr_utils.determine_files(\
        options.signal_roi_file,
@@ -393,9 +380,6 @@ if __name__ == "__main__":
        one_file=True)
     else:
         configure.norm_bkg_roi_file = configure.bkg_roi_file
-
-    # set the data paths
-    configure.data_paths = hlr_utils.create_data_paths(options.data_paths)
 
     if options.det_angle is not None:
         configure.det_angle = hlr_utils.split_values(options.det_angle)

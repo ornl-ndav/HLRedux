@@ -44,7 +44,7 @@ from hlr_wavelength_to_scalar_k import *
 from hlr_wavelength_to_scalar_Q import *
 from hlr_weighted_average import *
 
-from version import version as __version__
+from HLR_version import version as __version__
 
 #version
 __id__ = "$Id$"

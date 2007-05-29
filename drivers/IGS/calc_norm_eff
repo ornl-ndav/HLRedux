@@ -115,8 +115,10 @@ def run(config, tim):
     file_comment = "Integration range: %0.3f, %0.3f" % (config.norm_start,
                                                         config.norm_end)
 
-    hlr_utils.write_file(config.data[0], "text/num-info", n_som3,
+    hlr_utils.write_file(config.output, "text/num-info", n_som3,
                          output_ext="norm",
+                         data_ext=config.ext_replacement,
+                         path_replacement=config.path_replacement,
                          verbose=config.verbose,
                          message="normalization values",
                          arguments="normalization_int",

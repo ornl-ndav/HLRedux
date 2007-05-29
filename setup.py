@@ -35,7 +35,7 @@ import distutils.sysconfig
 import getopt
 import os
 import sys
-from version import version as __version__
+from HLR_version import version as __version__
 
 # Package name and version information
 PACKAGE = "HLRedux"

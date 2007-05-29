@@ -118,6 +118,7 @@ def add_files(filelist, **kwargs):
         if counter == 0:
             d_som1 = data_dst.getSOM(data_paths, so_axis,
                                      roi_file=signal_roi)
+            d_som1.rekeyNxPars(dataset_type)
 
             if verbose:
                 print "# Signal SO:",len(d_som1)
@@ -126,6 +127,8 @@ def add_files(filelist, **kwargs):
             if bkg_roi is not None:
                 b_som1 = data_dst.getSOM(data_paths, so_axis,
                                          roi_file=bkg_roi)
+                b_som1.rekeyNxPars(dataset_type)
+                
                 if verbose:
                     print "# Background SO:",len(b_som1)
 
@@ -138,17 +141,20 @@ def add_files(filelist, **kwargs):
         else:
             d_som_t = data_dst.getSOM(data_paths, so_axis,
                                       roi_file=signal_roi)
+            d_som_t.rekeyNxPars(dataset_type)
+
             if bkg_roi is not None:
                 b_som_t = data_dst.getSOM(data_paths, so_axis,
                                           roi_file=bkg_roi)
+                b_som_t.rekeyNxPars(dataset_type)
             else:
                 b_som_t = None
             if timer is not None:
                 timer.getTime(msg="After reading data")
 
-            d_som1 = common_lib.add_ncerr(d_som_t, d_som1)
+            d_som1 = common_lib.add_ncerr(d_som_t, d_som1, add_nxpars=True)
             if bkg_roi is not None:
-                b_som1 = common_lib.add_ncerr(b_som_t, b_som1)
+                b_som1 = common_lib.add_ncerr(b_som_t, b_som1, add_nxpars=True)
 
             if timer is not None:
                 timer.getTime(msg="After adding spectra")

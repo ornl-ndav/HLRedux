@@ -28,7 +28,7 @@ from hlr_options import *
 from hlr_data_helper import *
 from hlr_driver_helper import *
 
-from version import version as __version__
+from HLR_version import version as __version__
 
 #version
 __id__ = "$Id$"

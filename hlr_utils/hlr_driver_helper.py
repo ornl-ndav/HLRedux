@@ -324,6 +324,10 @@ def write_file(filename, dst_type, data, **kwargs):
                       path on the incoming filename is replaced with the
                       directory where the driver is running. The default
                       behavior is True (replace path)
+          path_replacement=<string> This is a directory path that will be
+                           prepended to the output filename. The default value
+                           is None and will cause the working directory to be
+                           the prepended path.
           extra_tag=<string> This is a tag that will be inserted into the file
                              name just before the file extension.
        NOTE: Extra keyword arguments can be passed onto the DST instance via
@@ -362,6 +366,11 @@ def write_file(filename, dst_type, data, **kwargs):
         replace_path = True
 
     try:
+        path_replacement = kwargs["path_replacement"]
+    except KeyError:
+        path_replacement = None       
+
+    try:
         replace_ext = kwargs["replace_ext"]
     except KeyError:
         replace_ext = True        
@@ -377,7 +386,11 @@ def write_file(filename, dst_type, data, **kwargs):
         arguments = None
 
     if replace_path:
-        fixed_filename = os.path.join(os.getcwd(), os.path.basename(filename))
+        if path_replacement is None:
+            path_replacement = os.getcwd()
+            
+        fixed_filename = os.path.join(path_replacement,
+                                      os.path.basename(filename))
     else:
         fixed_filename = filename
 
@@ -645,7 +658,7 @@ def program_version():
     <- A string containing a place holder for the program name and the
        version string
     """
-    from version import version as __version__
+    from HLR_version import version as __version__
     
     ver_tag = []
     ver_tag.append("%prog")
