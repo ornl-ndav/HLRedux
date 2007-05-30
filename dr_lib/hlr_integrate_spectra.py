@@ -39,13 +39,8 @@ def integrate_spectra(obj, **kwargs):
     
     Return:
     ------
-    <- A tuple (for a SO) or a list of tuples (for a SOM) containing the
-       integration and the uncertainty squared associated with the integration
-
-    Exceptions:
-    ----------
-    <- TypeError is raised if a tuple or another construct (besides a SOM or
-       SO) is passed to the function
+    <- SOM or a SO containing the integration and the uncertainty squared
+       associated with the integration
     """
 
     # import the helper functions
@@ -55,15 +50,11 @@ def integrate_spectra(obj, **kwargs):
         return obj
 
     # set up for working through data
-    # This time highest object in the hierarchy is NOT what we need
-    result = []
-    if(hlr_utils.get_length(obj) > 1):
-        res_descr = "list"
-    else:
-        res_descr = "number"
+    (result, res_descr) = hlr_utils.empty_result(obj)
 
     o_descr = hlr_utils.get_descr(obj)
-
+    result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
+    
     # If the integration start bound is not given, assume the 1st bin
     try:
         i_start = kwargs["start"]
@@ -102,10 +93,9 @@ def integrate_spectra(obj, **kwargs):
             print "Range not found:", obj1.id, b_start, b_end, len(obj1)
             value = (float('nan'), float('nan'))
 
-        hlr_utils.result_insert(result, res_descr, value, None, "all")
+        hlr_utils.result_insert(result, res_descr, value, obj1, "yonly")
 
-    import copy
-    return copy.deepcopy(result)
+    return result
 
 if __name__ == "__main__":
     import hlr_test
