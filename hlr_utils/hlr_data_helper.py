@@ -113,7 +113,7 @@ def result_insert(result, descr, value, map_so, axis="y", pap=0, xvals=None):
         if map_so is not None:
             so = SOM.SO(map_so.dim())
             
-        if axis.lower() == "y":
+        if axis.lower() == "y" or axis.lower() == "yonly":
             result_insert(so, None, value, map_so, axis, pap, xvals)
             result.append(so)
         elif axis.lower() == "x":
@@ -127,11 +127,12 @@ def result_insert(result, descr, value, map_so, axis="y", pap=0, xvals=None):
                 result.append(value)
                 
     elif result_type == SO_type:
-        if axis.lower() == "y":
+        if axis.lower() == "y" or axis.lower() == "yonly":
             result.y = value[0]
             result.var_y = value[1]
             result.id = map_so.id
-            result.axis = copy.deepcopy(map_so.axis)
+            if not axis.lower() == "yonly":
+                result.axis = copy.deepcopy(map_so.axis)
 
         elif axis.lower() == "x":
             result.id = map_so.id
