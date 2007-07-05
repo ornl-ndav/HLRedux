@@ -24,41 +24,53 @@
 
 def add_files(filelist, **kwargs):
     """
-    This function takes a list of NeXus files and various keyword arguments
-    and returns a data SOM and a background SOM (if requested) that is the
-    sum of all the data from the specified files. It is assumed that the files
-    contain similar data as only crude cross-checks will be made. You have
-    been warned.
+    This function takes a list of U{NeXus<www.nexusformat.org>} files and
+    various keyword arguments and returns a data C{SOM} and a background C{SOM}
+    (if requested) that is the sum of all the data from the specified files.
+    B{It is assumed that the files contain similar data as only crude
+    cross-checks will be made. You have been warned.}
 
-    Parameters:
-    ----------
-    -> filelist is a Python list containing the names of the files to sum
-    -> kwargs is a list of key word arguments that the function accepts:
-       SO_Axis=<string> This is the name of the main axis to read from the
-                        NeXus file
-       Data_Paths=<tuple> This is a tuple of tuples that contain the data
-                          paths and signals for the requested detector banks
-       Signal_ROI=<filename> This is the name of a file that contains a list
-                             of pixel IDs that will be read from the data file
-                             and stored as a signal SOM
-       Bkg_ROI=<filename> This is the name of a file that contains a list
-                          of pixel IDs that will be read from the data file
-                          and stored as a background SOM
-       dataset_type=<string> is the practical name of the dataset being
-                             processed. The default value is data.
-       Verbose=<boolean> This is a flag to turn on print statments. The
-                         default is False
-       Timer=<timer object> This is an SNS Timer object used for showing the
-                            performance timing in the function
+    @param filelist: A list containing the names of the files to sum
+    @type filelist: C{list}
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
+    
+    @keyword SO_Axis: This is the name of the main axis to read from the NeXus
+                      file
+    @type SO_Axis: C{string}
+    
+    @keyword Data_Paths: This contains the data paths and signals for the
+                         requested detector banks
+    @type Data_Paths: C{tuple} of C{tuple}s
+    
+    @keyword Signal_ROI: This is the name of a file that contains a list of
+                         pixel IDs that will be read from the data file and
+                         stored as a signal C{SOM}
+    @type Signal_ROI: C{string}
+    
+    @keyword Bkg_ROI: This is the name of a file that contains a list of pixel
+                      IDs that will be read from the data file and stored as a
+                      background C{SOM}
+    @type Bkg_ROI: C{string}
+    
+    @keyword dataset_type: The practical name of the dataset being processed.
+                           The default value is I{data}.
+    @type dataset_type: C{string}
+    
+    @keyword Verbose: This is a flag to turn on print statments. The default is
+                      I{False}.
+    @type Verbose: C{boolean}
+    
+    @keyword Timer: This is an SNS Timer object used for showing the
+                    performance timing in the function.
+    @type Timer: C{sns_timing.Timer}
 
-    Returns:
-    -------
-    <- A data SOM
-    <- A background SOM or None if background is not requested
 
-    Exceptions:
-    ----------
-    <- System exit if any file cannot be read
+    @return: Signal C{SOM.SOM} and background C{SOM.SOM}
+    @rtype: C{tuple}
+
+    
+    @raise SystemExit: If any file cannot be read
     """
     import sys
 

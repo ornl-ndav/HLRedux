@@ -26,35 +26,41 @@ import hlr_utils
 
 def sum_all_spectra(obj, **kwargs):
     """
-    This function takes all the SOs in a SOM and sums them together using the
-    summing by weights concept. All of the SOs are assumed to have the same
-    axis scale.
+    This function takes all the spectra in the given object and sums them
+    together. All of the sprectra are assumed to have the same axis scale.
     
-    Parameters:
-    ----------
-    -> obj is a SOM in which all of the SOs are to be summed together
-    -> kwargs is a list of keyword arguments that the function accepts
-       rebin_axis=<object> is a NessiList or a list of NessiLists containing
-                           the axes to rebin the spectra onto.
-       rebin_axis_dim=<int> is the dimension on the spectra being rebinned.
-                            The default value is 1.
-       y_sort=<boolean> is a flag that will sort the SO IDs by y. The default
-                        behavior is False and this maintains the original x
-                        ordering.
-       stripe=<boolean> is a flag that will combine spectra in either the x or
-                        or y direction at a given y or x. The integration
-                        direction is based on the setting of y_sort. The
-                        default behavior is False and corresponds to summing
-                        all spectra into one.
+    @param obj: Object in which all of the spectra are to be summed together
+    @type obj: C{SOM.SOM}
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
+    
+    @keyword rebin_axis: The axis(es) to rebin the spectra onto.
+    @type rebin_axis: C{nessi_list.NessiList} or C{list} of
+                      C{nessi_list.NessiList}s
+                      
+    @keyword rebin_axis_dim: Tthe dimension on the spectra being rebinned.
+                             The default value is I{1}.
+    @type rebin_axis_dim: C{int}
+    
+    @keyword y_sort: A flag that will sort the spectrum IDs by y. The default
+                     behavior is I{False} and this maintains the original x
+                     ordering.
+    @type y_sort: C{boolean}
+    
+    @keyword stripe: A flag that will combine spectra in either the x or y
+                     direction at a given y or x. The integration direction is
+                     based on the setting of y_sort. The default behavior is
+                     I{False} and corresponds to summing all spectra into one.
+    @type stripe: C{boolean}
 
-    Returns:
-    -------
-    <- A SOM containing a single spectrum
 
-    Exceptions:
-    ----------
-    <- TypeError is raised if anything other than a SOM is given
-    <- RuntimeError is raised if an unknown rebinning dimension is given
+    @return: Object containing a single spectrum
+    @rtype: C{SOM.SOM}
+    
+    
+    @raise TypeError: Anything other than a C{SOM} is given
+    
+    @raise RuntimeError: An unknown rebinning dimension is given
     """
 
     o_descr = hlr_utils.get_descr(obj)

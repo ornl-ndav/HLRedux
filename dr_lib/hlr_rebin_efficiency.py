@@ -24,31 +24,40 @@
 
 def rebin_efficiency(obj1, obj2, **kwargs):
     """
-    This function takes two SOMs or two SOs and rebins the data for obj1 onto
-    the axis provided by obj2. The units on the x-axes needs to be Angstroms,
-    since this is what the efficiencies will be present as.
+    This function takes two objects and rebins the data for obj1 onto the axis
+    provided by obj2. The units on the x-axes needs to be I{Angstroms}, since
+    this is what the efficiencies will be present as.
 
-    Parameters:
-    ----------
-    -> obj1 is a SOM or SO that will be rebinned
-    -> obj2 is a SOM or SO that will provide the axis for rebinning
-    -> kwargs is a list of key word arguments that the function accepts:
-          units= a string containing the expected units for this function.
-                 The default for this function is Angstroms
+    @param obj1: Object that will be rebinned
+    @type obj1: C{SOM.SOM} or C{SOM.SO}
+    
+    @param obj2: Object that will provide the axis for rebinning
+    @type obj2: C{SOM.SOM} or C{SOM.SO}
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
+    
+    @keyword units: The expected units for this function. The default for this
+                    function is I{Angstroms}.
+    @type units: C{string}
 
-    Returns:
-    -------
-    <- A SOM or SO that has been rebinned
 
-    Exceptions:
-    ----------
-    <- TypeError is raised if the SOM-SO operation is attempted
-    <- TypeError is raised if the SO-SOM operation is attempted
-    <- TypeError is raised is obj1 not a SOM or SO
-    <- TypeError is raised is obj2 not a SOM or SO
-    <- IndexError is raised if the SOMs do not have the same number of SOs
-    <- RuntimeError is raised if the SOM x-axis units are not Angstroms
-    <- RuntimeError is raised if the x-axis units of the SOMs do not match
+    @return: Object that has been rebinned
+    @rtype: C{SOM.SOM} or C{SOM.SO}
+
+
+    @raise TypeError: The C{SOM}-C{SO} operation is attempted
+    
+    @raise TypeError: The C{SO}-C{SOM} operation is attempted
+    
+    @raise TypeError: obj1 not a C{SOM} or C{SO}
+    
+    @raise TypeError: obj2 not a C{SOM} or C{SO}
+    
+    @raise IndexError: The C{SOM}s do not have the same number of C{SO}s
+    
+    @raise RuntimeError: The C{SOM} x-axis units are not I{Angstroms}
+    
+    @raise RuntimeError: The x-axis units of the C{SOM}s do not match
     """
 
     # import the helper functions
@@ -78,7 +87,7 @@ def rebin_efficiency(obj1, obj2, **kwargs):
         units = "Angstroms"
    
     if o1_descr == "SOM" and o2_descr == "SOM":
-        hlr_utils.hlr_math_compatible(obj1, o1_descr, obj2, o2_descr)
+        hlr_utils.math_compatible(obj1, o1_descr, obj2, o2_descr)
     # If both objects are not SOMs, do nothing
     else:
         pass
@@ -86,7 +95,7 @@ def rebin_efficiency(obj1, obj2, **kwargs):
     result = hlr_utils.copy_som_attr( result, res_descr, obj2, o2_descr)
 
     if res_descr == "SOM":
-        result = hlr_utils.hlr_force_units(result, units)
+        result = hlr_utils.force_units(result, units)
     # Can't force units on anything other than a SOM
     else:
         pass

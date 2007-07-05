@@ -24,41 +24,54 @@
 
 def sumw_ncerr(obj1, obj2, **kwargs):
     """
-    This function sums by weighting errors of two objects (SOM or SO) and
-    returns the result of that action in an SOM. The function does not
-    handle the cases of SOM+tuple, SO+tuple or tuple+tuple.
+    This function sums by weighting errors of two objects (C{SOM} or C{SO}) and
+    returns the result of that action in an C{SOM}. The function does not
+    handle the cases of C{SOM}+C{tuple}, C{SO}+C{tuple} or C{tuple}+C{tuple}.
 
-    Parameters:
-    ----------
-    -> obj1  First object in the weighted sum
-    -> obj2  Second object in the the weighted sum
-    -> kwargs is a list of key word arguments that the function accepts:
-         axis=<y or x> This is the axis one wishes to manipulate. If no
-               argument is given the default value is y
-         axis_pos=<number> This is position of the axis in the axis array. If
-                  no argument is given, the default value is 0
-         length_one_som=<boolean> This is a flag that lets the function know
-                                  it is dealing with a length 1 SOM so that
-                                  attributes may be passed along. The length
-                                  1 SOM will be turned into a SO. The default
-                                  value is False.
-         length_one_som_pos=<1 or 2> This is the argument position of the
-                                     length 1 SOM since the check is done
-                                     before the arguments are swapped. The
-                                     default value is 2.
+    @param obj1:  First object in the weighted sum
+    @type obj1: C{SOM.SOM} or C{SOM.SO} or C{tuple}
+    
+    @param obj2: Second object in the the weighted sum
+    @type obj2: C{SOM.SOM} or C{SOM.SO} or C{tuple}
 
-    Returns:
-    -------
-    <- A SOM or SO containing the results of the weighted sum
+    @param kwargs: A list of keyword arguments that the function accepts:
+    
+    @keyword axis: This is the axis one wishes to manipulate. If no argument
+                   is given the default value is y
+    @type axis: C{string}=<y or x>
+    
+    @keyword axis_pos: This is position of the axis in the axis array. If no
+                       argument is given, the default value is 0
+    @type axis_pos: C{int}
+    
+    @keyword length_one_som: This is a flag that lets the function know it is
+                             dealing with a length 1 C{SOM} so that attributes
+                             may be passed along. The length 1 C{SOM} will be
+                             turned into a C{SO}. The default value is False.
+    @type length_one_som: C{boolean}
+    
+    @keyword length_one_som_pos: This is the argument position of the
+                                 length 1 C{SOM} since the check is done
+                                 before the arguments are swapped. The default
+                                 value is 2.
+    @type length_one_som_pos: C{int}=<1 or 2>
+    
 
-    Exceptions:
-    ----------
-    <- TypeError is raised if the tuple/tuple case is presented to the function
-    <- IndexError is raised if the two SOMs do not contain the same number
-       of spectra
-    <- RunTimeError is raised if the x-axis units of the SOMs do not match
-    <- RunTimeError is raised if the y-axis units of the SOMs do not match
-    <- RunTimeError is raised if the x-axes of the two SOs are not equal
+    @return: Object containing the results of the addition
+    @rtype: C{SOM.SOM} or C{SOM.SO}
+
+
+    @raise TypeError: The C{SOM}+C{tuple}, C{SO}+C{tuple} or C{tuple}+C{tuple}
+                      cases are presented to the function
+    
+    @raise IndexError: The two C{SOM}s do not contain the same number of
+                       spectra
+                       
+    @raise RunTimeError: The x-axis units of the C{SOM}s do not match
+    
+    @raise RunTimeError: The y-axis units of the C{SOM}s do not match
+    
+    @raise RunTimeError: The x-axes of the two C{SO}s are not equal
     """
     
     # import the helper functions
@@ -100,7 +113,7 @@ def sumw_ncerr(obj1, obj2, **kwargs):
         (obj1, obj2) = hlr_utils.swap_args(obj1, obj2)
         (o1_descr, o2_descr) = hlr_utils.swap_args(o1_descr, o2_descr)
     elif o2_descr == "SOM" and o1_descr == "SOM":
-        hlr_utils.hlr_math_compatible(obj1, o1_descr, obj2, o2_descr)
+        hlr_utils.math_compatible(obj1, o1_descr, obj2, o2_descr)
     else:
         pass
 
@@ -140,7 +153,7 @@ def sumw_ncerr(obj1, obj2, **kwargs):
         
         (descr_1, descr_2) = hlr_utils.get_descr(val1, val2)
 
-        hlr_utils.hlr_math_compatible(val1, descr_1, val2, descr_2)
+        hlr_utils.math_compatible(val1, descr_1, val2, descr_2)
 
         value = array_manip.sumw_ncerr(val1, err2_1, val2, err2_2)
         

@@ -24,20 +24,22 @@
 
 def feff_correct_mon(obj, **kwargs):
     """
-    This function takes in a monitor SOM, calculates efficiencies based on
+    This function takes in a monitor spectra, calculates efficiencies based on
     the montior's wavelength axis and divides the monitor counts by the
-    calculated efficiencies. The function is a constant * wavelength.
+    calculated efficiencies. The function is a M{constant * wavelength}.
 
-    Parameters:
-    ----------
-    -> obj is a SOM or SO containing monitor spectra
-    -> kwargs is a list of key word arguments that the function accepts:
-           units= a string containing the expected units for this function.
-                  The default for this function is Angstroms
+    @param obj: Object containing monitor spectra
+    @type obj: C{SOM.SOM} or C{SOM.SO}
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
+    
+    @keyword units: The expected units for this function. The default for this
+                    function is I{Angstroms}.
+    @type units: C{string}
                   
-    Returns:
-    -------
-    <- Efficiency corrected monitor SOM or SO
+    
+    @return: Efficiency corrected monitor spectra
+    @rtype: C{SOM.SOM} or C{SOM.SO}
     """
     
     # import the helper functions
@@ -59,7 +61,7 @@ def feff_correct_mon(obj, **kwargs):
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
     if o_descr == "SOM":
-        axis = hlr_utils.hlr_1D_units(obj, units)
+        axis = hlr_utils.one_d_units(obj, units)
     else:
         axis = 0
 

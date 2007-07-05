@@ -24,25 +24,27 @@
 
 def rebin_axis_2D(obj, axis1_out, axis2_out):
     """
-    This function rebins two primary axes for a SOM or a SO based on the
-    given NessiList axis1 and axis2.
+    This function rebins two primary axes for a C{SOM} or a C{SO} based on the
+    given C{NessiList} axis1 and axis2.
 
-    Parameters:
-    ----------
-    -> obj is the SOM or SO to be rebinned
-    -> axis1_out is a NessiList containing the 1st axis to rebin the SOM or SO
-       to
-    -> axis2_out is a NessiList containing the 2nd axis to rebin the SOM or SO
-       to
+    @param obj: Object to be rebinned
+    @type obj: C{SOM.SOM} or C{SOM.SO}
 
-    Returns:
-    -------
-    <- A SOM or SO that has been rebinned according to the provided axis
+    @param axis1_out: The 1st axis to rebin the C{SOM} or C{SO} to
+    @type axis1_out: C{NessiList}
 
-    Exceptions:
-    ----------
-    <- TypeError is raised if the rebinning axis given is not a NessiList
-    <- TypeError is raised if object being rebinned is not a SOM or a SO
+    @param axis2_out: The 2nd axis to rebin the C{SOM} or C{SO} to
+    @type axis2_out: C{NessiList}
+
+
+    @return: Object that has been rebinned according to the provided axes
+    @rtype: C{SOM.SOM} or C{SOM.SO}
+
+
+    @raise TypeError: The rebinning axis given is not a C{NessiList}
+    
+    @raise TypeError: The object being rebinned is not a C{SOM} or a C{SO}
+
     """
     
     # import the helper functions

@@ -24,28 +24,39 @@
 
 def integrate_axis(obj, **kwargs):
     """
-    This function takes a SOM or a SO and integrates the given axis. The
-    function assumes that the incoming data is in the histogram form.
+    This function takes a spectrum and integrates the given axis. The function
+    assumes that the incoming data is in the histogram form.
 
-    Parameters:
-    ----------
-    -> obj is a SOM or a SO
-    -> kwargs is a list of key word arguments that the function accepts:
-         start=<index of starting bin>
-         end=<index of ending bin> This index is made inclusive by the
-             function.
-         axis=<y or x> This is the axis one wishes to manipulate. If no
-              argument is given the default value is y
-         axis_pos=<number> This is position of the axis in the axis array. If
-                  no argument is given, the default value is 0
+    @param obj: Spectrum to be integrated
+    @type obj: C{SOM.SOM} or C{SOM.SO}
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
+    
+    @keyword start: Index of the starting bin
+    @type start: C{int}
+    
+    @keyword end: Index of the ending bin. This index is made inclusive by the
+                  function.
+    @type end: C{int}
+    
+    @keyword axis: This is the axis one wishes to manipulate. If no argument is
+                   given the default value is I{y}.
+    @type axis: C{string}=<y or x>
+    
+    @keyword axis_pos: This is position of the axis in the axis array. If no
+    argument is given, the default value is I{0}.
+    @type axis_pos: C{int}
+    
+    @keyword avg: This allows the function to calculate a geometrical average.
+    The default value is I{False}.
+    @type avg: C{boolean}
 
-    Returns:
-    -------
-    <- A tuple containing the integration value and its associated error
 
-    Exceptions:
-    ----------
-    <- RuntimError is raised if a SOM or SO is not given to the function
+    @return: The integration value and its associated error
+    @rtype: C{tuple}
+
+    
+    @raise RuntimError: A C{SOM} or C{SO} is not given to the function.
     """
 
     # import the helper functions
@@ -88,11 +99,18 @@ def integrate_axis(obj, **kwargs):
     except KeyError:
         axis_pos = 0
 
+    # Check for avg keyword argument
+    try:
+        avg = kwargs["avg"]
+    except KeyError:
+        avg = False
+        
     integration = 0
     integration_error2 = 0
 
-    for i in xrange(hlr_utils.get_length(obj)):
-    
+    for i in xrange(hlr_utils.get_length(obj)): 
+        counter = 0  
+
         value = hlr_utils.get_value(obj, i, o_descr, axis, axis_pos)
         error = hlr_utils.get_err2(obj, i, o_descr, axis, axis_pos)
 
@@ -108,9 +126,13 @@ def integrate_axis(obj, **kwargs):
         for i in xrange(value_len):
             integration += value[i]
             integration_error2 += error[i]
-            
-    return (integration, integration_error2)
+            counter += 1
 
+    if avg:
+        return (integration / float(counter),
+                integration_error2 / float(counter))
+    else:
+        return (integration, integration_error2)
 
 if __name__ == "__main__":
     import hlr_test
@@ -128,6 +150,7 @@ if __name__ == "__main__":
     print "********** integrate_axis"
     print "* som      :", integrate_axis(som1)
     print "* som      :", integrate_axis(som2)
+    print "* som (avg):", integrate_axis(som2, avg=True)
     print "* som [2,4]:", integrate_axis(som2, start=2, end=4)
     print "* som  (x) :", integrate_axis(som2, axis="x")
     print "* so       :", integrate_axis(som1[0])

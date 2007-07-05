@@ -22,23 +22,23 @@
 
 # $Id$
 
-def hlr_1D_units(som, units):
+def one_d_units(som, units):
     """
-    This function takes a SOM and a unit string and checks the SOMs primary
-    axes for the requested units. Raises an exception if units are not found.
+    This function takes a C{SOM} and a unit string and checks the C{SOM}s
+    primary axes for the requested units. 
 
-    Parameters:
-    ----------
-    -> som is the SOM to search the primary axes for units
-    -> units is the units to search the SOM primary axes for
+    @param som: The C{SOM} to search the primary axes for units
+    @type som: C{SOM.SOM}
+    
+    @param units: The units to search the C{SOM} primary axes for
+    @type units: C{string}
 
-    Returns:
-    -------
-    <- The first index containing the requested units
 
-    Exceptions:
-    ----------
-    <- RuntimeError is raised if the requested units are not found
+    @return: The first index containing the requested units
+    @rtype: C{int}
+
+
+    @raise RuntimeError: The requested units are not found
     """
     
     if not som.hasAxisUnits(units):
@@ -46,22 +46,25 @@ def hlr_1D_units(som, units):
 
     return som.axisUnitsAt(units)
 
-def hlr_force_units(som, units, dim=1):
+def force_units(som, units, dim=1):
     """
-    This function takse a SOM, a unit string and an optional dimension
+    This function takes a C{SOM}, a unit string and an optional dimension
     parameter and replaces the units for the dimensional parameter minus 1 in
-    the SOM.
+    the C{SOM}.
 
-    Parameters:
-    ----------
-    -> som is the SOM in which an axis units will be replaced
-    -> units is the units to replace the current one in the SOM
-    -> dim is the order of the primary axis. It's actual position in the SOM
-       list is dim-1
+    @param som: The C{SOM} in which an axis units will be replaced
+    @type som: C{SOM.SOM}
+    
+    @param units: The units to replace the current units in the C{SOM} with
+    @type units: C{string}
+    
+    @param dim: The order of the primary axis. It's actual position in the
+                C{SOM} list is dim-1
+    @type dim: C{int}
 
-    Returns:
-    -------
-    <- The SOM with the units forced to the requested units
+
+    @return: The C{SOM} with the units forced to the requested units
+    @rtype: C{SOM.SOM}
     """
     
     som.setAxisUnits(dim-1, units)

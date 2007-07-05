@@ -24,27 +24,28 @@
 
 def weighted_average(obj, **kwargs):
     """
-    This function takes a SOM or SO and calculates the weighted average for
-    the primary axis.
+    This function takes a C{SOM} or C{SO} and calculates the weighted average
+    for the primary axis.
 
-    Parameters:
-    ----------
-    -> obj is a SOM or SO that will have the weighted average calculated from
-       it
-    -> kwargs is a list of key word arguments that the function accepts:
-          start=<index of starting bin>
-          end=<index of ending bin>
+    @param obj: Object that will have the weighted average calculated from it
+    @type obj: C{SOM.SOM} or C{SOM.SO}
+
+    @param kwargs: A list of keyword arguments that the function accepts:    
+
+    @keyword start: The index of starting bin
+    @type start: C{int}
+
+    @keyword end: The index of ending bin
+    @type end: C{int}    
     
-    Return:
-    ------
-    <- A tuple (for a SO) or a list of tuples (for a SOM) containing the
-       weighted average and the uncertainty squared associated with the
-       weighted average
+    
+    @return: Object containing the weighted average and the uncertainty
+             squared associated with the weighted average
+    @rtype: C{tuple} (for a C{SO}) or a C{list} of C{tuple}s (for a C{SOM})
 
-    Exceptions:
-    ----------
-    <- TypeError is raised if a tuple or another construct (besides a SOM or
-       SO) is passed to the function
+
+    @raise TypeError: A C{tuple} or another construct (besides a C{SOM} or
+                      C{SO}) is passed to the function
     """
 
     # import the helper functions

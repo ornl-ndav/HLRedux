@@ -24,40 +24,53 @@
 
 def sub_ncerr(left, right, **kwargs):
     """
-    This function subtracts two objects (SOM, SO or tuple[val,val_err2]) and
-    returns the result of the subtraction in an SOM. The function does not
-    handle the case of tuple-tuple.
+    This function subtracts two objects (C{SOM}, C{SO} or
+    C{tuple(val,val_err2)}) and returns the result of the subtraction in a
+    C{SOM} or C{SO}. The function does not handle the case of
+    C{tuple}-C{tuple}.
 
-    Parameters:
-    ----------
-    -> left  Object on the left of the subtraction sign
-    -> right Object on the right of the subtraction sign
-    -> kwargs is a list of key word arguments that the function accepts:
-         axis=<y or x> This is the axis one wishes to manipulate. If no
-               argument is given the default value is y
-         axis_pos=<number> This is position of the axis in the axis array. If
-                  no argument is given, the default value is 0
-         length_one_som=<boolean> This is a flag that lets the function know
-                                  it is dealing with a length 1 SOM so that
-                                  attributes may be passed along. The length
-                                  1 SOM will be turned into a SO. The default
-                                  value is False.
-         length_one_som_pos=<1 or 2> This is the argument position of the
-                                     length 1 SOM since subtraction order is
-                                     not commutative. The default value is 2.
-                  
-    Returns:
-    -------
-    <- A SOM or SO containing the results of the subtraction
+    @param left: Object on the left of the subtraction sign
+    @type left: C{SOM.SOM} or C{SOM.SO} or C{tuple}
+    
+    @param right: Object on the right of the subtraction sign
+    @type right: C{SOM.SOM} or C{SOM.SO} or C{tuple}
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
+    
+    @keyword axis: This is the axis one wishes to manipulate. If no argument
+                   is given the default value is y
+    @type axis: C{string}=<y or x>
+    
+    @keyword axis_pos: This is position of the axis in the axis array. If no
+                       argument is given, the default value is 0
+    @type axis_pos: C{int}
+    
+    @keyword length_one_som: This is a flag that lets the function know it is
+                             dealing with a length 1 C{SOM} so that attributes
+                             may be passed along. The length 1 C{SOM} will be
+                             turned into a C{SO}. The default value is False.
+    @type length_one_som: C{boolean}
+    
+    @keyword length_one_som_pos: This is the argument position of the length 1
+                                 C{SOM} since subtraction order is not
+                                 commutative. The default value is 2.
+    @type length_one_som_pos: C{int}=<1 or 2> 
 
-    Exceptions:
-    ----------
-    <- TypeError is raised if the tuple/tuple case is presented to the function
-    <- IndexError is raised if the two SOMs do not contain the same number
-       of spectra
-    <- RunTimeError is raised if the x-axis units of the SOMs do not match
-    <- RunTimeError is raised if the y-axis units of the SOMs do not match
-    <- RunTimeError is raised if the x-axes of the two SOs are not equal
+
+    @return: Object containing the results of the subtraction
+    @rtype: C{SOM.SOM} or C{SOM.SO} 
+
+
+    @raise TypeError: The C{tuple}-C{tuple} case is presented to the function
+
+    @raise IndexError: The two C{SOM}s do not contain the same number of
+                       spectra
+                       
+    @raise RunTimeError: The x-axis units of the C{SOM}s do not match
+    
+    @raise RunTimeError: The y-axis units of the C{SOM}s do not match
+    
+    @raise RunTimeError: The x-axes of the two C{SO}s are not equal
     """
 
     # import the helper functions
@@ -94,7 +107,7 @@ def sub_ncerr(left, right, **kwargs):
 
     # error check information
     if r_descr == "SOM" and l_descr == "SOM":
-        hlr_utils.hlr_math_compatible(left, l_descr, right, r_descr)
+        hlr_utils.math_compatible(left, l_descr, right, r_descr)
     elif l_descr == "number" and r_descr == "number":
         raise RuntimeError("tuple, tuple operation is not supported!")
     else:
@@ -136,7 +149,7 @@ def sub_ncerr(left, right, **kwargs):
 
         (descr_1, descr_2) = hlr_utils.get_descr(val1, val2)
 
-        hlr_utils.hlr_math_compatible(val1, descr_1, val2, descr_2)
+        hlr_utils.math_compatible(val1, descr_1, val2, descr_2)
 
         value = array_manip.sub_ncerr(val1, err2_1, val2, err2_2)
 

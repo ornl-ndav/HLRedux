@@ -24,32 +24,33 @@
 
 def energy_to_wavelength(obj, **kwargs):
     """
-    This function converts a primary axis of a SOM or SO from energy
-    to wavelength. The energy axis for a SOM must be in units of meV.
-    The primary axis of a SO is assumed to be in units of meV. A tuple
-    of [energy, energy_err2] (assumed to be in units of meV) can
-    be converted to [wavelength, wavelength_err2].
+    This function converts a primary axis of a C{SOM} or C{SO} from energy
+    to wavelength. The energy axis for a C{SOM} must be in units of I{meV}.
+    The primary axis of a C{SO} is assumed to be in units of I{meV}. A C{tuple}
+    of C{(energy, energy_err2)} (assumed to be in units of I{meV}) can
+    be converted to C{(wavelength, wavelength_err2)}.
 
-    Parameters:
-    ----------
-    -> obj is the SOM, SO or tuple to be converted
-    -> kwargs is a list of key word arguments that the function accepts:
-          lojac=<boolean> is a flag that allows one to turn off the
-                          calculation of the linear-order Jacobian. The
-                          default action is True for histogram data.
-           units= a string containing the expected units for this function.
-                 The default for this function is meV
+    @param obj: Object to be converted
+    @type obj: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
 
-    Return:
-    ------
-    <- A SOM or SO with a primary axis in energy or a tuple converted to
-       wavelength
+    @keyword lojac: A flag that allows one to turn off the calculation of the
+                    linear-order Jacobian. The default action is True for
+                    histogram data.
+    @type lojac: C{boolean}
+    
+    @keyword units: The expected units for this function. The default for this
+                    function is I{meV}
+    @type units: C{string}
 
-    Exceptions:
-    ----------
-    <- TypeError is raised if the incoming object is not a type the function
-       recognizes
-    <- RuntimeError is raised if the SOM x-axis units are not meV
+
+    @return: Object with a primary axis in energy converted to wavelength
+    @rtype: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+
+
+    @raise TypeError: The incoming object is not a type the function recognizes
+    @raise RuntimeError: The C{SOM} x-axis units are not I{meV}
     """
     # import the helper functions
     import hlr_utils
@@ -78,13 +79,13 @@ def energy_to_wavelength(obj, **kwargs):
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
     if o_descr == "SOM":
-        axis = hlr_utils.hlr_1D_units(obj, units)
+        axis = hlr_utils.one_d_units(obj, units)
     else:
         axis = 0
 
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
     if res_descr == "SOM":
-        result = hlr_utils.hlr_force_units(result, "Angstroms", axis)
+        result = hlr_utils.force_units(result, "Angstroms", axis)
         result.setAxisLabel(axis, "wavelength")
         result.setYUnits("Counts/Angstrom")
         result.setYLabel("Intensity")

@@ -1,0 +1,12 @@
+#!/bin/sh
+
+###############################################################################
+#
+# Script to generate the API documentation for HLRedux
+#
+# $Id$
+#
+###############################################################################
+
+epydoc --config=config.epy --css=material/epydoc.css
+

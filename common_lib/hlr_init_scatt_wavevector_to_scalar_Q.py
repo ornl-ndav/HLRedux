@@ -25,38 +25,47 @@
 def init_scatt_wavevector_to_scalar_Q(initk, scattk, **kwargs):
     """
     This function takes an initial wavevector and a scattered wavevector as a
-    tuple and a SOM, a tuple and a SO  or two tuples and calculates the
-    quantity scalar_Q units of 1/Angstroms. The SOM principle axis must be in
-    units of 1/Angstroms. The SOs and tuple(s) is(are) assumed to be in units
-    of 1/Angstroms. The polar angle must be provided if one of the initial
-    arguments is not a SOM. If a SOM is passed, by providing the polar angle
-    at the function call time, the polar angle carried in the SOM instrument
-    will be overridden.
+    C{tuple} and a C{SOM}, a C{tuple} and a C{SO} or two C{tuple}s and
+    calculates the quantity scalar Q units of I{1/Angstroms}. The C{SOM}
+    principle axis must be in units of I{1/Angstroms}. The C{SO}s and
+    C{tuple}(s) is(are) assumed to be in units of I{1/Angstroms}. The polar
+    angle must be provided if one of the initial arguments is not a C{SOM}. If
+    a C{SOM} is passed, by providing the polar angle at the function call time,
+    the polar angle carried in the C{SOM} instrument will be overridden.
 
-    Parameters:
-    ----------
-    -> initk is a SOM, SO or tuple of the initial wavevector
-    -> scattk is a SOM, SO or tuple of the scattered wavevector
-    -> kwargs is a list of key word arguments that the function accepts:
-          polar= a tuple or list of tuples containing the polar angle and
-                 its associated error^2
-          units= a string containing the expected units for this function.
-                 The default for this function is 1/Angstroms
+    @param initk: Object holding the initial wavevector
+    @type initk: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+    
+    @param scattk: Object holding the scattered wavevector
+    @type scattk: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
+    
+    @keyword polar: The polar angle and its associated error^2
+    @type polar: C{tuple} or C{list} of C{tuple}s
 
-    Return:
-    ------
-    <- A SOM, SO or tuple calculated for scalar_Q
+    @keyword units: The expected units for this function. The default for this
+                    function is I{1/Angstroms}.
+    @type units: C{string}
 
-    Exceptions:
-    ----------
-    <- TypeError is raised if the SOM-SOM operation is attempted
-    <- TypeError is raised if the SOM-SO operation is attempted
-    <- TypeError is raised if the SO-SOM operation is attempted
-    <- TypeError is raised if the SO-SO operation is attempted
-    <- RuntimeError is raised if the SOM x-axis units are not 1/Angstroms
-    <- RuntimeError is raised if a SOM is not passed and no polar angle is
-       provided
-    <- RuntimeError is raised if no instrument is provided in a SOM
+
+    @return: Object converted to scalar Q
+    @rtype: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+
+
+    @raise TypeError: The C{SOM}-C{SOM} operation is attempted
+    
+    @raise TypeError: The C{SOM}-C{SO} operation is attempted
+    
+    @raise TypeError: The C{SO}-C{SOM} operation is attempted
+    
+    @raise TypeError: The C{SO}-C{SO} operation is attempted
+    
+    @raise RuntimeError: The C{SOM} x-axis units are not I{1/Angstroms}
+    
+    @raise RuntimeError: A C{SOM} is not passed and no polar angle is provided
+    
+    @raise RuntimeError: No C{SOM.Instrument} is provided in a C{SOM}
     """
 
     # import the helper functions
@@ -92,8 +101,8 @@ def init_scatt_wavevector_to_scalar_Q(initk, scattk, **kwargs):
     result = hlr_utils.copy_som_attr(result, res_descr, initk, i_descr,
                                      scattk, s_descr)
     if res_descr == "SOM":
-        index = hlr_utils.hlr_1D_units(result, units)
-        result = hlr_utils.hlr_force_units(result, units, index)
+        index = hlr_utils.one_d_units(result, units)
+        result = hlr_utils.force_units(result, units, index)
         result.setAxisLabel(index, "scalar wavevector transfer")
         result.setYUnits("Counts/A-1")
         result.setYLabel("Intensity")

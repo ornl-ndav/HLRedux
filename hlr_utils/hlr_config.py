@@ -34,3 +34,70 @@ class Configure:
         self.verbose = False
         self.data = None
         self.output = None
+
+def ConfigFromXml(doc, configure):
+    """
+    This method takes a configuration file XML document and a
+    L{hlr_utils.Configure} object and sets the information from the document
+    into the object.
+
+    @param doc: A XML Document that is read from a reduction metadata file
+    @type doc: C{xml.dom.minidom.Document}
+
+    @param configure: A configuration object
+    @type configure: L{hlr_utils.Configure}
+
+
+    @return: The configuration object with the information added
+    @rtype: L{hlr_utils.Configure}
+    """
+    import hlr_utils
+    
+    for node in doc.childNodes:
+        for cnode in node.childNodes:
+            try:
+                attr = cnode.getAttribute("type")
+                
+                setter = None
+                
+                if attr == "bool":
+                    value = str(cnode.childNodes[0].nodeValue)
+                    if value == "False":
+                        setter = False
+                    elif value == "True":
+                        setter = True
+
+                elif attr == "int":
+                    setter = int(cnode.childNodes[0].nodeValue)
+                
+                elif attr == "float":
+                    setter = float(cnode.childNodes[0].nodeValue)
+
+                elif attr == "str":
+                    setter = str(cnode.childNodes[0].nodeValue)
+
+                elif attr == "unicode":
+                    setter = unicode(cnode.childNodes[0].nodeValue)
+
+                elif attr == "list":
+                    nval = str(cnode.childNodes[0].nodeValue).strip('[]')
+                    sval = nval.split(',')
+                    setter = []
+                    for val in sval:
+                        setter.append(val.strip(' \''))
+                    
+                elif attr == "hlr_utils.hlr_axis_object.Axis":
+                    setter = hlr_utils.AxisFromXmlConfig(cnode)
+
+                elif attr == "hlr_utils.hlr_drparameter.DrParameter":
+                    setter = hlr_utils.DrParameterFromXmlConfig(cnode)
+                    
+                elif attr == "hlr_utils.hlr_nxpath.NxPath":
+                    setter = hlr_utils.NxPathFromXmlConfig(cnode)
+                    
+                configure.__dict__[str(cnode.localName)] = setter
+                
+            except AttributeError:
+                continue
+
+    return configure

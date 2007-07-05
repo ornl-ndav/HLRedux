@@ -20,6 +20,11 @@
 # its use would not infringe privately owned rights.
 #
 
+"""
+The functions in this module help with generating data objects for simple
+function tests.
+"""
+
 from test_helpers import *
 
 from HLR_version import version as __version__

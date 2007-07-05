@@ -23,25 +23,27 @@
 # $Id$
 
 
-def hlr_math_compatible(obj1, obj1_descr, obj2, obj2_descr):
+def math_compatible(obj1, obj1_descr, obj2, obj2_descr):
     """
-    This function takes two SOMs and checks them for the following conditions:
-    1. The units of the primary axes in SOM1 match those in SOM2
-    2. The y units of SOM1 match the y units in SOM2
+    This function takes two C{SOM}s and checks them for the following
+    conditions:
+       1. The units of the primary axes in C{SOM}1 match those in C{SOM}2
+       2. The y units of C{SOM}1 match the y units in C{SOM}2
 
     If all three steps pass, nothing is done. If one step fails an exception
     is raised.
-    
-    Parameters:
-    ----------
-    -> som1 is the first SOM to compare
-    -> obj2 is the second SOM to compare
 
-    Exceptions:
-    ----------
-    <- RuntimeError is raised if the units of the primary axes in SOM1 do not
-       match those in SOM2
-    <- RuntimeError is raised if the y units in SOM1 is not the same as in SOM2
+    @param obj1: The first object to compare
+    @type obj1: C{SOM.SOM}
+    
+    @param obj2: The second object to compare
+    @type obj2: C{SOM.SOM}
+
+
+    @raise RuntimeError: The units of the primary axes in C{SOM}1 do not match
+                         those in C{SOM}2
+                         
+    @raise RuntimeError: The y units in C{SOM}1 is not the same as in C{SOM}2
     """
 
     if obj1_descr == "SOM" and obj2_descr == "SOM":

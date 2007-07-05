@@ -27,13 +27,12 @@ def file_exists(filename):
     This function accepts a filename as a string and queries the file system
     for the existence of the file.
 
-    Parameters:
-    ----------
-    -> filename is a string object containing the file name
+    @param filename: The filename to check existence
+    @type filename: C{string}
 
-    Returns:
-    -------
-    <- A boolean which is True if the file exists and False if is does not
+    
+    @return: I{True} if the file exists and I{False} if is does not
+    @rtype: C{boolean}
     """
     
     import os.path
@@ -46,15 +45,17 @@ def ext_replace(name, ext_out, ext_in):
     This function takes a filename and an extension (without the dot) and
     replaces that extension with new given extension (again without the dot).
 
-    Parameters:
-    ----------
-    -> name is a string object containing a filename
-    -> ext_out is a string object containing the extension being replaced
-    -> ext_in is a string object containing the replacing extension
+    @param name: The filename for extension replacement
+    @type name: C{string}
+    
+    @param ext_out: The extension being replaced
+    @type ext_out: C{string}
+    
+    @param ext_in: The replacing extension
+    @type ext_in: C{string}
 
-    Returns:
-    -------
-    <- A string object containing the new filename
+    @return: The old filename with the extension replaced
+    @rtype: C{string}
     """
 
     import re
@@ -68,14 +69,15 @@ def add_tag(filename, tag):
     This function takes a filename, splits it at the extension and appends a
     tag in front of the extension.
 
-    Parameters:
-    ----------
-    -> filename is a string object containing the file name
-    -> tag is a string that will be placed before the file extension
+    @param filename: The filename to which to add the tag
+    @type filename: C{string}
+
+    @param tag: Tag that will be placed before the file extension
+    @type tag: C{string}
     
-    Returns:
-    -------
-    <- A string object containing the new filename
+
+    @return: The new filename with the tag inserted
+    @rtype: C{string}
     """
     
     index = filename.rfind('.')
@@ -85,17 +87,15 @@ def split_values(thing):
     """
     This function takes a string object that has the form value,err^2,units or
     value,err^2 or value,units. If the latter version is given, a default
-    value of 0.0 will be given for err^2. It produces a tuple of
-    (value,err^2,units)
+    value of 0.0 will be given for err^2.
+    
+    @param thing: Comma-separated list of the form value,err^2 or
+                  value,err^2,units or value,units
+    @type thing: C{string}
 
-    Parameters:
-    ----------
-    -> thing is a string object of the form value,err^2 or value,err^2,units
-       or value,units
-
-    Returns:
-    -------
-    <- A tuple of (value,err^2,units)
+    
+    @return: Object of the form C{(value,err^2,units)}
+    @rtype: C{tuple}
     """
 
     if thing is None:
@@ -116,24 +116,29 @@ def make_axis(axis_min, axis_max, delta, **kwargs):
     This function takes a minimum, maximum and a delta value and converts
     those numbers into an axis.
 
-    Parameters:
-    ----------
-    -> axis_min is the minimum value of the axis
-    -> axis_max is the maximum value of the axis
-    -> delta is the bin width for the axis
-    -> kwargs is a list of key word arguments that the function accepts:
-          type= a string containing the type of axis desired. Type can be
-                histogram, coordinate or density (the last two are synonyms).
-                If type is not provided the default is histogram
+    @param axis_min: The minimum value of the axis
+    @type axis_min: C{float}
+    
+    @param axis_max: The maximum value of the axis
+    @type axis_max: C{float}
+    
+    @param delta: The bin width for the axis
+    @type delta: C{float}
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
+    
+    @keyword type: The type of axis desired. Type can be I{histogram},
+                   I{coordinate} or I{density} (the last two are synonyms).
+                   If type is not provided the default is I{histogram}
+    @type type: C{string}
 
-    Returns:
-    -------
-    <- A NessiList that contains the axis
+    
+    @return: The axis generated from the file information
+    @rtype: C{nessi_list.NessiList}
 
-    Exceptions:
-    ----------
-    <- RuntimeError is raised if the type provided via kwarg type is not
-       histogram or density or coordinate
+
+    @raise RuntimeError: The type provided via kwarg type is not I{histogram}
+                         or I{density} or I{coordinate}
     """
 
     import math
@@ -164,22 +169,23 @@ def make_axis_file(filename, **kwargs):
     This function takes a file of minimum, maximum and a delta values and
     converts those numbers into an axis.
 
-    Parameters:
-    ----------
-    -> filename is the name of the file containing the axis values
-    -> kwargs is a list of key word arguments that the function accepts:
-          type= a string containing the type of axis desired. Type can be
-                histogram, coordinate or density (the last two are synonyms).
-                If type is not provided the default is histogram
+    @param filename: Name of the file containing the axis values
+    @type filename: C{string}
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
+    
+    @keyword type: The type of axis desired. Type can be I{histogram},
+                   I{coordinate} or I{density} (the last two are synonyms).
+                   If type is not provided the default is I{histogram}
+    @type type: C{string}
 
-    Returns:
-    -------
-    <- A NessiList that contains the axis
+    
+    @return: The axis generated from the file information
+    @rtype: C{nessi_list.NessiList}
 
-    Exceptions:
-    ----------
-    <- RuntimeError is raised if the type provided via kwarg type is not
-       histogram or density or coordinate
+
+    @raise RuntimeError: The type provided via kwarg type is not I{histogram}
+                         or I{density} or I{coordinate}
     """
 
     import math
@@ -224,13 +230,12 @@ def fix_filename(filename):
     expands those into a proper filename. If a string contains no such
     references, nothing is no to the string
 
-    Parameters:
-    ----------
-    -> filename is a string containing the filname to be fixed
+    @param filename: The filename to be fixed
+    @type filename: C{string}
 
-    Returns:
-    -------
-    <- The filename with special cases expanded
+    
+    @return: The filename with special cases expanded
+    @rtype: C{string}
     """
     
     import os
@@ -260,13 +265,12 @@ def create_data_paths(thing):
     This function takes in a string that contains NeXus path and signal pairs
     and turns them into a tuple (for one pair) or a list of tuples.
 
-    Parameters:
-    ----------
-    -> things is a string containing a list of NeXus path and signal pairs
+    @param thing: A comma-spearated list of NeXus path and signal pairs
+    @type thing: C{string}
 
-    Returns:
-    -------
-    <- A tuple or list of tuples of the NeXus path,signal pairs
+    
+    @return: The NeXus path,signal pairs
+    @rtype: C{tuple} or C{list} of C{tuple}s 
     """
     
     mylist = thing.split(',')
@@ -297,42 +301,63 @@ def write_file(filename, dst_type, data, **kwargs):
     can pass a data filename or an output filename. If a data filename is
     passed, the data file extension, output file extension and the replace
     keyword must be passed. The expected data object to write to the file is
-    a SOM.
+    a C{SOM}. B{NOTE}: Extra keyword arguments can be passed onto the C{DST}
+    instance via calling them in the kwargs list. Those arguments will not be
+    processed by this function, but just pass them on.
 
-    Parameters:
-    ----------
-    -> filename is a string containing the name of the data file from which
-                the output is generated or the name of an output file
-    -> dst_type is a string containing the MIME type of the output formatter
-    -> data is a SOM that contains the output to be written to fil
-    -> kwargs is a list of key word arguments that the function accepts:
-          message=<string> This is part of the message that will be printed
-                  to STDOUT if verbose keyword is set to True. The default
-                  message is \"output file\"
-          data_ext=<string> This is the extension on the data file. This is
-                   used in conjunction with output_ext and replace to convert
-                   the data filename into an output filename. The default
-                   value is \"nxs\".
-          output_ext=<string> This is the extension to be used for the output
-                     file. The default value is \"txt\".
-          verbose=<True or False> This determines whether or not the print
-                  statement is executed. The default value is False.
-          replace_ext=<boolean> This determines whether or not the extension
-                     on the incoming filename is replaced with output_ext.
-                     The default behavior is True (replace extension)
-          replace_path=<boolean> This determines whether or not the directory
-                      path on the incoming filename is replaced with the
-                      directory where the driver is running. The default
-                      behavior is True (replace path)
-          path_replacement=<string> This is a directory path that will be
-                           prepended to the output filename. The default value
-                           is None and will cause the working directory to be
-                           the prepended path.
-          extra_tag=<string> This is a tag that will be inserted into the file
-                             name just before the file extension.
-       NOTE: Extra keyword arguments can be passed onto the DST instance via
-             calling them in the kwargs list. Those arguments will not be
-             processed by this function, but just pass them on.
+    @param filename: The name of the data file from which the output is
+                     generated or the name of an output file
+    @type filename: C{string}
+    
+    @param dst_type: The MIME type of the output formatter
+    @type dst_type: C{string}
+    
+    @param data: Object that contains the output to be written to file
+    @type data: C{SOM.SOM}
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
+    
+    @keyword message: This is part of the message that will be printed to
+                      STDOUT if verbose keyword is set to True. The default
+                      message is \"output file\"
+    @type message: C{string}
+    
+    @keyword data_ext: This is the extension on the data file. This is used in
+                       conjunction with output_ext and replace to convert the
+                       data filename into an output filename. The default
+                       value is \"nxs\".
+    @type data_ext: C{string}
+    
+    @keyword output_ext: This is the extension to be used for the output file.
+                         The default value is \"txt\".
+    @type output_ext: C{string}
+    
+    @keyword verbose: This determines whether or not the print statement is
+    executed. The default value is I{False}.
+    @type verbose: C{boolean}
+    
+    @keyword replace_ext: This determines whether or not the extension on the
+                          incoming filename is replaced with output_ext. The
+                          default behavior is I{True} (replace extension)
+    @type replace_ext: C{boolean}
+    
+    @keyword replace_path: This determines whether or not the directory path on
+                           the incoming filename is replaced with the
+                           directory where the driver is running. The default
+                           behavior is I{True} (replace path)
+    @type replace_path: C{boolean}
+    
+    @keyword path_replacement: This is a directory path that will be prepended
+                               to the output filename. The default value is
+                               C{None} and will cause the working directory to
+                               be the prepended path.
+    @type path_replacement: C{string}
+    
+    @keyword extra_tag: This is a tag that will be inserted into the file name
+                        just before the file extension.
+    @type extra_tag: C{string}
+
+
     """
 
     import os
@@ -415,21 +440,26 @@ def write_file(filename, dst_type, data, **kwargs):
 def create_id_pairs(pairs, paths, **kwargs):
     """
     This function takes in a string that contains pairs of numbers and turns
-    them into a tuple (for one pair) or a list of tuples. The function checks
-    against the number of data paths requested. If the number of paths is not
-    equal to the number of id pairs given, the last id pair is duplicated
-    until the number of id pairs is the same as the number of data paths
+    them into a C{tuple} (for one pair) or a C{list} of C{tuple}s. The function
+    checks against the number of data paths requested. If the number of paths
+    is not equal to the number of id pairs given, the last id pair is
+    duplicated until the number of id pairs is the same as the number of data
+    paths
 
-    Parameters:
-    ----------
-    -> pairs is a string containing a list of pixel id pairs
-    -> paths is a string containing a list of NeXus data paths and signal pairs
-    -> kwargs is a list of key word arguments that the function accepts:
-         inc=<boolean> is a switch to increment the ending ids by 1
+    @param pairs: List of comma-separated pixel id pairs
+    @type pairs: C{string}
+    
+    @param paths: List of comma-separated NeXus data paths and signal pairs
+    @type paths: C{string}
+    
+    @param kwargs: A list of key word arguments that the function accepts:
+    
+    @keyword inc: A switch to increment the ending ids by 1
+    @type inc: C{boolean}
 
-    Returns:
-    -------
-    <- A tuple or list of tuples of the pixel id pairs
+
+    @return: The pixel id pair(s)
+    @rtype: C{tuple} or C{list} of C{tuple}s
     """
 
     try:
@@ -495,19 +525,17 @@ def create_pixel_id(thing):
     This function creates a pixel ID out of a comma-delimited list of three
     values, i.e.: bank3,3,63.
 
-    Parameters:
-    ----------
-    -> thing is a string containing three pieces of information to create a
-             pixel ID
+    @param thing: Object containing three pieces of information to create a
+                  pixel ID
+    @type thing: C{string}
 
-    Returns:
-    -------
-    <- A tuple containing the pixel ID
 
-    Exceptions:
-    ----------
-    <- RuntimeError is raised if 3 pieces of information are not provided to
-                    the function
+    @return: Object containing the pixel ID
+    @rtype: C{tuple} C{(\"bankN\", (int(x), int(y)))}
+
+
+    @raise RuntimeError: 3 pieces of information are not provided to the
+                         function
     """
 
     mylist = thing.split(',')
@@ -523,29 +551,34 @@ def create_pixel_id(thing):
 def determine_files(inputlist, inst=None, **kwargs):
     """
     This function takes either a list of comma-separated file names or a list
-    of runs in the syntax of findnexus. If the input list begins with /, ~, $
-    or ., it will assume that this is a list of full file path names and will
-    not use the findnexus utility. If the input list begins with a number, it
-    will use the findnexus utility to locate the data files. Files not found
-    by the system will be removed from the list.
+    of runs in the syntax of findnexus. If the input list begins with /, ~, $,
+    . or character it will assume that this is a list of full file path names
+    and will not use the B{findnexus} utility. If the input list begins with a
+    number, it will use the B{findnexus} utility to locate the data files.
+    Files not found by the system will be removed from the list.
 
-    Parameters:
-    ----------
-    -> inputlist is a string containing either fully qualified filenames or
-       run numbers
-    -> inst is a string containing the name of the instrument for file lookup
-    -> kwargs is a list of keyword arguments that the function accepts:
-         stop_on_none=<boolean> is a flag that sets the priority for examining
-                                the files. If this is set to true, it will
-                                cause the driver to crash if it cannot find
-                                any files. The default behavior is False.
-         one_file=<boolean> is a flag that tells the function that there will
-                            be only one file name associated with this call.
-                            The default value is False.
+    @param inputlist: Comma-separated fully qualified filenames or run numbers
+    @type inputlist: C{string}
+    
+    @param inst: The name of the instrument for file lookup
+    @type inst: C{string}
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
+    
+    @keyword stop_on_none: Flag that sets the priority for examining the files.
+                           If this is set to I{True}, it will cause the driver
+                           to crash if it cannot find any files. The default
+                           behavior is I{False}.
+    @type stop_on_none: C{boolean}
+    
+    @keyword one_file: Flag that tells the function that there will be only one
+                       file name associated with this call. The default value
+                       is I{False}.
+    @type one_file: C{boolean}
 
-    Returns:
-    -------
-    <- A list of fully qualified file names
+
+    @return: The fully qualified file names
+    @rtype: C{list}
     """
 
     # Check on keywords
@@ -653,10 +686,8 @@ def program_version():
     """
     This function returns a version string for an option parser.
 
-    Returns:
-    -------
-    <- A string containing a place holder for the program name and the
-       version string
+    @return: A place holder for the program name and the version string
+    @rtype: C{string}
     """
     from HLR_version import version as __version__
     
@@ -665,3 +696,59 @@ def program_version():
     ver_tag.append(__version__)
     
     return " ".join(ver_tag)
+
+def cli_checker(opt1, opt2=""):
+    """
+    This function checks the command-line arguments against the requested
+    options to see if they have been set.
+
+    @param opt1: Option name (beginning with - or --) to search for on the CLI
+    @type opt1: C{string}
+    
+    @param opt2: (OPTIONAL) Option name (beginning with - or --) to search for
+                            on the CLI
+    @type opt2: C{string}
+
+
+    @return: I{True} if the option has been set or I{False} if it has not
+    @rtype: C{boolean}
+    """
+    import sys
+    
+    cli_options = [arg for arg in sys.argv if arg == opt1 or arg == opt2]
+    if len(cli_options) > 0:
+        return True
+    else:
+        return False
+
+def cli_provide_override(config, param, opt1, opt2=""):
+    """
+    This function checks the incoming parameter and uses cli_checker to
+    determine if the parameter should be set using the appropriate setter
+    function call.
+
+    @param config: Object containing the configuration
+    @type config: L{hlr_utils.Configure}
+    
+    @param param: The parameter name to check
+    @type param: C{string}
+    
+    @param opt1: First CLI option to check
+    @type opt1: C{string}
+    
+    @param opt2: (OPTIONAL) Second CLI option to check
+    @type opt2: C{string}
+
+
+    @return: I{True} if the parameter needs to be provided/overridden or
+             I{False} if it should not
+    @rtype: C{boolean}
+    """
+    try:
+        if config.__dict__[param] and cli_checker(opt1, opt2):
+            return True
+        else:
+            return False
+    except KeyError:
+        return True
+        

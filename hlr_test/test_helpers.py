@@ -26,19 +26,23 @@ import SOM
 
 def generate_so(data_type, start, stop=0, dim=1, extra=0):
     """
-    This function generates a SO for testing purposes. The SO can be either
-    a histogram or density.
+    This function generates a C{SO} for testing purposes. The C{SO} can be
+    either histogram or density data.
 
-    Parameters:
-    ----------
-    -> data_type is defined as histogram or density
-    -> start is the starting value for number generation
-    -> stop (OPTIONAL) is the stopping value for number generation
-    -> dim (OPTIONAL) allows for making SOs multi-dimensional
-
-    Returns:
-    -------
-    <- A SO
+    @param data_type: is defined as histogram or density
+    @type data_type: C{string}
+    @param start: is the starting value for number generation
+    @type start: C{int}
+    @param stop: (OPTIONAL) is the stopping value for number generation
+    @type stop: C{int}
+    @param dim: (OPTIONAL) allows for making C{SO}s multi-dimensional
+    @type dim: C{int}
+    @param extra: (OPTIONAL) is an offset added to the B{start} and B{stop}
+    values
+    @type extra: C{int}              
+    
+    @return: A C{SO} filled with default information
+    @rtype: C{SOM.SO}
     """
     
     if stop < start:
@@ -71,15 +75,17 @@ def generate_so(data_type, start, stop=0, dim=1, extra=0):
 
 def generate_som(data_type="histogram", dim=1, number=2):
     """
-    This function generates a SOM for testing purposes.
+    This function generates a C{SOM} for testing purposes.
 
-    Parameters:
-    ----------
-    -> data_type is defined as histogram or density
+    @param data_type: (OPTIONAL) is defined as histogram or density
+    @type data_type: C{string}
+    @param dim: (OPTIONAL) is the dimensionality of the individual C{SO}s
+    @type dim: C{int}
+    @param number: (OPTIONAL) is the number of C{SO}s generated
+    @type number: C{int}
 
-    Returns:
-    -------
-    <- A SOM
+    @return: A C{SOM} containing the requested information
+    @rtype: C{SOM.SOM}
     """
 
     som = SOM.SOM()

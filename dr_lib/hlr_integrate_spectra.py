@@ -24,23 +24,40 @@
 
 def integrate_spectra(obj, **kwargs):
     """
-    This function takes a SOM or SO and calculates the integration for the
-    primary axis. If the integration range for a pixel cannot be found, an
+    This function takes a set of spectra and calculates the integration for the
+    primary axis. If the integration range for a spectrum cannot be found, an
     error report will be generated with the following information:
-       Range not found: pixel ID, start bin, end bin, length of data array
-    A failing pixel will have the integration tuple set to (nan, nan).
 
-    Parameters:
-    ----------
-    -> obj is a SOM or SO that will have the integration calculated from it
-    -> kwargs is a list of key word arguments that the function accepts:
-          start=<index of starting bin>
-          end=<index of ending bin>
+    Range not found: pixel ID, start bin, end bin, length of data array
+       
+    A failing pixel will have the integration tuple set to C{(nan, nan)}.
+
+    @param obj: Object containing spectra that will have the integration
+    calculated from them.
+    @type obj: C{SOM.SOM} or C{SOM.SO}
     
-    Return:
-    ------
-    <- SOM or a SO containing the integration and the uncertainty squared
-       associated with the integration
+    @param kwargs: A list of keyword arguments that the function accepts:
+    
+    @keyword start: Index of the starting bin
+    @type start: C{int}
+    
+    @keyword end: Index of the ending bin. This index is made inclusive by the
+                  function.
+    @type end: C{int}
+    
+    @keyword axis_pos: This is position of the axis in the axis array. If no
+    argument is given, the default value is I{0}.
+    @type axis_pos: C{int}
+
+    @keyword bin_index: This is a flag to say that the values in the start and
+    end keyword arguments are either bin indicies (I{True}) or bounds
+    (I{False}). The default value is I{False}.
+    @type bin_index: C{boolean}
+    
+    
+    @return: Object containing the integration and the uncertainty squared
+    associated with the integration
+    @rtype: C{SOM.SOM} or C{SOM.SO}
     """
 
     # import the helper functions
@@ -54,18 +71,36 @@ def integrate_spectra(obj, **kwargs):
 
     o_descr = hlr_utils.get_descr(obj)
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
-    
+
+    # Check for axis_pos keyword argument
+    try:
+        axis_pos = kwargs["axis_pos"]
+    except KeyError:
+        axis_pos = 0
+
+    # Check for bin_index keyword argument
+    try:
+        bin_index = kwargs["bin_index"]
+    except KeyError:
+        bin_index = False
+        
     # If the integration start bound is not given, assume the 1st bin
     try:
         i_start = kwargs["start"]
     except KeyError:
-        i_start = 0
+        if bin_index:
+            i_start = 0
+        else:
+            i_start = obj1.axis[axis_pos].val[0]
 
     # If the integration end bound is not given, assume the last bin
     try:
         i_end = kwargs["end"]
     except KeyError:
-        i_end = -1
+        if bin_index:
+            i_end = -1
+        else:
+            i_end = obj1.axis[axis_pos].val[-1]
     
     # iterate through the values
     import bisect
@@ -76,14 +111,14 @@ def integrate_spectra(obj, **kwargs):
         obj1 = hlr_utils.get_value(obj, i, o_descr, "all")
 
         # Find the bin in the y values corresponding to the start bound
-        if i_start > 0:
-            b_start = bisect.bisect(obj1.axis[0].val, i_start) - 1
+        if not bin_index:
+            b_start = bisect.bisect(obj1.axis[axis_pos].val, i_start) - 1
         else:
             b_start = i_start
 
         # Find the bin in the y values corresponding to the end bound
-        if i_end != -1:
-            b_end = bisect.bisect(obj1.axis[0].val, i_end) - 1
+        if not bin_index:
+            b_end = bisect.bisect(obj1.axis[axis_pos].val, i_end) - 1
         else:
             b_end = i_end
 

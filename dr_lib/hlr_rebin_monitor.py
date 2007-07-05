@@ -24,26 +24,29 @@
 
 def rebin_monitor(obj1, obj2, **kwargs):
     """
-    This function takes two SOMs or two SOs (1st is the monitor, 2nd is the
-    detector data) and rebins the data for obj1 onto the axis provided by
-    obj2. 
+    This function takes objects (1st is the monitor, 2nd is the detector data)
+    and rebins the data for obj1 onto the axis provided by obj2. 
 
-    Parameters:
-    ----------
-    -> obj1 is a SOM or SO that will be rebinned
-    -> obj2 is a SOM or SO that will provide the axis for rebinning
-    -> kwargs is a list of key word arguments that the function accepts:
+    @param obj1: Monitor object that will be rebinned
+    @type obj1: C{SOM.SOM} or C{SOM.SO}
+    
+    @param obj2: Detector data object that will provide the axis for rebinning
+    @type obj2: C{SOM.SOM} or C{SOM.SO}
 
-    Returns:
-    -------
-    <- A SOM or SO that has been rebinned
+    @param kwargs: A list of keyword arguments that the function accepts:
 
-    Exceptions:
-    ----------
-    <- TypeError is raised if the SOM-SO operation is attempted
-    <- TypeError is raised if the SO-SOM operation is attempted
-    <- TypeError is raised is obj1 not a SOM or SO
-    <- TypeError is raised is obj2 not a SOM or SO
+    
+    @return: Object that has been rebinned
+    @rtype: C{SOM.SOM} or C{SOM.SO}
+
+
+    @raise TypeError: The C{SOM}-C{SO} operation is attempted
+    
+    @raise TypeError: The C{SO}-C{SOM} operation is attempted
+    
+    @raise TypeError: obj1 not a C{SOM} or C{SO}
+    
+    @raise TypeError: obj2 not a C{SOM} or C{SO}
     """
 
     # import the helper functions

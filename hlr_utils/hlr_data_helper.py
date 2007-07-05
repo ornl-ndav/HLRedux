@@ -36,17 +36,18 @@ def empty_result(obj1, obj2=None):
     """
     This function inspects the arguments and returns an appropriate
     return type for an operation using the arguments. The object can
-    be filled using result_insert.
+    be filled using L{result_insert}.
 
-    Parameters:
-    ----------
-    -> obj1 is a SOM, SO or tuple
-    -> obj2 is a SOM, SO or tuple
+    @param obj1: The first object to be inspected
+    @type obj1: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+    
+    @param obj2: (OPTIONAL) The second object to be inspected
+    @type obj2: C{SOM.SOM}, C{SOM.SO} or C{tuple}
 
-    Returns:
-    -------
-    <- A tuple containing the requested object (SOM, SO or tuple) and the
-       corresponding descriptor
+    
+    @return: A C{tuple} containing the requested object (C{SOM}, C{SO} or
+             C{tuple}) and the corresponding descriptor
+    @rtype: C{tuple}
     """
 
     obj1_type = get_type(obj1)
@@ -83,23 +84,34 @@ def result_insert(result, descr, value, map_so, axis="y", pap=0, xvals=None):
     This function takes value and puts it into the result in an
     appropriate fashion. The description is used for decision making.
 
-    Parameters:
-    ----------
-    -> result is a SOM, SO, list or tuple
-    -> descr is the object descriptor
-    -> value is a tuple containing information to be place in result directly
-       or an object that will be placed into result
-    -> map_so is a SO that has information that will be mapped to a SO if
-       result is either a SOM or a SO
-    -> axis (OPTIONAL) is the axis to grab the value from
-    -> pap (OPTIONAL) is the primary axis position. This is used to pull the
-       value from the correct primary axis position.
-    -> xvals (OPTIONAL) is a list of x-axes that are not provided by either
-       value or map_so      
+    @param result: Object used for insertion
+    @type result: C{SOM.SOM}, C{SOM.SO}, C{list} or C{tuple}
+    
+    @param descr: The object descriptor
+    @type descr: C{string}
+    
+    @param value: Information to be place in result directly or an object that
+    will be placed into result
+    @type value: C{tuple}
+    
+    @param map_so: A C{SO} that has information that will be mapped to a C{SO}
+    if result is either a C{SOM} or a C{SO}
+    @type map_so: C{SOM.SO}
+    
+    @param axis: (OPTIONAL) The axis from which to grab the value
+    @type axis: C{int}
+    
+    @param pap: (OPTIONAL) The primary axis position. This is used to pull the
+    value from the correct primary axis position.
+    @type pap: C{int}
+    
+    @param xvals: (OPTIONAL) A C{list} of x-axes that are not provided by
+    either value or map_so
+    @type xvals: C{list}
 
-    Returns:
-    -------
-    <- A SOM, SO, list or tuple with the provided information inserted
+
+    @return: Object with the provided information inserted
+    @rtype: C{SOM.SOM}, C{SOM.SO} or C{tuple}
     """
 
     import copy
@@ -198,20 +210,22 @@ def get_length(obj1, obj2=None):
     This function returns the length appropriate for iterating
     through the objects.
 
-    Parameters:
-    ----------
-    -> obj1 is a SOM, SO or tuple
-    -> obj2 (OPTIONAL) is a SOM, SO or tuple
+    @param obj1: First object for length checking
+    @type obj1: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+    
+    @param obj2: (OPTIONAL) Second object for length checking
+    @type obj2: C{SOM.SOM}, C{SOM.SO} or C{tuple}
 
-    Returns:
-    -------
-    <- The iteration length of the top hierarchy object (SOM > SO or tuple)
 
-    Exceptions:
-    ----------
-    <- IndexError is raised if the two incoming objects are SOMs and the number
-       of SOs in them are not equal
-    <- RuntimeError is raised if one or both objects are None
+    @return: The iteration length of the top hierarchy object (C{SOM} > C{SO}
+    or C{tuple})
+    @rtype: C{int}
+
+
+    @raise IndexError: The two incoming objects are C{SOM}s and the number of
+                       C{SO}s in them are not equal
+                       
+    @raise RuntimeError: One or both objects are C{None}
     """
 
     if obj2 is None:
@@ -247,14 +261,16 @@ def get_descr(obj1, obj2=None):
     This function takes one or two arbitrary objects and returns the descriptor
     for those objects.
 
-    Parameters:
-    ----------
-    -> obj1 is a SOM, SO or tuple
-    -> obj2 (OPTIONAL) is a SOM, SO or tuple
+    @param obj1: First object for descriptor retrieval
+    @type obj1: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+    
+    @param obj2: (OPTIONAL) Second object for descriptor retrieval
+    @type obj2: C{SOM.SOM}, C{SOM.SO} or C{tuple}
 
-    Returns:
-    -------
-    <- An obj1 descriptor or a tuple of the descriptors for obj1 and obj2
+
+    @return: A single descriptor or a C{tuple} of the descriptors for both
+             objects
+    @rtype: C{string} or C{tuple}
     """
 
     if obj2 is None:
@@ -268,22 +284,29 @@ def get_value(obj, index=0, descr=None, axis="y", pap=0):
     the given index. If the object is not a collection the index is
     ignored.
 
-    Parameters:
-    ----------
-    -> obj is a SOM, SO or tuple
-    -> index is a possible index for use in a SOM
-    -> descr (OPTIONAL) is the object descriptor, default is None
-    -> axis (OPTIONAL) is the axis to grab the value from
-    -> pap (OPTIONAL) is the primary axis position. This is used to pull the
-       value from the correct primary axis position.
+    @param obj: Object from which to retrieve value 
+    @type obj: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+    
+    @param index: A possible index for use in a C{SOM}
+    @type index: C{int}
+    
+    @param descr: (OPTIONAL) The object descriptor, default is C{None}
+    @type descr: C{string}
+    
+    @param axis: (OPTIONAL) The axis from which to grab the value
+    @type axis: C{string}=<y or x>
+    
+    @param pap: (OPTIONAL) The primary axis position. This is used to pull the
+                           value from the correct axis position in a
+                           multidimensional object.
+    @type pap: C{int}   
 
-    Returns:
-    -------
-    <- The appropriate object containing the value
 
-    Exceptions:
-    ----------
-    <- TypeError is raised if obj is not a recognized type
+    @return: The appropriate object containing the value
+    @rtype: C{nessi_list.NessiList} or C{float}
+
+
+    @raise TypeError: obj is not a recognized type
     """
     
     if descr is None:
@@ -312,26 +335,33 @@ def get_value(obj, index=0, descr=None, axis="y", pap=0):
 
 def get_err2(obj, index, descr=None, axis="y", pap=0):
     """
-    This function takes an arbitrary object and returns the
-    uncertainty squared for the given index. If the object is not a
-    collection the index is ignored.
+    This function takes an arbitrary object and returns the uncertainty
+    squared for the given index. If the object is not a collection the index
+    is ignored.
 
-    Parameters:
-    ----------
-    -> obj is a SOM, SO or tuple
-    -> index is a possible index for use in a SOM
-    -> descr (OPTIONAL) is the object descriptor, default is None
-    -> axis (OPTIONAL) is the axis to grab the error2 from
-    -> pap (OPTIONAL) is the primary axis position. This is used to pull the
-       error2 from the correct primary axis position.
+    @param obj: Object from which to retrieve error^2 
+    @type obj: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+    
+    @param index: A possible index for use in a C{SOM}
+    @type index: C{int}
+    
+    @param descr: (OPTIONAL) The object descriptor, default is C{None}
+    @type descr: C{string}
+    
+    @param axis: (OPTIONAL) The axis from which to grab the error^2
+    @type axis: C{string}=<y or x>
+    
+    @param pap: (OPTIONAL) The primary axis position. This is used to pull the
+                           error^2 from the correct axis position in a
+                           multidimensional object.
+    @type pap: C{int}   
 
-    Returns:
-    -------
-    <- The appropriate object containing the error2
 
-    Exceptions:
-    ----------
-    <- TypeError is raised if obj is not a recognized type
+    @return: The appropriate object containing the error^2
+    @rtype: C{nessi_list.NessiList} or C{float}
+
+
+    @raise TypeError: obj is not a recognized type
     """
 
     if descr is None:
@@ -358,16 +388,15 @@ def get_err2(obj, index, descr=None, axis="y", pap=0):
 
 def get_type(obj):
     """
-    This function taks an arbitraray object and returnes the descriptor for
+    This function taks an arbitraray object and returns the descriptor for
     the object.
 
-    Parameters:
-    ----------
-    -> obj is a SOM, SO or tuple
+    @param obj: Object for descriptor determination
+    @type obj: C{SOM.SOM}, C{SOM.SO} or C{tuple}
 
-    Returns:
-    -------
-    <- The descriptor for the corresponding object
+
+    @return: The descriptor for the corresponding object
+    @rtype: C{string}
     """
     
     if obj is None:
@@ -396,14 +425,15 @@ def swap_args(left, right):
     This function takes two arguments and returns the objects in the reversed
     positions.
 
-    Parameters:
-    ----------
-    -> left is one the object to be swapped to the right position
-    -> right is one the object to be swapped to the left position
+    @param left: The object to be swapped to the right position
+    @type left: C{SOM.SOM}, C{SOM.SO}, C{list} of C{tuple}s or C{tuple}
+    
+    @param right: The object to be swapped to the left position
+    @type right: C{SOM.SOM}, C{SOM.SO}, C{list} of C{tuple}s or C{tuple}
 
-    Returns:
-    -------
-    <- The incoming objects in the swapped locations
+
+    @return: The incoming objects in the swapped locations
+    @rtype: C{tuple}
     """
 
     temp = left
@@ -414,17 +444,18 @@ def swap_args(left, right):
 
 def get_map_so(obj1, obj2, index):
     """
-    This function takes a SOM and returns the first SO for use in mapping. If
-    the object is a SO, it is immediately returned.
+    This function takes a C{SOM} and returns the first C{SO} for use in
+    mapping. If the object is a C{SO}, it is immediately returned.
 
-    Parameters:
-    ----------
-    -> obj1 is a SOM, SO or tuple
-    -> obj2 is a SOM, SO or tuple
+    @param obj1: Object from which to retrieve mapping object
+    @type obj1: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+    
+    @param obj2: Object from which to retrieve mapping object
+    @type obj2: C{SOM.SOM}, C{SOM.SO} or C{tuple}
 
-    Returns:
-    -------
-    <- A mapping SO (can be None if obj is a tuple or empty
+
+    @return: A mapping object (can be C{None} if obj is a C{tuple} or empty)
+    @rtype: C{SOM.SO}
     """
 
     obj1_type = get_type(obj1)
@@ -460,23 +491,36 @@ def copy_som_attr(result, res_descr, obj1, obj1_descr,
     """
     This function takes a result object and one or two other arbitrary
     objects and copies the attributes from the objects to the result object if
-    the arbitrary objects are SOMs.
+    the arbitrary objects are C{SOM}s.
 
-    Parameters:
-    ----------
-    -> result is SOM, SO or tuple
-    -> res_descr is the descriptor for the result object
-    -> obj1 is SOM, SO or tuple
-    -> obj1_descr is the descriptor for the obj1 object
-    -> obj2 (OPTIONAL) is SOM, SO or tuple
-    -> obj2_descr (OPTIONAL) is the descriptor for the obj2 object
-    -> force (OPTIONAL) is a flag that says which object to copy last
-    -> add_nxpars (OPTIONAL) is a flag that determines if NxParameters in the
-                             attribute list are added
+    @param result: Object to have its attributes copied
+    @type result: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+    
+    @param res_descr: The descriptor for the result object
+    @type res_descr: C{string}
+    
+    @param obj1: First object for attribute copying
+    @type obj1: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+    
+    @param obj1_descr: The descriptor for the obj1 object
+    @type obj1_descr: C{string}
 
-    Returns:
-    -------
-    <- A SOM with copied attributes
+    @param obj2: (OPTIONAL) Second object for attribute copying
+    @type obj2: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+    
+    @param obj2_descr: (OPTIONAL) The descriptor for the obj2 object
+    @type obj2_descr: C{string}    
+
+    @param force: (OPTIONAL) Flag that says which object to copy last
+    @type force: C{boolean}
+    
+    @param add_nxpars: (OPTIONAL) Flag that determines if C{NxParameters} in
+                                  the attribute list are added
+    @type add_nxpars: C{boolean}
+
+                             
+    @return: Object with copied attributes
+    @rtype: C{SOM.SOM} 
     """
 
     if res_descr != SOM_type:
@@ -501,20 +545,21 @@ def get_parameter(param, so, inst):
     the appropriate parameter based on the parameter string. The SO is used
     to obtain the spectrum ID for the Instrument object.
 
-    Parameters:
-    ----------
-    -> param is the string containing the requested parameter
-    -> so is the required SO for the id
-    -> inst is the instrument object from which to fetch the parameter
-       information
+    @param param: The requested parameter
+    @type param: C{string}
+    
+    @param so: The required C{SO} for the id
+    @type so: C{SOM.SO}
+    
+    @param inst: Object from which to fetch the parameter information
+    @type inst: C{SOM.Instrument} or C{SOM.CompositeInstrument}
 
-    Returns:
-    -------
-    <- The result parameter and its associated error in a tuple
 
-    Exceptions:
-    ----------
-    <- RuntimeError is raised is a SO is not passed
+    @return: The parameter and its associated error^2
+    @rtype: C{tuple}
+
+
+    @raise RuntimeError: A C{SO} is not passed to the function
     """
 
     try:
@@ -539,21 +584,22 @@ def get_parameter(param, so, inst):
 
 def get_special(info, so):
     """
-    This function takes an Information or CompositeInformation object and a SO
-    and returns the appropriate tuple (value,err2) for the pixel ID contained
-    in the SO. If the object in not an Information object, but a tuple, the
-    function handles that case by just returning the tuple.
+    This function takes an information object and returns the appropriate
+    information for the pixel ID contained in the C{SO}. If the information
+    object in not an C{Information} object, but a C{tuple}, the function
+    handles that case by just returning the C{tuple}.
 
-    Parameters:
-    ----------
-    -> info is an Information, CompositeInformation object or a tuple
-       containing values and errors associated with the particular information
-    -> so is a SO that contains the spectrum ID to interrogate the info object
-       for its information
+    @param info: Object containing values and errors associated with the
+                 particular information
+    @type info: C{SOM.Information}, C{SOM.CompositeInformation} or C{tuple}
+    
+    @param so: Object that contains the spectrum ID to interrogate the info
+               object for its information
+    @type so: C{SOM.SO}
 
-    Return:
-    ------
-    <- A tuple containing the value and error^2 of the information
+
+    @return: A object containing the value and error^2 of the information
+    @rtype: C{tuple}
     """
 
     try:
@@ -563,16 +609,15 @@ def get_special(info, so):
 
 def check_lojac(obj):
     """
-    This function takes an data set (SOM, SO, list of tuples or tuple) and
-    determined if the linear-order Jacobian (lojac) should be calculated.
+    This function takes an data set and determines if the linear-order
+    Jacobian (lojac) should be calculated.
 
-    Parameters:
-    ----------
-    -> obj is a SOM, SO, list of tuples or a tuple
+    @param obj: Object to check if lojac should be calculated
+    @type obj: C{SOM.SOM}, C{SOM.SO}, C{list} of C{tuple}s or a C{tuple}
 
-    Returns:
-    -------
-    <- A boolean determining the calculation of lojac
+
+    @return: Determination for the calculation of lojac
+    @rtype: C{boolean}
     """
 
     descr = get_type(obj)

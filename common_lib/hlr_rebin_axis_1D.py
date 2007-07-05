@@ -24,22 +24,23 @@
 
 def rebin_axis_1D(obj, axis_out):
     """
-    This function rebins the primary axis for a SOM or a SO based on the
-    given NessiList axis.
+    This function rebins the primary axis for a C{SOM} or a C{SO} based on the
+    given C{NessiList} axis.
 
-    Parameters:
-    ----------
-    -> obj is the SOM or SO to be rebinned
-    -> axis_out is a NessiList containing the axis to rebin the SOM or SO to
+    @param obj: Object to be rebinned
+    @type obj: C{SOM.SOM} or C{SOM.SO}
+    
+    @param axis_out: The axis to rebin the C{SOM} or C{SO} to
+    @type axis_out: C{NessiList}
 
-    Returns:
-    -------
-    <- A SOM or SO that has been rebinned according to the provided axis
 
-    Exceptions:
-    ----------
-    <- TypeError is raised if the rebinning axis given is not a NessiList
-    <- TypeError is raised if object being rebinned is not a SOM or a SO
+    @return: Object that has been rebinned according to the provided axis
+    @rtype: C{SOM.SOM} or C{SOM.SO}
+
+
+    @raise TypeError: The rebinning axis given is not a C{NessiList}
+    
+    @raise TypeError: The object being rebinned is not a C{SOM} or a C{SO}
     """
 
     # import the helper functions

@@ -24,41 +24,51 @@
 
 def d_spacing_to_tof_focused_det(obj, **kwargs):
     """
-    This function converts a primary axis of a SOM or SO from d-spacing to
-    a focused time-of-flight. The focusing is done using the geometry
-    information from a single detector pixel. The d-spacing axis for a SOM
-    must be in units of Angstroms. The primary axis of a SO is assumed to be
-    in units of Angstroms.
+    This function converts a primary axis of a C{SOM} or C{SO} from d-spacing
+    to a focused time-of-flight. The focusing is done using the geometry
+    information from a single detector pixel. The d-spacing axis for a C{SOM}
+    must be in units of I{Angstroms}. The primary axis of a C{SO} is assumed
+    to be in units of I{Angstroms}.
 
-    Parameters:
-    ----------
-    -> obj is the SOM or SO to be converted
-    -> kwargs is a list of key word arguments that the function accepts:
-          polar= a tuple or list of tuples containing the polar angle and
-                 its associated error^2
-          pathlength= a tuple or list of tuples containing the pathlength and
-                      its associated error^2
-          pixel_id= a string containing the pixel ID from which the geometry
-                    information will be retrieved from the instrument
-          verbose=<boolean> This determines if the pixel geometry
-                            information is printed. The default is False
-          units= a string containing the expected units for this function.
-                 The default for this function is microseconds
+    @param obj: Object to be converted
+    @type obj: C{SOM.SOM} or C{SOM.SO}
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
+    
+    @keyword polar: The polar angle and its associated error^2
+    @type polar: C{tuple} or C{list} of C{tuple}s
+    
+    @keyword pathlength: The total pathlength and its associated error^2
+    @type pathlength: C{tuple} or C{list} of C{tuple}s
+    
+    @keyword pixel_id: The pixel ID from which the geometry information will
+                       be retrieved from the instrument
+    @type pixel_id: C{tuple}=(\"bankN\", (x, y))
+    
+    @keyword verbose: This determines if the pixel geometry information is
+                      printed. The default is False
+    @type verbose: C{boolean}
+    
+    @keyword units: The expected units for this function. The default for
+                    this function is I{microseconds}.
+    @type units: C{string}
 
-    Returns:
-    -------
-    <- A SOM or SO with a primary axis in d-spacing converted to time-of-flight
 
-    Exceptions:
-    ----------
-    <- RuntimeError is raised if a SOM or SO is not provided to the function
-    <- RuntimeError is raised if no instrument is provided in a SOM
-    <- RuntimeError is raised if no SOM is given and both the pathlength and
-       polar angle are not provided
-    <- RuntimeError is raised if no SOM is given and the pathlength is not
-       provided
-    <- RuntimeError is raised if no SOM is given and the polar angle is not
-       provided
+    @return: Object with a primary axis in d-spacing converted to
+             time-of-flight
+    @rtype: C{SOM.SOM} or C{SOM.SO}
+
+ 
+    @raise RuntimeError: A C{SOM} or C{SO} is not provided to the function
+    
+    @raise RuntimeError: No C{SOM.Instrument} is provided in a C{SOM}
+    
+    @raise RuntimeError: No C{SOM} is given and both the pathlength and polar
+                         angle are not provided
+                         
+    @raise RuntimeError: No C{SOM} is given and the pathlength is not provided
+    
+    @raise RuntimeError: No C{SOM} is given and the polar angle is not provided
     """
 
     # import the helper functions
@@ -103,13 +113,13 @@ def d_spacing_to_tof_focused_det(obj, **kwargs):
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
     if o_descr == "SOM":
-        axis = hlr_utils.hlr_1D_units(obj, units)
+        axis = hlr_utils.one_d_units(obj, units)
     else:
         axis = 0
 
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
     if res_descr == "SOM":
-        result = hlr_utils.hlr_force_units(result, "microseconds", axis)
+        result = hlr_utils.force_units(result, "microseconds", axis)
         result.setAxisLabel(axis, "time-of-flight")
         result.setYUnits("Counts/usec")
         result.setYLabel("Intensity")

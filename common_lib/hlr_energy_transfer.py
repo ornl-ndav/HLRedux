@@ -24,27 +24,37 @@
 
 def energy_transfer(left, right, **kwargs):
     """
-    This function takes a tuple and a SOM, a tuple and a SO or two tuples and
-    calculates the energy transfer in units of THz. The SOM principle axis
-    must be in units of meV. The SO and tuples are assumed to be in units of
-    meV.
+    This function takes a C{tuple} and a C{SOM}, a C{tuple} and a C{SO} or two
+    C{tuple}s and calculates the energy transfer in units of I{THz}. The C{SOM}
+    principle axis must be in units of I{meV}. The C{SO} and C{tuple}s are
+    assumed to be in units of I{meV}.
 
-    Parameters:
-    ----------
-    -> left is a SOM, SO or tuple on the left side of the subtraction
-    -> right is a SOM, SO or tuple on the right side of the subtraction
-    -> kwargs is a list of key word arguments that the function accepts:
-          units= a string containing the expected units for this function.
-                 The default for this function is meV
+    @param left: Object on the left side of the subtraction
+    @type left: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+    
+    @param right: Object on the right side of the subtraction
+    @type right: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
+    
+    @keyword units: The expected units for this function. The default for this
+                    function is I{meV}
+    @type units: C{string}
 
-    Return:
-    ------
-    <- A SOM, SO or tuple based on left - right in units of THz
 
-    Exceptions:
-    ----------
+    @return: Object based on left - right in units of I{THz}
+    @rtype: C{SOM.SOM}, C{SOM.SO} or C{tuple}
 
-    <- RuntimeError is raised if the x-axis units are not meV
+
+    @raise RuntimeError: The x-axis units are not I{meV}
+
+    @raise TypeError: C{SOM}-C{SOM} operation not supported
+
+    @raise TypeError: C{SOM}-C{SO} operation not supported
+
+    @raise TypeError: C{SO}-C{SOM} operation not supported
+
+    @raise TypeError: C{SO}-C{SO} operation not supported
     """
 
     # import the helper functions
@@ -75,8 +85,8 @@ def energy_transfer(left, right, **kwargs):
     result = hlr_utils.copy_som_attr(result, res_descr, left, l_descr,
                                      right, r_descr)
     if res_descr == "SOM":
-        index = hlr_utils.hlr_1D_units(result, units)
-        result = hlr_utils.hlr_force_units(result, "THz", index)
+        index = hlr_utils.one_d_units(result, units)
+        result = hlr_utils.force_units(result, "THz", index)
         result.setAxisLabel(index, "energy transfer")
         result.setYUnits("Counts/THz")
         result.setYLabel("Intensity")

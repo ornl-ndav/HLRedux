@@ -1,0 +1,61 @@
+<!--$Id$-->
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
+<head>
+<title>High-Level Reduction Functions Documentation Main Page</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link href="material/style.css" rel="stylesheet" type="text/css">
+<link href="material/code.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+
+<center>
+<img src="images/NScD-logo.png" />
+</center>
+
+<h1>High-Level Reduction Functions Documentation</h1>
+
+<h2>Interface Documentation (Version: 1.0.0itc9)</h2>
+<a href="html/index.html"><h3>API</h3></a>
+
+<h2>Usage Issues</h2>
+<p>
+The API documentation presented in the link above provides a slightly 
+misleading interpretation of how to use the functions in 
+<span class="text">common_lib</span>, <span class="text">dr_lib</span>, 
+<span class="text">hlr_utils</span> and <span class="text">hlr_test</span> 
+from a Python interpreter session or from within a Python script/module. From 
+the documentation, one might get the impression that the proper usage is:
+</p>
+<p>
+<pre class="cli"> >>> common_lib.hlr_add_ncerr.add_ncerr</pre>
+</p>
+<p>
+which looks like 
+<span class="text">package_name.file_name.function_name</span>.
+However, due to the way the package is configured to install, the correct 
+usage is:
+</p>
+<p>
+<pre class="cli"> >>> common_lib.add_ncerr</pre>
+</p>
+<p>
+No file name is present in the correct usage scenario.
+</p>
+<p>
+The data reduction driver scripts in <span class="text">drivers.XXX</span> can 
+be used either as a command-line script via the analogous shell script with 
+the same name as the driver except without the 
+<span class="text">drivers.XXX</span> or the driver can be imported and the 
+<span class="cmd">run</span> function can be used. The drivers contain their 
+own help documentation which can be accessed by doing:
+</p>
+<p>
+<pre class="cli"> >>> amorphous_reduction -h</pre>
+</p>
+</body>
+<iframe src="material/security.html" frameborder=0 width=100% height=150>
+</iframe>
+</html>

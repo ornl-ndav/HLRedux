@@ -24,35 +24,38 @@
 
 def tof_to_scalar_Q(obj, **kwargs):
     """
-    This function converts a primary axis of a SOM or SO from time-of-flight
-    to scalar_Q. The time-of-flight axis for a SOM must be in units of
-    microseconds. The primary axis of a SO is assumed to be in units of
-    microseconds. A tuple of [time-of-flight, time-of-flight_err2] (assumed to
-    be in units of microseconds) can be converted to [scalar_Q, scalar_Q_err2].
+    This function converts a primary axis of a C{SOM} or C{SO} from
+    time-of-flight to scalarQ. The time-of-flight axis for a C{SOM} must be in
+    units of I{microseconds}. The primary axis of a C{SO} is assumed to be in
+    units of I{microseconds}. A C{tuple} of C{(time-of-flight,
+    time-of-flight_err2)} (assumed to be in units of I{microseconds}) can be
+    converted to C{(scalar_Q, scalar_Q_err2)}.
 
-    Parameters:
-    ----------
-    -> obj is the SOM, SO or tuple to be converted
-    -> kwargs is a list of key word arguments that the function accepts:
-          polar= a tuple or list of tuples containing the polar angle and
-                 its associated error^2
-          pathlength= a tuple or list of tuples containing the pathlength and
-                      its associated error^2
-          units= a string containing the expected units for this function.
-                 The default for this function is microseconds
+    @param obj: Object to be converted
+    @type obj: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
+    
+    @keyword polar: The polar angle and its associated error^2
+    @type polar: C{tuple} or C{list} of C{tuple}s
+    
+    @keyword pathlength: The pathlength and its associated error^2
+    @type pathlength: C{tuple} or C{list} of C{tuple}s
+    
+    @keyword units: The expected units for this function. The default for this
+                    function is I{microseconds}.
+    @type units: C{string}
  
-    Return:
-    ------
-    <- A SOM or SO with a primary axis in time-of-flight or a tuple converted
-       to scalar_Q
 
-    Exceptions:
-    ----------
-    <- TypeError is raised if the incoming object is not a type the function
-       recognizes
-    <- RuntimeError is raised if a SOM is not passed and no polar angle is
-       provided
-    <- RuntimeError is raised if the SOM x-axis units are not microseconds
+    @return: Object with a primary axis in time-of-flight converted to scalar Q
+    @rtype: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+
+
+    @raise TypeError: The incoming object is not a type the function recognizes
+    
+    @raise RuntimeError: A C{SOM} is not passed and no polar angle is provided
+    
+    @raise RuntimeError: The C{SOM} x-axis units are not I{microseconds}
     """
     
     # import the helper functions
@@ -87,13 +90,13 @@ def tof_to_scalar_Q(obj, **kwargs):
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
     if o_descr == "SOM":
-        axis = hlr_utils.hlr_1D_units(obj, units)
+        axis = hlr_utils.one_d_units(obj, units)
     else:
         axis = 0
 
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
     if res_descr == "SOM":
-        result = hlr_utils.hlr_force_units(result, "1/Angstroms", axis)
+        result = hlr_utils.force_units(result, "1/Angstroms", axis)
         result.setAxisLabel(axis, "scalar wavevector transfer")
         result.setYUnits("Counts/A-1")
         result.setYLabel("Intensity")

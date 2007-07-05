@@ -25,19 +25,22 @@
 def determine_time_indep_bkg(obj, tof_vals, **kwargs):
     """
     This functions calculates the average counts at four given TOF channels
-    for determining the time-independent background. The incoming object must
-    be a SOM or a SO.
+    for determining the time-independent background. 
 
-    Parameters:
-    ----------
-    -> obj is a SOM used for determining the time-independent background
-    -> tof_vals is the four TOF channels from which the average counts will
-       be determined
+    @param obj: Object used for determining the time-independent background
+    @type obj: C{SOM.SOM} or C{SOM.SO}
+    
+    @param tof_vals: The four TOF channels from which the average counts will
+    be determined
+    @type tof_vals: C{list}
 
-    Returns:
-    -------
-    <- A list of tuples containing the time-independent background and the
-       associated error 
+       
+    @return: Object containing the time-independent background and the
+    associated error
+    @rtype: C{list} of C{tuple}s
+    
+
+    @raise TypeError: The incoming object is not a C{SOM} or C{SO}.
     """
 
     # Kickout if tof_vals is NoneType

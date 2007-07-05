@@ -41,7 +41,8 @@ from HLR_version import version as __version__
 PACKAGE = "HLRedux"
 VERSION = __version__
 
-package_list = ['', 'common_lib', 'dr_lib', 'hlr_utils', 'hlr_test']
+package_list = ['', 'common_lib', 'dr_lib', 'drivers.GEN', 'drivers.IGS',
+                'drivers.REF', 'hlr_utils', 'hlr_test']
 
 instrument_scripts = {
     "ASG" : [
@@ -59,22 +60,17 @@ instrument_scripts = {
     ],
     "IGS" : [
     'amorphous_reduction',
+    'amorphous_reduction_sqe',
     'bss_tof_spect_gen',
     'bss_tof_sum_gen',
     'calc_norm_eff',
-    'delta_E0',
+    'find_tib',
     'igs_diff_reduction'
     ],
     "PD" : [
     ],
     "REF" : [
-    'get_specular_background',
-    'incident_spectrum_ratio',
-    'reflect_reduction',
-    'reflect_tofred',
-    'rocking_curve',
-    'specular_area',
-    'specular_point'
+    'reflect_reduction'
     ],
     "SAS" : [
     ],

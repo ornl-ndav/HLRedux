@@ -27,50 +27,74 @@ import SOM
 
 def create_X_vs_pixpos(som, *args, **kwargs):
     """
-    This function takes a SOM of single spectrum with any given axes
+    This function takes a group of single spectrum with any given axes
     (wavelength, energy etc.) and rebins those axes to the given axis and
-    converts the spectra into a single I(X, pixel) spectrum.
+    converts the spectra into a single I{I(X, pixel)} spectrum.
 
-    Parameters:
-    ----------
-    -> som is the input SOM with arbitrary (but same) axis SOs
-    -> *args is a mandatory list of axes for rebinning.  There is a particular
-       order to them. They should be present in the following order:
-       Without errors
-       1. Axis
-       With errors
-       1. Axis
-       2. Axis error^2
-       
-    -> **kwargs is a dictionary of optional keywords that pass information to
-       the function. Here are the currently accepted keywords:
-       - withXVar=<string>. The string will either be True or False. If the
-                  keyword is not present, the default value will be False
-       - data_type=<string> The string can be either histogram, density or
-                   coordinate. If the keyword is not present, the default
-                   value will be histogram
-       - so_id=<identifier> The identifier represents a number, string, tuple
-               or other object that describes the resulting SO
-       - y_label=<string> This is a string that sets the y axis label
-       - y_units=<string> This is a string that sets the y axis units
-       - x_labels=<list of strings> This is a list of strings that sets the
-                  individual x axes labels
-       - x_units=<list of string> This is a list of strings that sets the
-                 individual x axes units
-       - rebin=<boolean> Flag for turning rebin on or off. Default is True
+    @param som: The input object with arbitrary (but same) axis spectra
+    @type som: C{SOM.SOM}
+    
+    @param args: A mandatory list of axes for rebinning.  There is a particular
+                 order to them. They should be present in the following order:
+    
+                 Without errors
+                   1. Axis
+                 With errors
+                   1. Axis
+                   2. Axis error^2
+    @type args: C{nessi_list.NessiList}s
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
+    
+    @keyword withXVar: Flag for whether the function should be expecting the
+                       associated axes to have errors. The default value will
+                       be I{False}.
+    @type withXVar: C{boolean}
 
-    Returns:
-    -------
-    <- A SOM with a single 2D SO with the given axis and global pixel position
+    @keyword data_type: Name of the data type which can be either I{histogram},
+                        I{density} or I{coordinate}. The default value will be
+                        I{histogram}
+    @type data_type: C{string}
+    
+    @keyword Q_filter: Flag to turn on or off Q filtering. The default behavior
+                       is I{True}.
+    @type Q_filter: C{boolean}
+    
+    @keyword so_id: The identifier represents a number, string, tuple or other
+                    object that describes the resulting C{SO}
+    @type so_id: C{int}, C{string}, C{tuple}, C{pixel ID}
+    
+    @keyword y_label: The y axis label
+    @type y_label: C{string}
+    
+    @keyword y_units: The y axis units
+    @type y_units: C{string}
+    
+    @keyword x_labels: This is a list of names that sets the individual x axis
+    labels
+    @type x_labels: C{list} of C{string}s
+    
+    @keyword x_units: This is a list of names that sets the individual x axis
+    units
+    @type x_units: C{list} of C{string}s
 
-    Exceptions:
-    ----------
-    <- RuntimeError is raised if the parameter given to the keyword argument
-       withXVar is not True or False
-    <- RuntimeError is raised if the parameter given to the keyword argument
-       data_type is not histogram or density or coordinate
-    <- RuntimeError is raised is the number of given arguments (x-axes) is not
-       either 2 (no errors) or 4 (with errors)
+    @keyword rebin: Flag for turning rebin on or off. Default is I{True}.
+    @type rebin: C{boolean}
+
+
+    @return: Object with a single 2D C{SO} with the given axis and global pixel
+             position
+    @rtype: C{SOM.SOM}
+
+
+    @raise RuntimeError: The parameter given to the keyword argument withXVar
+                         is not I{True} or I{False}
+                         
+    @raise RuntimeError: The parameter given to the keyword argument data_type
+                         is not I{histogram} or I{density} or I{coordinate}.
+                         
+    @raise RuntimeError: The number of given arguments (x-axes) is not either 2
+                         (no errors) or 4 (with errors)
     """
 
     import common_lib

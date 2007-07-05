@@ -24,33 +24,38 @@
 
 def wavelength_to_scalar_Q(obj, **kwargs):
     """
-    This function converts a primary axis of a SOM or SO from wavelength
-    to scalar_Q. The wavelength axis for a SOM must be in units of
-    Angstroms. The primary axis of a SO is assumed to be in units of
-    Angstroms. A tuple of [wavelength, wavelength_err2] (assumed to be in
-    units of Angstroms) can be converted to [scalar_Q, scalar_Q_err2].
+    This function converts a primary axis of a C{SOM} or C{SO} from wavelength
+    to scalar Q. The wavelength axis for a C{SOM} must be in units of
+    I{Angstroms}. The primary axis of a C{SO} is assumed to be in units of
+    I{Angstroms}. A C{tuple} of C{(wavelength, wavelength_err2)} (assumed to
+    be in units of I{Angstroms}) can be converted to C{(scalar_Q,
+    scalar_Q_err2)}.
 
-    Parameters:
-    ----------
-    -> obj is the SOM, SO or tuple to be converted
-    -> kwargs is a list of key word arguments that the function accepts:
-          polar= a tuple or list of tuples containing the polar angle and
-                 its associated error^2
-          units= a string containing the expected units for this function.
-                 The default for this function is Angstroms
+    @param obj: Object to be converted
+    @type obj: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
+    
+    @keyword polar: The polar angle and its associated error^2
+    @type polar: C{tuple} or C{list} of C{tuple}s
+    
+    @keyword pathlength: The pathlength and its associated error^2
+    @type pathlength: C{tuple} or C{list} of C{tuple}s
+    
+    @keyword units: The expected units for this function. The default for this
+                    function is I{Angstroms}.
+    @type units: C{string}
  
-    Return:
-    ------
-    <- A SOM or SO with a primary axis in wavelength or a tuple converted to
-       scalar_Q
 
-    Exceptions:
-    ----------
-    <- TypeError is raised if the incoming object is not a type the function
-       recognizes
-    <- RuntimeError is raised if a SOM is not passed and no polar angle is
-       provided
-    <- RuntimeError is raised if the SOM x-axis units are not Angstroms
+    @return: Object with a primary axis in wavelength converted to scalar Q
+    @rtype: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+
+
+    @raise TypeError: The incoming object is not a type the function recognizes
+    
+    @raise RuntimeError: A C{SOM} is not passed and no polar angle is provided
+    
+    @raise RuntimeError: The C{SOM} x-axis units are not I{Angstroms}
     """
     
     # import the helper functions
@@ -77,16 +82,21 @@ def wavelength_to_scalar_Q(obj, **kwargs):
     except KeyError:
         units = "Angstroms"
 
+    try:
+        lojac = kwargs["lojac"]
+    except KeyError:
+        lojac = hlr_utils.check_lojac(obj)
+
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
     if o_descr == "SOM":
-        axis = hlr_utils.hlr_1D_units(obj, units)
+        axis = hlr_utils.one_d_units(obj, units)
     else:
         axis = 0
 
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
     if res_descr == "SOM":
-        result = hlr_utils.hlr_force_units(result, "1/Angstroms", axis)
+        result = hlr_utils.force_units(result, "1/Angstroms", axis)
         result.setAxisLabel(axis, "scalar wavevector transfer")
         result.setYUnits("Counts/A-1")
         result.setYLabel("Intensity")
@@ -108,6 +118,8 @@ def wavelength_to_scalar_Q(obj, **kwargs):
 
     # iterate through the values
     import axis_manip
+    if lojac:
+        import utils
     
     for i in xrange(hlr_utils.get_length(obj)):
         val = hlr_utils.get_value(obj, i, o_descr, "x", axis)
@@ -124,6 +136,14 @@ def wavelength_to_scalar_Q(obj, **kwargs):
 
         value = axis_manip.wavelength_to_scalar_Q(val, err2, angle, angle_err2)
 
+        if lojac:
+            y_val = hlr_utils.get_value(obj, i, o_descr, "y")
+            y_err2 = hlr_utils.get_err2(obj, i, o_descr, "y")
+            counts = utils.linear_order_jacobian(val, value[0],
+                                                 y_val, y_err2)
+        else:
+            pass
+
         if o_descr != "number":
             value1 = axis_manip.reverse_array_cp(value[0])
             value2 = axis_manip.reverse_array_cp(value[1])
@@ -132,8 +152,12 @@ def wavelength_to_scalar_Q(obj, **kwargs):
             rev_value = value
 
         if map_so is not None:
-            map_so.y = axis_manip.reverse_array_cp(map_so.y)
-            map_so.var_y = axis_manip.reverse_array_cp(map_so.var_y)
+            if not lojac:
+                map_so.y = axis_manip.reverse_array_cp(map_so.y)
+                map_so.var_y = axis_manip.reverse_array_cp(map_so.var_y)
+            else:
+                map_so.y = axis_manip.reverse_array_cp(counts[0])
+                map_so.var_y = axis_manip.reverse_array_cp(counts[1])
         else:
             pass
         

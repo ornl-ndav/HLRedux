@@ -24,33 +24,35 @@
 
 def wavelength_to_d_spacing(obj, **kwargs):
     """
-    This function converts a primary axis of a SOM or SO from wavelength
-    to d-spacing. The wavelength axis for a SOM must be in units of
-    Angstroms. The primary axis of a SO is assumed to be in units of
-    Angstroms. A tuple of [wavelength, wavelength_err2] (assumed to be in
-    units of Angstroms) can be converted to [d_spacing, d_spacing_err2].
+    This function converts a primary axis of a C{SOM} or C{SO} from wavelength
+    to d-spacing. The wavelength axis for a C{SOM} must be in units of
+    I{Angstroms}. The primary axis of a C{SO} is assumed to be in units of
+    I{Angstroms}. A C{tuple} of C{(wavelength, wavelength_err2)} (assumed to
+    be in units of I{Angstroms}) can be converted to C{(d_spacing,
+    d_spacing_err2)}.
 
-    Parameters:
-    ----------
-    -> obj is the SOM, SO or tuple to be converted
-    -> kwargs is a list of key word arguments that the function accepts:
-          polar= a tuple or list of tuples containing the polar angle and
-                 its associated error^2
-          units= a string containing the expected units for this function.
-                 The default for this function is Angstroms
- 
-    Return:
-    ------
-    <- A SOM or SO with a primary axis in wavelength or a tuple converted to
-       d-spacing
+    @param obj: Object to be converted
+    @type obj: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
+    
+    @keyword polar:The polar angle and its associated error^2
+    @type polar: C{tuple}
 
-    Exceptions:
-    ----------
-    <- TypeError is raised if the incoming object is not a type the function
-       recognizes
-    <- RuntimeError is raised if a SOM is not passed and no polar angle is
-       provided
-    <- RuntimeError is raised if the SOM x-axis units are not Angstroms
+    @keyword units: The expected units for this function. The default for this
+                    function is I{Angstroms}
+    @type units: C{string}
+
+
+    @return: Object with a primary axis in wavelength converted to d-spacing
+    @rtype: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+
+
+    @raise TypeError: The incoming object is not a type the function recognizes
+
+    @raise RuntimeError: A C{SOM} is not passed and no polar angle is provided
+
+    @raise RuntimeError: The C{SOM} x-axis units are not I{Angstroms}
     """
     
     # import the helper functions
@@ -80,13 +82,13 @@ def wavelength_to_d_spacing(obj, **kwargs):
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
     if o_descr == "SOM":
-        axis = hlr_utils.hlr_1D_units(obj, units)
+        axis = hlr_utils.one_d_units(obj, units)
     else:
         axis = 0
 
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
     if res_descr == "SOM":
-        result = hlr_utils.hlr_force_units(result, "Angstroms", axis)
+        result = hlr_utils.force_units(result, "Angstroms", axis)
         result.setAxisLabel(axis, "d-spacing")
         result.setYUnits("Counts/A")
         result.setYLabel("Intensity")

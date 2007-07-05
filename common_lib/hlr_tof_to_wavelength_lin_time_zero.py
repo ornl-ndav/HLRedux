@@ -24,46 +24,57 @@
 
 def tof_to_wavelength_lin_time_zero(obj, **kwargs):
     """
-    This function converts a primary axis of a SOM or SO from time-of-flight
-    to wavelength incorporating a linear time zero which is a described as a
-    linear function of the wavelength. The time-of-flight axis for a SOM must
-    be in units of microseconds. The primary axis of a SO is assumed to be in
-    units of microseconds. A tuple of (tof, tof_err2) (assumed to be in units
-    of microseconds) can be converted to (wavelength, wavelength_err2).
+    This function converts a primary axis of a C{SOM} or C{SO} from
+    time-of-flight to wavelength incorporating a linear time zero which is a
+    described as a linear function of the wavelength. The time-of-flight axis
+    for a C{SOM} must be in units of I{microseconds}. The primary axis of a
+    C{SO} is assumed to be in units of I{microseconds}. A C{tuple} of C{(tof,
+    tof_err2)} (assumed to be in units of I{microseconds}) can be converted to
+    C{(wavelength, wavelength_err2)}.
 
-    Parameters:
-    ----------
-    -> obj is the SOM, SO or tuple to be converted
-    -> kwargs is a list of key word arguments that the function accepts:
-          pathlength= a tuple or list of tuples containing the pathlength and
-                      its associated error^2
-          time_zero_slope= a tuple containing the time zero slope and its
-                           associated error^2
-          time_zero_offset= a tuple containing the time zero offset and its
-                            associated error^2                     
-          inst_param= a string containing the type of parameter requested
-                      from an associated instrument. For this function the
-                      acceptable parameters are primary, secondary and total.
-                      Default is primary.
-          lojac=<boolean> is a flag that allows one to turn off the
-                          calculation of the linear-order Jacobian. The
-                          default action is True for histogram data.
-          units= a string containing the expected units for this function.
-                 The default for this function is microseconds
+    @param obj: Object to be converted
+    @type obj: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
+    
+    @keyword pathlength: The pathlength and its associated error^2
+    @type pathlength: C{tuple} or C{list} of C{tuple}s
 
-    Return:
-    ------
-    <- A SOM or SO with a primary axis in wavelength or a tuple converted to
-       wavelength
+    @keyword time_zero_slope: The time zero slope and its associated error^2
+    @type time_zero_slope: C{tuple}
 
-    Exceptions:
-    ----------
-    <- TypeError is raised if the incoming object is not a type the function
-       recognizes
-    <- RuntimeError is raised if the SOM x-axis units are not microseconds
-    <- RuntimeError is raised if a SOM does not contain an instrument and
-       no pathlength was provided
-    <- RuntimeError is raised is no SOM is provided and no pathlength given
+    @keyword time_zero_offset: The time zero offset and its associated error^2
+    @type time_zero_offset: C{tuple}
+
+    @keyword inst_param: The type of parameter requested from an associated
+                         instrument. For this function the acceptable
+                         parameters are I{primary}, I{secondary} and I{total}.
+                         Default is I{primary}.
+    @type inst_param: C{string}
+
+    @keyword lojac: A flag that allows one to turn off the calculation of the
+                    linear-order Jacobian. The default action is I{True} for
+                    histogram data.
+    @type lojac: C{boolean}
+
+    @keyword units: The expected units for this function. The default for this
+                    function is I{microseconds}.
+    @type units: C{string}
+ 
+
+    @return: Object with a primary axis in time-of-flight converted to
+             wavelength
+    @rtype: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+
+
+    @raise TypeError: The incoming object is not a type the function recognizes
+    
+    @raise RuntimeError: The C{SOM} x-axis units are not I{microseconds}
+    
+    @raise RuntimeError: A C{SOM} does not contain an instrument and no
+                         pathlength was provided
+                         
+    @raise RuntimeError: No C{SOM} is provided and no pathlength given
     """
 
     # import the helper functions
@@ -113,13 +124,13 @@ def tof_to_wavelength_lin_time_zero(obj, **kwargs):
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
     if o_descr == "SOM":
-        axis = hlr_utils.hlr_1D_units(obj, units)
+        axis = hlr_utils.one_d_units(obj, units)
     else:
         axis = 0
 
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
     if res_descr == "SOM":
-        result = hlr_utils.hlr_force_units(result, "Angstroms", axis)
+        result = hlr_utils.force_units(result, "Angstroms", axis)
         result.setAxisLabel(axis, "wavelength")
         result.setYUnits("Counts/A")
         result.setYLabel("Intensity")

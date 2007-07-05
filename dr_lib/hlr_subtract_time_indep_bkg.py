@@ -24,27 +24,28 @@
 
 def subtract_time_indep_bkg(obj, B_list):
     """
-    This function takes a SOM or a SO and a list of time-independent background
-    tuples and subtracts the numbers from the appropriate SO in the SOM or the
-    given SO. The list of tuples (could be just one tuple in the case of the
-    SO) is assumed to be in the same order as the SOs in the SOM.
+    This function takes spectrum object(s) and time-independent background
+    value(s) and subtracts the numbers from the appropriate spectrum. The
+    time-independent background number(s) are assumed to be in the same order
+    as the spectrum object(s).
 
-    Parameters:
-    ----------
-    -> obj is a SOM or SO from which to subtract the individual Bs from the
-       B_list
-    -> B_list are the time-independent backgrounds to subtract from the SOs in
-       the SOM or a SO
+    @param obj: Object from which to subtract the individual background numbers
+    @type obj: C{SOM.SOM} or C{SOM.SO}
+    
+    @param B_list: The time-independent backgrounds to subtract from the
+    individual spectra.
+    @type B_list: C{list} of C{tuple}s or C{tuple}
 
-    Return:
-    -------
-    <- A SOM or SO with the time-independent backgrounds subtracted
+    
+    @return: Object with the time-independent backgrounds subtracted
+    @rtype: C{SOM.SOM} or C{SOM.SO}
+    
 
-    Exceptions:
-    ----------
-    <- IndexError is raised if the B_list object is empty
-    <- TypeError is raised if the first argument is not a SOM or SO
-    <- RuntimeError is raised if the SOM and list are not the same length
+    @raise IndexError: The B_list object is empty
+    
+    @raise TypeError: The first argument is not a C{SOM} or C{SO}
+    
+    @raise RuntimeError: The C{SOM} and list are not the same length
     """
 
     if len(B_list) <= 0:

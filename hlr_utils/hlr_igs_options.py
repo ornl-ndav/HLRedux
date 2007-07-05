@@ -32,18 +32,34 @@ class IgsOptions(hlr_options.SNSOptions):
     reducing neutron scattering data with the data reduction drivers.
     """
 
-    def __init__(self, usage=None, option_list=None, version=None,
-                 conflict_handler='error', description=None, **kwargs):
+    def __init__(self, usage=None, option_list=None, options_class=None,
+                 version=None, conflict_handler='error', description=None,
+                 **kwargs):
         """
-        Constructor for IgsOptions
+        Constructor for C{IgsOptions}
 
-        Parameters:
-        ----------
-        -> usage (OPTIONAL) is a string that will print the correct usage of
-                 program in which the option class is used
-        -> option_list (OPTIONAL) is a list containing the alternative method
-                       of providing options
-        -> kwargs is a list of keyword arguments that the function accepts
+        @param usage: (OPTIONAL) The correct usage of program in which the
+                                 option class is used
+        @type usage: C{string}
+        
+        @param option_list: (OPTIONAL) A list containing the alternative method
+                                       of providing options
+        @type option_list: C{list}
+
+        @param options_class: (OPTIONAL) The options class type
+        @type options_class: C{optparse.Option}
+
+        @param version: (OPTIONAL) The program version
+        @type version: C{string}
+
+        @param conflict_handler: (OPTIONAL) How the parser handles conflicts
+                                            between options.
+        @type conflict_handler: C{string}
+
+        @param description: (OPTIONAL) The program description
+        @type description: C{string}
+        
+        @param kwargs: A list of keyword arguments that the function accepts:
         """
         # parent constructor
         hlr_options.SNSOptions.__init__(self, usage, option_list,
@@ -174,112 +190,156 @@ class IgsOptions(hlr_options.SNSOptions):
 
 def IgsConfiguration(parser, configure, options, args):
     """
-    This function sets the incoming Configure object with all the options that
-    have been specified via the IgsOptions object.
+    This function sets the incoming C{Configure} object with all the options
+    that have been specified via the C{IgsOptions} object.
 
-    Parameters:
-    ----------
-    -> parser is the IgsOptions parser object
-    -> configure is the Configure object
-    -> options is the parsed options from IgsOptions
-    -> args is the parsed arguments from IgsOptions
+    @param parser: The parser object
+    @type parser: L{hlr_utils.IgsOptions}
+    
+    @param configure: The configuration object
+    @type configure: L{hlr_utils.Configure}
+    
+    @param options: The parsed options from C{IgsOptions}
+    @type options: C{Option}
+
+    @param args: The parsed arguments from C{IgsOptions}
+    @type args: C{list}
     """
 
     # Call the configuration setter for SNSOptions
     hlr_options.SnsConfiguration(parser, configure, options, args, inst="IGS")
 
     # Set the ROI file
-    configure.roi_file = hlr_utils.determine_files(options.roi_file,
-                                                   one_file=True)
+    if hlr_utils.cli_provide_override(configure, "roi_file", "--roi-file"):
+        configure.roi_file = hlr_utils.determine_files(options.roi_file,
+                                                       one_file=True)
 
     # Set the monitor path
-    configure.mon_path = hlr_utils.create_data_paths(options.mon_path)
+    if hlr_utils.cli_provide_override(configure, "mon_path", "--mon-path"):
+        configure.mon_path = hlr_utils.NxPath(options.mon_path)
 
     # Set the dead time
-    configure.dead_time = hlr_utils.split_values(options.dead_time)
+    if hlr_utils.cli_provide_override(configure, "dead_time", "--dead-time"):
+        configure.dead_time = hlr_utils.DrParameterFromString(\
+            options.dead_time)
 
     # Set the time-independent background TOFs
-    if options.tib_tofs is not None:
-        configure.tib_tofs = options.tib_tofs.split(',')
-    else:
-        configure.tib_tofs = options.tib_tofs
+    if hlr_utils.cli_provide_override(configure, "tib_tofs", "--tib-tofs"):
+        if options.tib_tofs is not None:
+            configure.tib_tofs = options.tib_tofs.split(',')
+        else:
+            configure.tib_tofs = options.tib_tofs
 
     # Set the time-independent background constant for data
-    configure.tib_data_const = hlr_utils.split_values(options.tib_data_const)
+    if hlr_utils.cli_provide_override(configure, "tib_data_const",
+                                      "--tib-data-const"):
+        configure.tib_data_const = hlr_utils.DrParameterFromString(\
+                    options.tib_data_const, True)
 
     # Set the time-independent background constant for ecan
-    configure.tib_ecan_const = hlr_utils.split_values(options.tib_ecan_const)
+    if hlr_utils.cli_provide_override(configure, "tib_ecan_const",
+                                      "--tib-ecan-const"):
+        configure.tib_ecan_const = hlr_utils.DrParameterFromString(\
+                    options.tib_ecan_const, True)
 
     # Set the time-independent background constant for back
-    configure.tib_back_const = hlr_utils.split_values(options.tib_back_const)
+    if hlr_utils.cli_provide_override(configure, "tib_back_const",
+                                      "--tib-back-const"):    
+        configure.tib_back_const = hlr_utils.DrParameterFromString(\
+                    options.tib_back_const, True)
 
     # Set the time-independent background constant for norm
-    configure.tib_norm_const = hlr_utils.split_values(options.tib_norm_const)
+    if hlr_utils.cli_provide_override(configure, "tib_norm_const",
+                                      "--tib-norm-const"):    
+        configure.tib_norm_const = hlr_utils.DrParameterFromString(\
+                    options.tib_norm_const, True)
 
     # Set the normalization start wavelength
-    configure.norm_start = float(options.norm_start)
+    if hlr_utils.cli_provide_override(configure, "norm_start", "--norm_start"):
+        configure.norm_start = float(options.norm_start)
 
-    # Set the normalization end wavelength
-    configure.norm_end = float(options.norm_end)
+    # Set the normalization end wavelength 
+    if hlr_utils.cli_provide_override(configure, "norm_end", "--norm_end"):
+        configure.norm_end = float(options.norm_end)
 
     # Set no_mon_norm flag
-    configure.no_mon_norm = options.no_mon_norm
+    if hlr_utils.cli_provide_override(configure, "no_mon_norm",
+                                      "--no-mon-norm"):
+        configure.no_mon_norm = options.no_mon_norm
 
     # Set no_mon_effc flag
-    configure.no_mon_effc = options.no_mon_effc
+    if hlr_utils.cli_provide_override(configure, "no_mon_effc",
+                                      "--no-mon-effc"):
+        configure.no_mon_effc = options.no_mon_effc
 
     # Set the final wavelength
-    configure.wavelength_final = hlr_utils.split_values(\
-            options.wavelength_final)
+    if hlr_utils.cli_provide_override(configure, "wavelength_final",
+                                      "--wavelength-final"):    
+        configure.wavelength_final = hlr_utils.DrParameterFromString(\
+            options.wavelength_final, True)
 
     # Set the time-zero offset
-    configure.time_zero_offset = hlr_utils.split_values(\
-            options.time_zero_offset)
+    if hlr_utils.cli_provide_override(configure, "time_zero_offset",
+                                      "--time-zero-offset"):    
+        configure.time_zero_offset = hlr_utils.DrParameterFromString(\
+            options.time_zero_offset, True)
 
     # Set the time-zero slope
-    configure.time_zero_slope = hlr_utils.split_values(\
-            options.time_zero_slope)
+    if hlr_utils.cli_provide_override(configure, "time_zero_slope",
+                                      "--time-zero-slope"):    
+        configure.time_zero_slope = hlr_utils.DrParameterFromString(\
+            options.time_zero_slope, True)
 
     # Set the lambda bins for use with dump-mnorm-wave
-    if options.lambda_bins is not None:
-        lfacts = options.lambda_bins.split(',')
-        configure.lambda_bins = hlr_utils.make_axis(float(lfacts[0]),
-                                                    float(lfacts[1]),
-                                                    float(lfacts[2]))
-    else:
-        configure.lambda_bins = options.lambda_bins        
+    if hlr_utils.cli_provide_override(configure, "lambda_bins",
+                                      "--lambda-bins"):    
+        configure.lambda_bins = hlr_utils.AxisFromString(options.lambda_bins)
 
     # Set the ability to dump the time-independent background information
-    configure.dump_tib = options.dump_tib
+    if hlr_utils.cli_provide_override(configure, "dump_tib", "--dump-tib"): 
+        configure.dump_tib = options.dump_tib
 
     # Set the ability to dump the wavelength information
-    configure.dump_wave = options.dump_wave
+    if hlr_utils.cli_provide_override(configure, "dump_wave", "--dump-wave"):
+        configure.dump_wave = options.dump_wave
 
     # Set the ability to dump the monitor wavelength information
-    configure.dump_mon_wave = options.dump_mon_wave    
+    if hlr_utils.cli_provide_override(configure, "dump_mon_wave",
+                                      "--dump-mon-wave"):
+        configure.dump_mon_wave = options.dump_mon_wave    
 
     # Set the ability to dump the rebinned monitor wavelength information
-    configure.dump_mon_rebin = options.dump_mon_rebin
+    if hlr_utils.cli_provide_override(configure, "dump_mon_rebin",
+                                      "--dump-mon-rebin"):
+        configure.dump_mon_rebin = options.dump_mon_rebin
 
     # Set the ability to dump the efficiency corrected monitor wavelength
     # information
-    configure.dump_mon_effc = options.dump_mon_effc        
+    if hlr_utils.cli_provide_override(configure, "dump_mon_effc",
+                                      "--dump-mon-effc"):
+        configure.dump_mon_effc = options.dump_mon_effc        
 
     # Set the ability to dump the wavelength information
-    configure.dump_wave_mnorm = options.dump_wave_mnorm
+    if hlr_utils.cli_provide_override(configure, "dump_wave_mnorm",
+                                      "--dump-wave-mnorm"):
+        configure.dump_wave_mnorm = options.dump_wave_mnorm
 
-    if options.dump_all:
-        configure.dump_tib = True
-        configure.dump_wave = True
-        configure.dump_mon_wave = True
-        configure.dump_mon_wave = True
-        configure.dump_mon_effc = True
-        configure.dump_mon_rebin = True
-        configure.dump_wave_mnorm = True        
+    if hlr_utils.cli_provide_override(configure, "dump_all", "--dump-all"):
+        if options.dump_all:
+            configure.dump_tib = True
+            configure.dump_wave = True
+            configure.dump_mon_wave = True
+            configure.dump_mon_wave = True
+            configure.dump_mon_effc = True
+            configure.dump_mon_rebin = True
+            configure.dump_wave_mnorm = True        
 
     # Set the filter option
-    configure.filter = options.filter
+    if hlr_utils.cli_provide_override(configure, "filter", "--filter",
+                                      "--no-filter"):    
+        configure.filter = options.filter
 
     # Set MC option
-    configure.mc = options.mc
+    if hlr_utils.cli_provide_override(configure, "mc", "--mc"):
+        configure.mc = options.mc
     

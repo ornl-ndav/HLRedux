@@ -24,30 +24,36 @@
 
 def subtract_bkg_from_data(data_som, bkg_som, **kwargs):
     """
-    This function subtracts one data set from another. The data sets must be
-    either two SOMs, a SO and a SOM or a SOM and a SO.
+    This function subtracts one data set from another. 
 
-    Parameters:
-    ----------
-    -> data_som is a SOM or a SO containing the data to subtract from
-    -> bkg_som is a SOM or a SO containing the data to be subtracted
-    -> kwargs is a list of key word arguments that the function accepts:
-         dataset1=<string> is a the type name of the first dataset. Default is
-                           dataset1
-         dataset2=<string> is a the type name of the second dataset. Default is
-                           dataset2
-         verbose=<boolean> is a flag for turning on information from the
-                           function
-         timer=<DiffTime> provides a DiffTime object so the function can
-                          perform timing estimates
-    Returns:
-    -------
-    <- The data subtracted by the background 
+    @param data_som: Object containing the data to subtract from
+    @type data_som: C{SOM.SOM} or C{SOM.SO}
+    
+    @param bkg_som: Object containing the data to be subtracted
+    @type bkg_som: C{SOM.SOM} or C{SOM.SO}
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
+    
+    @keyword dataset1: The type name of the first dataset. Default is
+                       I{dataset1}.
+    @type dataset1: C{string}
+    
+    @keyword dataset2: The type name of the second dataset. Default is
+                       I{dataset2}.
+                       
+    @keyword verbose: A flag for turning on information from the function.
+    @type verbose: C{boolean}
 
-    Exceptions:
-    ----------
-    <- TypeError is raised if both objects are not SOMs, a SO and a SOM or
-       a SOM and a SO
+    @keyword timer: Timing object so the function can perform timing
+    @type timer: C{sns_timer.DiffTime}    
+ 
+
+    @return: The data subtracted by the background
+    @rtype: C{SOM.SOM} or C{SOM.SO}
+
+
+    @raise TypeError: Both objects are not C{SOM}s, a C{SO} and a C{SOM} or
+                      a C{SOM} and a C{SO}
     """
 
     # Kickout if data object is NoneType
@@ -64,7 +70,7 @@ def subtract_bkg_from_data(data_som, bkg_som, **kwargs):
     (data_descr, bkg_descr) = hlr_utils.get_descr(data_som, bkg_som)
 
     if data_descr == "SOM" and bkg_descr == "SOM":
-        hlr_utils.hlr_math_compatible(data_som, data_descr, bkg_som, bkg_descr)
+        hlr_utils.math_compatible(data_som, data_descr, bkg_som, bkg_descr)
     elif data_descr == "SOM" and bkg_descr == "SO" or \
          data_descr == "SO" and bkg_descr == "SOM":
         # You have SO-SOM or SOM-SO, so assume everything is OK

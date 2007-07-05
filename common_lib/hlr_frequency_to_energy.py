@@ -24,29 +24,29 @@
 
 def frequency_to_energy(obj, **kwargs):
     """
-    This function converts a primary axis of a SOM or SO from frequency
-    to energy. The frequency axis for a SOM must be in units of THz.
-    The primary axis of a SO is assumed to be in units of THz. A tuple
-    of [frequency, frequency_err2] (assumed to be in units of THz) can be
-    converted to [energy, energy_err2].
+    This function converts a primary axis of a C{SOM} or C{SO} from frequency
+    to energy. The frequency axis for a C{SOM} must be in units of I{THz}.
+    The primary axis of a C{SO} is assumed to be in units of I{THz}. A C{tuple}
+    of C{(frequency, frequency_err2)} (assumed to be in units of I{THz}) can be
+    converted to C{(energy, energy_err2)}.
 
-    Parameters:
-    ----------
-    -> obj is the SOM, SO or tuple to be converted
-    -> kwargs is a list of key word arguments that the function accepts:
-          units= a string containing the expected units for this function.
-                 The default for this function is THz
+    @param obj: Object to be converted
+    @type obj: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
+    
+    @keyword units: The expected units for this function. The default for this
+                    function is I{THz}.
+    @type units: C{string}
 
-    Return:
-    ------
-    <- A SOM or SO with a primary axis in energy or a tuple converted to
-       energy
 
-    Exceptions:
-    ----------
-    <- TypeError is raised if the incoming object is not a type the function
-       recognizes
-    <- RuntimeError is raised if the SOM x-axis units are not THz
+    @return: Object with primary axis in frequency converted to energy
+    @rtype: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+
+
+    @raise TypeError: The incoming object is not a type the function recognizes
+    
+    @raise RuntimeError: The C{SOM} x-axis units are not I{THz}
     """
 
     # import the helper functions
@@ -65,13 +65,13 @@ def frequency_to_energy(obj, **kwargs):
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
     if o_descr == "SOM":
-        axis = hlr_utils.hlr_1D_units(obj, units)
+        axis = hlr_utils.one_d_units(obj, units)
     else:
         axis = 0
 
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
     if o_descr == "SOM":
-        result = hlr_utils.hlr_force_units(result, "meV", axis)
+        result = hlr_utils.force_units(result, "meV", axis)
         result.setAxisLabel(axis, "energy transfer")
         result.setYUnits("Counts/meV")
         result.setYLabel("Intensity")

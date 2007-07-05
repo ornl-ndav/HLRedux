@@ -28,31 +28,39 @@ import dr_lib
 def process_igs_data(datalist, conf, **kwargs):
     """
     This function combines Steps 1 through 8 of the data reduction process for
-    Inverse Geometry Spectrometers as specified by the documenta at
-    http://www.sns.gov/asg/projects/SCL/reqspec/DR_Lib_RS.doc. The function
-    takes a list of file names, a Configure object and processes the data
-    accordingly. This function should really only be used in the context of
-    amorphous_reduction and calc_norm_eff.
+    Inverse Geometry Spectrometers as specified by the documents at
+    U{http://neutrons.ornl.gov/asg/projects/SCL/reqspec/DR_Lib_RS.doc}. The
+    function takes a list of file names, a L{hlr_utils.Configure} object and
+    processes the data accordingly. This function should really only be used in
+    the context of I{amorphous_reduction} and I{calc_norm_eff}.
 
-    Parameters:
-    ----------
-    -> datalist is a list of strings containing the filenames of the data to be
-       processed
-    -> conf is a Configure object that contains the current setup of the
-       driver
-    -> kwargs is a list of key word arguments that the function accepts:
-          inst_geom_dst=<DST> is a DST object that contains instrument
-                              geometry information
-          dataset_type=<string> is the practical name of the dataset being
-                                processed. The default value is data.
-          tib_const=<tuple> is a tuple providing the time-independent
-                            background constant to subtract
-          timer=<DiffTime> provides a DiffTime object so the function can
-                           perform timing estimates
+    @param datalist: A list containing the filenames of the data to be
+    processed.
+    @type datalist: C{list} of C{string}s
+    
+    @param conf: Object that contains the current setup of the driver.
+    @type conf: L{hlr_utils.Configure}
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
+    
+    @keyword inst_geom_dst: File object that contains instrument geometry
+    information.
+    @type inst_geom_dst: C{DST.GeomDST}
+    
+    @keyword dataset_type: The practical name of the dataset being processed.
+    The default value is I{data}.
+    @type dataset_type: C{string}
+    
+    @keyword tib_const: Object providing the time-independent background
+    constant to subtract.
+    @type tib_const: L{hlr_utils.DrParameter}
+    
+    @keyword timer: Timing object so the function can perform timing estimates.
+    @type timer: C{sns_timer.DiffTime}
 
-    Returns:
-    -------
-    <- A data SOM that has undergone all requested processing steps
+
+    @return: Object that has undergone all requested processing steps
+    @rtype: C{SOM.SOM}
     """
     import hlr_utils
 
@@ -68,7 +76,10 @@ def process_igs_data(datalist, conf, **kwargs):
         t = None
 
     try:
-        tib_const = kwargs["tib_const"]
+        if kwargs["tib_const"] is not None:
+            tib_const = kwargs["tib_const"].toValErrTuple()
+        else:
+            tib_const = None
     except KeyError:
         tib_const = None
 
@@ -87,7 +98,7 @@ def process_igs_data(datalist, conf, **kwargs):
         print "Reading %s file" % dataset_type
 
     # The [0] is to get the data SOM and ignore the None background SOM
-    dp_som1 = dr_lib.add_files(datalist, Data_Paths=conf.data_paths,
+    dp_som1 = dr_lib.add_files(datalist, Data_Paths=conf.data_paths.toPath(),
                                SO_Axis=so_axis, Signal_ROI=conf.roi_file,
                                dataset_type=dataset_type,
                                Verbose=conf.verbose, Timer=t)[0]
@@ -96,7 +107,7 @@ def process_igs_data(datalist, conf, **kwargs):
         t.getTime(msg="After reading %s " % dataset_type)
 
     if conf.inst_geom is not None:
-        i_geom_dst.setGeometry(conf.data_paths, dp_som1)
+        i_geom_dst.setGeometry(conf.data_paths.toPath(), dp_som1)
 
     if conf.no_mon_norm:
         dm_som1 = None
@@ -105,7 +116,7 @@ def process_igs_data(datalist, conf, **kwargs):
             print "Reading in monitor data from %s file" % dataset_type
 
         # The [0] is to get the data SOM and ignore the None background SOM
-        dm_som1 = dr_lib.add_files(datalist, Data_Paths=conf.mon_path,
+        dm_som1 = dr_lib.add_files(datalist, Data_Paths=conf.mon_path.toPath(),
                                    SO_Axis=so_axis,
                                    dataset_type=dataset_type,
                                    Verbose=conf.verbose,
@@ -115,7 +126,7 @@ def process_igs_data(datalist, conf, **kwargs):
             t.getTime(msg="After reading monitor data ")
 
         if conf.inst_geom is not None:
-            i_geom_dst.setGeometry(conf.mon_path, dm_som1)
+            i_geom_dst.setGeometry(conf.mon_path.toPath(), dm_som1)
 
     # Step 2: Dead Time Correction
     # No dead time correction is being applied to the data yet
@@ -190,15 +201,18 @@ def process_igs_data(datalist, conf, **kwargs):
     # time-zero offset
 
     if conf.wavelength_final is not None:
-        dp_som3.attr_list["Wavelength_final"] = conf.wavelength_final
+        dp_som3.attr_list["Wavelength_final"] =\
+                                     conf.wavelength_final.toValErrTuple()
 
     # Note: time_zero_slope MUST be a tuple
     if conf.time_zero_slope is not None:
-        dp_som3.attr_list["Time_zero_slope"] = conf.time_zero_slope
+        dp_som3.attr_list["Time_zero_slope"] = \
+                                     conf.time_zero_slope.toValErrTuple()
 
     # Note: time_zero_offset MUST be a tuple
     if conf.time_zero_offset is not None:
-        dp_som3.attr_list["Time_zero_offset"] = conf.time_zero_offset
+        dp_som3.attr_list["Time_zero_offset"] = \
+                                     conf.time_zero_offset.toValErrTuple()
 
     # Step 6: Convert TOF to wavelength for data and monitor
     if conf.verbose:
@@ -310,8 +324,9 @@ def process_igs_data(datalist, conf, **kwargs):
         dp_som5 = dp_som4
 
     if conf.dump_wave_mnorm:
-        dp_som5_1 = dr_lib.sum_all_spectra(dp_som5,
-                                           rebin_axis=conf.lambda_bins)
+        dp_som5_1 = dr_lib.sum_all_spectra(dp_som5,\
+                                   rebin_axis=conf.lambda_bins.toNessiList())
+        
         hlr_utils.write_file(conf.output, "text/Spec", dp_som5_1,
                              output_ext="pml",
                              extra_tag=dataset_type,

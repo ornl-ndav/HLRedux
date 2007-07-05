@@ -24,42 +24,49 @@
 
 def tof_to_initial_wavelength_igs(obj, **kwargs):
     """
-    This function converts a primary axis of a SOM or SO from time-of-flight
-    to initial_wavelength_igs. The time-of-flight axis for a SOM must be in
-    units of microseconds. The primary axis of a SO is assumed to be in units
-    of microseconds. A tuple of [tof, tof_err2] (assumed to be in units of
-    microseconds) can be converted to [initial_wavelength_igs,
-    initial_wavelength_igs_err2].
+    This function converts a primary axis of a C{SOM} or C{SO} from
+    time-of-flight to initial_wavelength_igs. The time-of-flight axis for a
+    C{SOM} must be in units of I{microseconds}. The primary axis of a C{SO} is
+    assumed to be in units of I{microseconds}. A C{tuple} of C{(tof, tof_err2)}
+    (assumed to be in units of I{microseconds}) can be converted to
+    C{(initial_wavelength_igs, initial_wavelength_igs_err2)}.
 
-    Parameters:
-    ----------
-    -> obj is the SOM, SO or tuple to be converted
-    -> kwargs is a list of key word arguments that the function accepts:
-          lambda_f= a tuple containing the final wavelength and its
-                    associated error^2
-          time_zero= a tuple containing the time zero offset and its
-                     associated error^2
-          dist_source_sample= a tuple or list of tuples containing the source
-                              to sample distance information and its
-                              associated error^2
-          dist_sample_detector= a tuple or list of tuples containing the sample
-                                to detector distance information and its
-                                associated error^2
-          run_filter=<True or False> This determines if the filter on the
-                     negative wavelengths is run
-          units= a string containing the expected units for this function.
-                 The default for this function is microseconds
+    @param obj: Object to be converted
+    @type obj: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
+    
+    @keyword lambda_f:The final wavelength and its associated error^2
+    @type lambda_f: C{tuple}
+    
+    @keyword time_zero: The time zero offset and its associated error^2
+    @type time_zero: C{tuple}
+    
+    @keyword dist_source_sample: The source to sample distance information and
+                                 its associated error^2
+    @type dist_source_sample: C{tuple} or C{list} of C{tuple}s 
 
-    Return:
-    ------
-    <- A SOM or SO with a primary axis in time-of-flight or a tuple converted
-       to initial_wavelength_igs
+    @keyword dist_sample_detector: The sample to detector distance information
+                                   and its associated error^2
+    @type dist_sample_detector: C{tuple} or C{list} of C{tuple}s
+    
+    @keyword run_filter: This determines if the filter on the negative
+                         wavelengths is run. The default setting is True.
+    @type run_filter: C{boolean}
+    
+    @keyword units: The expected units for this function. The default for this
+                    function is I{microseconds}
+    @type units: C{string}
 
-    Exceptions:
-    ----------
-    <- TypeError is raised if the incoming object is not a type the function
-       recognizes
-    <- RuntimeError is raised if the SOM x-axis units are not microseconds
+
+    @return: Object with a primary axis in time-of-flight converted to
+             initial_wavelength_igs
+    @rtype: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+
+
+    @raise TypeError: The incoming object is not a type the function recognizes
+    
+    @raise RuntimeError: The C{SOM} x-axis units are not I{microseconds}
     """
 
     # import the helper functions
@@ -103,13 +110,13 @@ def tof_to_initial_wavelength_igs(obj, **kwargs):
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
     if o_descr == "SOM":
-        axis = hlr_utils.hlr_1D_units(obj, units)
+        axis = hlr_utils.one_d_units(obj, units)
     else:
         axis = 0
 
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
     if res_descr == "SOM":
-        result = hlr_utils.hlr_force_units(result, "Angstroms", axis)
+        result = hlr_utils.force_units(result, "Angstroms", axis)
         result.setAxisLabel(axis, "wavelength")
         result.setYUnits("Counts/A")
         result.setYLabel("Intensity")

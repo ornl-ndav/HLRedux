@@ -24,23 +24,21 @@
 
 def reverse_array_cp(obj):
     """
-    This function reverses the y and var_y tuples of all the SOs in a SOM or
-    an individual SO. This is assuming that there was a previous
-    transformation on the x-axis of the SO or SOM.
+    This function reverses the y and var_y values of all the C{SO}s in a
+    C{SOM} or an individual C{SO}. This is assuming that there was a previous
+    transformation on the x-axis of the C{SO} or C{SOM}.
 
-    Parameters:
-    ----------
-    -> obj is the SOM or SO that needs to have its y and var_y tuples
-       reversed
 
-    Return:
-    ------
-    <- A SOM or SO containing the results of the reversal process
+    @param obj: Object that needs to have its y and var_y values reversed
+    @type obj: C{SOM.SOM} or C{SOM.SO}
 
-    Exceptions:
-    ----------
-    <- TypeError is raised if a tuple or list of tuples is presented to the
-       function
+
+    @return: Object containing the results of the reversal process
+    @rtype: C{SOM.SOM} or C{SOM.SO}
+
+    
+    @raise TypeError: A C{tuple} or C{list} of C{tuple}s is presented to the
+                      function
     """
 
     # import the helper functions

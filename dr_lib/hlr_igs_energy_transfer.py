@@ -24,6 +24,9 @@
 
 def igs_energy_transfer(obj, **kwargs):
     """
+    @depricated: This function will eventually disappear when the full S(Q,E)
+                 transformation for IGS detectors is completed and verified.
+                 
     This function takes a SOM or a SO and calculates the energy transfer for
     the IGS class of instruments. It is different from
     common_lib.energy_transfer in that the final wavelength is provided in a
@@ -95,7 +98,7 @@ def igs_energy_transfer(obj, **kwargs):
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
     if o_descr == "SOM":
-        axis = hlr_utils.hlr_1D_units(obj, units)
+        axis = hlr_utils.one_d_units(obj, units)
     else:
         axis = 0
 
@@ -115,7 +118,7 @@ def igs_energy_transfer(obj, **kwargs):
 
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
     if res_descr == "SOM":
-        result = hlr_utils.hlr_force_units(result, "ueV", axis)
+        result = hlr_utils.force_units(result, "ueV", axis)
         result.setAxisLabel(axis, "energy_transfer")
         result.setYUnits("Counts/ueV")
         result.setYLabel("Intensity")
