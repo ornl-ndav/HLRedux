@@ -24,7 +24,7 @@
 
 """
 This program covers the functionality outlined in B{Section 2.2.2 Determination
-of Time-Indepdent Background} in
+of Time-Independent Background} in
 U{http://neutrons.ornl.gov/asg/projects/SCL/reqspec/DR_Lib_RS.doc}.
 """
 
