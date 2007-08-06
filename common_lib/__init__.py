@@ -40,6 +40,7 @@ from hlr_sub_ncerr import *
 from hlr_sumw_ncerr import *
 from hlr_tof_to_initial_wavelength_igs import *
 from hlr_tof_to_initial_wavelength_igs_lin_time_zero import *
+from hlr_tof_to_scalar_Q import *
 from hlr_tof_to_wavelength import *
 from hlr_tof_to_wavelength_lin_time_zero import *
 from hlr_wavelength_to_d_spacing import *
