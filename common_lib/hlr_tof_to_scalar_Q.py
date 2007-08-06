@@ -41,6 +41,11 @@ def tof_to_scalar_Q(obj, **kwargs):
     
     @keyword pathlength: The pathlength and its associated error^2
     @type pathlength: C{tuple} or C{list} of C{tuple}s
+
+    @keyword lojac: A flag that allows one to turn off the calculation of the
+                    linear-order Jacobian. The default action is True for
+                    histogram data.
+    @type lojac: C{boolean}    
     
     @keyword units: The expected units for this function. The default for this
                     function is I{microseconds}.
@@ -87,6 +92,11 @@ def tof_to_scalar_Q(obj, **kwargs):
     except KeyError:
         units = "microseconds"
 
+    try:
+        lojac = kwargs["lojac"]
+    except KeyError:
+        lojac = hlr_utils.check_lojac(obj)
+        
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
     if o_descr == "SOM":
@@ -139,6 +149,8 @@ def tof_to_scalar_Q(obj, **kwargs):
 
     # iterate through the values
     import axis_manip
+    if lojac:
+        import utils
 
     for i in xrange(hlr_utils.get_length(obj)):
         val = hlr_utils.get_value(obj, i, o_descr, "x", axis)
@@ -162,6 +174,14 @@ def tof_to_scalar_Q(obj, **kwargs):
         value = axis_manip.tof_to_scalar_Q(val, err2, pl, pl_err2, angle,
                                            angle_err2)
 
+        if lojac:
+            y_val = hlr_utils.get_value(obj, i, o_descr, "y")
+            y_err2 = hlr_utils.get_err2(obj, i, o_descr, "y")
+            counts = utils.linear_order_jacobian(val, value[0],
+                                                 y_val, y_err2)
+        else:
+            pass
+
         if o_descr != "number":
             value1 = axis_manip.reverse_array_cp(value[0])
             value2 = axis_manip.reverse_array_cp(value[1])
@@ -170,8 +190,12 @@ def tof_to_scalar_Q(obj, **kwargs):
             rev_value = value
 
         if map_so is not None:
-            map_so.y = axis_manip.reverse_array_cp(map_so.y)
-            map_so.var_y = axis_manip.reverse_array_cp(map_so.var_y)
+            if not lojac:
+                map_so.y = axis_manip.reverse_array_cp(map_so.y)
+                map_so.var_y = axis_manip.reverse_array_cp(map_so.var_y)
+            else:
+                map_so.y = axis_manip.reverse_array_cp(counts[0])
+                map_so.var_y = axis_manip.reverse_array_cp(counts[1])
         else:
             pass
 
