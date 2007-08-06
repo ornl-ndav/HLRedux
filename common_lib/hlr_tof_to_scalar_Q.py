@@ -162,7 +162,21 @@ def tof_to_scalar_Q(obj, **kwargs):
         value = axis_manip.tof_to_scalar_Q(val, err2, pl, pl_err2, angle,
                                            angle_err2)
 
-        hlr_utils.result_insert(result, res_descr, value, map_so, "x", axis)
+        if o_descr != "number":
+            value1 = axis_manip.reverse_array_cp(value[0])
+            value2 = axis_manip.reverse_array_cp(value[1])
+            rev_value = (value1, value2)
+        else:
+            rev_value = value
+
+        if map_so is not None:
+            map_so.y = axis_manip.reverse_array_cp(map_so.y)
+            map_so.var_y = axis_manip.reverse_array_cp(map_so.var_y)
+        else:
+            pass
+
+        hlr_utils.result_insert(result, res_descr, rev_value, map_so, "x",
+                                axis)
 
     return result
 
