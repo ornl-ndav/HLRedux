@@ -98,8 +98,12 @@ def result_insert(result, descr, value, map_so, axis="y", pap=0, xvals=None):
     if result is either a C{SOM} or a C{SO}
     @type map_so: C{SOM.SO}
     
-    @param axis: (OPTIONAL) The axis from which to grab the value
-    @type axis: C{int}
+    @param axis: (OPTIONAL) The axis from which to grab the values. The
+                            possible values are I{y} (copy id and axis, insert
+                            y and var_y), I{x} (copy id, y and var_y, insert
+                            axis), I{yonly} (copy id, axis and var_y, insert
+                            y) and I{all} (insert id, axis, y and var_y).
+    @type axis: C{string}
     
     @param pap: (OPTIONAL) The primary axis position. This is used to pull the
     value from the correct primary axis position.
