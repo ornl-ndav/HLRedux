@@ -7,6 +7,6 @@
 # $Id$
 #
 ###############################################################################
-export PYTHONPATH=../build/lib
+
 epydoc --config=config.epy --css=material/epydoc.css
 
