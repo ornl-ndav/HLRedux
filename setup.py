@@ -41,8 +41,8 @@ from HLR_version import version as __version__
 PACKAGE = "HLRedux"
 VERSION = __version__
 
-package_list = ['', 'common_lib', 'dr_lib', 'drivers.GEN', 'drivers.IGS',
-                'drivers.REF', 'hlr_utils', 'hlr_test']
+package_list = ['', 'common_lib', 'dr_lib', 'drivers', 'drivers.GEN',
+                'drivers.IGS', 'drivers.REF', 'hlr_utils', 'hlr_test']
 
 instrument_scripts = {
     "ASG" : [
