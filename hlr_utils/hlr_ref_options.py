@@ -71,28 +71,14 @@ class RefOptions(hlr_options.SNSOptions):
                       help="Specify the detector inclination angle, err^2, "\
                       +"and units=<degrees or radians>")
 
-        self.add_option("", "--signal-roi-file", dest="signal_roi_file",
+        self.add_option("", "--data-roi-file", dest="data_roi_file",
                         help="Specify the file containing the list pixel IDs "\
-                        +"for the signal region.")
+                        +"for the sample data region.")
         
-        self.add_option("", "--bkg-roi-file", dest="bkg_roi_file",
+        self.add_option("", "--norm-roi-file", dest="norm_roi_file",
                         help="Specify the file containing the list pixel IDs "\
-                        +"for the background region.")
+                        +"for the normalization data region.")
         
-        self.add_option("", "--norm-signal-roi-file",
-                        dest="norm_signal_roi_file",
-                        help="Specify the file containing the list pixel IDs "\
-                        +"for the normalization signal region.")
-        
-        self.add_option("", "--norm-bkg-roi-file", dest="norm_bkg_roi_file",
-                        help="Specify the file containing the list pixel IDs "\
-                        +"for the normalization background region.")    
-        
-        self.add_option("", "--combine", action="store_true", dest="combine",
-                        help="Flag to combine all sample data spectra in one "\
-                        +"spectrum")
-        self.set_defaults(combine=False)
-
         self.add_option("", "--no-bkg", action="store_true", dest="no_bkg",
                         help="Flag to turn off background estimation and "\
                         +"subtraction")
@@ -110,12 +96,6 @@ class RefOptions(hlr_options.SNSOptions):
                         +"information. Creates a *.sdc file.")
         self.set_defaults(dump_specular=False)
         
-        self.add_option("", "--dump-norm", action="store_true",
-                        dest="dump_norm",
-                        help="Flag to dump the combined normalization TOF "\
-                        +"information. Creates a *.nom file.")
-        self.set_defaults(dump_norm=False)
-        
         self.add_option("", "--dump-sub", action="store_true",
                         dest="dump_sub",
                         help="Flag to dump the combined subtracted TOF "\
@@ -126,13 +106,13 @@ class RefOptions(hlr_options.SNSOptions):
                         help="Flag to dump the combined background TOF "\
                         +"information. Creates a *.bkg file.")
         self.set_defaults(dump_bkg=False)
-        
-        self.add_option("", "--dump-norm-bkg", action="store_true",
-                        dest="dump_norm_bkg",
-                        help="Flag to dump the combined normalization "\
-                        +"background TOF information. Creates a *.bnm file.")
-        self.set_defaults(dump_norm_bkg=False)
 
+        self.add_option("", "--dump-rtof", action="store_true",
+                        dest="dump_rtof",
+                        help="Flag to dump the R(TOF) information. Creates a "\
+                        +"*.rtof file.")
+        self.set_defaults(dump_rtof=False)        
+        
         self.add_option("", "--dump-all", action="store_true", dest="dump_all",
                         help="Flag to dump combined information")
         self.set_defaults(dump_all=False)
@@ -159,40 +139,23 @@ def RefConfiguration(parser, configure, options, args):
     # Call the configuration setter for SNSOptions
     hlr_options.SnsConfiguration(parser, configure, options, args, inst="REF")
 
-    # Get the data path for the signal ROI file
-    if hlr_utils.cli_provide_override(configure, "signal_roi_file",
-                                      "--signal-roi-file"):
-        configure.signal_roi_file = hlr_utils.determine_files(\
-                     options.signal_roi_file,
+    # Get the data path for the sample data ROI file
+    if hlr_utils.cli_provide_override(configure, "data_roi_file",
+                                      "--data-roi-file"):
+        configure.data_roi_file = hlr_utils.determine_files(\
+                     options.data_roi_file,
                      one_file=True)
     
-    # Get the data path for the background ROI file
-    if hlr_utils.cli_provide_override(configure, "bkg_roi_file",
-                                      "--bkg-roi-file"):
-        configure.bkg_roi_file = hlr_utils.determine_files(\
-                     options.bkg_roi_file,
-                     one_file=True)
-    
-    # Get the data path for the normalization signal ROI file
-    if hlr_utils.cli_provide_override(configure, "norm_signal_roi_file",
-                                      "--norm-signal-roi-file"):
-        if options.norm_signal_roi_file is not None:
-            configure.norm_signal_roi_file = hlr_utils.determine_files(\
-                     options.norm_signal_roi_file,
+    # Get the data path for the normalization data ROI file
+    if hlr_utils.cli_provide_override(configure, "norm_roi_file",
+                                      "--norm-roi-file"):
+        if options.norm_roi_file is not None:
+            configure.norm_roi_file = hlr_utils.determine_files(\
+                     options.norm_roi_file,
                      one_file=True)
         else:
-            configure.norm_signal_roi_file = configure.signal_roi_file
+            configure.norm_roi_file = configure.data_roi_file
     
-    # Get the data path for the normalization background ROI file
-    if hlr_utils.cli_provide_override(configure, "norm_bkg_roi_file",
-                                      "--norm-bkg-roi-file"):
-        if options.norm_bkg_roi_file is not None:
-            configure.norm_bkg_roi_file = hlr_utils.determine_files(\
-                     options.norm_bkg_roi_file,
-                     one_file=True)
-        else:
-            configure.norm_bkg_roi_file = configure.bkg_roi_file
-
     # Get the detector angle
     if hlr_utils.cli_provide_override(configure, "det_angle", "--det-angle"):
         configure.det_angle = hlr_utils.DrParameterFromString(\
@@ -208,37 +171,27 @@ def RefConfiguration(parser, configure, options, args):
                                       "--no-norm-bkg"):    
         configure.no_norm_bkg = options.no_norm_bkg
 
-    # Set the ability to combine sample data spectra into one spectrum
-    if hlr_utils.cli_provide_override(configure, "combine", "--combine"):   
-        configure.combine = options.combine
-
     # Set the ability to dump the combined specular TOF information
-    if hlr_utils.cli_provide_override(configure, "specular", "--specular"): 
+    if hlr_utils.cli_provide_override(configure, "dump_specular",
+                                      "--dump-specular"): 
         configure.dump_specular = options.dump_specular
 
     # Set the ability to dump the combined background TOF information
     if hlr_utils.cli_provide_override(configure, "dump_bkg", "--dump-bkg"):
         configure.dump_bkg = options.dump_bkg
 
-    # Set the ability to dump the combined normalization TOF information
-    if hlr_utils.cli_provide_override(configure, "dump_norm", "--dump-norm"):
-        configure.dump_norm = options.dump_norm
-
     # Set the ability to dump the combined subtracted TOF information
     if hlr_utils.cli_provide_override(configure, "dump_sub", "--dump-sub"):    
         configure.dump_sub = options.dump_sub
 
-    # Set the ability to dump the combined normalization background TOF
-    # information
-    if hlr_utils.cli_provide_override(configure, "dump_norm_bkg",
-                                      "--dump-norm-bkg"):    
-        configure.dump_norm_bkg = options.dump_norm_bkg
+    # Set the ability to dump the R(TOF) information
+    if hlr_utils.cli_provide_override(configure, "dump_rtof", "--dump-rtof"): 
+        configure.dump_rtof = options.dump_rtof        
 
     if hlr_utils.cli_provide_override(configure, "dump_all", "--dump-all"):
         if options.dump_all:
             configure.dump_specular = True
             configure.dump_bkg = True
             configure.dump_sub = True
-            configure.dump_norm = True
-            configure.dump_norm_bkg = True
+            configure.dump_rtof = True
             

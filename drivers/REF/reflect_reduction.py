@@ -60,48 +60,79 @@ def run(config, tim):
     else:
         inst_geom_dst = None
     
-    # Perform Steps 1-11 on sample data
+    # Perform Steps 1-5 on sample data
     d_som1 = dr_lib.process_ref_data(config.data, config,
-                                     config.signal_roi_file,
-                                     config.bkg_roi_file,
+                                     config.data_roi_file,
                                      config.no_bkg,
                                      inst_geom_dst=inst_geom_dst,
                                      timer=tim)
 
-    # Perform Steps 1-11 on normalization data
+    # Perform Steps 1-5 on normalization data
     if config.norm is not None:
         n_som1 = dr_lib.process_ref_data(config.norm, config,
-                                          config.norm_signal_roi_file,
-                                          config.norm_bkg_roi_file,
-                                          config.no_norm_bkg,
-                                          dataset_type="norm",
-                                          inst_geom_dst=inst_geom_dst,
-                                          timer=tim)
+                                         config.norm_roi_file,
+                                         config.no_norm_bkg,
+                                         dataset_type="norm",
+                                         inst_geom_dst=inst_geom_dst,
+                                         timer=tim)
     else:
         n_som1 = None
+
+    # Step 6: Sum all normalization spectra together
+    if config.norm is not None:
+        n_som2 = dr_lib.sum_all_spectra(n_som1)
+    else:
+        n_som2 = None
+
+    del n_som1
 
     if inst_geom_dst is not None:
         inst_geom_dst.release_resource()
 
-    # Step 12: Divide data by normalization
+    # Step 7: Divide data by normalization
     if config.verbose and config.norm is not None:
         print "Scale data by normalization"
 
     if config.norm is not None:
-        d_som2 = common_lib.div_ncerr(d_som1, n_som1,
-                                      length_one_som=config.split)
+        d_som2 = common_lib.div_ncerr(d_som1, n_som2, length_one_som=True)
     else:
         d_som2 = d_som1
 
     if tim is not None and config.norm is not None:
         tim.getTime(msg="After normalizing signal spectra")
 
-    del d_som1, n_som1
+    del d_som1, n_som2
+
+    if config.dump_rtof:
+        d_som2_1 = dr_lib.filter_ref_data(d_som2)
+        
+        hlr_utils.write_file(config.output, "text/Spec", d_som2_1,
+                             output_ext="rtof",
+                             verbose=config.verbose,
+                             data_ext=config.ext_replacement,
+                             path_replacement=config.path_replacement,
+                             message="R(TOF) information")
+        del d_som2_1
+
+    # Step 8: Convert TOF to scalar Q
+    if config.verbose:
+        print "Converting TOF to scalar Q"
+
+    if tim is not None:
+        tim.getTime(False)
+
+    d_som3 = common_lib.tof_to_scalar_Q(d_som2, units="microsecond")
+
+    del d_som2
+        
+    if tim is not None:
+        tim.getTime(msg="After converting wavelength to scalar Q ")
+
 
     if config.det_angle is None:
-        d_som2.attr_list["detector_angle"] = (0.0, 0.0, "degree")
+        d_som3.attr_list["detector_angle"] = (0.0, 0.0, "degree")
     else:
-        d_som2.attr_list["detector_angle"] = config.det_angle
+        d_som3.attr_list["detector_angle"] = config.det_angle
 
     if not config.no_filter:
         if config.verbose:
@@ -110,24 +141,30 @@ def run(config, tim):
         if tim is not None:
             tim.getTime(False)
         
-            d_som3 = dr_lib.filter_ref_data(d_som2)
+        d_som4 = dr_lib.filter_ref_data(d_som3, zero_mode=True)
 
         if tim is not None:
             tim.getTime(msg="After filtering data")
     else:
-        d_som3 = d_som2
+        d_som4 = d_som3
 
-    del d_som2
+    del d_som3
 
-    hlr_utils.write_file(config.output, "text/Spec", d_som3,
+    # Rebin all spectra to final Q axis
+    rebin_axis = config.Q_bins.toNessiList()
+    d_som5 = dr_lib.sum_all_spectra(d_som4, rebin_axis=rebin_axis)
+
+    del d_som4
+
+    hlr_utils.write_file(config.output, "text/Spec", d_som5,
                          replace_ext=False,
                          replace_path=False,
                          verbose=config.verbose,
                          message="combined Reflectivity information")
 
-    d_som3.attr_list["config"] = config
+    d_som5.attr_list["config"] = config
 
-    hlr_utils.write_file(config.output, "text/rmd", d_som3,
+    hlr_utils.write_file(config.output, "text/rmd", d_som5,
                          output_ext="rmd", verbose=config.verbose,
                          data_ext=config.ext_replacement,
                          path_replacement=config.path_replacement,
@@ -146,10 +183,10 @@ if __name__ == "__main__":
     result = []
     result.append("This driver runs the data reduction for REF_M and REF_L")
     result.append("instruments. The standard output is a *.txt file (3-column")
-    result.append("ASCII) for R(TOF), R(lambda) or R(Q). Other intermediate")
-    result.append("files can be produced by using the appropriate dump-X flag")
-    result.append("described in this help. The file extensions are described")
-    result.append("in the option documentation.")
+    result.append("ASCII) for R(Q). Other intermediate files can be produced")
+    result.append("by using the appropriate dump-X flag described in this")
+    result.append("help. The file extensions are described in the option")
+    result.append("documentation.")
     
     # Set up the options available
     parser = hlr_utils.RefRedOptions("usage: %prog [options] <datafile>", None,

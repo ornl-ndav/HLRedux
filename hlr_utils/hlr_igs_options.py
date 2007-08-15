@@ -188,6 +188,13 @@ class IgsOptions(hlr_options.SNSOptions):
                         +"values and the wavelength bin width in Angstroms")
         self.set_defaults(lambda_bins="0,10,0.1")
 
+        self.add_option("", "--hwfix", action="store_true", dest="hwfix",
+                        help="Flag to turn on early background subtraction "\
+                        +"using background datasets scaled by proton charge "\
+                        +"ratio.")
+        self.set_defaults(hwfix=False)
+                        
+
 def IgsConfiguration(parser, configure, options, args):
     """
     This function sets the incoming C{Configure} object with all the options
@@ -342,4 +349,8 @@ def IgsConfiguration(parser, configure, options, args):
     # Set MC option
     if hlr_utils.cli_provide_override(configure, "mc", "--mc"):
         configure.mc = options.mc
+
+    # Set the early background subtraction option
+    if hlr_utils.cli_provide_override(configure, "hwfix", "--hwfix"):
+        configure.hwfix = options.hwfix        
     

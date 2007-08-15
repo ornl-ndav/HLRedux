@@ -60,45 +60,31 @@ class RefRedOptions(hlr_utils.RefOptions):
         hlr_utils.RefOptions.__init__(self, usage, option_list, Option,
                                       version, conflict_handler, description)
         
-        # Add REF_M specific options
-        self.add_option("", "--lambda-bins", dest="lambda_bins",
-                        help="Specify the minimum and maximum wavelength "\
-                        +"values and the wavelength bin width in Angstroms")
-
         self.add_option("", "--mom-trans-bins", dest="Q_bins",
                         help="Specify the minimum and maximum momentum "\
                         +"transfer values and the momentum transfer bin "\
                         +"width in Angstroms^-1")
-
-        self.add_option("", "--tof-only", action="store_const", const=0,
-                        dest="step_stop",
-                        help="Flag to have driver stop processing data at TOF")
-        
-        self.add_option("", "--wave-only", action="store_const", const=1,
-                        dest="step_stop",
-                        help="Flag to have driver stop processing data at "\
-                        +"wavelength")
-        self.set_defaults(step_stop=2)
-
-        self.add_option("", "--split", action="store_true", dest="split",
-                        help="Flag to split data up in N spectra along the "\
-                        +"short axis of the signal ROI.")
-        self.set_defaults(split=False)
 
         self.add_option("", "--no-filter", action="store_true",
                         dest="no_filter",
                         help="Flag to turn off bad data filtering.")
         self.set_defaults(no_filter=False)
 
-        self.add_option("", "--no-dtot", action="store_true", dest="no_dtot",
-                        help="Flag to turn off calculation of delta t over t")
-        self.set_defaults(no_dtot=False)
+        self.add_option("", "--store-dtot", action="store_true",
+                        dest="store_dtot",
+                        help="Flag to turn on storage of delta t over t in "\
+                        +"TOF output file.")
+        self.set_defaults(store_dtot=False)
 
-        # Remove unneeded options
-        self.remove_option("--combine")
-        self.remove_option("--dump-norm")
-        self.remove_option("--dump-norm-bkg")
+        self.add_option("", "--data-peak-excl", dest="data_peak_excl",
+                        type="int", nargs=2,
+                        help="Peak exclusion range pixel IDs for sample data.")
 
+        self.add_option("", "--norm-peak-excl", dest="norm_peak_excl",
+                        type="int", nargs=2,
+                        help="Peak exclusion range pixel IDs for "\
+                        +"normalization data.")    
+        
 def RefRedConfiguration(parser, configure, options, args):
     """
     This function sets the incoming C{Configure} object with all the options
@@ -120,27 +106,24 @@ def RefRedConfiguration(parser, configure, options, args):
     # Call the configuration setter for RefOptions
     hlr_utils.RefConfiguration(parser, configure, options, args)
 
-    # Set the lambda bins
-    if hlr_utils.cli_provide_override(configure, "lambda_bins",
-                                      "--lambda-bins"):
-        configure.lambda_bins = hlr_utils.AxisFromString(options.lambda_bins)
-
     # Set the momentum transfer bins
     if hlr_utils.cli_provide_override(configure, "Q_bins", "--mom-trans-bins"):
         configure.Q_bins = hlr_utils.AxisFromString(options.Q_bins)
-
-    # Set the step stop flag
-    if hlr_utils.cli_provide_override(configure, "step_stop", "--step-stop"):
-        configure.step_stop = options.step_stop
-
-    # Set the split spectra flag
-    if hlr_utils.cli_provide_override(configure, "split", "--split"):
-        configure.split = options.split        
 
     # Set the no bad data filter flag
     if hlr_utils.cli_provide_override(configure, "no_filter", "--no-filter"):
         configure.no_filter = options.no_filter
 
-    # Set the no delta t over t flag
-    if hlr_utils.cli_provide_override(configure, "no_dtot", "--no-dtot"):
-        configure.no_dtot = options.no_dtot        
+    # Set the store delta t over t flag
+    if hlr_utils.cli_provide_override(configure, "store_dtot", "--store-dtot"):
+        configure.store_dtot = options.store_dtot        
+
+    # Set the pixel ID range values for peak exclusion from sample data
+    if hlr_utils.cli_provide_override(configure, "data_peak_excl",
+                                      "--data-peak-excl"):
+        configure.data_peak_excl = options.data_peak_excl
+
+    # Set the pixel ID range values for peak exclusion from normalization data
+    if hlr_utils.cli_provide_override(configure, "norm_peak_excl",
+                                      "--norm-peak-excl"):
+        configure.norm_peak_excl = options.norm_peak_excl        

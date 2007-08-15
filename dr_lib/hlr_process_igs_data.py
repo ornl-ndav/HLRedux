@@ -54,6 +54,9 @@ def process_igs_data(datalist, conf, **kwargs):
     @keyword tib_const: Object providing the time-independent background
     constant to subtract.
     @type tib_const: L{hlr_utils.DrParameter}
+
+    @keyword bkg_som: Object that will be used for early background subtraction
+    @type bkg_som: C{SOM.SOM}
     
     @keyword timer: Timing object so the function can perform timing estimates.
     @type timer: C{sns_timer.DiffTime}
@@ -88,11 +91,19 @@ def process_igs_data(datalist, conf, **kwargs):
     except KeyError:
         i_geom_dst = None
 
+    try:
+        bkg_som = kwargs["bkg_som"]
+    except KeyError:
+        bkg_som = None    
+
     # Step 1: Open appropriate data files
     if not conf.mc:
         so_axis = "time_of_flight"
     else:
         so_axis = "Time_of_Flight"
+
+    # Add so_axis to Configure object
+    conf.so_axis = so_axis
 
     if conf.verbose:
         print "Reading %s file" % dataset_type
@@ -128,6 +139,29 @@ def process_igs_data(datalist, conf, **kwargs):
         if conf.inst_geom is not None:
             i_geom_dst.setGeometry(conf.mon_path.toPath(), dm_som1)
 
+
+    if bkg_som is not None:
+        bkg_pcharge = bkg_som.attr_list["background-proton_charge"].getValue()
+        data_pcharge = dp_som1.attr_list[dataset_type+
+                                         "-proton_charge"].getValue()
+
+        ratio = data_pcharge / bkg_pcharge
+
+        bkg_som1 = common_lib.mult_ncerr(bkg_som, (ratio, 0.0))
+        
+        del bkg_som
+
+        dp_som2 = dr_lib.subtract_bkg_from_data(dp_som1, bkg_som1,
+                                                verbose=conf.verbose,
+                                                timer=t,
+                                                dataset1=dataset_type,
+                                                dataset2="background")
+        
+    else:
+        dp_som2 = dp_som1
+
+    del dp_som1
+
     # Step 2: Dead Time Correction
     # No dead time correction is being applied to the data yet
 
@@ -138,17 +172,17 @@ def process_igs_data(datalist, conf, **kwargs):
     if t is not None and conf.tib_tofs is not None:
         t.getTime(False)
             
-    B = dr_lib.determine_time_indep_bkg(dp_som1, conf.tib_tofs)
+    B = dr_lib.determine_time_indep_bkg(dp_som2, conf.tib_tofs)
 
     if t is not None and B is not None:
         t.getTime(msg="After determining time-independent background ")
 
     if conf.dump_tib and B is not None:
         attr_name = "time-independent-background"
-        dp_som1.attr_list[attr_name] = B
+        dp_som2.attr_list[attr_name] = B
         file_comment = "TOFs: %s" % conf.tib_tofs
         
-        hlr_utils.write_file(conf.output, "text/num-info", dp_som1,
+        hlr_utils.write_file(conf.output, "text/num-info", dp_som2,
                              output_ext="tib",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
@@ -160,7 +194,7 @@ def process_igs_data(datalist, conf, **kwargs):
                              tag="Average",
                              units="counts",
                              comments=[file_comment])
-        del dp_som1.attr_list[attr_name]
+        del dp_som2.attr_list[attr_name]
 
     # Step 4: Subtract time-independent background
     if conf.verbose and B is not None:
@@ -170,14 +204,14 @@ def process_igs_data(datalist, conf, **kwargs):
         t.getTime(False)
             
     if B is not None:
-        dp_som2 = common_lib.sub_ncerr(dp_som1, B)
+        dp_som3 = common_lib.sub_ncerr(dp_som2, B)
     else:
-        dp_som2 = dp_som1
+        dp_som3 = dp_som2
 
     if B is not None and t is not None:
         t.getTime(msg="After subtracting time-independent background ")
 
-    del dp_som1, B
+    del dp_som2, B
 
     # Step 5: Subtract time-independent background constant
     if conf.verbose and tib_const is not None:
@@ -187,31 +221,31 @@ def process_igs_data(datalist, conf, **kwargs):
         t.getTime(False)
                 
     if tib_const is not None:
-        dp_som3 = common_lib.sub_ncerr(dp_som2, tib_const)
+        dp_som4 = common_lib.sub_ncerr(dp_som3, tib_const)
     else:
-        dp_som3 = dp_som2
+        dp_som4 = dp_som3
 
     if t is not None and tib_const is not None:
         t.getTime(msg="After subtracting time-independent background "\
                   +"constant ")
 
-    del dp_som2
+    del dp_som3
 
     # Provide override capability for final wavelength, time-zero slope and
     # time-zero offset
 
     if conf.wavelength_final is not None:
-        dp_som3.attr_list["Wavelength_final"] =\
+        dp_som4.attr_list["Wavelength_final"] =\
                                      conf.wavelength_final.toValErrTuple()
 
     # Note: time_zero_slope MUST be a tuple
     if conf.time_zero_slope is not None:
-        dp_som3.attr_list["Time_zero_slope"] = \
+        dp_som4.attr_list["Time_zero_slope"] = \
                                      conf.time_zero_slope.toValErrTuple()
 
     # Note: time_zero_offset MUST be a tuple
     if conf.time_zero_offset is not None:
-        dp_som3.attr_list["Time_zero_offset"] = \
+        dp_som4.attr_list["Time_zero_offset"] = \
                                      conf.time_zero_offset.toValErrTuple()
 
     # Step 6: Convert TOF to wavelength for data and monitor
@@ -230,8 +264,8 @@ def process_igs_data(datalist, conf, **kwargs):
         dm_som2 = None
 
     # Convert detector pixels
-    dp_som4 = common_lib.tof_to_initial_wavelength_igs_lin_time_zero(
-        dp_som3,
+    dp_som5 = common_lib.tof_to_initial_wavelength_igs_lin_time_zero(
+        dp_som4,
         units="microsecond",
         run_filter=conf.filter)
 
@@ -239,7 +273,7 @@ def process_igs_data(datalist, conf, **kwargs):
         t.getTime(msg="After converting TOF to wavelength ")
 
     if conf.dump_wave:
-        hlr_utils.write_file(conf.output, "text/Spec", dp_som4,
+        hlr_utils.write_file(conf.output, "text/Spec", dp_som5,
                              output_ext="pxl",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
@@ -255,7 +289,7 @@ def process_igs_data(datalist, conf, **kwargs):
                              path_replacement=conf.path_replacement,
                              message="monitor wavelength information")
         
-    del dp_som3, dm_som1
+    del dp_som4, dm_som1
 
     # Step 7: Efficiency correct monitor
     if conf.verbose and dm_som2 is not None and not conf.no_mon_effc:
@@ -291,7 +325,7 @@ def process_igs_data(datalist, conf, **kwargs):
     if t is not None:
         t.getTime(False)
 
-    dm_som4 = dr_lib.rebin_monitor(dm_som3, dp_som4)
+    dm_som4 = dr_lib.rebin_monitor(dm_som3, dp_som5)
 
     if t is not None and dm_som3 is not None:
         t.getTime(msg="After rebinning monitor ")
@@ -316,18 +350,18 @@ def process_igs_data(datalist, conf, **kwargs):
         t.getTime(False)
 
     if dm_som4 is not None:
-        dp_som5 = common_lib.div_ncerr(dp_som4, dm_som4)
+        dp_som6 = common_lib.div_ncerr(dp_som5, dm_som4)
 
         if t is not None:
             t.getTime(msg="After normalizing data by monitor ")
     else:
-        dp_som5 = dp_som4
+        dp_som6 = dp_som5
 
     if conf.dump_wave_mnorm:
-        dp_som5_1 = dr_lib.sum_all_spectra(dp_som5,\
+        dp_som6_1 = dr_lib.sum_all_spectra(dp_som6,\
                                    rebin_axis=conf.lambda_bins.toNessiList())
         
-        hlr_utils.write_file(conf.output, "text/Spec", dp_som5_1,
+        hlr_utils.write_file(conf.output, "text/Spec", dp_som6_1,
                              output_ext="pml",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
@@ -335,11 +369,11 @@ def process_igs_data(datalist, conf, **kwargs):
                              path_replacement=conf.path_replacement,
                              message="combined pixel wavelength information "\
                              +"(monitor normalized)")
-        del dp_som5_1
+        del dp_som6_1
 
-    del dm_som4, dp_som4
+    del dm_som4, dp_som5
 
-    return dp_som5
+    return dp_som6
 
 
 

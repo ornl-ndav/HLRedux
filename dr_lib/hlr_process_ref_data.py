@@ -22,10 +22,9 @@
 
 # $Id$
 
-def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file,
-                     no_bkg=False, **kwargs):
+def process_ref_data(datalist, conf, signal_roi_file, no_bkg=False, **kwargs):
     """
-    This function combines Steps 1 through 11 in section 2.4.5 of the data
+    This function combines Steps 1 through 6 in section 2.4.5 of the data
     reduction process for Reflectometers (without Monitors) as specified by
     the document at
     U{http://neutrons.ornl.gov/asg/projects/SCL/reqspec/DR_Lib_RS.doc}. The
@@ -42,10 +41,6 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file,
     @param signal_roi_file: The file containing the list of pixel IDs for the
                             signal region of interest.
     @type signal_roi_file: C{string}
-    
-    @param bkg_roi_file: The file containing the list of pixel IDs for the
-                         background region of interest.
-    @type bkg_roi_file: C{string}
     
     @param no_bkg: (OPTIONAL) Flag which determines if the background will be
                               calculated nad subtracted.
@@ -96,47 +91,66 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file,
     
     so_axis = "time_of_flight"
 
-    # Steps 1 and 2: Open data files and select signal and background ROIs
+    # Step 0: Open data files and select signal ROIs
     if conf.verbose:
         print "Reading %s file" % dataset_type
 
-    (d_som1, b_som1) = dr_lib.add_files(datalist,
-                                        Data_Paths=conf.data_paths.toPath(),
-                                        SO_Axis=so_axis,
-                                        dataset_type=dataset_type,
-                                        Signal_ROI=signal_roi_file,
-                                        Bkg_ROI=bkg_roi_file,
-                                        Verbose=conf.verbose,
-                                        Timer=t)
+    d_som1 = dr_lib.add_files(datalist,
+                              Data_Paths=conf.data_paths.toPath(),
+                              SO_Axis=so_axis,
+                              dataset_type=dataset_type,
+                              Signal_ROI=signal_roi_file,
+                              Verbose=conf.verbose,
+                              Timer=t)[0]
 
     if t is not None:
         t.getTime(msg="After reading %s " % dataset_type)
 
+    # Calculate delta t over t
+    if conf.verbose:
+        print "Calculating delta t over t"
+        
+    dtot = dr_lib.calc_deltat_over_t(d_som1[0].axis[0].val)
+
+    # Calculate delta theta over theta
+    if conf.verbose:
+        print "Calculating delta theta over theta"
+        
+    #dr_lib.calc_delta_theta_over_theta(d_som1, dataset_type)
+
+    # Step 1: Sum all spectra along the low resolution direction
+    
+    # Set sorting for REF_L 
+    if conf.inst == "REF_L":
+        y_sort = True
+    else:
+        y_sort = False
+
+    d_som2 = dr_lib.sum_all_spectra(d_som1, y_sort=y_sort, stripe=True,
+                                    pixel_fix=127)
+
+    del d_som1
+        
     if conf.dump_specular:
-        d_som1_1 = dr_lib.sum_all_spectra(d_som1)
-        hlr_utils.write_file(conf.output, "text/Spec", d_som1_1,
+        hlr_utils.write_file(conf.output, "text/Spec", d_som2,
                              output_ext="sdc",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
                              data_ext=conf.ext_replacement,
                              path_replacement=conf.path_replacement,
-                             message="combined specular TOF information")
-        del d_som1_1
+                             message="specular TOF information")
 
-    # Calculate delta t over t
-    if not conf.no_dtot:
-        if conf.verbose:
-            print "Calculating delta t over t"
-        
-        dtot = dr_lib.calc_deltat_over_t(d_som1[0].axis[0].val)
-    else:
-        dtot = None
-
-    # Steps 3 and 4: Determine background spectrum
+    # Steps 2-4: Determine background spectrum
     if conf.verbose and not no_bkg:
         print "Determining %s background" % dataset_type
 
-    B = dr_lib.determine_ref_background(b_som1, no_bkg)
+    if dataset_type == "data":
+        peak_excl = conf.data_peak_excl
+    elif dataset_type == "norm":
+        peak_excl = conf.norm_peak_excl
+
+    B = dr_lib.calculate_ref_background(d_som2, no_bkg, conf.inst,
+                                        peak_excl)
 
     if t is not None:
         t.getTime(msg="After background determination")
@@ -148,102 +162,35 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file,
                              verbose=conf.verbose,
                              data_ext=conf.ext_replacement,
                              path_replacement=conf.path_replacement,
-                             message="combined background TOF information")
-
-    del b_som1
+                             message="background TOF information")
 
     # Step 5: Subtract background spectrum from data spectra
     if not no_bkg:
-        d_som2 = dr_lib.subtract_bkg_from_data(d_som1, B[0],
+        d_som3 = dr_lib.subtract_bkg_from_data(d_som2, B,
                                                verbose=conf.verbose,
                                                timer=t,
                                                dataset1="data",
                                                dataset2="background")
     else:
-        d_som2 = d_som1
+        d_som3 = d_som2
 
-    del d_som1
-
-    # Set sorting for REF_L if split spectra required
-    if conf.inst == "REF_L":
-        y_sort = True
-    else:
-        y_sort = False
-
-    rebin_axis = None
-
-    if conf.step_stop == 0:
-        d_som4 = d_som2
-        del d_som2
-
-    # Step 6: Convert TOF to wavelength for data
-    if conf.step_stop > 0:
-        if conf.inst_geom is not None:
-            inst_geom_dst.setGeometry(conf.data_paths.toPath(), d_som2)
-
-        if conf.verbose:
-            print "Converting TOF to wavelength"
-
-        if t is not None:
-            t.getTime(False)
-
-        d_som3 = common_lib.tof_to_wavelength(d_som2, inst_param="total",
-                                              units="microsecond")
-        
-        if t is not None:
-            t.getTime(msg="After converting TOF to wavelength ")
-
-        del d_som2
-
-        if conf.step_stop == 1:
-            d_som4 = d_som3
-            del d_som3
-            rebin_axis = conf.lambda_bins.toNessiList()
-
-    # Step 7: Convert wavelength to scalar Q
-    if conf.step_stop > 1:
-        if conf.verbose:
-            print "Converting wavelength to scalar Q"
-
-        if t is not None:
-            t.getTime(False)
-
-        d_som4 = common_lib.wavelength_to_scalar_Q(d_som3)
-        del d_som3
-        
-        rebin_axis = conf.Q_bins.toNessiList()
-
-        if t is not None:
-            t.getTime(msg="After converting wavelength to scalar Q ")
-
-    # Steps 8 to 11: Combine the spectra from the dataset
-    if conf.verbose:
-        print "Combining %s spectra" % dataset_type
-
-    if dataset_type == "norm":
-        d_som5 = dr_lib.sum_all_spectra(d_som4, rebin_axis=rebin_axis)
-    else:
-        d_som5 = dr_lib.sum_all_spectra(d_som4, y_sort=y_sort,
-                                        stripe=conf.split,
-                                        rebin_axis=rebin_axis)
-
-    del d_som4
+    del d_som2
 
     if conf.dump_sub:
-        hlr_utils.write_file(conf.output, "text/Spec", d_som5,
+        hlr_utils.write_file(conf.output, "text/Spec", d_som3,
                              output_ext="sub",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
                              data_ext=conf.ext_replacement,
                              path_replacement=conf.path_replacement,
-                             message="combined subtracted information")
+                             message="subtracted TOF information")
 
-    if conf.step_stop == 0 and dtot is not None:
-        d_som5.attr_list["extra_som"] = dtot
 
-    if dtot is not None:
-        dtot_int = dr_lib.integrate_axis(dtot, avg=True)
-        param_key = dataset_type+"-dt_over_t"
-        d_som5.attr_list[param_key] = dtot_int[0]
-        
-    return d_som5
+    dtot_int = dr_lib.integrate_axis(dtot, avg=True)
+    param_key = dataset_type+"-dt_over_t"
+    d_som3.attr_list[param_key] = dtot_int[0]
+
+    if conf.store_dtot:
+        d_som3.attr_list["extra_som"] = dtot
+
+    return d_som3

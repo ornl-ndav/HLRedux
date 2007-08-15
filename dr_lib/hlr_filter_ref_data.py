@@ -35,6 +35,12 @@ def filter_ref_data(som, **kwargs):
     @param som: Object containing a single spectrum to be cleaned
     @type som: C{SOM.SOM}
 
+    @param kwargs: A list of keyword arguments that the function accepts:
+
+    @keyword zero_mode: A flag that tells the function to zero the bad values
+                        instead of removing them
+    @type zero_mode: C{boolean}
+    
 
     @return: Object containing a spectrum that has been cleaned of all bad data
     @rtype: C{SOM.SOM}
@@ -59,6 +65,12 @@ def filter_ref_data(som, **kwargs):
         dtot = result.attr_list["extra_som"]
     except KeyError:
         dtot = None
+ 
+    # Check keyword arguments
+    try:
+        zero_mode = kwargs["zero_mode"]
+    except KeyError:
+        zero_mode = False
 
     import copy
     import itertools
@@ -141,17 +153,21 @@ def filter_ref_data(som, **kwargs):
 
         offset = 0
         for index in index_map[map_so.id]:
-            # Index arithmetic since list length get shorter with every
-            # element deleted
-            dindex = index - offset
-            del y_val[dindex]
-            del y_err2[dindex]
-            del x_val[dindex]
-            del x_err2[dindex]
-            if dtot is not None:
-                del dso.y[dindex]
+            if not zero_mode:
+                # Index arithmetic since list length get shorter with every
+                # element deleted
+                dindex = index - offset
+                del y_val[dindex]
+                del y_err2[dindex]
+                del x_val[dindex]
+                del x_err2[dindex]
+                if dtot is not None:
+                    del dso.y[dindex]
 
-            offset += 1
+                offset += 1
+            else:
+                y_val[index] = 0.0
+                y_err2[index] = 0.0
 
         if dtot is not None and multiple_dtot:
             hlr_utils.result_insert(res_dtot, resd_descr, dso, None, "all")

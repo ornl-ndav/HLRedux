@@ -62,17 +62,34 @@ def run(config, tim=None):
     else:
         inst_geom_dst = None
 
+    # Perform early background subtraction if the hwfix flag is used
+    if config.hwfix:
+        if not config.mc:
+            so_axis = "time_of_flight"
+        else:
+            so_axis = "Time_of_Flight"
+        
+        bkg_som = dr_lib.add_files(config.back,
+                                   Data_Paths=config.data_paths.toPath(),
+                                   SO_Axis=so_axis, Signal_ROI=config.roi_file,
+                                   dataset_type="background",
+                                   Verbose=config.verbose, Timer=tim)[0]
+    else:
+        bkg_som = None
+
     # Perform Steps 1-9 on sample data
     d_som1 = dr_lib.process_igs_data(config.data, config, timer=tim,
                                      inst_geom_dst=inst_geom_dst,
-                                     tib_const=config.tib_data_const)
+                                     tib_const=config.tib_data_const,
+                                     bkg_som=bkg_som)
 
     # Perform Steps 1-9 on empty can data
     if config.ecan is not None:
         e_som1 = dr_lib.process_igs_data(config.ecan, config, timer=tim,
                                          inst_geom_dst=inst_geom_dst,
                                          dataset_type="empty_can",
-                                         tib_const=config.tib_ecan_const)
+                                         tib_const=config.tib_ecan_const,
+                                         bkg_som=bkg_som)
     else:
         e_som1 = None
 
@@ -81,12 +98,13 @@ def run(config, tim=None):
         n_som1 = dr_lib.process_igs_data(config.norm, config, timer=tim,
                                          inst_geom_dst=inst_geom_dst,
                                          dataset_type="normalization",
-                                         tib_const=config.tib_norm_const)
+                                         tib_const=config.tib_norm_const,
+                                         bkg_som=bkg_som)
     else:
         n_som1 = None
 
     # Perform Steps 1-9 on background data
-    if config.back is not None:
+    if config.back is not None and not config.hwfix:
         b_som1 = dr_lib.process_igs_data(config.back, config, timer=tim,
                                          inst_geom_dst=inst_geom_dst,
                                          dataset_type="background",

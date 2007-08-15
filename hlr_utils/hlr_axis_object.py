@@ -27,7 +27,7 @@ class Axis(object):
     This class provides a container for information to create a data axis
     """
 
-    def __init__(self, min, max, delta, units="", title=""):
+    def __init__(self, min, max, delta, units="", title="", **kwargs):
         """
         Constructor for class
 
@@ -46,12 +46,26 @@ class Axis(object):
         
         @param title: The title associated with the axis
         @type title: C{string}
+
+        @param kwargs: A list of keyword arguments that the function accepts:
+
+        @keyword type: The type of binning requested for the axis. The current
+                       types are C{log} and C{lin}. The default behavior is
+                       C{lin}.
+        @type type: C{string}
         """
         self.__min = float(min)
         self.__max = float(max)
         self.__delta = float(delta)
         self.__units = units
         self.__title = title
+
+        try:
+            self.__bintype = kwargs["bintype"]
+        except KeyError:
+            self.__bintype = "lin"
+
+        self.__names = {"lin" : "Linear", "log" : "Logarithmic"}
 
     def __repr__(self):
         """
@@ -69,9 +83,9 @@ class Axis(object):
         @return: The representation of the C{Axis} object
         @rtype: C{string}
         """
-        return "Min=%f, Max=%f, Delta=%f, Units=%s, Title: %s" % \
+        return "Min=%f, Max=%f, Delta=%f, Units=%s, Title: %s, Type: %s" % \
                (self.__min, self.__max, self.__delta, str(self.__units),
-                self.__title)
+                self.__title, self.__names[self.__bintype])
 
     def __eq__(self, other):
         """
@@ -97,7 +111,10 @@ class Axis(object):
                 return False
             
             if self.__units != other.getUnits():
-                return False            
+                return False
+
+            if self.__bintype != other.getBinningType():
+                return False
 
         except:
             return True
@@ -118,6 +135,85 @@ class Axis(object):
         @rtype: C{boolean}
         """
         return not self.__eq__(other)
+
+    def __do_linear(self, atype, axis):
+        """
+        This method creates an axis based on linear binning.
+
+        @param atype: The axis type to create
+        @type atype: C{string} (I{histogram}, I{density} or I{coordinate}
+
+        @param axis: The C{NessiList} for holding the axis elements
+        @type axis: C{nessi_list.NessiList}
+
+
+        @return: The axis with the values or boundaries supplied
+        @rtype: C{nessi_list.NessiList}
+        """
+        import math
+        
+        n_bins = int(math.fabs(self.__max - self.__min) / self.__delta)
+        
+        for i in xrange(n_bins):
+            axis.append(self.__min + i * self.__delta)
+
+        if atype == "histogram":
+            axis.append(self.__max)
+        elif atype == "density" or atype == "coordinate":
+            pass
+        else:
+            raise RuntimeError("Linear binning cannot handle type: %s" % atype)
+
+        return axis
+
+    def __do_logarithmic(self, atype, axis):
+        """
+        This method creates an axis based on logarithmic binning.
+
+        @param atype: The axis type to create
+        @type atype: C{string} (I{histogram}, I{density} or I{coordinate}
+
+        @param axis: The C{NessiList} for holding the axis elements
+        @type axis: C{nessi_list.NessiList}
+
+
+        @return: The axis with the values or boundaries supplied
+        @rtype: C{nessi_list.NessiList}
+        """
+        import utils
+
+        if not utils.compare(self.__min, 0.0):
+            raise RuntimeError("Logarithmic binning cannot have zero as a "\
+                               +"minimum starting value")
+        else:
+            pass
+        
+        cur_val = self.__min
+        axis.append(cur_val)
+        
+        while cur_val < self.__max:
+            cur_val *= (1.0 + self.__delta)
+            axis.append(cur_val)
+
+        if atype == "histogram":
+            axis.append(self.__max)
+        elif atype == "density" or atype == "coordinate":
+            cur_val *= (1.0 + self.__delta)
+            axis.append(cur_val)
+            self.__max = cur_val
+        else:
+            raise RuntimeError("Log binning cannot handle type: %s" % atype)
+
+        return axis
+
+    def getBinningType():
+        """
+        This method returns the C{Axis} object's binning type
+
+        @return: C{Axis} binning type (I{lin} or I{log})
+        @rtype: C{string}
+        """        
+        return self.__bintype
 
     def getDelta():
         """
@@ -163,6 +259,15 @@ class Axis(object):
         @rtype: C{string}
         """        
         return self.__units
+
+    def setBinningType(bintype):
+        """
+        This method sets the C{Axis} object's binning type 
+
+        @param bintype: The binning type for the C{Axis} object
+        @type bintype: C{string}
+        """
+        self.__bintype = bintype    
 
     def setDelta(delta):
         """
@@ -220,28 +325,18 @@ class Axis(object):
         @param type: The axis data type: I{histogram} or I{density}
         @type type: C{string}
         """
-        import math
         import nessi_list
-        
-        n_bins = int(math.fabs(self.__max - self.__min) / self.__delta)
 
         axis = nessi_list.NessiList()
-        
-        for i in xrange(n_bins):
-            axis.append(self.__min + i * self.__delta)
 
-        try:
-            if(type == "histogram"):
-                axis.append(self.__max)
-            elif(type == "density" or type == "coordinate"):
-                pass
-            else:
-                raise RuntimeError("Do not understand type: %s" % type)
-        except KeyError:
-            axis.append(self.__max)
-
-        return axis
-
+        if self.__bintype == "lin":
+            return self.__do_linear(type, axis)
+        elif self.__bintype == "log":
+            return self.__do_logarithmic(type, axis)
+        else:
+            raise RuntimeError("Have no method for creating axis of type %s" \
+                               % self.__bintype)
+            
     def toXmlConfig(self, doc, node):
         """
         This method an XML document and node and fills the information from the
@@ -277,13 +372,18 @@ class Axis(object):
 
         title_node = doc.createElement("title")
         title_text = doc.createTextNode(str(self.__title))
-        title_node.appendChild(title_text)        
+        title_node.appendChild(title_text)
+
+        bintype_node = doc.createElement("bintype")
+        bintype_text = doc.createTextNode(str(self.__bintype))
+        bintype_node.appendChild(bintype_text)                
         
         node.appendChild(min_node)
         node.appendChild(max_node)
         node.appendChild(delta_node)
         node.appendChild(units_node)
-        node.appendChild(title_node)        
+        node.appendChild(title_node)
+        node.appendChild(bintype_node)        
 
         return node
 
@@ -293,10 +393,10 @@ def AxisFromString(infostr):
 
     @param infostr: A comma delimited list containing the following pieces of
                     information: axis minimum, axis maximum, axis bin width,
-                    axis units and axis title. The mimimum string must conatin
-                    the first three pieces of information (min, max, width). If
-                    units and title are supplied, it must be in the order l
-                    isted above.
+                    axis type (I{lin} or I{log}, axis units and axis title. The
+                    mimimum string must contain the first three pieces of
+                    information (min, max, width). If axis type, units and
+                    title are supplied, it must be in the order listed above.
     @type infostr: C{string}
     
 
@@ -310,18 +410,22 @@ def AxisFromString(infostr):
     values = infostr.split(',')
     lenval = len(values)
 
-    if lenval < 3 or lenval > 5:
+    if lenval < 3 or lenval > 6:
         raise RuntimeError("Axis object requires at least three pieces of "\
-                           +"information and a max of five pieces. See class "\
+                           +"information and a max of six pieces. See class "\
                            +"documentation for details")
     try:
-        return Axis(values[0], values[1], values[2], values[3],
-                              values[4])
+        return Axis(values[0], values[1], values[2], values[4],
+                              values[5], bintype=values[3])
     except IndexError:
         try:
-            return Axis(values[0], values[1], values[2], values[3])
+            return Axis(values[0], values[1], values[2], values[4],
+                        bintype=values[3])
         except IndexError:
-            return Axis(values[0], values[1], values[2])
+            try:
+                return Axis(values[0], values[1], values[2], bintype=values[3])
+            except IndexError:
+                return Axis(values[0], values[1], values[2])
 
 def AxisFromXmlConfig(node):
     """
@@ -348,8 +452,15 @@ def AxisFromXmlConfig(node):
 
     title_node = node.getElementsByTagName("title")[0]
     title = title_node.childNodes[0].nodeValue.strip(os.linesep).strip(' ')
+
+    try:
+        bintype_node = node.getElementsByTagName("bintype")[0]
+        bintype = \
+             bintype_node.childNodes[0].nodeValue.strip(os.linesep).strip(' ')
+    except IndexError:
+        bintype = "lin"
     
-    return Axis(amin, amax, delta, units, title) 
+    return Axis(amin, amax, delta, units, title, bintype=bintype) 
 
 if __name__ == "__main__":
     import hlr_utils
@@ -371,9 +482,12 @@ if __name__ == "__main__":
     tnode = rdoc.getElementsByTagName("test_axis")[0]
     axis3 = hlr_utils.AxisFromXmlConfig(tnode)
 
+    axis4 = Axis(0.1, 10, 0.1, "log arb", "A Log Test Axis", bintype="log")
+
     print "****************************"
     print "* Axis1: ", axis1
     print "* Axis2: ", axis2
     print "* Axis2 (NL):", axis2.toNessiList()
     print "* Axis3: ", axis3
-    
+    print "* Axis4: ", axis4
+    print "* Axis4 (NL):", axis4.toNessiList()    

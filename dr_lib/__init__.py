@@ -27,7 +27,9 @@ data reduction functionality.
 
 from hlr_add_files import *
 from hlr_calc_deltat_over_t import *
-from hlr_create_E_vs_Q_igs import *
+from hlr_calc_delta_theta_over_theta import *
+from hlr_calculate_ref_background import *
+from hlr_create_E_vs_Q_igs import create_E_vs_Q_igs
 from hlr_create_X_vs_pixpos import *
 from hlr_determine_time_indep_bkg import *
 from hlr_determine_ref_background import *

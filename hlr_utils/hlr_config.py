@@ -85,6 +85,15 @@ def ConfigFromXml(doc, configure):
                     setter = []
                     for val in sval:
                         setter.append(val.strip(' \''))
+
+                elif attr == "tuple":
+                    nval = str(cnode.childNodes[0].nodeValue).strip('()')
+                    sval = nval.split(',')
+                    setter = []
+                    for val in sval:
+                        setter.append(int(val))
+
+                    setter = tuple(setter)
                     
                 elif attr == "hlr_utils.hlr_axis_object.Axis":
                     setter = hlr_utils.AxisFromXmlConfig(cnode)
@@ -94,7 +103,7 @@ def ConfigFromXml(doc, configure):
                     
                 elif attr == "hlr_utils.hlr_nxpath.NxPath":
                     setter = hlr_utils.NxPathFromXmlConfig(cnode)
-                    
+
                 configure.__dict__[str(cnode.localName)] = setter
                 
             except AttributeError:

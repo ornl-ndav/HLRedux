@@ -53,6 +53,12 @@ def sum_all_spectra(obj, **kwargs):
                      I{False} and corresponds to summing all spectra into one.
     @type stripe: C{boolean}
 
+    @keyword pix_fix: A single or list of pixel IDs with which to override the
+                      summed spectrum pixel ID. The setting of y_sort
+                      determines is the x component (y_sort=False) or the y
+                      component (y_sort=True) of the pixel ID is overridden.
+    @type pix_fix: C{int} or C{list} of C{int}s
+    
 
     @return: Object containing a single spectrum
     @rtype: C{SOM.SOM}
@@ -98,6 +104,11 @@ def sum_all_spectra(obj, **kwargs):
     except KeyError:
         stripe = False        
 
+    try:
+        pix_fix = kwargs["pixel_fix"]
+    except KeyError:
+        pix_fix = None
+
     import common_lib
 
     if rebin_axis is not None:
@@ -141,7 +152,18 @@ def sum_all_spectra(obj, **kwargs):
             
         hlr_utils.result_insert(result, res_descr, value, None, "all")
         result.attr_list["Summed IDs"] = so_id_list
-        result[0].id = so_id_list[0]
+
+        if pix_fix is not None:
+            if y_sort:
+                fixed_pixel = (so_id_list[0][0], (pix_fix,
+                                                  so_id_list[0][1][1]))
+            else:
+                fixed_pixel = (so_id_list[0][0], (so_id_list[0][1][0],
+                                                  pix_fix))
+        else:
+            fixed_pixel = so_id_list[0]            
+            
+        result[0].id = fixed_pixel
 
     else:
         # iterate through the values        
@@ -180,7 +202,31 @@ def sum_all_spectra(obj, **kwargs):
             i_start = i
             so_id_list.append(stripe_list)
             hlr_utils.result_insert(result, res_descr, value, None, "all")
-            result[stripe_count].id = stripe_list[0]
+
+            if pix_fix is not None:
+                try:
+                    if y_sort:
+                        fixed_pixel = (stripe_list[0][0],
+                                       (pix_fix[stripe_count],
+                                        stripe_list[0][1][1]))
+                    else:
+                        fixed_pixel = (stripe_list[0][0],
+                                       (stripe_list[0][1][0],
+                                        pix_fix[stripe_count]))
+                    
+                except TypeError:
+                    if y_sort:
+                        fixed_pixel = (stripe_list[0][0],
+                                       (pix_fix,
+                                        stripe_list[0][1][1]))
+                    else:
+                        fixed_pixel = (stripe_list[0][0],
+                                       (stripe_list[0][1][0],
+                                        pix_fix))
+            else:
+                fixed_pixel = stripe_list[0]
+
+            result[stripe_count].id = fixed_pixel
             stripe_count += 1
 
         result.attr_list["summed_ids"] = so_id_list            
