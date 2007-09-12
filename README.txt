@@ -61,10 +61,9 @@ Installation Instructions
   Documentation
   -------------
 
-  To (re)create the package documentation, cd to the doc directory and run the 
-  following command:
+  To (re)create the package documentation, run the following command:
 
-  sh makedoc
+  python setup.py build_doc
 
 
 $Id$
