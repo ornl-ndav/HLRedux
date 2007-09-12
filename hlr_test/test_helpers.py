@@ -66,9 +66,11 @@ def generate_so(data_type, start, stop=0, dim=1, extra=0):
             so.y.extend(range(start + extra, stop + extra))
             so.var_y.extend(range(start + extra, stop + extra))
         else:
-            for j in range(size - 2):
+            counter = 0
+            while counter < (size - 2):
                 so.y.extend(range(start + extra, stop + extra))
                 so.var_y.extend(range(start + extra, stop + extra))
+                counter += 1
 
     return so
 

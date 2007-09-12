@@ -66,13 +66,33 @@ def run(config):
     else:
         pass
 
-    if len(d_som1) == 1:
-        d_som2 = d_som1
-    else:
-        d_som2 = dr_lib.sum_all_spectra(d_som1)
-        d_som2[0].id = d_som1[0].id
+    if config.tib_const is not None:
+        import common_lib
+        d_som2 = common_lib.sub_ncerr(d_som1, config.tib_const.toValErrTuple())
 
-    hlr_utils.write_file(config.output, "text/Spec", d_som2, replace_ext=False,
+        if config.dump_sxl:
+            hlr_utils.write_file(config.data, "text/Spec", d_som2,
+                                 output_ext="tsp", verbose=config.verbose,
+                                 message="TIB const sub pixel TOF information")
+        
+    else:
+        d_som2 = d_som1
+
+    del d_som1
+
+    if len(d_som2) == 1:
+        if config.verbose:
+            print "Summing 1 spectrum."        
+        d_som3 = d_som2
+    else:
+        if config.verbose:
+            print "Summing %d spectra." % len(d_som2)
+        d_som3 = dr_lib.sum_all_spectra(d_som2)
+        d_som3[0].id = d_som2[0].id
+
+    del d_som2
+
+    hlr_utils.write_file(config.output, "text/Spec", d_som3, replace_ext=False,
                          verbose=config.verbose,
                          message="combined TOF information")
 
@@ -93,8 +113,8 @@ if __name__ == "__main__":
     # set up the options available
     parser = hlr_utils.BasicOptions("usage: %prog [options] <datafile>", None,
                                     None, hlr_utils.program_version(), 'error',
-                                  " ".join(result))
-
+                                    " ".join(result))
+    
     parser.add_option("", "--data-paths", dest="data_paths",
                       help="Specify the comma separated list of detector data"\
                       +" paths and signals. Default is /entry/bank1,1")
@@ -118,6 +138,15 @@ if __name__ == "__main__":
     parser.add_option("", "--roi-file", dest="roi_file",
                       help="Specify a file that contains a list of pixel ids "\
                       +"from a region-of-interest to be read from the data")
+
+    parser.add_option("", "--tib-const", dest="tib_const",
+                      help="Specify constant to subtract from data "\
+                        +"spectra: value, err^2")
+
+    parser.add_option("", "--dump-sxl", action="store_true", dest="dump_sxl",
+                      help="Flag to dump the TOF for all pixels after TIB"\
+                      +"subtraction. Creates a *.tsp file.")
+    parser.set_defaults(dump_sxl=False)    
 
     (options, args) = parser.parse_args()
 
@@ -176,6 +205,13 @@ if __name__ == "__main__":
 
     # set the dump all TOF pixel information
     configure.dump_pxl = options.dump_pxl
+
+    # set the dump all TOF pixel information after TIB subtraction
+    configure.dump_sxl = options.dump_sxl    
+
+    # Set the time-independent backgroun constant
+    configure.tib_const = hlr_utils.DrParameterFromString(options.tib_const,
+                                                          True)
 
     # run the program
     run(configure)

@@ -106,19 +106,19 @@ def calculate_ref_background(obj, no_bkg, inst, peak_excl):
         
     # Slice data, fit, evaluate and repackage spectra
     for i in xrange(len_tof):
-        slice = nessi_list.NessiList()
-        slice_err2 = nessi_list.NessiList()
+        sliced_data = nessi_list.NessiList()
+        sliced_data_err2 = nessi_list.NessiList()
 
         for j in xrange(len_som):
             obj1 = hlr_utils.get_value(obj, j, o_descr, "all")
             cur_pix_id = obj1.id[1][inst_pix_id]
 
             if cur_pix_id < peak_excl[0] or cur_pix_id > peak_excl[1]:
-                slice.append(obj1.y[i])
-                slice_err2.append(obj1.var_y[i])
+                sliced_data.append(obj1.y[i])
+                sliced_data_err2.append(obj1.var_y[i])
 
         params = utils.fit_linear_background(pix_axis_no_peak,
-                                             slice, slice_err2,
+                                             sliced_data, sliced_data_err2,
                                              0, len_fit-1)
 
         param_list.append(((obj1.axis[0].val[i], "microseconds"), params))

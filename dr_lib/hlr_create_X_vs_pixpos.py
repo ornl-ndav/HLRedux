@@ -116,7 +116,6 @@ def create_X_vs_pixpos(som, *args, **kwargs):
                                    +"axes must be provided.")
             else:
                 xvar = True
-                Q_pos = 2
         elif value.lower() == "false":
             if N_args != 2:
                 raise RuntimeError("Since you did not requested x errors, 2 "\

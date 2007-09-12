@@ -235,7 +235,7 @@ def process_igs_data(datalist, conf, **kwargs):
     # time-zero offset
 
     if conf.wavelength_final is not None:
-        dp_som4.attr_list["Wavelength_final"] =\
+        dp_som4.attr_list["Wavelength_final"] = \
                                      conf.wavelength_final.toValErrTuple()
 
     # Note: time_zero_slope MUST be a tuple

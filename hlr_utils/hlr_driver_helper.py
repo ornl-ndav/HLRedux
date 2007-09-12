@@ -240,19 +240,9 @@ def fix_filename(filename):
     
     import os
 
-    if filename != None:
-        try:
-            filename.index('~')
-            filename = os.path.expanduser(filename)
-        except ValueError:
-            pass
-        
-        try:
-            filename.index('$')
-            filename = os.path.expandvars(filename)
-        except ValueError:
-            pass
-
+    if filename is not None:
+        filename = os.path.expanduser(filename)
+        filename = os.path.expandvars(filename)
     # Filename is a None type, just pass it back
     else:
         pass
@@ -477,10 +467,11 @@ def create_id_pairs(pairs, paths, **kwargs):
 
     size = len(paths.split(','))
     try:
-        if int(paths.split(',')[1]) == 1:
+        temp = paths.split(',')[1]
+        if int(temp) == 1:
             size = 1
-    except TypeError:
-        pass
+    except IndexError:
+        size = 1
     
     if length == 2 and length/2 == size:
         use_extend = True
@@ -515,8 +506,10 @@ def create_id_pairs(pairs, paths, **kwargs):
     else:
         last_pair = id_pairs[-1]
         additions = size / (length/2) - 1
-        for j in range(additions):
+        counter = 0
+        while counter < additions:
             id_pairs.append(last_pair)
+            counter += 1
 
         return id_pairs
 
@@ -668,11 +661,12 @@ def __run_cmd(cmd, lines=True):
     returning single lines of output need to set the second argument to False.
     """
     import os
-    fin, fout = os.popen4(cmd)
+    # Returns a tuple: (STDIN, STDOUT+STDERR)
+    streams = os.popen4(cmd)
     if lines:
-        return fout.readlines()
+        return streams[1].readlines()
     else:
-        return fout.read()
+        return streams[1].read()
         
 def __run_findnexus(nums, inst):
     """

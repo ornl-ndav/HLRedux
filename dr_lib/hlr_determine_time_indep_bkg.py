@@ -22,7 +22,7 @@
 
 # $Id$
 
-def determine_time_indep_bkg(obj, tof_vals, **kwargs):
+def determine_time_indep_bkg(obj, tof_vals):
     """
     This functions calculates the average counts at four given TOF channels
     for determining the time-independent background. 

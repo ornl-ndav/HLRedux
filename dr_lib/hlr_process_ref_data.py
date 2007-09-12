@@ -64,7 +64,6 @@ def process_ref_data(datalist, conf, signal_roi_file, no_bkg=False, **kwargs):
     @return: Object that has undergone all requested processing steps
     @rtype: C{SOM.SOM}
     """
-    import common_lib
     import dr_lib
     import hlr_utils
 
@@ -106,6 +105,9 @@ def process_ref_data(datalist, conf, signal_roi_file, no_bkg=False, **kwargs):
     if t is not None:
         t.getTime(msg="After reading %s " % dataset_type)
 
+    if i_geom_dst is not None:
+        i_geom_dst.setGeometry(conf.data_paths.toPath(), d_som1)
+
     # Calculate delta t over t
     if conf.verbose:
         print "Calculating delta t over t"
@@ -115,8 +117,8 @@ def process_ref_data(datalist, conf, signal_roi_file, no_bkg=False, **kwargs):
     # Calculate delta theta over theta
     if conf.verbose:
         print "Calculating delta theta over theta"
-        
-    #dr_lib.calc_delta_theta_over_theta(d_som1, dataset_type)
+
+    dr_lib.calc_delta_theta_over_theta(d_som1, dataset_type)
 
     # Step 1: Sum all spectra along the low resolution direction
     
@@ -176,7 +178,7 @@ def process_ref_data(datalist, conf, signal_roi_file, no_bkg=False, **kwargs):
 
     del d_som2
 
-    if conf.dump_sub:
+    if not no_bkg and conf.dump_sub:
         hlr_utils.write_file(conf.output, "text/Spec", d_som3,
                              output_ext="sub",
                              extra_tag=dataset_type,

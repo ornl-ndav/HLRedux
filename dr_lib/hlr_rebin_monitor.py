@@ -22,7 +22,7 @@
 
 # $Id$
 
-def rebin_monitor(obj1, obj2, **kwargs):
+def rebin_monitor(obj1, obj2):
     """
     This function takes objects (1st is the monitor, 2nd is the detector data)
     and rebins the data for obj1 onto the axis provided by obj2. 
@@ -32,8 +32,6 @@ def rebin_monitor(obj1, obj2, **kwargs):
     
     @param obj2: Detector data object that will provide the axis for rebinning
     @type obj2: C{SOM.SOM} or C{SOM.SO}
-
-    @param kwargs: A list of keyword arguments that the function accepts:
 
     
     @return: Object that has been rebinned

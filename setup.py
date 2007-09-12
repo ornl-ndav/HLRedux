@@ -31,6 +31,7 @@
 ###############################################################################
 
 from distutils.core import setup
+from distutils.cmd import Command
 import distutils.sysconfig
 import getopt
 import os
@@ -77,6 +78,38 @@ instrument_scripts = {
     "SCD" : [
     ]
     }
+
+class build_doc(Command):
+    """
+    This class is responsible for creating the API documentation via the
+    epydoc system.
+    """
+    description = "Build the API documentation"
+    user_options = []
+    
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        try:
+            epydoc_conf = os.path.join('doc', 'config.epy')
+            
+            from epydoc import cli
+            old_argv = sys.argv[1:]
+
+            sys.argv[1:] = [
+                "--config=%s" % epydoc_conf,
+                "--verbose"
+                ]
+            cli.cli()
+
+            sys.argv[1:] = old_argv
+
+        except ImportError:
+            print "Epydoc is needed to create API documentation. Skipping.."
 
 def pythonVersionCheck():
     # Minimum version of Python
@@ -172,5 +205,6 @@ if __name__ == "__main__":
           version=VERSION,
           extra_path=PACKAGE,
           packages=package_list,
-          scripts=script_list)
+          scripts=script_list,
+          cmdclass = {'build_doc': build_doc})
                         

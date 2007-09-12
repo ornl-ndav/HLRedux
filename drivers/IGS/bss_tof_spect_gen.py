@@ -36,7 +36,7 @@ def run(config):
     @type config: L{hlr_utils.Configure}
     """
     runner = "tof_slicer"
-    filter = "mask_generator"
+    mfilter = "mask_generator"
     banks = [("/entry/bank1", 1), ("/entry/bank2", 1)]
 
     max_ids = (64, 64)
@@ -101,7 +101,7 @@ def run(config):
                 counter = 0
                 for tube in tubes:
                     run_gen = []
-                    run_gen.append(filter)
+                    run_gen.append(mfilter)
                     run_gen.append("--bank-ids=%s,%s" % (bank[-1], bank[-1]))
                     run_gen.append("--h-ranges=%d,%d" % (tube-1, tube-1))
                     run_gen.append("--v-ranges=%d,%d" % (start_id, end_id-1))
@@ -118,7 +118,7 @@ def run(config):
                 oufile = bank + "_" + tag + "_" + tag1 + ".tof"
 
                 if config.verbose:
-                        print "Creating %s" % oufile
+                    print "Creating %s" % oufile
                         
                 command = []
 

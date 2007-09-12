@@ -170,7 +170,7 @@ def sum_all_spectra(obj, **kwargs):
         so_id_list = []
         i_start = 0
         stripe_count = 0
-        total_size = hlr_utils.get_length(obj1) - 1
+        total_size = hlr_utils.get_length(obj1)
         while i_start < total_size:
             stripe_list = []
             counted = 2
@@ -185,7 +185,7 @@ def sum_all_spectra(obj, **kwargs):
             else:
                 comp_id = val2.id[1][0]
             
-            for i in xrange(i_start+2, hlr_utils.get_length(obj1)):
+            for i in xrange(i_start+2, total_size):
                 val = hlr_utils.get_value(obj1, i, o_descr, "all")
                 if y_sort:
                     new_id = val.id[1][1]
@@ -199,7 +199,8 @@ def sum_all_spectra(obj, **kwargs):
                 stripe_list.append(val.id)
                 counted += 1
 
-            i_start = i
+            i_start += counted
+
             so_id_list.append(stripe_list)
             hlr_utils.result_insert(result, res_descr, value, None, "all")
 

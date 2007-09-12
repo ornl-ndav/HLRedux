@@ -28,18 +28,18 @@ of Time-Independent Background} in
 U{http://neutrons.ornl.gov/asg/projects/SCL/reqspec/DR_Lib_RS.doc}.
 """
 
-def __bisect_range(range):
+def __bisect_range(trange):
     """
     This function provides a convenient range bisection call
 
-    @param range: Object containing a minimum and maximum value to bisect
-    @type range: C{tuple}
+    @param trange: Object containing a minimum and maximum value to bisect
+    @type trange: C{tuple}
 
 
     @return: The value of the bisection
     @rtype: C{float}
     """
-    return (range[1] + range[0]) / 2.0
+    return (trange[1] + trange[0]) / 2.0
 
 def __check_parts(parts):
     """
@@ -160,9 +160,15 @@ def run(config, tim=None):
     ratio_min_parts = __calculate_ratio(config, config.ctib_min)
     ratio_min = __make_ratio(ratio_min_parts)
 
+    if tim is not None:
+        tim.getTime(msg="After minimum ratio calculation ")
+
     # Step 4
     ratio_max_parts = __calculate_ratio(config, config.ctib_max)
     ratio_max = __make_ratio(ratio_max_parts)
+
+    if tim is not None:
+        tim.getTime(msg="After maximum ratio calculation ")
 
     # Step 5
     if __check_parts(ratio_min_parts) and __check_parts(ratio_max_parts):
@@ -192,8 +198,9 @@ def run(config, tim=None):
     tib_range = [config.ctib_min, config.ctib_max]
 
     run_ok = False
-        
-    for i in range(config.niter):
+
+    counter = 0
+    while counter < config.niter:
         tib_try = __bisect_range(tib_range)
         if config.verbose:
             print "TIB Try: ", tib_try
@@ -221,6 +228,8 @@ def run(config, tim=None):
             else:
                 # Move range up
                 tib_range[0] = tib_try
+
+        counter += 1
 
     if not run_ok:
         # If you hit here, you've exhausted the number of iterations
@@ -321,7 +330,7 @@ if __name__ == "__main__":
     if options.ratio:
         configure.ratio = hlr_utils.split_values(options.ratio)
     else:
-       parser.error("An integration ratio must be supplied") 
+        parser.error("An integration ratio must be supplied") 
 
     # Set the number of iterations
     configure.niter = options.niter

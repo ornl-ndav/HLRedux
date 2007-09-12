@@ -91,7 +91,7 @@ def integrate_spectra(obj, **kwargs):
         if bin_index:
             i_start = 0
         else:
-            i_start = obj1.axis[axis_pos].val[0]
+            i_start = obj.axis[axis_pos].val[0]
 
     # If the integration end bound is not given, assume the last bin
     try:
@@ -100,7 +100,7 @@ def integrate_spectra(obj, **kwargs):
         if bin_index:
             i_end = -1
         else:
-            i_end = obj1.axis[axis_pos].val[-1]
+            i_end = obj.axis[axis_pos].val[-1]
     
     # iterate through the values
     import bisect

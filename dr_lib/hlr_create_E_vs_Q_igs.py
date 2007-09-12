@@ -198,7 +198,8 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
         l_i_err2 = hlr_utils.get_err2(som, j, "SOM", "x")
         
         # Get lambda_f from instrument information
-        (l_f, l_f_err2) = hlr_utils.get_special(lambda_final, map_so)
+        (l_f, l_f_err2, l_f_units) = hlr_utils.get_special(lambda_final,
+                                                           map_so)
 
         # Get source to sample distance
         (L_s, L_s_err2) = hlr_utils.get_parameter("primary", map_so, inst)

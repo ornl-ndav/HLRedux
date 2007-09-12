@@ -22,7 +22,7 @@
 
 # $Id$
 
-def calc_deltat_over_t(axis, axis_err2=None, **kwargs):
+def calc_deltat_over_t(axis, axis_err2=None):
     """
     This function takes a TOF axis and calculates the quantity Delta t / t
     for every element. 
@@ -55,7 +55,7 @@ def calc_deltat_over_t(axis, axis_err2=None, **kwargs):
     deltat_err2 = nessi_list.NessiList()
     
     # Calculate bin deltas, assume axis in ascending order
-    for i in xrange(len_axis-1):
+    for i in xrange(len_axis - 1):
         deltat.append(axis[i+1] - axis[i])
         deltat_err2.append(axis_err2[i+1] - axis_err2[i])        
 

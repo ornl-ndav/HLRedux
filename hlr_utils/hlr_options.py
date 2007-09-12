@@ -181,7 +181,6 @@ def BasicConfiguration(parser, configure, options, args):
         # We have an output file, so no need to do anything else
         try:
             configure.path_replacement
-            pass
         except AttributeError:
             configure.path_replacement = None
     # Create the output file name if there isn't one supplied

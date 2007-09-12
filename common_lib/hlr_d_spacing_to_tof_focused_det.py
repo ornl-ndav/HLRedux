@@ -22,6 +22,8 @@
 
 # $Id$
 
+import SOM
+    
 def d_spacing_to_tof_focused_det(obj, **kwargs):
     """
     This function converts a primary axis of a C{SOM} or C{SO} from d-spacing
@@ -156,11 +158,6 @@ def d_spacing_to_tof_focused_det(obj, **kwargs):
         a_descr = hlr_utils.get_descr(polar)
 
     # iterate through the values
-    import axis_manip
-    import SOM
-    
-    import math
-
     if pixel_id is not None:
         tmp_so = SOM.SO()
         tmp_so.id = pixel_id
@@ -176,8 +173,8 @@ def d_spacing_to_tof_focused_det(obj, **kwargs):
     else:
         pl = hlr_utils.get_value(pathlength, 0, p_descr)
         pl_err2 = hlr_utils.get_err2(pathlength, 0, p_descr)
-        angle = hlr_utils.get_value(polar, 0, p_descr)
-        angle_err2 = hlr_utils.get_err2(polar, 0, p_descr)
+        angle = hlr_utils.get_value(polar, 0, a_descr)
+        angle_err2 = hlr_utils.get_err2(polar, 0, a_descr)
 
     # iterate through the values
     import axis_manip
@@ -195,23 +192,23 @@ def d_spacing_to_tof_focused_det(obj, **kwargs):
 
     return result
 
-
-if __name__=="__main__":
+if __name__ == "__main__":
     import hlr_test
-    import SOM
 
-    pl = (20.0, 0.1)
+    pathlen = (20.0, 0.1)
     po = (0.785, 0.005)   
     pid = 14
     
-    som1=hlr_test.generate_som()
+    som1 = hlr_test.generate_som()
     som1.setAllAxisUnits(["Angstroms"])
     som1.attr_list.instrument = SOM.ASG_Instrument()
 
     print "********** SOM1"
-    print "* ",som1[0]
-    print "* ",som1[1] 
+    print "* ", som1[0]
+    print "* ", som1[1] 
     print "********** d_spacing_to_tof_focused_det"
-    print "* d_spacing_to_tof_focused_det som :",d_spacing_to_tof_focused_det(som1, pixel_id=pid, verbose=True)
-    print "* d_spacing_to_tof_focused_det so  :",d_spacing_to_tof_focused_det(som1[0],pathlength=pl, polar=po)
+    print "* d_spacing_to_tof_focused_det som :", \
+          d_spacing_to_tof_focused_det(som1, pixel_id=pid, verbose=True)
+    print "* d_spacing_to_tof_focused_det so  :", \
+          d_spacing_to_tof_focused_det(som1[0], pathlength=pathlen, polar=po)
 

@@ -17,13 +17,13 @@
 
 <h1>High-Level Reduction Functions Documentation</h1>
 
-<h2>Interface Documentation (Version: 1.0.0iqc10)</h2>
+<h2>Interface Documentation (Version: 1.0.0itc11)</h2>
 <a href="html/index.html"><h3>API</h3></a>
 
 <h2>Usage Issues</h2>
 <p>
 The API documentation presented in the link above provides a slightly 
-misleading interpretation of how to use the functions in 
+misleading interpretation of how to use the functions and classes in 
 <span class="text">common_lib</span>, <span class="text">dr_lib</span>, 
 <span class="text">hlr_utils</span> and <span class="text">hlr_test</span> 
 from a Python interpreter session or from within a Python script/module. From 
@@ -33,10 +33,15 @@ the documentation, one might get the impression that the proper usage is:
 <pre class="cli"> >>> common_lib.hlr_add_ncerr.add_ncerr</pre>
 </p>
 <p>
-which looks like 
-<span class="text">package_name.file_name.function_name</span>.
-However, due to the way the package is configured to install, the correct 
-usage is:
+or
+</p>
+<p>
+<pre class="cli"> >>> common_lib.hlr_add_ncerr</pre>
+</p>
+<p>
+which is <span class="text">package_name.file_name.function_name</span> or 
+<span class="text">package_name.file_name</span>. However, due to the way the 
+package is configured to install, the correct usage is:
 </p>
 <p>
 <pre class="cli"> >>> common_lib.add_ncerr</pre>
@@ -48,7 +53,9 @@ No file name is present in the correct usage scenario.
 The data reduction driver scripts in <span class="text">drivers.XXX</span> can 
 be used either as a command-line script via the analogous shell script with 
 the same name as the driver except without the 
-<span class="text">drivers.XXX</span> or the driver can be imported and the 
+<span class="text">drivers.XXX</span> or the driver can be imported (via 
+<span class="text">drivers.XXX.driver_name</span> or 
+<span class="text">drivers.driver_name</span>) and the 
 <span class="cmd">run</span> function can be used. The drivers contain their 
 own help documentation which can be accessed by doing:
 </p>

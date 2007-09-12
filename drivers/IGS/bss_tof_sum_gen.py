@@ -71,7 +71,7 @@ def run(config):
         for i in range(size):
 
             tSOM = SOM.SOM()
-            tSO = SOM.SO()
+            tSO = SOM.SO(construct=True)
             
             counter = 1
             for j in range(reps):

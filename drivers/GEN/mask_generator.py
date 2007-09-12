@@ -45,7 +45,7 @@ def run(config):
 
     resource = open(config.output, option)
 
-    for id in config.bank_ids:
+    for pid in config.bank_ids:
 
         try:
             h_min = config.h_ranges[index][0]
@@ -71,15 +71,13 @@ def run(config):
 
             for j in xrange(v_min, v_max):
 
-                print >> resource, "bank%s_%d_%d" % (id, i, j) 
+                print >> resource, "bank%s_%d_%d" % (pid, i, j) 
                 
         index += 1
 
     resource.close()
 
 if __name__ == "__main__":
-    import os
-
     import hlr_utils
 
     # Make description for driver

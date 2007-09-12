@@ -93,7 +93,6 @@ def energy_to_wavelength(obj, **kwargs):
         pass
 
     # iterate through the values
-    import array_manip
     import axis_manip
     if lojac:
         import utils

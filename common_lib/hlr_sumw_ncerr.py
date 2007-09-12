@@ -93,11 +93,11 @@ def sumw_ncerr(obj1, obj2, **kwargs):
 
     if length_one_som:
         if length_one_som_pos == 1:
-            som_copy = left
-            left = left[0]
+            som_copy = obj1
+            obj1 = obj1[0]
         else:
-            som_copy = right
-            right = right[0]
+            som_copy = obj2
+            obj2 = obj2[0]
     else:
         # Not working with a length 1 SOM, do nothing
         pass
@@ -133,9 +133,9 @@ def sumw_ncerr(obj1, obj2, **kwargs):
         if length_one_som_pos == 1:
             result = hlr_utils.copy_som_attr(result, res_descr,
                                              som_copy, "SOM",
-                                             right, r_descr)
+                                             obj2, o2_descr)
         else:
-            result = hlr_utils.copy_som_attr(result, res_descr, left, l_descr,
+            result = hlr_utils.copy_som_attr(result, res_descr, obj1, o1_descr,
                                              som_copy, "SOM")            
     else:
         result = hlr_utils.copy_som_attr(result, res_descr, obj1, o1_descr,
@@ -164,7 +164,7 @@ def sumw_ncerr(obj1, obj2, **kwargs):
     return result
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     import hlr_test
 
     som1 = hlr_test.generate_som()
