@@ -133,6 +133,7 @@ def calc_delta_theta_over_theta(som, dataset_type="data"):
             slit1_size_units = slit1_top[2]
     else:
         slit1_size = float('nan')
+        slit1_size_units = None
 
     if slit2_size_ok:
         slit2_size = math.fabs(slit2_top[0] - slit2_bot[0])
@@ -143,6 +144,7 @@ def calc_delta_theta_over_theta(som, dataset_type="data"):
             slit2_size_units = slit2_top[2]
     else:
         slit2_size = float('nan')
+        slit2_size_units = None
 
     if slit12_dist_ok:
         slit12_distance = math.fabs(slit1_dist[0] - slit2_dist[0])
