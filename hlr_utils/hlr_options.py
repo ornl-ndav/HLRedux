@@ -268,6 +268,10 @@ class SNSOptions(BasicOptions):
                             help="Specify the background (empty instrument) "\
                             +"file")
 
+            self.add_option("", "--dsback",
+                            help="Specify the direct scattering background "\
+                            +"(sample data at baseline temperature) file") 
+
         else:
             pass
 
@@ -334,6 +338,12 @@ def SnsConfiguration(parser, configure, options, args, **kwargs):
         if hlr_utils.cli_provide_override(configure, "back", "--back"):
             configure.back = hlr_utils.determine_files(options.back,
                                                        configure.inst)
+
+        # Set the direct scattering background file list
+        if hlr_utils.cli_provide_override(configure, "dsback", "--dsback"):
+            configure.dsback = hlr_utils.determine_files(options.dsback,
+                                                         configure.inst)
+
     else:
         pass
 

@@ -55,6 +55,9 @@ def process_ref_data(datalist, conf, signal_roi_file, no_bkg=False, **kwargs):
     @keyword dataset_type: The practical name of the dataset being processed.
                            The default value is I{data}.
     @type dataset_type: C{string}
+
+    @keyword tof_cuts: Time-of-flight bins to remove (zero) from the data
+    @type tof_cuts: C{list} of C{string}s
     
     @keyword timer:  Timing object so the function can perform timing
                      estimates.
@@ -87,6 +90,11 @@ def process_ref_data(datalist, conf, signal_roi_file, no_bkg=False, **kwargs):
         i_geom_dst = kwargs["inst_geom_dst"]
     except KeyError:
         i_geom_dst = None
+
+    try:
+        tof_cuts = kwargs["tof_cuts"]
+    except KeyError:
+        tof_cuts = None
     
     so_axis = "time_of_flight"
 
@@ -132,9 +140,20 @@ def process_ref_data(datalist, conf, signal_roi_file, no_bkg=False, **kwargs):
                                     pixel_fix=127)
 
     del d_som1
+
+    # Fix TOF cuts to make them list of integers
+    try:
+        tof_cuts = [int(x) for x in tof_cuts]
+    # This will trigger if tof_cuts is None
+    except TypeError:
+        pass
+
+    d_som3 = dr_lib.zero_bins(d_som2, tof_cuts)
+
+    del d_som2
         
     if conf.dump_specular:
-        hlr_utils.write_file(conf.output, "text/Spec", d_som2,
+        hlr_utils.write_file(conf.output, "text/Spec", d_som3,
                              output_ext="sdc",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
@@ -151,7 +170,7 @@ def process_ref_data(datalist, conf, signal_roi_file, no_bkg=False, **kwargs):
     elif dataset_type == "norm":
         peak_excl = conf.norm_peak_excl
 
-    B = dr_lib.calculate_ref_background(d_som2, no_bkg, conf.inst,
+    B = dr_lib.calculate_ref_background(d_som3, no_bkg, conf.inst,
                                         peak_excl)
 
     if t is not None:
@@ -168,18 +187,18 @@ def process_ref_data(datalist, conf, signal_roi_file, no_bkg=False, **kwargs):
 
     # Step 5: Subtract background spectrum from data spectra
     if not no_bkg:
-        d_som3 = dr_lib.subtract_bkg_from_data(d_som2, B,
+        d_som4 = dr_lib.subtract_bkg_from_data(d_som3, B,
                                                verbose=conf.verbose,
                                                timer=t,
                                                dataset1="data",
                                                dataset2="background")
     else:
-        d_som3 = d_som2
+        d_som4 = d_som3
 
-    del d_som2
+    del d_som3
 
     if not no_bkg and conf.dump_sub:
-        hlr_utils.write_file(conf.output, "text/Spec", d_som3,
+        hlr_utils.write_file(conf.output, "text/Spec", d_som4,
                              output_ext="sub",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
@@ -190,9 +209,9 @@ def process_ref_data(datalist, conf, signal_roi_file, no_bkg=False, **kwargs):
 
     dtot_int = dr_lib.integrate_axis(dtot, avg=True)
     param_key = dataset_type+"-dt_over_t"
-    d_som3.attr_list[param_key] = dtot_int[0]
+    d_som4.attr_list[param_key] = dtot_int[0]
 
     if conf.store_dtot:
-        d_som3.attr_list["extra_som"] = dtot
+        d_som4.attr_list["extra_som"] = dtot
 
-    return d_som3
+    return d_som4

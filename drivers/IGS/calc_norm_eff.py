@@ -27,7 +27,7 @@ This driver repeats the procedures found in B{Section 2.2.1 Powder or
 amorphous material reduction} of 
 U{http://neutrons.ornl.gov/asg/projects/SCL/reqspec/DR_Lib_RS.doc} to find the 
 normalization efficiency on a per-pixel basis from a vanadium run file. It 
-will repeat steps 1-8,10,11,13,14.
+will repeat steps 1-9,16-19,22-24
 """
 
 def run(config, tim):
@@ -105,32 +105,36 @@ def run(config, tim):
 
     if inst_geom_dst is not None:
         inst_geom_dst.release_resource()
-        
-    # Step 11: Subtract background spectrum from empty can spectrum    
+
+    # Steps 16-17: Subtract background spectrum from empty can spectrum for
+    #              normalization
     e_som2 = dr_lib.subtract_bkg_from_data(e_som1, b_som1,
                                            verbose=config.verbose,
                                            timer=tim,
                                            dataset1="empty_can",
-                                           dataset2="background")
+                                           dataset2="background",
+                                           scale=config.scale_bcs)
 
-    # Step 12: Subtract background spectrum from normalization spectrum
+    # Step 18-19: Subtract background spectrum from normalization spectrum
     n_som2 = dr_lib.subtract_bkg_from_data(n_som1, b_som1,
                                            verbose=config.verbose,
                                            timer=tim,
                                            dataset1="normalization",
-                                           dataset2="background")
+                                           dataset2="background",
+                                           scale=config.scale_bn)
     del b_som1
 
-    # Step 14: Subtract empty can spectrum from normalization spectrum
+    # Step 22-23: Subtract empty can spectrum from normalization spectrum
     n_som3 = dr_lib.subtract_bkg_from_data(n_som2, e_som2,
                                            verbose=config.verbose,
                                            timer=tim,
                                            dataset1="normalization",
-                                           dataset2="empty_can")
+                                           dataset2="empty_can",
+                                           scale=config.scale_cn)
 
     del n_som2, e_som2
 
-    # Step 15: Integrate normalization spectra
+    # Step 24: Integrate normalization spectra
     if config.verbose:
         print "Integrating normalization spectra"
 
@@ -181,6 +185,14 @@ if __name__ == "__main__":
     parser.set_defaults(norm_start="6.24")
     parser.set_defaults(norm_end="6.30")
 
+    # Remove unnecessary options
+    parser.remove_option("--dsback")
+    parser.remove_option("--tib-dsback-const")
+    parser.remove_option("--scale-bs")
+    parser.remove_option("--scale-bcs")
+    parser.remove_option("--scale-cs")
+    parser.remove_option("--tof-elastic")    
+    
     parser.add_option("", "--timing", action="store_true", dest="timing",
                       help="Flag to turn on timing of code")
     parser.set_defaults(timing=False)

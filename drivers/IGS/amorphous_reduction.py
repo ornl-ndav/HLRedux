@@ -112,50 +112,178 @@ def run(config, tim=None):
     else:
         b_som1 = None
 
+    # Perform Step 1-9 on direct scattering background data
+    if config.dsback is not None:
+        ds_som1 = dr_lib.process_igs_data(config.dsback, config, timer=tim,
+                                          inst_geom_dst=inst_geom_dst,
+                                          tib_const=config.tib_dsback_const,
+                                          dataset_type="dsbackground",
+                                          bkg_som=bkg_som)
+
+        # Step 10: Linearly interpolate TOF elastic range in direct scattering
+        #          background data
+
+        # First convert TOF elastic range to appropriate pixel initial
+        # wavelengths
+        if config.verbose:
+            print "Determining initial wavelength range for elastic line"
+
+        if tim is not None:
+            tim.getTime(False)
+        
+        if config.tof_elastic is None:
+            # Units are in microseconds
+            tof_elastic_range = (140300, 141300)
+        else:
+            tof_elastic_range = config.tof_elastic
+        
+        ctof_elastic_low = dr_lib.convert_single_to_list(\
+               "tof_to_initial_wavelength_igs_lin_time_zero",
+               (tof_elastic_range[0], 0.0),
+               ds_som1)
+        
+        ctof_elastic_high = dr_lib.convert_single_to_list(\
+               "tof_to_initial_wavelength_igs_lin_time_zero",
+               (tof_elastic_range[1], 0.0),
+               ds_som1)
+        
+        ctof_elastic_range = [(ctof_elastic_low[i][0], ctof_elastic_high[i][0])
+                              for i in xrange(len(ctof_elastic_low))]
+
+        if tim is not None:
+            tim.getTime(msg="After calculating initial wavelength range for "\
+                        +"elastic line ")
+
+        del ctof_elastic_low, ctof_elastic_high
+
+        # Now interpolate spectra between TOF elastic range (converted to
+        # initial wavelength)
+        if config.verbose:
+            print "Linearly interpolating direct scattering spectra"
+
+        if tim is not None:
+            tim.getTime(False)
+            
+        ds_som2 = dr_lib.lin_interpolate_spectra(ds_som1, ctof_elastic_range)
+
+        if tim is not None:
+            tim.getTime(msg="After linearly interpolating direct scattering "\
+                        +"spectra ")
+
+        if config.dump_dslin:
+            ds_som2_1 = dr_lib.sum_all_spectra(ds_som2,\
+                                  rebin_axis=config.lambda_bins.toNessiList())
+
+            hlr_utils.write_file(config.output, "text/Spec", ds_som2_1,
+                                 output_ext="lin",
+                                 data_ext=config.ext_replacement,    
+                                 path_replacement=config.path_replacement,
+                                 verbose=config.verbose,
+                                 message="dsbackground linear interpolation")
+            del ds_som2_1
+        
+        del ds_som1
+    else:
+        ds_som2 = None
+
     if inst_geom_dst is not None:
         inst_geom_dst.release_resource()
         
-    # Step 10: Subtract background spectrum from sample spectrum    
-    d_som2 = dr_lib.subtract_bkg_from_data(d_som1, b_som1,
+    # Steps 11-12: Subtract background spectrum from sample spectrum
+    if config.dsback is None:
+        back_som = b_som1
+        bkg_type = "background"
+    else:
+        back_som = ds_som2
+        bkg_type = "dsbackground"
+    d_som2 = dr_lib.subtract_bkg_from_data(d_som1, back_som,
                                            verbose=config.verbose,
                                            timer=tim,
                                            dataset1="data",
-                                           dataset2="background")
+                                           dataset2=bkg_type,
+                                           scale=config.scale_bs)
 
-    # Step 11: Subtract background spectrum from empty can spectrum    
-    e_som2 = dr_lib.subtract_bkg_from_data(e_som1, b_som1,
+    if config.dsback is not None:
+        del ds_som2 
+
+    # Step 13: Zero region outside TOF elastic for background for empty can
+    if config.dsback is None:
+        bcs_som = b_som1
+        cs_som = e_som1
+    else:
+        if config.verbose and b_som1 is not None:
+            print "Zeroing background spectra"
+
+        if tim is not None and b_som1 is not None:
+            tim.getTime(False)
+            
+        bcs_som = dr_lib.zero_spectra(b_som1, ctof_elastic_range)
+
+        if tim is not None and b_som1 is not None:
+            tim.getTime(msg="After zeroing background spectra")
+
+
+        if config.verbose and e_som1 is not None:
+            print "Zeroing empty can spectra"
+
+        if tim is not None and e_som1 is not None:
+            tim.getTime(False)
+            
+        cs_som = dr_lib.zero_spectra(e_som1, ctof_elastic_range)
+
+        if tim is not None and e_som1 is not None:
+            tim.getTime(msg="After zeroing empty can spectra")
+            
+        del ctof_elastic_range
+
+    # Steps 14-15: Subtract background spectrum from empty can spectrum    
+    e_som2 = dr_lib.subtract_bkg_from_data(cs_som, bcs_som,
                                            verbose=config.verbose,
                                            timer=tim,
                                            dataset1="empty_can",
-                                           dataset2="background")
+                                           dataset2="background",
+                                           scale=config.scale_bcs)
 
-    # Step 12: Subtract background spectrum from normalization spectrum
+    # Steps 16-17: Subtract background spectrum from empty can spectrum for
+    #              normalization
+    e_som3 = dr_lib.subtract_bkg_from_data(e_som1, b_som1,
+                                           verbose=config.verbose,
+                                           timer=tim,
+                                           dataset1="empty_can",
+                                           dataset2="background",
+                                           scale=config.scale_bcn)
+
+    # Steps 18-19: Subtract background spectrum from normalization spectrum
     n_som2 = dr_lib.subtract_bkg_from_data(n_som1, b_som1,
                                            verbose=config.verbose,
                                            timer=tim,
                                            dataset1="normalization",
-                                           dataset2="background")
-    del b_som1
+                                           dataset2="background",
+                                           scale=config.scale_bn)
 
-    # Step 13: Subtract empty can spectrum from sample spectrum    
+    del b_som1, e_som1, bcs_som, cs_som
+
+    # Steps 20-21: Subtract empty can spectrum from sample spectrum    
     d_som3 = dr_lib.subtract_bkg_from_data(d_som2, e_som2,
                                            verbose=config.verbose,
                                            timer=tim,
                                            dataset1="data",
-                                           dataset2="empty_can")
+                                           dataset2="empty_can",
+                                           scale=config.scale_cs)
 
-    del d_som2
+    del d_som2, e_som2
     
-    # Step 14: Subtract empty can spectrum from normalization spectrum
-    n_som3 = dr_lib.subtract_bkg_from_data(n_som2, e_som2,
+    # Steps 22-23: Subtract empty can spectrum from normalization spectrum
+    n_som3 = dr_lib.subtract_bkg_from_data(n_som2, e_som3,
                                            verbose=config.verbose,
                                            timer=tim,
                                            dataset1="normalization",
-                                           dataset2="empty_can")    
+                                           dataset2="empty_can",
+                                           scale=config.scale_cn)    
 
-    del n_som2, e_som2
+    del n_som2, e_som3
 
-    # Step 15: Integrate normalization spectra
+    # Step 24: Integrate normalization spectra
     if config.verbose and n_som3 is not None:
         print "Integrating normalization spectra"
 
@@ -164,7 +292,7 @@ def run(config, tim=None):
 
     del n_som3
         
-    # Step 16: Normalize data by integrated values
+    # Step 25: Normalize data by integrated values
     if config.verbose and norm_int is not None:
         print "Normalizing data by normalization data"
 
@@ -179,7 +307,7 @@ def run(config, tim=None):
 
     del d_som3, norm_int
 
-    # Step 17: Convert initial wavelength to E_initial
+    # Step 26: Convert initial wavelength to E_initial
     if config.verbose:
         print "Converting initial wavelength to E_initial"
         
@@ -201,7 +329,7 @@ def run(config, tim=None):
             
     del d_som4
 
-    # Steps 19-20: Calculate energy transfer
+    # Steps 28-29: Calculate energy transfer
     if config.verbose:
         print "Calculating energy transfer"
 
@@ -233,7 +361,7 @@ def run(config, tim=None):
     
     del d_som7_1
 
-    # Steps 18-20: Calculate scaled energy transfer
+    # Steps 27-29: Calculate scaled energy transfer
     if config.verbose:
         print "Calculating scaled energy transfer"
         

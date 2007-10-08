@@ -238,7 +238,7 @@ def DrParameterFromString(infostr, errsqr=False):
                            +"class documentation for details")
 
 
-    if not values[-1].find("units"):
+    if "units" in values[-1]:
         units = values[-1].split('=')[-1]
         try:
             error = float(values[1])

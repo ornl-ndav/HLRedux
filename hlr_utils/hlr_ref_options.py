@@ -67,9 +67,9 @@ class RefOptions(hlr_options.SNSOptions):
                                         description, inst="REF")
 
         # Add REF specific options
-        self.add_option("", "--det-angle", dest="det_angle",
-                      help="Specify the detector inclination angle, err^2, "\
-                      +"and units=<degrees or radians>")
+        self.add_option("", "--angle-offset", dest="angle_offset",
+                        help="Specify the global offset for the polar angle: "\
+                        +"angle, err^2, and units=<degrees or radians>")
 
         self.add_option("", "--data-roi-file", dest="data_roi_file",
                         help="Specify the file containing the list pixel IDs "\
@@ -89,6 +89,36 @@ class RefOptions(hlr_options.SNSOptions):
                         help="Flag to turn off normalization background "\
                         +"estimation and subtraction")
         self.set_defaults(no_norm_bkg=False)
+
+        self.add_option("", "--mom-trans-bins", dest="Q_bins",
+                        help="Specify the minimum and maximum momentum "\
+                        +"transfer values and the momentum transfer bin "\
+                        +"width in Angstroms^-1")
+
+        self.add_option("", "--tof-cuts", dest="tof_cuts",
+                        help="Specify the TOF bins (comma-separated) that "\
+                        +"will be zeroed out in the data and normalization "\
+                        +"spectra")
+
+        self.add_option("", "--no-filter", action="store_true",
+                        dest="no_filter",
+                        help="Flag to turn off bad data filtering.")
+        self.set_defaults(no_filter=False)
+
+        self.add_option("", "--store-dtot", action="store_true",
+                        dest="store_dtot",
+                        help="Flag to turn on storage of delta t over t in "\
+                        +"TOF output file.")
+        self.set_defaults(store_dtot=False)
+
+        self.add_option("", "--data-peak-excl", dest="data_peak_excl",
+                        type="int", nargs=2,
+                        help="Peak exclusion range pixel IDs for sample data.")
+
+        self.add_option("", "--norm-peak-excl", dest="norm_peak_excl",
+                        type="int", nargs=2,
+                        help="Peak exclusion range pixel IDs for "\
+                        +"normalization data.")    
 
         self.add_option("", "--dump-specular", action="store_true",
                         dest="dump_specular",
@@ -156,10 +186,11 @@ def RefConfiguration(parser, configure, options, args):
         else:
             configure.norm_roi_file = configure.data_roi_file
     
-    # Get the detector angle
-    if hlr_utils.cli_provide_override(configure, "det_angle", "--det-angle"):
-        configure.det_angle = hlr_utils.DrParameterFromString(\
-            options.det_angle, True)
+    # Get the polar angle offset
+    if hlr_utils.cli_provide_override(configure, "angle_offset",
+                                      "--angle-offset"):
+        configure.angle_offset = hlr_utils.DrParameterFromString(\
+            options.angle_offset, True)
 
     # Set the ability to turn off background estimation and subtraction
     if hlr_utils.cli_provide_override(configure, "no_bkg", "--no-bkg"):    
@@ -170,6 +201,35 @@ def RefConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "no_norm_bkg",
                                       "--no-norm-bkg"):    
         configure.no_norm_bkg = options.no_norm_bkg
+
+    # Set the TOF bins to zero out from the data and normalization spectra
+    if hlr_utils.cli_provide_override(configure, "tof_cuts", "--tof-cuts"):
+        if options.tof_cuts is not None:
+            configure.tof_cuts = options.tof_cuts.split(',')
+        else:
+            configure.tof_cuts = options.tof_cuts
+
+    # Set the momentum transfer bins
+    if hlr_utils.cli_provide_override(configure, "Q_bins", "--mom-trans-bins"):
+        configure.Q_bins = hlr_utils.AxisFromString(options.Q_bins)
+
+    # Set the no bad data filter flag
+    if hlr_utils.cli_provide_override(configure, "no_filter", "--no-filter"):
+        configure.no_filter = options.no_filter
+
+    # Set the store delta t over t flag
+    if hlr_utils.cli_provide_override(configure, "store_dtot", "--store-dtot"):
+        configure.store_dtot = options.store_dtot        
+
+    # Set the pixel ID range values for peak exclusion from sample data
+    if hlr_utils.cli_provide_override(configure, "data_peak_excl",
+                                      "--data-peak-excl"):
+        configure.data_peak_excl = options.data_peak_excl
+
+    # Set the pixel ID range values for peak exclusion from normalization data
+    if hlr_utils.cli_provide_override(configure, "norm_peak_excl",
+                                      "--norm-peak-excl"):
+        configure.norm_peak_excl = options.norm_peak_excl        
 
     # Set the ability to dump the combined specular TOF information
     if hlr_utils.cli_provide_override(configure, "dump_specular",

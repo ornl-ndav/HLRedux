@@ -40,6 +40,9 @@ def subtract_bkg_from_data(data_som, bkg_som, **kwargs):
     
     @keyword dataset2: The type name of the second dataset. Default is
                        I{dataset2}.
+
+    @keyword scale: The constant by which to scale the background spectra
+    @type scale: L{hlr_utils.DrParameter}
                        
     @keyword verbose: A flag for turning on information from the function.
     @type verbose: C{boolean}
@@ -101,12 +104,30 @@ def subtract_bkg_from_data(data_som, bkg_som, **kwargs):
     except KeyError:
         dataset2 = "dataset2"
 
-    if verbose:
-        print "Subtracting %s from %s" % (dataset2, dataset1)
+    try:
+        scale = kwargs["scale"]
+    except KeyError:
+        scale = None
 
     import common_lib
-    
-    data_som2 = common_lib.sub_ncerr(data_som, bkg_som)
+
+    if scale is not None:
+        if verbose:
+            print "Scaling %s for %s" % (dataset2, dataset1)
+        
+        bkg_som2 = common_lib.mult_ncerr(bkg_som, scale.toValErrTuple())
+        
+        if t is not None:
+            t.getTime(msg="After scaling %s for %s " % (dataset2, dataset1))
+    else:
+        bkg_som2 = bkg_som
+
+    del bkg_som
+
+    if verbose:
+        print "Subtracting %s from %s" % (dataset2, dataset1)
+        
+    data_som2 = common_lib.sub_ncerr(data_som, bkg_som2)
 
     if t is not None:
         t.getTime(msg="After subtracting %s from %s " % (dataset2, dataset1))

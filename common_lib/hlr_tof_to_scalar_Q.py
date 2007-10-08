@@ -42,6 +42,11 @@ def tof_to_scalar_Q(obj, **kwargs):
     @keyword pathlength: The pathlength and its associated error^2
     @type pathlength: C{tuple} or C{list} of C{tuple}s
 
+    @keyword angle_offset: A constant offset for the polar angle and its
+                           associated error^2. The units of the offset should
+                           be in radians.
+    @type angle_offset: C{tuple}
+
     @keyword lojac: A flag that allows one to turn off the calculation of the
                     linear-order Jacobian. The default action is True for
                     histogram data.
@@ -96,6 +101,11 @@ def tof_to_scalar_Q(obj, **kwargs):
         lojac = kwargs["lojac"]
     except KeyError:
         lojac = hlr_utils.check_lojac(obj)
+
+    try:
+        angle_offset = kwargs["angle_offset"]
+    except KeyError:
+        angle_offset = None
         
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
@@ -171,6 +181,10 @@ def tof_to_scalar_Q(obj, **kwargs):
             angle = hlr_utils.get_value(polar, i, a_descr)
             angle_err2 = hlr_utils.get_err2(polar, i, a_descr)
 
+        if angle_offset is not None:
+            angle += angle_offset[0]
+            angle_err2 += angle_offset[1]
+
         value = axis_manip.tof_to_scalar_Q(val, err2, pl, pl_err2, angle,
                                            angle_err2)
 
@@ -209,7 +223,8 @@ if __name__ == "__main__":
     import SOM
 
     ple = (20.0, 0.1)
-    pa = (0.785, 0.005)   
+    pa = (0.785, 0.005)
+    ao = (0.785, 0.000)
     
     som1 = hlr_test.generate_som()
     som1.setAllAxisUnits(["microseconds"])
@@ -224,4 +239,5 @@ if __name__ == "__main__":
     print "* tof_to_scalar_Q so  :", tof_to_scalar_Q(som1[0],
                                                      pathlength=ple,
                                                      polar=pa)
-    
+    print "* tof_to_scalar_Q som (offset):", tof_to_scalar_Q(som1,
+                                                             angle_offset=ao)

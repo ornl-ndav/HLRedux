@@ -88,6 +88,10 @@ class IgsOptions(hlr_options.SNSOptions):
         self.add_option("", "--tib-norm-const", dest="tib_norm_const",
                         help="Specify constant to subtract from "\
                         +"normalization spectra: value, err^2")        
+
+        self.add_option("", "--tib-dsback-const", dest="tib_dsback_const",
+                        help="Specify constant to subtract from direct "\
+                        +"scattering background spectra: value, err^2")
         
         self.add_option("", "--no-mon-norm", action="store_true",
                         dest="no_mon_norm",
@@ -194,6 +198,40 @@ class IgsOptions(hlr_options.SNSOptions):
                         +"ratio.")
         self.set_defaults(hwfix=False)
                         
+        self.add_option("", "--scale-bs", dest="scale_bs",
+                        help="Specify constant to scale the background "
+                        +"spectra for subtraction from the sample data "\
+                        +"spectra: value, err^2")
+
+        self.add_option("", "--scale-bn", dest="scale_bn",
+                        help="Specify constant to scale the background "\
+                        +"spectra for subtraction from the normalization "\
+                        +"data spectra: value, err^2")
+
+        self.add_option("", "--scale-bcs", dest="scale_bcs",
+                        help="Specify constant to scale the background "\
+                        +"spectra for subtraction from the sample data "\
+                        +"associated empty container spectra: value, err^2")
+
+        self.add_option("", "--scale-bcn", dest="scale_bcn",
+                        help="Specify constant to scale the background "\
+                        +"spectra for subtraction from the normalization "\
+                        +"data associated empty container spectra: value, "\
+                        +"err^2")
+
+        self.add_option("", "--scale-cs", dest="scale_cs",
+                        help="Specify constant to scale the empty container "\
+                        +"spectra for subtraction from the sample data "\
+                        +"spectra: value, err^2")
+
+        self.add_option("", "--scale-cn", dest="scale_cn",
+                        help="Specify constant to scale the empty container "\
+                        +"spectra for subtraction from the normalization "\
+                        +"data spectra: value, err^2")
+
+        self.add_option("", "--tof-elastic", dest="tof_elastic",
+                        help="Specify the low and high TOF values that "\
+                        +"bracket the elastic peak")
 
 def IgsConfiguration(parser, configure, options, args):
     """
@@ -260,6 +298,12 @@ def IgsConfiguration(parser, configure, options, args):
                                       "--tib-norm-const"):    
         configure.tib_norm_const = hlr_utils.DrParameterFromString(\
                     options.tib_norm_const, True)
+
+    # Set the time-independent background constant for dsback
+    if hlr_utils.cli_provide_override(configure, "tib_dsback_const",
+                                      "--tib-dsback-const"):    
+        configure.tib_dsback_const = hlr_utils.DrParameterFromString(\
+                    options.tib_dsback_const, True)
 
     # Set the normalization start wavelength
     if hlr_utils.cli_provide_override(configure, "norm_start", "--norm_start"):
@@ -354,3 +398,42 @@ def IgsConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "hwfix", "--hwfix"):
         configure.hwfix = options.hwfix        
     
+    # Set the constant for scaling the background spectra: sample 
+    if hlr_utils.cli_provide_override(configure, "scale_bs", "--scale-bs"):
+        configure.scale_bs = hlr_utils.DrParameterFromString(options.scale_bs,
+                                                             True)
+
+    # Set the constant for scaling the background spectra: normalization
+    if hlr_utils.cli_provide_override(configure, "scale_bn", "--scale-bn"):
+        configure.scale_bn = hlr_utils.DrParameterFromString(options.scale_bn,
+                                                             True)
+
+    # Set the constant for scaling the background spectra: empty container
+    # for sample 
+    if hlr_utils.cli_provide_override(configure, "scale_bcs", "--scale-bcs"):
+        configure.scale_bcs = hlr_utils.DrParameterFromString(\
+            options.scale_bcs, True)
+
+    # Set the constant for scaling the background spectra: empty container
+    # for normalization
+    if hlr_utils.cli_provide_override(configure, "scale_bcn", "--scale-bcn"):
+        configure.scale_bcn = hlr_utils.DrParameterFromString(\
+            options.scale_bcn, True)
+
+    # Set the constant for scaling the empty container spectra: sample 
+    if hlr_utils.cli_provide_override(configure, "scale_cs", "--scale-cs"):
+        configure.scale_cs = hlr_utils.DrParameterFromString(options.scale_cs,
+                                                             True)
+
+    # Set the constant for scaling the empty container spectra: normalization
+    if hlr_utils.cli_provide_override(configure, "scale_cn", "--scale-cn"):
+        configure.scale_cn = hlr_utils.DrParameterFromString(options.scale_cn,
+                                                             True)
+
+    # Set the elastic peak range in TOF
+    if hlr_utils.cli_provide_override(configure, "tof_elastic",
+                                      "--tof-elastic"):
+        if options.tof_elastic is not None:
+            configure.tof_elastic = options.tof_elastic.split(',')
+        else:
+            configure.tof_elastic = options.tof_elastic

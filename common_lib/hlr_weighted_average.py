@@ -61,14 +61,14 @@ def weighted_average(obj, **kwargs):
 
     o_descr = hlr_utils.get_descr(obj)
 
-    if(kwargs.has_key("start")):
+    try:
         start = int(kwargs["start"])
-    else:
+    except KeyError:
         start = 0
 
-    if(kwargs.has_key("end")):
+    try:
         end = int(kwargs["end"])
-    else:
+    except KeyError:
         end = hlr_utils.get_length(obj) - 1
             
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)

@@ -64,6 +64,7 @@ def run(config, tim):
     d_som1 = dr_lib.process_ref_data(config.data, config,
                                      config.data_roi_file,
                                      config.no_bkg,
+                                     tof_cuts=config.tof_cuts,
                                      inst_geom_dst=inst_geom_dst,
                                      timer=tim)
 
@@ -73,6 +74,7 @@ def run(config, tim):
                                          config.norm_roi_file,
                                          config.no_norm_bkg,
                                          dataset_type="norm",
+                                         tof_cuts=config.tof_cuts,
                                          inst_geom_dst=inst_geom_dst,
                                          timer=tim)
     else:
@@ -118,21 +120,36 @@ def run(config, tim):
     if config.verbose:
         print "Converting TOF to scalar Q"
 
+    # Check to see if polar angle offset is necessary
+    if config.angle_offset is not None:
+        # Check on units, offset must be in radians
+        p_temp = config.angle_offset.toFullTuple(True)
+        if p_temp[2] == "degrees" or p_temp[2] == "degree":
+            import math
+            deg_to_rad =  (math.pi / 180.0)
+            p_off_rads = p_temp[0] * deg_to_rad
+            p_off_err2_rads = p_temp[1] * deg_to_rad * deg_to_rad
+        else:
+            p_off_rads = p_temp[0]
+            p_off_err2_rads = p_temp[1]
+
+        p_offset = (p_off_rads, p_off_err2_rads)
+
+        d_som2.attr_list["angle_offset"] = config.angle_offset
+    else:
+        p_offset = None
+
     if tim is not None:
         tim.getTime(False)
 
-    d_som3 = common_lib.tof_to_scalar_Q(d_som2, units="microsecond")
+    d_som3 = common_lib.tof_to_scalar_Q(d_som2, units="microsecond",
+                                        angle_offset=p_offset,
+                                        lojac=False)
 
     del d_som2
         
     if tim is not None:
         tim.getTime(msg="After converting wavelength to scalar Q ")
-
-
-    if config.det_angle is None:
-        d_som3.attr_list["detector_angle"] = (0.0, 0.0, "degree")
-    else:
-        d_som3.attr_list["detector_angle"] = config.det_angle
 
     if not config.no_filter:
         if config.verbose:
@@ -151,6 +168,9 @@ def run(config, tim):
     del d_som3
 
     # Rebin all spectra to final Q axis
+    if config.Q_bins is None:
+        config.Q_bins = dr_lib.create_axis_from_data(d_som4)
+
     rebin_axis = config.Q_bins.toNessiList()
     d_som5 = dr_lib.sum_all_spectra(d_som4, rebin_axis=rebin_axis)
 
@@ -189,9 +209,9 @@ if __name__ == "__main__":
     result.append("documentation.")
     
     # Set up the options available
-    parser = hlr_utils.RefRedOptions("usage: %prog [options] <datafile>", None,
-                                     hlr_utils.program_version(), 'error',
-                                     " ".join(result))
+    parser = hlr_utils.RefOptions("usage: %prog [options] <datafile>", None,
+                                  None, hlr_utils.program_version(), 'error',
+                                  " ".join(result))
 
     # Defaults for REF
     parser.set_defaults(data_paths="/entry/bank1,1")
@@ -207,7 +227,7 @@ if __name__ == "__main__":
     configure = hlr_utils.Configure()
 
     # Call the configuration setter for RefRedOptions
-    hlr_utils.RefRedConfiguration(parser, configure, options, args)
+    hlr_utils.RefConfiguration(parser, configure, options, args)
 
     # Setup the timing object
     if options.timing:

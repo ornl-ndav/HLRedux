@@ -340,36 +340,36 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
                                                          y_2d, y_2d_err2)
 
     # Check for so_id keyword argument
-    if kwargs.has_key("so_id"):
+    try:
         so_dim.id = kwargs["so_id"]
-    else:
+    except KeyError:
         so_dim.id = 0
 
     comb_som = SOM.SOM()
     comb_som.copyAttributes(som)
 
     # Check for y_label keyword argument
-    if kwargs.has_key("y_label"):
+    try:
         comb_som.setYLabel(kwargs["y_label"])
-    else:
+    except KeyError:
         comb_som.setYLabel("Counts")
 
     # Check for y_units keyword argument
-    if kwargs.has_key("y_units"):
+    try:
         comb_som.setYUnits(kwargs["y_units"])
-    else:
+    except KeyError:
         comb_som.setYUnits("Counts / ueV A^-1")
 
     # Check for x_labels keyword argument
-    if kwargs.has_key("x_labels"):
+    try:
         comb_som.setAllAxisLabels(kwargs["x_labels"])
-    else:
+    except KeyError:
         comb_som.setAllAxisLabels(["Momentum transfer", "Energy transfer"])
 
     # Check for x_units keyword argument
-    if kwargs.has_key("x_units"):
+    try:
         comb_som.setAllAxisUnits(kwargs["x_units"])
-    else:
+    except KeyError:
         comb_som.setAllAxisUnits(["A^-1", "ueV"])
 
     comb_som.append(so_dim)

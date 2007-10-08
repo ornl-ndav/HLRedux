@@ -115,7 +115,10 @@ def calculate_ref_background(obj, no_bkg, inst, peak_excl):
 
             if cur_pix_id < peak_excl[0] or cur_pix_id > peak_excl[1]:
                 sliced_data.append(obj1.y[i])
-                sliced_data_err2.append(obj1.var_y[i])
+                if utils.compare(obj1.var_y[i], 0.0) == 0:
+                    sliced_data_err2.append(1.0)
+                else:
+                    sliced_data_err2.append(obj1.var_y[i])
 
         params = utils.fit_linear_background(pix_axis_no_peak,
                                              sliced_data, sliced_data_err2,

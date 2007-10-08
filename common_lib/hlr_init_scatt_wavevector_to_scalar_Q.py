@@ -109,7 +109,7 @@ def init_scatt_wavevector_to_scalar_Q(initk, scattk, **kwargs):
     else:
         pass
 
-    if polar == None:
+    if polar is None:
         if i_descr == "SOM":
             try:
                 initk.attr_list.instrument.get_primary()

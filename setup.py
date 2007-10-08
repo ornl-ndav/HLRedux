@@ -114,7 +114,7 @@ class build_doc(Command):
 def pythonVersionCheck():
     # Minimum version of Python
     PYTHON_MAJOR = 2
-    PYTHON_MINOR = 2
+    PYTHON_MINOR = 3
 
     if sys.version_info < (PYTHON_MAJOR, PYTHON_MINOR):
         print >> sys.stderr, 'You need at least Python %d.%d for %s %s' \
@@ -174,11 +174,11 @@ def getScripts(instruments):
     scripts = []
     if len(instruments) == 1:
         if instruments[0].lower() == "all":
-            for key in instrument_scripts.keys():
+            for key in instrument_scripts:
                 for script in instrument_scripts[key]:
                     scripts.append(os.path.join('drivers', key, script))
         else:
-            if instrument_scripts.has_key(instruments[0]):
+            if instruments[0] in instrument_scripts:
                 for script in instrument_scripts[instruments[0]]:
                     scripts.append(os.path.join('drivers', instruments[0],
                                                 script))
@@ -187,7 +187,7 @@ def getScripts(instruments):
 
     else:
         for inst in instruments:
-            if instrument_scripts.has_key(inst):
+            if inst in instrument_scripts:
                 for script in instrument_scripts[inst]:
                     scripts.append(os.path.join('drivers', inst, script))
             else:

@@ -191,8 +191,10 @@ class Axis(object):
         cur_val = self.__min
         axis.append(cur_val)
         
-        while cur_val < self.__max:
+        while 1:
             cur_val *= (1.0 + self.__delta)
+            if cur_val > self.__max:
+                break
             axis.append(cur_val)
 
         if atype == "histogram":

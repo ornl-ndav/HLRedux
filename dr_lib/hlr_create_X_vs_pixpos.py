@@ -207,9 +207,9 @@ def create_X_vs_pixpos(som, *args, **kwargs):
 
         
     # Check for so_id keyword argument
-    if kwargs.has_key("so_id"):
+    try:
         so_dim.id = kwargs["so_id"]
-    else:
+    except KeyError:
         so_dim.id = 0
 
     comb_som = SOM.SOM()
@@ -218,27 +218,27 @@ def create_X_vs_pixpos(som, *args, **kwargs):
     del som_1
 
     # Check for y_label keyword argument
-    if kwargs.has_key("y_label"):
+    try:
         comb_som.setYLabel(kwargs["y_label"])
-    else:
+    except KeyError:        
         comb_som.setYLabel("Counts")
 
     # Check for y_units keyword argument
-    if kwargs.has_key("y_units"):
+    try:
         comb_som.setYUnits(kwargs["y_units"])
-    else:
+    except KeyError:
         comb_som.setYUnits("Counts / Arb")
 
     # Check for x_labels keyword argument
-    if kwargs.has_key("x_label"):
+    try:
         comb_som.setAllAxisLabels(["Pixel Number", kwargs["x_label"]])
-    else:
+    except KeyError:
         comb_som.setAllAxisLabels(["Pixel Number", "Arbitrary"])
 
     # Check for x_units keyword argument
-    if kwargs.has_key("x_units"):
+    try:
         comb_som.setAllAxisUnits(["Pixel#", kwargs["x_units"]])
-    else:
+    except KeyError:
         comb_som.setAllAxisUnits(["Pixel#", "Arb"])
 
     comb_som.append(so_dim)
