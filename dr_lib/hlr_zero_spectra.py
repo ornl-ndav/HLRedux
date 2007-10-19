@@ -71,20 +71,16 @@ def zero_spectra(obj, nz_range):
         y_err2 = hlr_utils.get_err2(obj, i, o_descr, "y")
         x_axis = hlr_utils.get_value(obj, i, o_descr, "x", 0)
         
-        y_new = nessi_list.NessiList()
-        var_y_new = nessi_list.NessiList()
+        y_new = nessi_list.NessiList(len(y_val))
+        var_y_new = nessi_list.NessiList(len(y_err2))
 
         # Find the bins for the range to not zero
         i_start = bisect.bisect(x_axis, nz_range[i][0]) - 1
         i_end = bisect.bisect(x_axis, nz_range[i][1]) - 1
         
-        for j in xrange(len(y_val)):
-            if j >= i_start and j <= i_end:
-                y_new.append(y_val[j])
-                var_y_new.append(y_err2[j])
-            else:
-                y_new.append(0.0)
-                var_y_new.append(0.0)
+        for j in xrange(i_start, i_end+1):
+            y_new[j] = y_val[j]
+            var_y_new[j] = y_err2[j]
 
         hlr_utils.result_insert(result, res_descr, (y_new, var_y_new),
                                 map_so, "y")
