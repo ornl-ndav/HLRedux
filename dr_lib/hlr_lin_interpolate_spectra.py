@@ -64,7 +64,7 @@ def lin_interpolate_spectra(obj, lint_range):
     import bisect
 
     import nessi_list
-
+    import copy
     for i in xrange(hlr_utils.get_length(obj)):
         map_so = hlr_utils.get_map_so(obj, None, i)
 
@@ -73,8 +73,8 @@ def lin_interpolate_spectra(obj, lint_range):
         y_err2 = hlr_utils.get_err2(obj, i, o_descr, "y")
         x_axis = hlr_utils.get_value(obj, i, o_descr, "x", 0)
         
-        y_new = nessi_list.NessiList()
-        var_y_new = nessi_list.NessiList()
+        y_new = copy.deepcopy(y_val)
+        var_y_new = copy.deepcopy(y_err2)
 
         # Find the bins for the range to linearly interpolate
         i_start = bisect.bisect(x_axis, lint_range[i][0]) - 1
@@ -85,14 +85,10 @@ def lin_interpolate_spectra(obj, lint_range):
                 (x_axis[i_end] - x_axis[i_start])
         
         offset = y_val[i_start] - slope * x_axis[i_start]
-        
-        for j in xrange(len(y_val)):
-            if j >= i_start and j <= i_end:
-                y_new.append((slope * x_axis[j]) + offset)
-                var_y_new.append(y_err2[i_start])
-            else:
-                y_new.append(y_val[j])
-                var_y_new.append(y_err2[j])
+
+        for j in xrange(i_start, i_end+1):
+            y_new[j] = (slope * x_axis[j]) + offset
+            var_y_new[j] = y_err2[i_start]
 
         hlr_utils.result_insert(result, res_descr, (y_new, var_y_new),
                                 map_so, "y")

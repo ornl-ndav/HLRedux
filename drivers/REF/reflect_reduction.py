@@ -151,6 +151,16 @@ def run(config, tim):
     if tim is not None:
         tim.getTime(msg="After converting wavelength to scalar Q ")
 
+    if config.dump_rq:
+        d_som3_1 = dr_lib.filter_ref_data(d_som3, zero_mode=True)
+        hlr_utils.write_file(config.output, "text/Spec", d_som3_1,
+                             output_ext="rq",
+                             verbose=config.verbose,
+                             data_ext=config.ext_replacement,
+                             path_replacement=config.path_replacement,
+                             message="pixel R(Q) information")
+        del d_som3_1
+
     if not config.no_filter:
         if config.verbose:
             print "Filtering final data"
@@ -172,19 +182,51 @@ def run(config, tim):
         config.Q_bins = dr_lib.create_axis_from_data(d_som4)
 
     rebin_axis = config.Q_bins.toNessiList()
-    d_som5 = dr_lib.sum_all_spectra(d_som4, rebin_axis=rebin_axis)
+
+    if config.verbose:
+        print "Rebinning spectra"
+
+    if tim is not None:
+        tim.getTime(False)
+        
+    d_som5 = common_lib.rebin_axis_1D_linint(d_som4, rebin_axis)
+
+    if tim is not None:
+        tim.getTime(msg="After rebinning spectra")
 
     del d_som4
 
-    hlr_utils.write_file(config.output, "text/Spec", d_som5,
+    if config.dump_rqr:
+        hlr_utils.write_file(config.output, "text/Spec", d_som5,
+                             output_ext="rqr",
+                             verbose=config.verbose,
+                             data_ext=config.ext_replacement,
+                             path_replacement=config.path_replacement,
+                             message="pixel R(Q) (after rebinning) "\
+                             +"information")
+
+    if config.verbose:
+        print "Summing spectra"
+
+    if tim is not None:
+        tim.getTime(False)
+
+    d_som6 = dr_lib.sum_all_spectra(d_som5)
+
+    if tim is not None:
+        tim.getTime(msg="After summing spectra")
+
+    del d_som5
+
+    hlr_utils.write_file(config.output, "text/Spec", d_som6,
                          replace_ext=False,
                          replace_path=False,
                          verbose=config.verbose,
                          message="combined Reflectivity information")
 
-    d_som5.attr_list["config"] = config
+    d_som6.attr_list["config"] = config
 
-    hlr_utils.write_file(config.output, "text/rmd", d_som5,
+    hlr_utils.write_file(config.output, "text/rmd", d_som6,
                          output_ext="rmd", verbose=config.verbose,
                          data_ext=config.ext_replacement,
                          path_replacement=config.path_replacement,
@@ -192,7 +234,7 @@ def run(config, tim):
 
     if tim is not None:
         tim.setOldTime(old_time)
-        tim.getTime(msg="Completing driver")
+        tim.getTime(msg="Total Running Time")
 
 if __name__ == "__main__":
     import common_lib

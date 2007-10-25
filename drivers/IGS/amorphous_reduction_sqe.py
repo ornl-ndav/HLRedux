@@ -204,7 +204,7 @@ def run(config, tim=None):
     
         if tim is not None:
             tim.setOldTime(old_time)
-            tim.getTime(msg="Total Running Time: ")
+            tim.getTime(msg="Total Running Time")
 
     else:
         return d_som5

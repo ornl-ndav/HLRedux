@@ -405,7 +405,7 @@ def run(config, tim=None):
     
     if tim is not None:
         tim.setOldTime(old_time)
-        tim.getTime(msg="Total Running Time: ")
+        tim.getTime(msg="Total Running Time")
     
 if __name__ == "__main__":
     import hlr_utils

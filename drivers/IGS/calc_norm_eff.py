@@ -141,6 +141,15 @@ def run(config, tim):
     norm_int = dr_lib.integrate_spectra(n_som3, start=config.norm_start,
                                         end=config.norm_end)
 
+    n_som3.attr_list["config"] = config
+    
+    hlr_utils.write_file(config.output, "text/rmd", n_som3,
+                         output_ext="rmd",
+                         data_ext=config.ext_replacement,         
+                         path_replacement=config.path_replacement,
+                         verbose=config.verbose,
+                         message="metadata")
+    
     del n_som3
 
     file_comment = "Normalization Integration range: %0.3fA, %0.3fA" % \
@@ -157,7 +166,7 @@ def run(config, tim):
 
     if tim is not None:
         tim.setOldTime(old_time)
-        tim.getTime(msg="Total Running Time: ")
+        tim.getTime(msg="Total Running Time")
 
 if __name__ == "__main__":
     import dr_lib

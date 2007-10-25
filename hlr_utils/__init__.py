@@ -28,6 +28,7 @@ handling various data reduction requests.
 from hlr_1D_units import *
 from hlr_amr_options import AmrOptions, AmrConfiguration
 from hlr_axis_object import *
+from hlr_bisect_helper import bisect_helper
 from hlr_config import Configure, ConfigFromXml
 from hlr_drparameter import *
 from hlr_igs_options import IgsOptions, IgsConfiguration

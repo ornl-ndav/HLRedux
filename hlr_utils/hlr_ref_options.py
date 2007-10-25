@@ -142,7 +142,19 @@ class RefOptions(hlr_options.SNSOptions):
                         help="Flag to dump the R(TOF) information. Creates a "\
                         +"*.rtof file.")
         self.set_defaults(dump_rtof=False)        
-        
+
+        self.add_option("", "--dump-rq", action="store_true",
+                        dest="dump_rq",
+                        help="Flag to dump the R(Q) information. Creates a "\
+                        +"*.rq file.")
+        self.set_defaults(dump_rq=False)        
+
+        self.add_option("", "--dump-rqr", action="store_true",
+                        dest="dump_rqr",
+                        help="Flag to dump the R(Q) after rebinning "\
+                        +"information. Creates a *.rqr file.")
+        self.set_defaults(dump_rqr=False)        
+
         self.add_option("", "--dump-all", action="store_true", dest="dump_all",
                         help="Flag to dump combined information")
         self.set_defaults(dump_all=False)
@@ -246,7 +258,15 @@ def RefConfiguration(parser, configure, options, args):
 
     # Set the ability to dump the R(TOF) information
     if hlr_utils.cli_provide_override(configure, "dump_rtof", "--dump-rtof"): 
-        configure.dump_rtof = options.dump_rtof        
+        configure.dump_rtof = options.dump_rtof
+
+    # Set the ability to dump the R(Q) information
+    if hlr_utils.cli_provide_override(configure, "dump_rq", "--dump-rq"): 
+        configure.dump_rq = options.dump_rq
+
+    # Set the ability to dump the R(Q) after rebinning information
+    if hlr_utils.cli_provide_override(configure, "dump_rqr", "--dump-rqr"): 
+        configure.dump_rqr = options.dump_rqr        
 
     if hlr_utils.cli_provide_override(configure, "dump_all", "--dump-all"):
         if options.dump_all:
@@ -254,4 +274,5 @@ def RefConfiguration(parser, configure, options, args):
             configure.dump_bkg = True
             configure.dump_sub = True
             configure.dump_rtof = True
-            
+            configure.dump_rq = True
+            configure.dump_rqr = True

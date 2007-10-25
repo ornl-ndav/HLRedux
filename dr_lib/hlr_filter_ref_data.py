@@ -139,6 +139,8 @@ def filter_ref_data(som, **kwargs):
         index_map[so.id] = indicies
 
     # Parse through data to remove bad data at requested indicies
+    import copy
+    
     for j in xrange(len_som):
         map_so = hlr_utils.get_map_so(som, None, j)
 
@@ -148,8 +150,15 @@ def filter_ref_data(som, **kwargs):
         x_val = hlr_utils.get_value(som, j, o_descr, "x", 0)
         x_err2 = hlr_utils.get_err2(som, j, o_descr, "x", 0)        
 
+        y_val_new = copy.deepcopy(y_val)
+        y_err2_new = copy.deepcopy(y_err2)
+
+        x_val_new = copy.deepcopy(x_val)
+        x_err2_new = copy.deepcopy(x_err2)
+        
         if dtot is not None:
             dso = hlr_utils.get_value(dtot, j, "SOM", "all")
+            dso_new = copy.deepcopy(dso)
 
         offset = 0
         for index in index_map[map_so.id]:
@@ -157,23 +166,23 @@ def filter_ref_data(som, **kwargs):
                 # Index arithmetic since list length get shorter with every
                 # element deleted
                 dindex = index - offset
-                del y_val[dindex]
-                del y_err2[dindex]
-                del x_val[dindex]
-                del x_err2[dindex]
+                del y_val_new[dindex]
+                del y_err2_new[dindex]
+                del x_val_new[dindex]
+                del x_err2_new[dindex]
                 if dtot is not None:
-                    del dso.y[dindex]
+                    del dso_new.y[dindex]
 
                 offset += 1
             else:
-                y_val[index] = 0.0
-                y_err2[index] = 0.0
+                y_val_new[index] = 0.0
+                y_err2_new[index] = 0.0
 
         if dtot is not None and multiple_dtot:
-            hlr_utils.result_insert(res_dtot, resd_descr, dso, None, "all")
+            hlr_utils.result_insert(res_dtot, resd_descr, dso_new, None, "all")
 
-        hlr_utils.result_insert(result, res_descr, (y_val, y_err2), map_so,
-                                "all", 0, [x_val])
+        hlr_utils.result_insert(result, res_descr, (y_val_new, y_err2_new),
+                                map_so, "all", 0, [x_val_new])
 
     if dtot is not None:
         result.attr_list["extra_som"] = res_dtot
