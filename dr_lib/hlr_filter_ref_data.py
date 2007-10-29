@@ -139,8 +139,6 @@ def filter_ref_data(som, **kwargs):
         index_map[so.id] = indicies
 
     # Parse through data to remove bad data at requested indicies
-    import copy
-    
     for j in xrange(len_som):
         map_so = hlr_utils.get_map_so(som, None, j)
 

@@ -52,6 +52,14 @@ def bisect_helper(axis, low_val, high_val):
     lo_val = float(low_val)
     hi_val = float(high_val)
 
+    # Requested range is off low end of axis
+    if lo_val < axis[0] and hi_val < axis[0]:
+        return (-1, -1)
+
+    # Requested range is off high end of axis
+    if lo_val > axis[-1] and hi_val > axis[-1]:
+        return (-1, -1)    
+
     import bisect
 
     index_lo_r = bisect.bisect(axis, lo_val)
@@ -60,10 +68,11 @@ def bisect_helper(axis, low_val, high_val):
     index_hi_r = bisect.bisect(axis, hi_val)
     index_hi_l = bisect.bisect_left(axis, hi_val)
 
-    len_axis = len(axis)
+    # This quantity is actually the length of the associated value array
+    len_axis = len(axis) - 1
 
     index_l = __fix_index(max(index_lo_r, index_lo_l)-1, len_axis)
-    index_r = __fix_index(max(index_hi_r, index_hi_l), len_axis)
+    index_r = __fix_index(min(index_hi_r, index_hi_l)-1, len_axis)
                   
     return (index_l, index_r)
 
@@ -76,7 +85,7 @@ def __fix_index(index, end_index):
     @param index: The index to possible correct
     @type index: C{int}
 
-    @param end_index: The last index in the axis
+    @param end_index: The last index in the value axis
     @type end_index: C{int}
 
 

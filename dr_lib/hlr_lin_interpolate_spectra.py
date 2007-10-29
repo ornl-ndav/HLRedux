@@ -63,7 +63,6 @@ def lin_interpolate_spectra(obj, lint_range):
     # iterate through the values
     import bisect
 
-    import nessi_list
     import copy
     for i in xrange(hlr_utils.get_length(obj)):
         map_so = hlr_utils.get_map_so(obj, None, i)

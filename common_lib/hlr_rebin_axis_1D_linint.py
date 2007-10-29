@@ -22,6 +22,8 @@
 
 # $Id$
 
+import nessi_list
+
 def rebin_axis_1D_linint(obj, axis_out):
     """
     This function rebins the primary axis for a C{SOM} or a C{SO} based on the
@@ -69,7 +71,6 @@ def rebin_axis_1D_linint(obj, axis_out):
     xvals.append(axis_out)
 
     # Need a vector of zeros for the next function call
-    import nessi_list
     len_axis_out = len(axis_out)
     zero_vec = nessi_list.NessiList(len_axis_out)
 
@@ -103,15 +104,14 @@ def rebin_axis_1D_linint(obj, axis_out):
             index_pair = hlr_utils.bisect_helper(axis_in, axis_out[k],
                                                  axis_out[k+1])
 
-            # Left index is off the array
-            if index_pair[0] == -1:
+            # Requested range is outside axis boundaries
+            if index_pair[0] == -1 and index_pair[1] == -1:
                 rebin_val.append(0.0)
                 rebin_err2.append(0.0)
                 continue
 
             # If there is only one value, just use it directly
-            if index_pair[0] == index_pair[1] or \
-                   index_pair[0]+1 == index_pair[1]:
+            if index_pair[0] == index_pair[1]:
                 rebin_val.append(val[index_pair[0]])
                 rebin_err2.append(err2[index_pair[0]])
             else:
@@ -157,7 +157,6 @@ def rebin_axis_1D_linint(obj, axis_out):
 
 if __name__ == "__main__":
     import hlr_test
-    import nessi_list
 
     som1 = hlr_test.generate_som()
 
