@@ -49,10 +49,10 @@ class Axis(object):
 
         @param kwargs: A list of keyword arguments that the function accepts:
 
-        @keyword type: The type of binning requested for the axis. The current
-                       types are C{log} and C{lin}. The default behavior is
-                       C{lin}.
-        @type type: C{string}
+        @keyword bintype: The type of binning requested for the axis. The
+                          current types are C{log} and C{lin}. The default
+                          behavior is C{lin}.
+        @type bintype: C{string}
         """
         self.__min = float(min)
         self.__max = float(max)
