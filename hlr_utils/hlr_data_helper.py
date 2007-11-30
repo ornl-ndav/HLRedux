@@ -582,6 +582,8 @@ def get_parameter(param, so, inst):
         return inst.get_secondary(so.id)
     elif param == "total":
         return inst.get_total_path(so.id)
+    elif param in inst.get_diff_geom_keys():
+        return inst.get_diff_geom(param, so.id)
     else:
         raise RuntimeError("Parameter %s is not an understood type." % \
                            param)

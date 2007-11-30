@@ -169,13 +169,19 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
     # Create y and var_y lists from total 2D size
     so_dim.y = nessi_list.NessiList(N_tot)
     so_dim.var_y = nessi_list.NessiList(N_tot)
-
+    
+    # Create area sum and errors for the area sum lists from total 2D size
+    area_sum = nessi_list.NessiList(N_tot)
+    area_sum_err2 = nessi_list.NessiList(N_tot)
+    
     inst = som.attr_list.instrument
     lambda_final = som.attr_list["Wavelength_final"]
+    inst_name = inst.get_name()
 
     import bisect
     import math
 
+    import dr_lib
     import utils
 
     arr_len = 0
@@ -200,7 +206,6 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
         # Get lambda_f from instrument information
         (l_f, l_f_err2, l_f_units) = hlr_utils.get_special(lambda_final,
                                                            map_so)
-
         # Get source to sample distance
         (L_s, L_s_err2) = hlr_utils.get_parameter("primary", map_so, inst)
 
@@ -210,27 +215,9 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
         # Get polar angle from instrument information
         (angle, angle_err2) = hlr_utils.get_parameter("polar", map_so, inst)
 
-        # FIXME: Replace with correct calls, these are just place holders
-        #(dlf_dh, dlf_dh_err2) = hlr_utils.get_parameter("dlf_dh", map_so,
-        #                                                inst)
-        #(dphi_dh, dphi_dh_err2) = hlr_utils.get_parameter("dphi_dh", map_so,
-        #                                                inst)
-        #(dpol_dh, dpol_dh_err2) = hlr_utils.get_parameter("dpol_dh", map_so,
-        #                                                inst)
-        #(dpol_dpolD, dpol_dpolD_err2) = hlr_utils.get_parameter("dpol_dpolD",
-        #map_so,
-        #                                                inst)
-        #(dphi_dpolD, dphi_dpolD_err2) = hlr_utils.get_parameter("dphi_dpolD",
-        #map_so,
-        #                                                inst)
+        # Get the detector pixel height
         #(dh, dh_err2) = hlr_utils.get_parameter("dh", map_so,
         #                                                inst)        
-
-        dlf_dh = 0.1
-        dphi_dh = 0.1
-        dpol_dh = 0.1
-        dpol_dpolD = 0.1
-        dphi_dpolD = 0.1
         dh = 0.1
 
         # Calculate T_i
@@ -255,10 +242,12 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
         # Calculate E_t
         (E_t, E_t_err2) = array_manip.sub_ncerr(E_i, E_i_err2, E_f, E_f_err2)
 
-        # Convert E_t from meV to ueV
-        (E_t, E_t_err2) = array_manip.mult_ncerr(E_t, E_t_err2, 1000.0, 0.0)
-        (counts, counts_err2) = array_manip.mult_ncerr(counts, counts_err2,
-                                                       1.0/1000.0, 0.0)
+        if inst_name == "BSS":
+            # Convert E_t from meV to ueV
+            (E_t, E_t_err2) = array_manip.mult_ncerr(E_t, E_t_err2,
+                                                     1000.0, 0.0)
+            (counts, counts_err2) = array_manip.mult_ncerr(counts, counts_err2,
+                                                           1.0/1000.0, 0.0)
 
         # Convert lambda_i to k_i
         (k_i, k_i_err2) = axis_manip.wavelength_to_scalar_k(l_i, l_i_err2)
@@ -274,39 +263,30 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
                                                                    angle,
                                                                    angle_err2)
 
-        # Calculate bin centric values
-        (E_i_bc, E_i_bc_err2) = utils.calc_bin_centers(E_i, E_i_err2)
-        (k_i_bc, k_i_bc_err2) = utils.calc_bin_centers(k_i, k_i_err2)
-        (Q_bc, Q_bc_err2) = utils.calc_bin_centers(Q, Q_err2)
-        (T_i_bc, T_i_bc_err2) = utils.calc_bin_centers(T_i, T_i_err2)
-
-        # Get numeric values
-        sin_polar = math.sin(angle)
-        cos_polar = math.cos(angle)
-        length_ratio = L_d / L_s
-        lambda_const = ((2.0 * math.pi) / (l_f * l_f)) * dlf_dh
-        kf_cos_pol = k_f * cos_polar
-        kf_sin_pol = k_f * sin_polar
-
-        # Calculate coefficients
-        (x_1, x_1_err2) = __calc_x1(k_i_bc, Q_bc, length_ratio, k_f,
-                                    kf_cos_pol, kf_sin_pol, lambda_const,
-                                    dphi_dh, dpol_dh, dpol_dpolD, dphi_dpolD,
-                                    math.cos(angle), zero_vec)
-        (x_2, x_2_err2) = __calc_x2(k_i_bc, Q_bc, T_i_bc, kf_cos_pol, zero_vec)
-        (x_3, x_3_err2) = __calc_x3(k_i_bc, E_i_bc, length_ratio, E_f, k_f,
-                                    lambda_const, zero_vec)
-        (x_4, x_4_err2) = __calc_x4(E_i_bc, T_i_bc, zero_vec)
-
         # Calculate dT
         (dT, dT_err2) = utils.calc_bin_widths(T_i, T_i_err2)
 
         # Calculate Jacobian
-        (A, A_err2) = __calc_EQ_Jacobian(x_1, x_2, x_3, x_4, dT, dh, zero_vec)
+        if inst_name == "BSS":
+            (x_1, x_2,
+             x_3, x_4) = dr_lib.calc_BSS_coeffs(map_so, inst, (E_i, E_i_err2),
+                                                (Q, Q_err2), (k_i, k_i_err2),
+                                                (T_i, T_i_err2), angle, E_f,
+                                                k_f, l_f, L_s, L_d, zero_vec)
+        else:
+            raise RuntimeError("Do not know how to calculate x_i "\
+                               +"coefficients for instrument %s" % inst_name)
 
-        # Apply Jacobian
-        (counts, counts_err2) = array_manip.div_ncerr(counts, counts_err2,
-                                                      A, zero_vec)
+        (A, A_err2) = dr_lib.calc_EQ_Jacobian(x_1, x_2, x_3, x_4, dT, dh,
+                                              zero_vec)
+        
+        # Apply Jacobian: C/dlam * dlam / A(EQ) = C/EQ
+        (jac_ratio, jac_ratio_err2) = array_manip.div_ncerr(l_i_bc,
+                                                            l_i_bc_err2,
+                                                            A, A_err2)
+        (counts, counts_err2) = array_manip.mult_ncerr(counts, counts_err2,
+                                                       jac_ratio,
+                                                       jac_ratio_err2)
         
         # Reverse counts, E_t, k_i and Q
         E_t = axis_manip.reverse_array_cp(E_t)
@@ -316,7 +296,13 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
         counts = axis_manip.reverse_array_cp(counts)
         counts_err2 = axis_manip.reverse_array_cp(counts_err2)
         k_i = axis_manip.reverse_array_cp(k_i)
+        x_1 = axis_manip.reverse_array_cp(x_1)
+        x_2 = axis_manip.reverse_array_cp(x_2)
+        x_3 = axis_manip.reverse_array_cp(x_3)
+        x_4 = axis_manip.reverse_array_cp(x_4)
+        dT = axis_manip.reverse_array_cp(dT)        
 
+        # Filter for duplicate Q values
         if Q_filter:
             k_i_cutoff = k_f * math.cos(angle)
             k_i_cutbin = bisect.bisect(k_i, k_i_cutoff)
@@ -327,17 +313,49 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
             Q_err2.__delslice__(0, k_i_cutbin)
             E_t.__delslice__(0, k_i_cutbin)
             E_t_err2.__delslice__(0, k_i_cutbin)
+            x_1.__delslice__(0, k_i_cutbin)
+            x_2.__delslice__(0, k_i_cutbin)
+            x_3.__delslice__(0, k_i_cutbin)
+            x_4.__delslice__(0, k_i_cutbin)            
+            dT.__delslice__(0, k_i_cutbin)
+            zero_vec.__delslice__(0, k_i_cutbin)
 
-        # Rebin S_i(Q,E) to final S(Q,E)
-        (y_2d, y_2d_err2) = axis_manip.rebin_diagonal(Q, E_t,
-                                                      counts, counts_err2,
-                                                      so_dim.axis[0].val,
-                                                      so_dim.axis[1].val)
-        
+        if inst_name == "BSS":
+            ((Q_1, E_t_1),
+             (Q_2, E_t_2),
+             (Q_3, E_t_3),
+             (Q_4, E_t_4)) = dr_lib.calc_BSS_EQ_verticies((E_t, E_t_err2),
+                                                          (Q, Q_err2), x_1,
+                                                          x_2, x_3, x_4,
+                                                          dT, dh, zero_vec)
+        else:
+            raise RuntimeError("Do not know how to calculate (Q_i, E_t_i) "\
+                               +"verticies for instrument %s" % inst_name)
+
+        (y_2d, y_2d_err2,
+         area_new) = axis_manip.rebin_2D_quad_to_rectlin(Q_1, E_t_1,
+                                                         Q_2, E_t_2,
+                                                         Q_3, E_t_3,
+                                                         Q_4, E_t_4,
+                                                         counts, counts_err2,
+                                                         so_dim.axis[0].val,
+                                                         so_dim.axis[1].val)
+
         # Add in together with previous results
         (so_dim.y, so_dim.var_y) = array_manip.add_ncerr(so_dim.y,
                                                          so_dim.var_y,
                                                          y_2d, y_2d_err2)
+        
+        (area_sum, area_sum_err2) = array_manip.add_ncerr(area_sum,
+                                                          area_sum_err2,
+                                                          area_new,
+                                                          area_sum_err2)
+        
+    # Divide summed fractional counts by the sum of the fractional areas
+    (so_dim.y, so_dim.var_y) = array_manip.div_ncerr(so_dim.y,
+                                                     so_dim.var_y,
+                                                     area_sum,
+                                                     area_sum_err2)
 
     # Check for so_id keyword argument
     try:
@@ -358,7 +376,10 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
     try:
         comb_som.setYUnits(kwargs["y_units"])
     except KeyError:
-        comb_som.setYUnits("Counts / ueV A^-1")
+        if inst_name == "BSS":
+            comb_som.setYUnits("Counts / ueV A^-1")
+        else:
+            comb_som.setYUnits("Counts / meV A^-1")
 
     # Check for x_labels keyword argument
     try:
@@ -370,215 +391,13 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
     try:
         comb_som.setAllAxisUnits(kwargs["x_units"])
     except KeyError:
-        comb_som.setAllAxisUnits(["A^-1", "ueV"])
+        if inst_name == "BSS":
+            comb_som.setAllAxisUnits(["A^-1", "ueV"])
+        else:
+            comb_som.setAllAxisUnits(["A^-1", "meV"])
 
     comb_som.append(so_dim)
 
     del so_dim
 
     return comb_som
-
-def __calc_x1(*args):
-    """
-    This function calculates the x1 coeffiecient to the S(Q,E) Jacobian
-
-    @param args: A list of parameters used to calculate the x1 coeffiecient
-
-    The following is a list of the arguments needed in there expected order
-      1. Initial Wavevector
-      2. Momentum Transfer
-      3. Length Ratio (L_f / L_i)
-      4. Final Wavevector
-      5. Wavevector Final x Cos(polar)
-      6. Wavevector Final x Sin(polar)
-      7. Lambda Constant (2*pi/l_f^2)(dlf/dh)
-      8. Derivative dphi_dh
-      9. Derivative dpol_dh
-      10. Derivative dpol_dpolD
-      11. Derivative dphi_dpolD
-      12. Cos(polar)
-      13. Vector of Zeros
-    @type args: C{list}
-
-    
-    @return: The calculated x1 coefficient
-    @rtype: (C{nessi_list.NessiList}, C{nessi_list.NessiList})
-    """
-    # (L_f / L_i) * (1 / k_f)^2
-    const1 = args[2] / (args[4] * args[4])
-    # k_f * sin(pol) * (dpol/dh - (dpol/dpolD dphi/dh / dphi/dpolD))
-    const2 = (args[8] - ((args[9] * args[7]) / args[10])) * args[5]
-
-    # k_i^2
-    temp1 = array_manip.mult_ncerr(args[0], args[12], args[0], args[12])
-    # (L_f / L_i) * (k_i / k_f)^2
-    temp2 = array_manip.mult_ncerr(temp1[0], temp1[1], const1, 0.0)
-    # k_i - k_f * cos(pol)
-    temp3 = array_manip.sub_ncerr(args[0], args[12], args[4], 0.0)
-    # (k_i - k_f * cos(pol)) * (L_f / L_i) * (k_i / k_f)^2
-    temp4 = array_manip.mult_ncerr(temp2[0], temp2[1], temp3[0], temp3[1])
-
-    # k_i * cos(pol)
-    temp5 = array_manip.mult_ncerr(args[0], args[12], args[11], 0.0)
-    # k_f - k_i * cos(pol)
-    temp6 = array_manip.sub_ncerr(args[3], 0.0, temp5[0], temp5[1])
-
-    # (k_i - k_f * cos(pol)) * (L_f / L_i) * (k_i / k_f)^2 -
-    # (k_f - k_i * cos(pol))
-    temp7 = array_manip.sub_ncerr(temp4[0], temp4[1], temp6[0], temp6[1])
-    # ((k_i - k_f * cos(pol)) * (L_f / L_i) * (k_i / k_f)^2 -
-    # (k_f - k_i * cos(pol))) * (2 * pi / l_f^2) * dlf/dh
-    temp8 = array_manip.mult_ncerr(temp7[0], temp7[1], args[6], 0.0)
-
-    # k_i * k_f * sin(pol) * (dpol/dh - (dpol/dpolD dphi/dh / dphi/dpolD))
-    temp9 = array_manip.mult_ncerr(args[0], args[12], const2, 0.0)
-
-    # ((k_i - k_f * cos(pol)) * (L_f / L_i) * (k_i / k_f)^2 -
-    # (k_f - k_i * cos(pol))) * (2 * pi / l_f^2) * dlf/dh + 
-    # k_i * k_f * sin(pol) * (dpol/dh - (dpol/dpolD dphi/dh / dphi/dpolD))
-    temp10 = array_manip.add_ncerr(temp8[0], temp8[1], temp9[0], temp9[1])
-
-    # (((k_i - k_f * cos(pol)) * (L_f / L_i) * (k_i / k_f)^2 -
-    # (k_f - k_i * cos(pol))) * (2 * pi / l_f^2) * dlf/dh + 
-    # k_i * k_f * sin(pol) * (dpol/dh - (dpol/dpolD dphi/dh / dphi/dpolD))) / Q
-    return array_manip.div_ncerr(temp10[0], temp10[1], args[1], args[12])
-
-def __calc_x2(*args):
-    """
-    This function calculates the x2 coeffiecient to the S(Q,E) Jacobian
-
-    @param args: A list of parameters used to calculate the x2 coeffiecient
-
-    The following is a list of the arguments needed in there expected order
-      1. Initial Wavevector
-      2. Momentum Transfer
-      3. Initial Time-of-Flight
-      4. Wavevector Final x Cos(polar)
-      5. Vector of Zeros
-    @type args: C{list}
-
-    
-    @return: The calculated x2 coefficient
-    @rtype: (C{nessi_list.NessiList}, C{nessi_list.NessiList})
-    """
-    # k_f * cos(pol) - k_i
-    temp1 = array_manip.sub_ncerr(args[3], 0.0, args[0], args[4])
-    # (k_f * cos(pol) - k_i) / Q
-    temp2 = array_manip.div_ncerr(temp1[0], temp1[1], args[1], args[4])
-    # k_i / T_i
-    temp3 = array_manip.div_ncerr(args[0], args[4], args[2], args[4])
-    # (k_i / T_i) * ((k_f * cos(pol) - k_i) / Q)
-    return array_manip.mult_ncerr(temp2[0], temp2[1], temp3[0], temp3[1])
-
-def __calc_x3(*args):
-    """
-    This function calculates the x3 coeffiecient to the S(Q,E) Jacobian
-
-    @param args: A list of parameters used to calculate the x3 coeffiecient
-
-    The following is a list of the arguments needed in there expected order
-      1. Initial Wavevector
-      2. Initial Energy
-      3. Length Ratio (L_f / L_i)
-      4. Final Energy
-      5. Final Wavevector
-      6. Lambda Constant (2*pi/l_f^2)(dlf/dh)
-      7. Vector of Zeros
-    @type args: C{list}
-
-    
-    @return: The calculated x3 coefficient
-    @rtype: (C{nessi_list.NessiList}, C{nessi_list.NessiList})
-    """
-    # E_f / k_f
-    const1 = args[3] / args[4]
-    # (L_f / L_i) * (1 / k_f)^2
-    const2 = args[2] / (args[4] * args[4])
-    # (4 * pi / l_f^2) * dlf/dh
-    const3 = 2.0 * args[5]
-    # E_i * k_i
-    temp1 = array_manip.mult_ncerr(args[0], args[6], args[1], args[6])
-    # E_i * k_i * (L_f / L_i) * (1 / k_f)^2
-    temp2 = array_manip.mult_ncerr(temp1[0], temp1[1], const2, 0.0)
-    # E_i * k_i * (L_f / L_i) * (1 / k_f)^2 + E_f / k_f
-    temp3 = array_manip.add_ncerr(temp2[0], temp2[1], const1, 0.0)
-    # (4 * pi / l_f^2) * dlf/dh * (E_i * k_i * (L_f / L_i) * (1 / k_f)^2 +
-    # E_f / k_f)
-    return array_manip.mult_ncerr(temp3[0], temp3[1], const3, 0.0)
-    
-def __calc_x4(*args):
-    """
-    This function calculates the x4 coeffiecient to the S(Q,E) Jacobian
-
-    @param args: A list of parameters used to calculate the x4 coeffiecient
-
-    The following is a list of the arguments needed in there expected order
-      1. Initial Energy
-      2. Initial Time-of-Flight
-      3. Vector of Zeros
-    @type args: C{list}
-
-    
-    @return: The calculated x4 coefficient
-    @rtype: (C{nessi_list.NessiList}, C{nessi_list.NessiList}) 
-    """
-    # E_i / T_i
-    temp1 = array_manip.div_ncerr(args[0], args[2], args[1], args[2])
-    # -2 * (E_i / T_i)
-    return array_manip.mult_ncerr(temp1[0], temp1[1], -2.0, 0.0)
-
-def __calc_EQ_Jacobian(*args):
-    """
-    This function calculates the Jacobian for S(Q,E)
-    
-    @param args: A list of parameters used to calculate the Jacobian
-
-    The following is a list of the arguments needed in there expected order
-      1. x_1 coefficient
-      2. x_2 coefficient
-      3. x_3 coefficient
-      4. x_4 coefficient
-      5. dT
-      6. dh
-      7. Vector of Zeros
-    @type args: C{list}
-
-
-    @return: The calculated Jacobian
-    @rtype: (C{nessi_list.NessiList}, C{nessi_list.NessiList})
-    """
-    # x_2 * x_3
-    temp1 = array_manip.mult_ncerr(args[1], args[6], args[2], args[6])
-    # x_1 * x_4
-    temp2 = array_manip.mult_ncerr(args[0], args[6], args[3], args[6])
-    # dh * dT
-    temp3 = array_manip.mult_ncerr(args[4], args[6], args[5], 0.0)
-
-    # x_1 * x_4 - x_2 * x_3
-    temp4 = array_manip.add_ncerr(temp1[0], temp1[1], temp2[0], temp2[1])
-    # |x_1 * x_4 - x_2 * x_3|
-    temp5 = (array_manip.abs_val(temp4[0]), temp4[1])
-    # |x_1 * x_4 - x_2 * x_3| * dh * dT 
-    return array_manip.mult_ncerr(temp3[0], temp3[1], temp5[0], temp5[1])
-
-if __name__ == "__main__":
-    import hlr_test
-
-    som1 = hlr_test.generate_som("histogram", 1, 3)
-    som1.attr_list["Wavelength_final"] = (1, 1)
-    som1.attr_list.instrument = SOM.ASG_Instrument()
-
-    Q_axis = hlr_utils.make_axis(4, 5, 0.25)
-    x_axis_err = hlr_utils.make_axis(0, 1, 0.25)
-
-    print "********** SOM1"
-    print "* ", som1[0]
-    print "* ", som1[1]
-    print "* ", som1[2]
-
-    print "********** create_E_vs_Q_igs"
-    print "* som: ", create_E_vs_Q_igs(som1, som1[0].axis[0].val,
-                                       x_axis_err, Q_axis, x_axis_err,
-                                       withXVar="True")
-    print "* som: ", create_E_vs_Q_igs(som1, som1[0].axis[0].val,
-                                       Q_axis)

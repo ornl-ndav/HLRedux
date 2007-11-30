@@ -66,7 +66,19 @@ class RefOptions(hlr_options.SNSOptions):
                                         Option, version, conflict_handler,
                                         description, inst="REF")
 
+        # Remove inst-geom option since we'll duplicate it below
+        self.remove_option("--inst-geom")
+
         # Add REF specific options
+        self.add_option("", "--data-inst-geom", dest="data_inst_geom",
+                        metavar="FILENAME",
+                        help="Specify the data instrument geometry file")
+
+        self.add_option("", "--norm-inst-geom", dest="norm_inst_geom",
+                        metavar="FILENAME",
+                        help="Specify the normalization instrument geometry "\
+                        +"file")        
+        
         self.add_option("", "--angle-offset", dest="angle_offset",
                         help="Specify the global offset for the polar angle: "\
                         +"angle, err^2, and units=<degrees or radians>")
@@ -180,6 +192,20 @@ def RefConfiguration(parser, configure, options, args):
 
     # Call the configuration setter for SNSOptions
     hlr_options.SnsConfiguration(parser, configure, options, args, inst="REF")
+
+    # Set the data instrument geometry file
+    if hlr_utils.cli_provide_override(configure, "data_inst_geom",
+                                      "--data-inst-geom"):
+        configure.data_inst_geom = hlr_utils.determine_files(\
+            options.data_inst_geom,
+            one_file=True)
+
+    # Set the normalization instrument geometry file
+    if hlr_utils.cli_provide_override(configure, "norm_inst_geom",
+                                      "--norm-inst-geom"):
+        configure.norm_inst_geom = hlr_utils.determine_files(\
+            options.norm_inst_geom,
+            one_file=True)        
 
     # Get the data path for the sample data ROI file
     if hlr_utils.cli_provide_override(configure, "data_roi_file",

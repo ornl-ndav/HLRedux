@@ -242,11 +242,17 @@ def process_igs_data(datalist, conf, **kwargs):
     if conf.time_zero_slope is not None:
         dp_som4.attr_list["Time_zero_slope"] = \
                                      conf.time_zero_slope.toValErrTuple()
+        if dm_som1 is not None:
+            dm_som1.attr_list["Time_zero_slope"] = \
+                                          conf.time_zero_slope.toValErrTuple()
 
     # Note: time_zero_offset MUST be a tuple
     if conf.time_zero_offset is not None:
         dp_som4.attr_list["Time_zero_offset"] = \
                                      conf.time_zero_offset.toValErrTuple()
+        if dm_som1 is not None:
+            dm_som1.attr_list["Time_zero_offset"] = \
+                                      conf.time_zero_offset.toValErrTuple()    
 
     # Step 6: Convert TOF to wavelength for data and monitor
     if conf.verbose:
@@ -280,7 +286,7 @@ def process_igs_data(datalist, conf, **kwargs):
                              data_ext=conf.ext_replacement,
                              path_replacement=conf.path_replacement,
                              message="pixel wavelength information")
-    if conf.dump_mon_wave:        
+    if conf.dump_mon_wave and dm_som2 is not None:
         hlr_utils.write_file(conf.output, "text/Spec", dm_som2,
                              output_ext="mxl",
                              extra_tag=dataset_type,
@@ -306,7 +312,7 @@ def process_igs_data(datalist, conf, **kwargs):
     if t is not None and dm_som2 is not None and not conf.no_mon_effc:
         t.getTime(msg="After efficiency correcting monitor ")
 
-    if conf.dump_mon_effc and not conf.no_mon_effc:        
+    if conf.dump_mon_effc and not conf.no_mon_effc and dm_som3 is not None:   
         hlr_utils.write_file(conf.output, "text/Spec", dm_som3,
                              output_ext="mel",
                              extra_tag=dataset_type,
@@ -332,7 +338,7 @@ def process_igs_data(datalist, conf, **kwargs):
 
     del dm_som3
 
-    if conf.dump_mon_rebin:        
+    if conf.dump_mon_rebin and dm_som4 is not None:        
         hlr_utils.write_file(conf.output, "text/Spec", dm_som4,
                              output_ext="mrl",
                              extra_tag=dataset_type,
@@ -360,6 +366,10 @@ def process_igs_data(datalist, conf, **kwargs):
     if conf.dump_wave_mnorm:
         dp_som6_1 = dr_lib.sum_all_spectra(dp_som6,\
                                    rebin_axis=conf.lambda_bins.toNessiList())
+
+        write_message = "combined pixel wavelength information"
+        if dm_som4 is not None:
+            write_message += " (monitor normalized)"
         
         hlr_utils.write_file(conf.output, "text/Spec", dp_som6_1,
                              output_ext="pml",
@@ -367,8 +377,7 @@ def process_igs_data(datalist, conf, **kwargs):
                              verbose=conf.verbose,
                              data_ext=conf.ext_replacement,
                              path_replacement=conf.path_replacement,
-                             message="combined pixel wavelength information "\
-                             +"(monitor normalized)")
+                             message=write_message)
         del dp_som6_1
 
     del dm_som4, dp_som5

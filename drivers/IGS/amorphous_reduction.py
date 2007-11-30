@@ -120,6 +120,16 @@ def run(config, tim=None):
                                           dataset_type="dsbackground",
                                           bkg_som=bkg_som)
 
+        # Note: time_zero_slope MUST be a tuple
+        if config.time_zero_slope is not None:
+            ds_som1.attr_list["Time_zero_slope"] = \
+                                      config.time_zero_slope.toValErrTuple()
+
+        # Note: time_zero_offset MUST be a tuple
+        if config.time_zero_offset is not None:
+            ds_som1.attr_list["Time_zero_offset"] = \
+                                      config.time_zero_offset.toValErrTuple()
+        
         # Step 10: Linearly interpolate TOF elastic range in direct scattering
         #          background data
 

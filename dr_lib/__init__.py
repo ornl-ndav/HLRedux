@@ -26,6 +26,7 @@ data reduction functionality.
 """
 
 from hlr_add_files import *
+from hlr_bss_E_vs_Q_helpers import calc_BSS_coeffs, calc_BSS_EQ_verticies
 from hlr_calc_deltat_over_t import *
 from hlr_calc_delta_theta_over_theta import *
 from hlr_calculate_ref_background import *
@@ -35,6 +36,7 @@ from hlr_convert_single_to_list import *
 from hlr_create_X_vs_pixpos import *
 from hlr_determine_time_indep_bkg import *
 from hlr_determine_ref_background import *
+from hlr_E_vs_Q_helpers import *
 from hlr_feff_correct_mon import *
 from hlr_filter_ref_data import *
 from hlr_igs_energy_transfer import *

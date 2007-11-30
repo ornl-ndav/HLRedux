@@ -20,27 +20,28 @@
 # its use would not infringe privately owned rights.
 #
 
-"""
-The functions and objects in this module provide support functionality for
-handling various data reduction requests.
-"""
+# $Id$
 
-from hlr_1D_units import *
-from hlr_amr_options import AmrOptions, AmrConfiguration
-from hlr_axis_object import *
-from hlr_bisect_helper import bisect_helper
-from hlr_config import Configure, ConfigFromXml
-from hlr_drparameter import *
-from hlr_fix_index import *
-from hlr_igs_options import IgsOptions, IgsConfiguration
-from hlr_math_compatible import *
-from hlr_nxpath import *
-from hlr_options import *
-from hlr_ref_options import RefOptions, RefConfiguration
-from hlr_data_helper import *
-from hlr_driver_helper import *
+def fix_index(index, end_index):
+    """
+    This function corrects a given index so that it remains on the correct
+    bounds for a histogram value array which is one longer than the
+    corresponding axis.
 
-from HLR_version import version as __version__
+    @param index: The index to possible correct
+    @type index: C{int}
 
-#version
-__id__ = "$Id$"
+    @param end_index: The last index in the value axis
+    @type end_index: C{int}
+
+
+    @return: The corrected index
+    @rtype: C{int}
+    """
+    
+    if index == -1:
+        return 0
+    elif index == end_index:
+        return index - 1
+    else:
+        return index

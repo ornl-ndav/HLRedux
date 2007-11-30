@@ -50,22 +50,32 @@ def run(config, tim):
         raise RuntimeError("Need to pass a data filename to the driver "\
                            +"script.")
 
-    # Read in geometry if one is provided
-    if config.inst_geom is not None:
+    # Read in sample data geometry if one is provided
+    if config.data_inst_geom is not None:
         if config.verbose:
-            print "Reading in instrument geometry file"
+            print "Reading in sample data instrument geometry file"
             
-        inst_geom_dst = DST.getInstance("application/x-NxsGeom",
-                                        config.inst_geom)
+        data_inst_geom_dst = DST.getInstance("application/x-NxsGeom",
+                                             config.data_inst_geom)
     else:
-        inst_geom_dst = None
+        data_inst_geom_dst = None
+
+    # Read in normalization data geometry if one is provided
+    if config.norm_inst_geom is not None:
+        if config.verbose:
+            print "Reading in normalization instrument geometry file"
+            
+        norm_inst_geom_dst = DST.getInstance("application/x-NxsGeom",
+                                        config.norm_inst_geom)
+    else:
+        norm_inst_geom_dst = None        
     
     # Perform Steps 1-5 on sample data
     d_som1 = dr_lib.process_ref_data(config.data, config,
                                      config.data_roi_file,
                                      config.no_bkg,
                                      tof_cuts=config.tof_cuts,
-                                     inst_geom_dst=inst_geom_dst,
+                                     inst_geom_dst=data_inst_geom_dst,
                                      timer=tim)
 
     # Perform Steps 1-5 on normalization data
@@ -75,10 +85,18 @@ def run(config, tim):
                                          config.no_norm_bkg,
                                          dataset_type="norm",
                                          tof_cuts=config.tof_cuts,
-                                         inst_geom_dst=inst_geom_dst,
+                                         inst_geom_dst=norm_inst_geom_dst,
                                          timer=tim)
     else:
         n_som1 = None
+
+    # Closing sample data instrument geometry file
+    if data_inst_geom_dst is not None:
+        data_inst_geom_dst.release_resource()
+
+    # Closing normalization data instrument geometry file
+    if norm_inst_geom_dst is not None:
+        norm_inst_geom_dst.release_resource()        
 
     # Step 6: Sum all normalization spectra together
     if config.norm is not None:
@@ -87,9 +105,6 @@ def run(config, tim):
         n_som2 = None
 
     del n_som1
-
-    if inst_geom_dst is not None:
-        inst_geom_dst.release_resource()
 
     # Step 7: Divide data by normalization
     if config.verbose and config.norm is not None:

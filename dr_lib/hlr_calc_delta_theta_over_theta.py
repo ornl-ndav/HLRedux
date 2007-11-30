@@ -59,6 +59,24 @@ def calc_delta_theta_over_theta(som, dataset_type="data"):
     # Create a dummy information tuple
     no_info = (None, None, None)
 
+    # Set instrument specific strings
+    inst_name = som.attr_list["instrument_name"]
+    if inst_name == "REF_L":
+        last_slit_top = "Slit2_top"
+        last_slit_bot = "Slit2_bottom"
+        last_slit_dis = "Slit2_distance"
+        last_slit = "slit2"
+        last_slit_distot = "slit12"
+    elif inst_name == "REF_M":
+        last_slit_top = "Slit3_top"
+        last_slit_bot = "Slit3_bottom"
+        last_slit_dis = "Slit3_distance"
+        last_slit = "slit3"
+        last_slit_distot = "slit13"
+    else:
+        raise RuntimeError("Do not know how to handle instrument %s" \
+                           % inst_name)
+    
     # Get slit information
     try:
         slit1_top = hlr_utils.get_special(som.attr_list["Slit1_top"], so)
@@ -81,17 +99,17 @@ def calc_delta_theta_over_theta(som, dataset_type="data"):
         slit1_size_ok = True
 
     try:
-        slit2_top = hlr_utils.get_special(som.attr_list["Slit2_top"], so)
+        slit2_top = hlr_utils.get_special(som.attr_list[last_slit_top], so)
     except KeyError:
         slit2_top = no_info
 
     try:
-        slit2_bot = hlr_utils.get_special(som.attr_list["Slit2_bottom"], so)
+        slit2_bot = hlr_utils.get_special(som.attr_list[last_slit_bot], so)
     except KeyError:
         slit2_bot = no_info
 
     try:
-        slit2_dist = hlr_utils.get_special(som.attr_list["Slit2_distance"], so)
+        slit2_dist = hlr_utils.get_special(som.attr_list[last_slit_dis], so)
     except KeyError:
         slit2_dist = no_info
 
@@ -109,19 +127,22 @@ def calc_delta_theta_over_theta(som, dataset_type="data"):
     if slit1_size_ok and slit2_size_ok:
         if slit1_top[2] != slit2_top[2]:
             raise ValueError("Slit top opening distances are not in the same "\
-                             +"units. slit1 (%s), slit2 (%s)" % (slit1_top[2],
-                                                                 slit2_top[2]))
+                             +"units. slit1 (%s), %s (%s)" % (slit1_top[2],
+                                                              last_slit,
+                                                              slit2_top[2]))
 
         if slit1_bot[2] != slit2_bot[2]:
             raise ValueError("Slit bottom opening distances are not in the "\
-                             +"same units. slit1 (%s), slit2 (%s)" \
+                             +"same units. slit1 (%s), %s (%s)" \
                              % (slit1_bot[2],
+                                last_slit,
                                 slit2_bot[2]))    
             
     if slit1_dist[2] != slit2_dist[2] and slit12_dist_ok:
         raise ValueError("Slit distances are not in the same units. "\
-                         +"slit1 (%s), slit2 (%s)" % (slit1_dist[2],
-                                                      slit2_dist[2]))
+                         +"slit1 (%s), %s (%s)" % (slit1_dist[2],
+                                                   last_slit,
+                                                   slit2_dist[2]))
 
     # Calculate intermediate slit parameters
     if slit1_size_ok:
@@ -177,8 +198,10 @@ def calc_delta_theta_over_theta(som, dataset_type="data"):
 
     # Add parameters to attribute list
     som.attr_list[dataset_type+"-slit1_size"] = (slit1_size, slit1_size_units)
-    som.attr_list[dataset_type+"-slit2_size"] = (slit2_size, slit2_size_units)
-    som.attr_list[dataset_type+"-slit12_distance"] = (slit12_distance,
+    last_slit_tag = "-%s_size" % last_slit
+    som.attr_list[dataset_type+last_slit_tag] = (slit2_size, slit2_size_units)
+    last_slit_dist_tag = "-%s_distance" % last_slit_distot
+    som.attr_list[dataset_type+last_slit_dist_tag] = (slit12_distance,
                                                       slit1_dist[2])
     som.attr_list[dataset_type+"-delta_theta"] = (dtheta, "radians")
     som.attr_list[dataset_type+"-theta"] = (theta_rads, "radians")

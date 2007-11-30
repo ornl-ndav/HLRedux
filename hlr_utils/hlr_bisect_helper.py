@@ -43,7 +43,8 @@ def bisect_helper(axis, low_val, high_val):
 
     @raise TypeError: The axis given is not a C{NessiList}
     """
-
+    import hlr_utils
+    
     try:
         axis.__type__
     except AttributeError:
@@ -71,31 +72,8 @@ def bisect_helper(axis, low_val, high_val):
     # This quantity is actually the length of the associated value array
     len_axis = len(axis) - 1
 
-    index_l = __fix_index(max(index_lo_r, index_lo_l)-1, len_axis)
-    index_r = __fix_index(min(index_hi_r, index_hi_l)-1, len_axis)
+    index_l = hlr_utils.fix_index(max(index_lo_r, index_lo_l)-1, len_axis)
+    index_r = hlr_utils.fix_index(min(index_hi_r, index_hi_l)-1, len_axis)
                   
     return (index_l, index_r)
 
-def __fix_index(index, end_index):
-    """
-    This function corrects a given index so that it remains on the correct
-    bounds for a histogram value array which is one longer than the
-    corresponding axis.
-
-    @param index: The index to possible correct
-    @type index: C{int}
-
-    @param end_index: The last index in the value axis
-    @type end_index: C{int}
-
-
-    @return: The corrected index
-    @rtype: C{int}
-    """
-    
-    if index == -1:
-        return 0
-    elif index == end_index:
-        return index - 1
-    else:
-        return index
