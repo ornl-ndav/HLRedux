@@ -153,9 +153,14 @@ class Axis(object):
         import math
         
         n_bins = int(math.fabs(self.__max - self.__min) / self.__delta)
-        
+
         for i in xrange(n_bins):
             axis.append(self.__min + i * self.__delta)
+
+        # If n_bins is zero, the above loop will not run, so add the minimum
+        # to the axis
+        if not n_bins:
+            axis.append(self.__min)
 
         if atype == "histogram":
             axis.append(self.__max)
