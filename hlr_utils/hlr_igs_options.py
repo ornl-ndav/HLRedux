@@ -145,7 +145,14 @@ class IgsOptions(hlr_options.SNSOptions):
                         help="Flag to dump the wavelength information for the"\
                         +" efficiency corrected monitor. Creates a *.mel "\
                         +"file for each dataset.")
-        self.set_defaults(dump_mon_rebin=False)            
+        self.set_defaults(dump_mon_effc=False)
+
+        self.add_option("", "--dump-mon-diml", action="store_true",
+                        dest="dump_mon_diml",
+                        help="Flag to dump the wavelength information for the"\
+                        +" dimensionless monitor. Creates a *.mdl "\
+                        +"file for each dataset.")
+        self.set_defaults(dump_mon_diml=False)
         
         self.add_option("", "--dump-wave-mnorm", action="store_true",
                         dest="dump_wave_mnorm",
@@ -368,7 +375,12 @@ def IgsConfiguration(parser, configure, options, args):
     # information
     if hlr_utils.cli_provide_override(configure, "dump_mon_effc",
                                       "--dump-mon-effc"):
-        configure.dump_mon_effc = options.dump_mon_effc        
+        configure.dump_mon_effc = options.dump_mon_effc
+
+    # Set the ability to dump the dimensionless monitor wavelength information
+    if hlr_utils.cli_provide_override(configure, "dump_mon_diml",
+                                      "--dump-mon-diml"):
+        configure.dump_mon_diml = options.dump_mon_diml        
 
     # Set the ability to dump the wavelength information
     if hlr_utils.cli_provide_override(configure, "dump_wave_mnorm",
@@ -382,6 +394,7 @@ def IgsConfiguration(parser, configure, options, args):
             configure.dump_mon_wave = True
             configure.dump_mon_wave = True
             configure.dump_mon_effc = True
+            configure.dump_mon_diml = True
             configure.dump_mon_rebin = True
             configure.dump_wave_mnorm = True        
 

@@ -51,12 +51,24 @@ def integrate_axis(obj, **kwargs):
     The default value is I{False}.
     @type avg: C{boolean}
 
+    @keyword width: This is a flag to turn on the multiplication of the
+                    individual bin contents with the bins corresponding width.
+    @type width: C{boolean}
 
+    @keyword width_pos: This is position of the x-axis in the axis array from
+                        which to calculate the bin widths in support of the
+                        width flag. If no argument is given, the default value
+                        is I{0}.
+    @type width_pos: C{int}
+
+    
     @return: The integration value and its associated error
     @rtype: C{tuple}
 
     
     @raise RuntimError: A C{SOM} or C{SO} is not given to the function.
+
+    @raise RuntimeError: The width keyword is used with x-axis integration.
     """
 
     # import the helper functions
@@ -104,9 +116,25 @@ def integrate_axis(obj, **kwargs):
         avg = kwargs["avg"]
     except KeyError:
         avg = False
+
+    # Check for width keyword argument
+    try:
+        width = kwargs["width"]
+    except KeyError:
+        width = False        
+
+    # Check for width_pos keyword argument
+    try:
+        width_pos = kwargs["width_pos"]
+    except KeyError:
+        width_pos = 0       
         
     integration = 0
     integration_error2 = 0
+
+    import itertools
+    if width:
+        import utils
 
     for i in xrange(hlr_utils.get_length(obj)): 
         counter = 0  
@@ -120,14 +148,28 @@ def integrate_axis(obj, **kwargs):
         else:
             value = value[start:end]
             error = error[start:end]
+            
+        if not width:
+            for val, err2 in itertools.izip(value, error):
+                integration += val
+                integration_error2 += err2
+                counter += 1
+        else:
+            if axis == "y":
+                x_axis = hlr_utils.get_value(obj, i, o_descr, "x", width_pos)
+                x_err2 = hlr_utils.get_err2(obj, i, o_descr, "x", width_pos)
+            elif axis == "x":
+                raise RuntimeError("Cannot use width flag with x-axis "\
+                                   +"integration")
 
-        value_len = len(value)
+            bin_widths = utils.calc_bin_widths(x_axis, x_err2)
 
-        for i in xrange(value_len):
-            integration += value[i]
-            integration_error2 += error[i]
-            counter += 1
-
+            for val, err2, delta in itertools.izip(value, error,
+                                                   bin_widths[0]):
+                integration += (delta * val)
+                integration_error2 += (delta * delta * err2)
+                counter += 1
+            
     if avg:
         return (integration / float(counter),
                 integration_error2 / float(counter))
@@ -148,10 +190,13 @@ if __name__ == "__main__":
     print "* ", som2[0]
 
     print "********** integrate_axis"
-    print "* som      :", integrate_axis(som1)
-    print "* som      :", integrate_axis(som2)
-    print "* som (avg):", integrate_axis(som2, avg=True)
-    print "* som [2,4]:", integrate_axis(som2, start=2, end=4)
-    print "* som  (x) :", integrate_axis(som2, axis="x")
-    print "* so       :", integrate_axis(som1[0])
-    print "* so  [0,3]:", integrate_axis(som1[0], start=0, end=3)
+    print "* som        :", integrate_axis(som1)
+    print "* som        :", integrate_axis(som2)
+    print "* som (avg)  :", integrate_axis(som2, avg=True)
+    print "* som [2,4]  :", integrate_axis(som2, start=2, end=4)
+    print "* som  (x)   :", integrate_axis(som2, axis="x")
+    print "* som (width):", integrate_axis(som1, width=True)
+    print "* so         :", integrate_axis(som1[0])
+    print "* so  [0,3]  :", integrate_axis(som1[0], start=0, end=3)
+    print "* so (width) :", integrate_axis(som1[0], width=True)
+

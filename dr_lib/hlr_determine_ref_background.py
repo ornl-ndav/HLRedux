@@ -22,7 +22,7 @@
 
 # $Id$
 
-def determine_ref_background(obj, no_bkg=False, **kwargs):
+def determine_ref_background(obj, no_bkg=False):
     """
     This function takes in a collection of pixels that have been selected as
     the reflectometer background. The pixels are summed into a single spectrum

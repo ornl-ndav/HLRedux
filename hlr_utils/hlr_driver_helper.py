@@ -691,7 +691,7 @@ def program_version():
     
     return " ".join(ver_tag)
 
-def cli_checker(opt1, opt2=""):
+def cli_checker(opt1, opt2=None):
     """
     This function checks the command-line arguments against the requested
     options to see if they have been set.
@@ -708,14 +708,18 @@ def cli_checker(opt1, opt2=""):
     @rtype: C{boolean}
     """
     import sys
-    
-    cli_options = [arg for arg in sys.argv if arg == opt1 or arg == opt2]
+
+    if opt2 is not None:
+        cli_options = [arg for arg in sys.argv if opt1 in arg or opt2 in arg]
+    else:
+        cli_options = [arg for arg in sys.argv if opt1 in arg]
+
     if len(cli_options) > 0:
         return True
     else:
         return False
 
-def cli_provide_override(config, param, opt1, opt2=""):
+def cli_provide_override(config, param, opt1, opt2=None):
     """
     This function checks the incoming parameter and uses cli_checker to
     determine if the parameter should be set using the appropriate setter

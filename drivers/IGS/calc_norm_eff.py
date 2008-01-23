@@ -69,22 +69,26 @@ def run(config, tim):
         else:
             so_axis = "Time_of_Flight"
             
-        bkg_som = dr_lib.add_files(config.back,
-                                   Data_Paths=config.data_paths.toPath(),
-                                   SO_Axis=so_axis, Signal_ROI=config.roi_file,
-                                   dataset_type="background",
-                                   Verbose=config.verbose, Timer=tim)[0]
+        bkg_som0 = dr_lib.add_files(config.back,
+                                    Data_Paths=config.data_paths.toPath(),
+                                    SO_Axis=so_axis,
+                                    Signal_ROI=config.roi_file,
+                                    dataset_type="background",
+                                    Verbose=config.verbose, Timer=tim)[0]
+
+        bkg_som = dr_lib.fix_bin_contents(bkg_som0)
+        del bkg_som0
     else:
         bkg_som = None
 
-    # Perform Steps 1-9 on normalization data            
+    # Perform Steps 1-15 on normalization data            
     n_som1 = dr_lib.process_igs_data(config.data, config, timer=tim,
                                      inst_geom_dst=inst_geom_dst,
                                      dataset_type="normalization",
                                      tib_const=config.tib_norm_const,
                                      bkg_som=bkg_som)
     
-    # Perform Steps 1-9 on empty can data
+    # Perform Steps 1-15 on empty can data
     if config.ecan is not None:
         e_som1 = dr_lib.process_igs_data(config.ecan, config, timer=tim,
                                          inst_geom_dst=inst_geom_dst,
@@ -94,7 +98,7 @@ def run(config, tim):
     else:
         e_som1 = None
 
-    # Perform Steps 1-9 on background data
+    # Perform Steps 1-15 on background data
     if config.back is not None and not config.hwfix:
         b_som1 = dr_lib.process_igs_data(config.back, config, timer=tim,
                                          inst_geom_dst=inst_geom_dst,
@@ -106,16 +110,16 @@ def run(config, tim):
     if inst_geom_dst is not None:
         inst_geom_dst.release_resource()
 
-    # Steps 16-17: Subtract background spectrum from empty can spectrum for
+    # Steps 22-23: Subtract background spectrum from empty can spectrum for
     #              normalization
     e_som2 = dr_lib.subtract_bkg_from_data(e_som1, b_som1,
                                            verbose=config.verbose,
                                            timer=tim,
                                            dataset1="empty_can",
                                            dataset2="background",
-                                           scale=config.scale_bcs)
+                                           scale=config.scale_bcn)
 
-    # Step 18-19: Subtract background spectrum from normalization spectrum
+    # Step 24-25: Subtract background spectrum from normalization spectrum
     n_som2 = dr_lib.subtract_bkg_from_data(n_som1, b_som1,
                                            verbose=config.verbose,
                                            timer=tim,
@@ -124,7 +128,7 @@ def run(config, tim):
                                            scale=config.scale_bn)
     del b_som1
 
-    # Step 22-23: Subtract empty can spectrum from normalization spectrum
+    # Step 28-29: Subtract empty can spectrum from normalization spectrum
     n_som3 = dr_lib.subtract_bkg_from_data(n_som2, e_som2,
                                            verbose=config.verbose,
                                            timer=tim,
@@ -134,12 +138,12 @@ def run(config, tim):
 
     del n_som2, e_som2
 
-    # Step 24: Integrate normalization spectra
+    # Step 30-32: Integrate normalization spectra
     if config.verbose:
         print "Integrating normalization spectra"
 
     norm_int = dr_lib.integrate_spectra(n_som3, start=config.norm_start,
-                                        end=config.norm_end)
+                                        end=config.norm_end, norm=True)
 
     n_som3.attr_list["config"] = config
     

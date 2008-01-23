@@ -167,7 +167,7 @@ def run(config, tim):
         tim.getTime(msg="After converting wavelength to scalar Q ")
 
     if config.dump_rq:
-        d_som3_1 = dr_lib.filter_ref_data(d_som3, zero_mode=True)
+        d_som3_1 = dr_lib.data_filter(d_som3, clean_axis=True)
         hlr_utils.write_file(config.output, "text/Spec", d_som3_1,
                              output_ext="rq",
                              verbose=config.verbose,
@@ -183,7 +183,7 @@ def run(config, tim):
         if tim is not None:
             tim.getTime(False)
         
-        d_som4 = dr_lib.filter_ref_data(d_som3, zero_mode=True)
+        d_som4 = dr_lib.data_filter(d_som3)
 
         if tim is not None:
             tim.getTime(msg="After filtering data")

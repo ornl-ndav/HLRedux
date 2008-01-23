@@ -99,6 +99,14 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
     N_tot = 1
     N_args = len(args)
 
+    # Get T0 slope in order to calculate dT = dT_i + dT_0
+    try:
+        t_0_slope = som.attr_list["Time_zero_slope"][0]
+        t_0_slope_err2 = som.attr_list["Time_zero_slope"][1]
+    except KeyError:
+        t_0_slope = float(0.0)
+        t_0_slope_err2 = float(0.0)
+
     # Check withXVar keyword argument and also check number of given args.
     # Set xvar to the appropriate value
     try:
@@ -204,21 +212,25 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
         l_i_err2 = hlr_utils.get_err2(som, j, "SOM", "x")
         
         # Get lambda_f from instrument information
-        (l_f, l_f_err2, l_f_units) = hlr_utils.get_special(lambda_final,
-                                                           map_so)
+        l_f_tuple = hlr_utils.get_special(lambda_final, map_so)
+        l_f = l_f_tuple[0]
+        l_f_err2 = l_f_tuple[1]
+        
         # Get source to sample distance
         (L_s, L_s_err2) = hlr_utils.get_parameter("primary", map_so, inst)
 
         # Get sample to detector distance
-        (L_d, L_d_err2) = hlr_utils.get_parameter("secondary", map_so, inst)
+        L_d_tuple = hlr_utils.get_parameter("secondary", map_so, inst)
+        L_d = L_d_tuple[0]
 
         # Get polar angle from instrument information
         (angle, angle_err2) = hlr_utils.get_parameter("polar", map_so, inst)
 
         # Get the detector pixel height
-        #(dh, dh_err2) = hlr_utils.get_parameter("dh", map_so,
-        #                                                inst)        
-        dh = 0.1
+        dh_tuple = hlr_utils.get_parameter("dh", map_so, inst)
+        dh = dh_tuple[0]
+        # Need dh in units of Angstrom
+        dh *= 1e10
 
         # Calculate T_i
         (T_i, T_i_err2) = axis_manip.wavelength_to_tof(l_i, l_i_err2, 
@@ -263,16 +275,24 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
                                                                    angle,
                                                                    angle_err2)
 
-        # Calculate dT
-        (dT, dT_err2) = utils.calc_bin_widths(T_i, T_i_err2)
+        # Calculate dT = dT_0 + dT_i
+        dT_i = utils.calc_bin_widths(T_i, T_i_err2)
+
+        (l_i_bw, l_i_bw_err2) = utils.calc_bin_widths(l_i, l_i_err2)
+        dT_0 = array_manip.mult_ncerr(l_i_bw, l_i_bw_err2,
+                                      t_0_slope, t_0_slope_err2)
+
+        dT_tuple = array_manip.add_ncerr(dT_i[0], dT_i[1], dT_0[0], dT_0[1])
+        dT = dT_tuple[0]
 
         # Calculate Jacobian
         if inst_name == "BSS":
             (x_1, x_2,
              x_3, x_4) = dr_lib.calc_BSS_coeffs(map_so, inst, (E_i, E_i_err2),
                                                 (Q, Q_err2), (k_i, k_i_err2),
-                                                (T_i, T_i_err2), angle, E_f,
-                                                k_f, l_f, L_s, L_d, zero_vec)
+                                                (T_i, T_i_err2), dh, angle,
+                                                E_f, k_f, l_f, L_s, L_d,
+                                                t_0_slope, zero_vec)
         else:
             raise RuntimeError("Do not know how to calculate x_i "\
                                +"coefficients for instrument %s" % inst_name)
@@ -281,8 +301,8 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
                                               zero_vec)
         
         # Apply Jacobian: C/dlam * dlam / A(EQ) = C/EQ
-        (jac_ratio, jac_ratio_err2) = array_manip.div_ncerr(l_i_bc,
-                                                            l_i_bc_err2,
+        (jac_ratio, jac_ratio_err2) = array_manip.div_ncerr(l_i_bw,
+                                                            l_i_bw_err2,
                                                             A, A_err2)
         (counts, counts_err2) = array_manip.mult_ncerr(counts, counts_err2,
                                                        jac_ratio,
@@ -332,14 +352,30 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
             raise RuntimeError("Do not know how to calculate (Q_i, E_t_i) "\
                                +"verticies for instrument %s" % inst_name)
 
-        (y_2d, y_2d_err2,
-         area_new) = axis_manip.rebin_2D_quad_to_rectlin(Q_1, E_t_1,
-                                                         Q_2, E_t_2,
-                                                         Q_3, E_t_3,
-                                                         Q_4, E_t_4,
-                                                         counts, counts_err2,
-                                                         so_dim.axis[0].val,
-                                                         so_dim.axis[1].val)
+        try:
+            (y_2d, y_2d_err2,
+             area_new) = axis_manip.rebin_2D_quad_to_rectlin(Q_1, E_t_1,
+                                                           Q_2, E_t_2,
+                                                           Q_3, E_t_3,
+                                                           Q_4, E_t_4,
+                                                           counts,
+                                                           counts_err2,
+                                                           so_dim.axis[0].val,
+                                                           so_dim.axis[1].val)
+        except IndexError, e:
+            # Get the offending index from the error message
+            index = int(str(e).split()[1].split('index')[-1].strip('[]'))
+            print "Id:", map_so.id
+            print "Index:", index
+            print "Verticies: %f, %f, %f, %f, %f, %f, %f, %f" % (Q_1[index],
+                                                                 E_t_1[index],
+                                                                 Q_2[index],
+                                                                 E_t_2[index],
+                                                                 Q_3[index],
+                                                                 E_t_3[index],
+                                                                 Q_4[index],
+                                                                 E_t_4[index])
+            raise IndexError(str(e))
 
         # Add in together with previous results
         (so_dim.y, so_dim.var_y) = array_manip.add_ncerr(so_dim.y,

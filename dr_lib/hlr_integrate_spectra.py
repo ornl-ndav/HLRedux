@@ -53,10 +53,18 @@ def integrate_spectra(obj, **kwargs):
     end keyword arguments are either bin indicies (I{True}) or bounds
     (I{False}). The default value is I{False}.
     @type bin_index: C{boolean}
+
+    @keyword norm: This is a flag to turn on the division of the individual
+                   spectrum integrations by the sum of the integrations from
+                   all spectra. This also activates the multiplication of the
+                   individual spectrum bin values by their corresponding bin
+                   width via the I{width} flag in L{integrate_axis}. The
+                   default value of the flag is I{False}.
+    @type norm: C{boolean}
     
     
     @return: Object containing the integration and the uncertainty squared
-    associated with the integration
+             associated with the integration
     @rtype: C{SOM.SOM} or C{SOM.SO}
     """
 
@@ -72,6 +80,12 @@ def integrate_spectra(obj, **kwargs):
     o_descr = hlr_utils.get_descr(obj)
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
 
+    # Create temporary object to access axis
+    if o_descr == "SOM":
+        aobj = obj[0]
+    elif o_descr == "SO":
+        aobj = obj
+
     # Check for axis_pos keyword argument
     try:
         axis_pos = kwargs["axis_pos"]
@@ -83,7 +97,23 @@ def integrate_spectra(obj, **kwargs):
         bin_index = kwargs["bin_index"]
     except KeyError:
         bin_index = False
-        
+
+    # Check for norm keyword argument
+    try:
+        norm = kwargs["norm"]
+        if norm:
+            if o_descr == "SO":
+                raise RuntimeError("Cannot use norm keyword with SO!")
+            
+            width = True
+            num_pixels = len(obj)
+            inst = obj.attr_list.instrument
+        else:
+            width = False
+    except KeyError:
+        norm = False
+        width = False
+
     # If the integration start bound is not given, assume the 1st bin
     try:
         i_start = kwargs["start"]
@@ -91,7 +121,7 @@ def integrate_spectra(obj, **kwargs):
         if bin_index:
             i_start = 0
         else:
-            i_start = obj.axis[axis_pos].val[0]
+            i_start = aobj.axis[axis_pos].val[0]
 
     # If the integration end bound is not given, assume the last bin
     try:
@@ -100,11 +130,11 @@ def integrate_spectra(obj, **kwargs):
         if bin_index:
             i_end = -1
         else:
-            i_end = obj.axis[axis_pos].val[-1]
+            i_end = aobj.axis[axis_pos].val[-1]
     
     # iterate through the values
     import bisect
-    
+
     import dr_lib
 
     for i in xrange(hlr_utils.get_length(obj)):
@@ -123,14 +153,63 @@ def integrate_spectra(obj, **kwargs):
             b_end = i_end
 
         try:
-            value = dr_lib.integrate_axis(obj1, start=b_start, end=b_end)
+            value = dr_lib.integrate_axis(obj1, start=b_start, end=b_end,
+                                          width=width)
         except IndexError:
             print "Range not found:", obj1.id, b_start, b_end, len(obj1)
             value = (float('nan'), float('nan'))
 
-        hlr_utils.result_insert(result, res_descr, value, obj1, "yonly")
+        if norm:
+            if inst.get_name() == "BSS":
+                map_so = hlr_utils.get_map_so(obj, None, i)
+                dOmega = dr_lib.calc_BSS_solid_angle(map_so, inst)
+        
+                value1 = (value[0] / dOmega, value[1] / (dOmega * dOmega))
+        else:
+            value1 = value
 
-    return result
+        hlr_utils.result_insert(result, res_descr, value1, obj1, "yonly")
+
+    if not norm:
+        return result
+    else:
+        # Sum all integration counts
+        total_counts = 0
+        total_err2 = 0
+
+        for j in xrange(hlr_utils.get_length(result)):
+            total_counts += hlr_utils.get_value(result, j, res_descr, "y")
+            total_err2 += hlr_utils.get_err2(result, j, res_descr, "y")
+
+        total_counts /= num_pixels
+        total_err2 /= (num_pixels * num_pixels)
+
+        # Create new result object
+        (result2, res2_descr) = hlr_utils.empty_result(result)
+
+        result2 = hlr_utils.copy_som_attr(result2, res2_descr,
+                                          result, res_descr)
+
+        # Normalize integration counts
+        for k in xrange(hlr_utils.get_length(result)):
+            res1 = hlr_utils.get_value(result, k, res_descr, "all")
+            
+            counts =  hlr_utils.get_value(result, k, res_descr, "y")
+            counts_err2 =  hlr_utils.get_err2(result, k, res_descr, "y")
+
+            norm_counts = counts / total_counts
+            total_counts2 = total_counts * total_counts
+            norm_counts_err2 = ((norm_counts * total_err2) / total_counts)
+            norm_counts_err2 += counts_err2
+            norm_counts_err2 /= total_counts2
+
+            hlr_utils.result_insert(result2, res2_descr,
+                                    (norm_counts, norm_counts_err2),
+                                    res1, "yonly")
+
+        del result
+
+        return result2
 
 if __name__ == "__main__":
     import hlr_test
@@ -145,3 +224,4 @@ if __name__ == "__main__":
     print "som            :", integrate_spectra(som1)
     print "som (1.5, 3.5) :", integrate_spectra(som1, start=1.5, end=3.5)
     print "som (0.5, 2.75):", integrate_spectra(som1, start=0.5, end=2.75)
+    print "som (norm)     :", integrate_spectra(som1, norm=True)

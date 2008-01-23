@@ -35,6 +35,29 @@ class Configure:
         self.data = None
         self.output = None
 
+    def __repr__(self):
+        """
+        This method returns an instance representation of the C{Configure}
+        object
+
+        @return: The representation of the C{Configure} object
+        @rtype: C{string}
+        """
+        return str(self.__dict__)
+
+    def __str__(self):
+        """
+        This method returns a string representation of the C{Configure} object
+
+        @return: The representation of the C{Configure} object
+        @rtype: C{string}
+        """
+        import os
+        output = ""
+        for key, value in self.__dict__.items():
+            output += str(key) + ": " + str(value) + os.linesep
+        return output
+
 def ConfigFromXml(doc, configure):
     """
     This method takes a configuration file XML document and a
