@@ -92,7 +92,8 @@ def rebin_axis_1D_linint(obj, axis_out):
 
         # Set zero errors to 1 for linear fit
         for j in xrange(len(err2)):
-            if utils.compare(err2[j], 0.0) == 0:
+            if utils.compare(err2[j], 0.0) == 0 and \
+                   utils.compare(val[j], 0.0) == 0:
                 err2[j] = 1.0
 
         # Create new NessiLists for rebinned values
@@ -100,7 +101,6 @@ def rebin_axis_1D_linint(obj, axis_out):
         rebin_err2 = nessi_list.NessiList()
 
         for k in xrange(len_axis_out-1):
-
             index_pair = hlr_utils.bisect_helper(axis_in, axis_out[k],
                                                  axis_out[k+1])
 
@@ -120,7 +120,7 @@ def rebin_axis_1D_linint(obj, axis_out):
                                                          val, err2,
                                                          index_pair[0],
                                                          index_pair[1])
-                
+
                 # Evaluate the interpolation at the rebin axis bin center
                 eval_out = utils.eval_linear_fit(bin_centers[0][k:k+1],
                                                  bin_centers[1][k:k+1],
@@ -128,7 +128,7 @@ def rebin_axis_1D_linint(obj, axis_out):
                                                  fit_params["slope"][1],
                                                  fit_params["intercept"][0],
                                                  fit_params["intercept"][1])
-                
+
                 rebin_val.append(eval_out[0][0])
 
                 # Use a geometric average for the error bars

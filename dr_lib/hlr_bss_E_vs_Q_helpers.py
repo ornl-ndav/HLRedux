@@ -243,7 +243,8 @@ def calc_BSS_solid_angle(map_so, inst):
     @rtype: C{float}
     """
     # Get polar angle from instrument information
-    (angle, angle_err2) = hlr_utils.get_parameter("polar", map_so, inst)
+    angle_tuple = hlr_utils.get_parameter("polar", map_so, inst)
+    angle = angle_tuple[0]
 
     # Get the detector pixel height
     dh_tuple = hlr_utils.get_parameter("dh", map_so, inst)
