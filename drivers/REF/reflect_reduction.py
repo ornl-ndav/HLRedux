@@ -120,6 +120,20 @@ def run(config, tim):
 
     del d_som1, n_som2
 
+    if config.dump_rtof_comb:
+        d_som2_1 = dr_lib.sum_all_spectra(d_som2)
+        d_som2_2 = dr_lib.data_filter(d_som2_1)
+        del d_som2_1
+        
+        hlr_utils.write_file(config.output, "text/Spec", d_som2_2,
+                             output_ext="crtof",
+                             verbose=config.verbose,
+                             data_ext=config.ext_replacement,
+                             path_replacement=config.path_replacement,
+                             message="combined R(TOF) information")
+
+        del d_som2_2
+
     if config.dump_rtof:
         d_som2_1 = dr_lib.filter_ref_data(d_som2)
         

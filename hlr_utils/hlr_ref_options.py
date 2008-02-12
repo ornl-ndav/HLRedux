@@ -153,7 +153,13 @@ class RefOptions(hlr_options.SNSOptions):
                         dest="dump_rtof",
                         help="Flag to dump the R(TOF) information. Creates a "\
                         +"*.rtof file.")
-        self.set_defaults(dump_rtof=False)        
+        self.set_defaults(dump_rtof=False)
+
+        self.add_option("", "--dump-rtof-comb", action="store_true",
+                        dest="dump_rtof_comb",
+                        help="Flag to dump the combined R(TOF) information. "\
+                        +"Creates a *.crtof file.")
+        self.set_defaults(dump_rtof_comb=False)        
 
         self.add_option("", "--dump-rq", action="store_true",
                         dest="dump_rq",
@@ -286,6 +292,11 @@ def RefConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "dump_rtof", "--dump-rtof"): 
         configure.dump_rtof = options.dump_rtof
 
+    # Set the ability to dump the combined R(TOF) information
+    if hlr_utils.cli_provide_override(configure, "dump_rtof_comb",
+                                      "--dump-rtof-comb"): 
+        configure.dump_rtof_comb = options.dump_rtof_comb        
+
     # Set the ability to dump the R(Q) information
     if hlr_utils.cli_provide_override(configure, "dump_rq", "--dump-rq"): 
         configure.dump_rq = options.dump_rq
@@ -300,5 +311,6 @@ def RefConfiguration(parser, configure, options, args):
             configure.dump_bkg = True
             configure.dump_sub = True
             configure.dump_rtof = True
+            configure.dump_rtof_comb = True
             configure.dump_rq = True
             configure.dump_rqr = True
