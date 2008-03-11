@@ -76,16 +76,12 @@ def calculate_ref_background(obj, no_bkg, inst, peak_excl):
     # Create blank SOs for background spectra
     so_list = []
 
-    # Create blank list for fit parameters
-    param_list = []
-
     import nessi_list
     import SOM
     import utils
 
     # Setup pixel axes
     pix_axis = nessi_list.NessiList()
-    pix_axis_err2 = nessi_list.NessiList(len_som)
     pix_axis_no_peak = nessi_list.NessiList()
 
     # Fill pixel axes and background SOs
@@ -102,10 +98,9 @@ def calculate_ref_background(obj, no_bkg, inst, peak_excl):
         hlr_utils.result_insert(so, "SO", map_so, None, "all")
         so_list.append(so)
 
-    len_fit = len(pix_axis_no_peak)
-        
-    # Slice data, fit, evaluate and repackage spectra
+    # Slice data, calculate weighted average and repackage spectra
     for i in xrange(len_tof):
+
         sliced_data = nessi_list.NessiList()
         sliced_data_err2 = nessi_list.NessiList()
 
@@ -114,32 +109,25 @@ def calculate_ref_background(obj, no_bkg, inst, peak_excl):
             cur_pix_id = obj1.id[1][inst_pix_id]
 
             if cur_pix_id < peak_excl[0] or cur_pix_id > peak_excl[1]:
-                sliced_data.append(obj1.y[i])
-                if utils.compare(obj1.var_y[i], 0.0) == 0:
-                    sliced_data_err2.append(1.0)
-                else:
+                if not (utils.compare(obj1.var_y[i], 0.0) == 0 and \
+                        utils.compare(obj1.y[i], 0.0) == 0):
+                    sliced_data.append(obj1.y[i])
                     sliced_data_err2.append(obj1.var_y[i])
 
-        params = utils.fit_linear_background(pix_axis_no_peak,
-                                             sliced_data, sliced_data_err2,
-                                             0, len_fit-1)
+        len_fit = len(sliced_data)
 
-        param_list.append(((obj1.axis[0].val[i], "microseconds"), params))
-
-        value = utils.eval_linear_fit(pix_axis, pix_axis_err2,
-                                      params["slope"][0],
-                                      params["slope"][1],
-                                      params["intercept"][0],
-                                      params["intercept"][1])
+        if not len_fit:
+            value = (0.0, 0.0)
+        else:
+            value = utils.weighted_average(sliced_data, sliced_data_err2,
+                                           0, len_fit-1)
 
         for j in xrange(len_som):
-            so_list[j].y[i] = value[0][j]
-            so_list[j].var_y[i] = value[1][j]
+            so_list[j].y[i] = value[0]
+            so_list[j].var_y[i] = value[1]
 
     for m in xrange(len_som):
         hlr_utils.result_insert(result, res_descr, so_list[m], None, "all")
-
-    result.attr_list["ref_bkg_fit"] = param_list
 
     return result
 

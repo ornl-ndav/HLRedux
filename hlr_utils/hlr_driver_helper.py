@@ -606,6 +606,11 @@ def determine_files(inputlist, inst=None, **kwargs):
         else:
             raise RuntimeError("Do not know how to interpret %s" % inputlist)
 
+    # This is to convert a list of files making it in as one entry in a list.
+    # This happens if arguments to the script (not options) are comma separated
+    if len(filelist) == 1:
+        filelist = filelist[0].split(',')
+
     import copy
     tmplist = copy.deepcopy(filelist)
     counter = 0
