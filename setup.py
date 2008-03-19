@@ -56,6 +56,7 @@ instrument_scripts = {
     "DGS" : [
     ],
     "GEN" : [
+    'agg_dr_files',
     'mask_generator',
     'tof_slicer'
     ],

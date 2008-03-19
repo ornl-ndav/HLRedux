@@ -21,6 +21,7 @@
 #
 
 # GEN drivers
+from GEN import agg_dr_files
 from GEN import mask_generator
 from GEN import tof_slicer
 
