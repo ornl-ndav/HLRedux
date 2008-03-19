@@ -40,7 +40,8 @@ def run(config, tim):
     @type tim: C{sns_time.DiffTime}    
     """
     import sys
-    
+
+    import common_lib
     import DST
     
     if tim is not None:
@@ -54,27 +55,29 @@ def run(config, tim):
     dst_type = hlr_utils.file_peeker(config.data[0])
 
     if config.verbose:
-        print "Initial file type:", config.dst_type
+        print "Initial file type:", dst_type
 
     d_som1 = None
     counter = 0
 
-    for data_file in config.data:
+    for filename in config.data:
         if config.verbose:
-            print "File:", data_file
+            print "File:", filename
+
+        resource = open(filename, "r")
             
         try:
-            data_dst = DST.getInstance(dst_type, data_file) 
+            data_dst = DST.getInstance(dst_type, resource) 
         except SystemError:
-            print "ERROR: Failed to data read file %s" % data_file
+            print "ERROR: Failed to data read file %s" % filename
             sys.exit(-1)
 
-        if verbose:
+        if config.verbose:
             print "Reading data file %d" % counter
 
         if counter == 0:
             d_som1 = data_dst.getSOM()
-                        
+
             if tim is not None:
                 tim.getTime(msg="After reading data")
 
@@ -100,7 +103,6 @@ def run(config, tim):
 
         if tim is not None:
             tim.getTime(msg="After resource release and DST deletion")
-
     
     hlr_utils.write_file(config.output, dst_type, d_som1,
                          verbose=config.verbose,
@@ -142,6 +144,8 @@ if __name__ == "__main__":
 
     # Call the configuration setter for SNSOptions
     hlr_utils.BasicConfiguration(parser, configure, options, args)
+
+    configure.output = "test.txt"
 
     # Setup the timing object
     if options.timing:
