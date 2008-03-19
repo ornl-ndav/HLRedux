@@ -755,3 +755,36 @@ def cli_provide_override(config, param, opt1, opt2=None):
     except KeyError:
         return True
         
+def file_peeker(filename):
+    """
+    This function opens a file and reads out the first 2 bytes looking for the
+    signature of a data reduction produced file. The signatures are I{# } for
+    a C{Dave2dDST} and I{#F} for a C{Ascii3ColDST}.
+
+    @param filename: The name of the file to peek into
+    @type filename: C{string}
+
+
+    @return: The DST type of the peeked file
+    @rtype: C{string}
+
+
+    @raise RuntimeError: If the file isn't data reduction produced
+    @raise RuntimeError: If the file looks like a DR prodcued one, but still
+                         isn't recognized
+    """
+    pfile = open(filename, "r")
+    peek = pfile.read(2)
+    pfile.close()
+
+    if peek.startswith('#'):
+        if peek[1] == " ":
+            return "text/Dave2d"
+        elif peek[1] == "F":
+            return "text/Spec"
+        else:
+            raise RuntimeError("Signature of second byte %s not recognized." \
+                               % peek[1])
+    else:
+        raise RuntimeError("File %s is not a data reduction produced file." \
+                           % filename)
