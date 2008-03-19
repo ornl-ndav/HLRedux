@@ -39,10 +39,78 @@ def run(config, tim):
                 evaluations.
     @type tim: C{sns_time.DiffTime}    
     """
-    pass
+    import sys
+    
+    import DST
+    
+    if tim is not None:
+        tim.getTime(False)
+        old_time = tim.getOldTime()
+
+    if config.data is None:
+        raise RuntimeError("Need to pass a data filename to the driver "\
+                           +"script.")
+
+    dst_type = hlr_utils.file_peeker(config.data[0])
+
+    if config.verbose:
+        print "Initial file type:", config.dst_type
+
+    d_som1 = None
+    counter = 0
+
+    for data_file in config.data:
+        if config.verbose:
+            print "File:", data_file
+            
+        try:
+            data_dst = DST.getInstance(dst_type, data_file) 
+        except SystemError:
+            print "ERROR: Failed to data read file %s" % data_file
+            sys.exit(-1)
+
+        if verbose:
+            print "Reading data file %d" % counter
+
+        if counter == 0:
+            d_som1 = data_dst.getSOM()
+                        
+            if tim is not None:
+                tim.getTime(msg="After reading data")
+
+        else:
+            d_som_t = data_dst.getSOM()
+
+            if tim is not None:
+                tim.getTime(msg="After reading data")
+
+            d_som1 = common_lib.add_ncerr(d_som_t, d_som1)
+    
+            if tim is not None:
+                tim.getTime(msg="After adding spectra")
+
+            del d_som_t
+
+            if tim is not None:
+                tim.getTime(msg="After SOM deletion")
+
+        data_dst.release_resource()
+        del data_dst
+        counter += 1
+
+        if tim is not None:
+            tim.getTime(msg="After resource release and DST deletion")
+
+    
+    hlr_utils.write_file(config.output, dst_type, d_som1,
+                         verbose=config.verbose,
+                         message="combined file")
+
+    if tim is not None:
+        tim.setOldTime(old_time)
+        tim.getTime(msg="Total Running Time")
     
 if __name__ == "__main__":
-    import dr_lib
     import hlr_utils
 
     # Make description for driver
@@ -55,10 +123,22 @@ if __name__ == "__main__":
                                     None, hlr_utils.program_version(), 'error',
                                     " ".join(description))
 
+    parser.add_option("", "--timing", action="store_true", dest="timing",
+                      help="Flag to turn on timing of code")
+    parser.set_defaults(timing=False)
+
+    # Do not need to use config option
+    parser.remove_option("--config")
+    # Remove the old output option as we need to modify its behavior
+    parser.remove_option("-o")
+
     (options, args) = parser.parse_args()
 
     # set up the configuration
     configure = hlr_utils.Configure()
+
+    # Need to set the inst parameter to None to spoof data file finder
+    configure.inst = None
 
     # Call the configuration setter for SNSOptions
     hlr_utils.BasicConfiguration(parser, configure, options, args)
