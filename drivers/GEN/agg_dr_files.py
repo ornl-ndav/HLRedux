@@ -115,6 +115,7 @@ def run(config, tim):
     hlr_utils.write_file(config.output, dst_type, d_som1,
                          verbose=config.verbose,
                          replace_ext=False,
+                         path_replacement=config.path_replacement,
                          axis_ok=True,
                          message="combined file")
 
@@ -145,6 +146,15 @@ if __name__ == "__main__":
                       help="Flag to turn on timing of code")
     parser.set_defaults(timing=False)
 
+    # Change help message for output option
+    parser.get_option("-o").help = "Specify a new output file name, a new "\
+                                   +"data directory or a new directory plus "\
+                                   +"output file name. The new directory "\
+                                   +"must exist. The default is to use the "\
+                                   +"current working directory and the first "\
+                                   +"data file as the basis for the output "\
+                                   +"file name."
+
     # Do not need to use config option
     parser.remove_option("--config")
 
@@ -158,26 +168,56 @@ if __name__ == "__main__":
 
     # Quick test on output
     if options.output is not None:
-        have_output = True
+        filename = hlr_utils.fix_filename(options.output)
+        import os
+        # If this is a directory only, then we want to have the default
+        # created filename
+        if os.path.isdir(filename) and not os.path.isfile(filename):
+            have_output = False
+            is_dir = True
+        else:
+            have_output = True
+            is_dir = False
     else:
         have_output = False
+        is_dir = False
+        
+    # Temporarily silence verbosity
+    old_verbosity = options.verbose
+    options.verbose = False
 
     # Call the configuration setter for SNSOptions
     hlr_utils.BasicConfiguration(parser, configure, options, args)
 
+    # Reset verbosity
+    configure.verbose = old_verbosity
+
     # This is a standard file, but we need to remove the segment number
     if not have_output:
-        parts = configure.output.split('_')
+        if is_dir:
+            dired = os.path.dirname(configure.output)
+            dired += "/"
+            infile = os.path.basename(configure.output)
+        else:
+            dired = ""
+            infile = configure.output
+
+        configure.path_replacement = dired
+        parts = infile.split('_')
+        outfile = dired + "_".join(parts[:2])
         # Have dataset tag
         if len(parts) == 4:
-            configure.output = "_".join(parts[:2]) + "_" + parts[-1]
+            configure.output = outfile + "_" + parts[-1]
         else:
             ext_parts = parts[-1].split('.')
-            configure.output = "_".join(parts[:2]) + "." + ext_parts[-1]
+            configure.output = outfile + "." + ext_parts[-1]
     # An output file has been provided so do nothing
     else:
         pass
 
+    if configure.verbose:
+        print "Using %s as output file" % configure.output
+        
     # Setup the timing object
     if options.timing:
         import sns_timing
