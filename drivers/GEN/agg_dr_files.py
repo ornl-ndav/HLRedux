@@ -114,6 +114,7 @@ def run(config, tim):
 
     hlr_utils.write_file(config.output, dst_type, d_som1,
                          verbose=config.verbose,
+                         replace_ext=False,
                          axis_ok=True,
                          message="combined file")
 
@@ -127,7 +128,13 @@ if __name__ == "__main__":
     # Make description for driver
     description = []
     description.append("This driver reads in data reduction produced 3-column")
-    description.append("ASCII or DAVE 2D ASCII files.")
+    description.append("ASCII or DAVE 2D ASCII files. The expected filenames")
+    description.append("should be of the form <inst_name>_<run_number>_")
+    description.append("<segment_number>[_dataset_type].<ext>. If they are")
+    description.append("not, the driver will still work, but it is possible")
+    description.append("that the first data file will be overwritten. In")
+    description.append("this case, it is best to provide an output filename")
+    description.append("via the command-line.")
 
     # Set up the options available
     parser = hlr_utils.BasicOptions("usage: %prog [options] <datafiles>", None,
@@ -140,8 +147,6 @@ if __name__ == "__main__":
 
     # Do not need to use config option
     parser.remove_option("--config")
-    # Remove the old output option as we need to modify its behavior
-    parser.remove_option("-o")
 
     (options, args) = parser.parse_args()
 
@@ -151,10 +156,27 @@ if __name__ == "__main__":
     # Need to set the inst parameter to None to spoof data file finder
     configure.inst = None
 
+    # Quick test on output
+    if options.output is not None:
+        have_output = True
+    else:
+        have_output = False
+
     # Call the configuration setter for SNSOptions
     hlr_utils.BasicConfiguration(parser, configure, options, args)
 
-    configure.output = "test.txt"
+    # This is a standard file, but we need to remove the segment number
+    if not have_output:
+        parts = configure.output.split('_')
+        # Have dataset tag
+        if len(parts) == 4:
+            configure.output = "_".join(parts[:2]) + "_" + parts[-1]
+        else:
+            ext_parts = parts[-1].split('.')
+            configure.output = "_".join(parts[:2]) + "." + ext_parts[-1]
+    # An output file has been provided so do nothing
+    else:
+        pass
 
     # Setup the timing object
     if options.timing:
