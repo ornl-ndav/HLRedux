@@ -78,6 +78,14 @@ def run(config, tim):
         if counter == 0:
             d_som1 = data_dst.getSOM()
 
+            if config.verbose:
+                print "Data Size:", len(d_som1[0])
+                print "X-Axis:", len(d_som1[0].axis[0].val)
+                try:
+                    print "Y-Axis:", len(d_som1[0].axis[1].val)
+                except KeyError:
+                    pass
+
             if tim is not None:
                 tim.getTime(msg="After reading data")
 
@@ -103,7 +111,7 @@ def run(config, tim):
 
         if tim is not None:
             tim.getTime(msg="After resource release and DST deletion")
-    
+
     hlr_utils.write_file(config.output, dst_type, d_som1,
                          verbose=config.verbose,
                          message="combined file")
