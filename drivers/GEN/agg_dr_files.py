@@ -114,6 +114,7 @@ def run(config, tim):
 
     hlr_utils.write_file(config.output, dst_type, d_som1,
                          verbose=config.verbose,
+                         axis_ok=True,
                          message="combined file")
 
     if tim is not None:
