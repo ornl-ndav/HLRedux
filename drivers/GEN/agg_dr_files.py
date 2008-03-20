@@ -83,7 +83,7 @@ def run(config, tim):
                 print "X-Axis:", len(d_som1[0].axis[0].val)
                 try:
                     print "Y-Axis:", len(d_som1[0].axis[1].val)
-                except KeyError:
+                except IndexError:
                     pass
 
             if tim is not None:
