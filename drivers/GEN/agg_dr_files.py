@@ -202,6 +202,11 @@ if __name__ == "__main__":
             dired = ""
             infile = configure.output
 
+        # Check and remove extra extensions. This happens when original
+        # extension is not .txt
+        if infile.rfind('.') != infile.find('.'):
+            infile = infile[:infile.rfind('.')]
+
         configure.path_replacement = dired
         parts = infile.split('_')
         outfile = dired + "_".join(parts[:2])
