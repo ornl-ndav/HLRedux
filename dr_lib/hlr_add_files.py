@@ -56,6 +56,10 @@ def add_files(filelist, **kwargs):
     @keyword dataset_type: The practical name of the dataset being processed.
                            The default value is I{data}.
     @type dataset_type: C{string}
+
+    @keyword dst_type: The type of C{DST} to be created during file read-in.
+                       The default value is I{application/x-NeXus}.
+    @type dst_type: C{string}
     
     @keyword Verbose: This is a flag to turn on print statments. The default is
                       I{False}.
@@ -103,6 +107,11 @@ def add_files(filelist, **kwargs):
         dataset_type = "data"
 
     try:
+        dst_type = kwargs["dst_type"]
+    except KeyError:
+        dst_type = "application/x-NeXus"
+
+    try:
         verbose = kwargs["Verbose"]
     except KeyError:
         verbose = False
@@ -116,10 +125,10 @@ def add_files(filelist, **kwargs):
 
     for filename in filelist:
         if verbose:
-            print "File:",filename
+            print "File:", filename
             
         try:
-            data_dst = DST.getInstance("application/x-NeXus", filename) 
+            data_dst = DST.getInstance(dst_type, filename) 
         except SystemError:
             print "ERROR: Failed to data read file %s" % filename
             sys.exit(-1)
@@ -128,21 +137,34 @@ def add_files(filelist, **kwargs):
             print "Reading data file %d" % counter
 
         if counter == 0:
-            d_som1 = data_dst.getSOM(data_paths, so_axis,
-                                     roi_file=signal_roi)
-            d_som1.rekeyNxPars(dataset_type)
+            if dst_type == "application/x-NeXus":
+                d_som1 = data_dst.getSOM(data_paths, so_axis,
+                                         roi_file=signal_roi)
+                d_som1.rekeyNxPars(dataset_type)
+            else:
+                d_som1 = data_dst.getSOM(data_paths, roi_file=signal_roi)
 
             if verbose:
-                print "# Signal SO:",len(d_som1)
-                print "# TOF:",len(d_som1[0])
+                print "# Signal SO:", len(d_som1)
+                if dst_type == "application/x-NeXus":
+                    print "# TOF:", len(d_som1[0])
+                else:
+                    print "# Data Size:", len(d_som1[0])
+                    print "# X-Axis:", len(d_som1[0].axis[0].val)
+                    try:
+                        print "# Y-Axis:", len(d_som1[0].axis[1].val)
+                    except IndexError:
+                        pass
 
             if bkg_roi is not None:
-                b_som1 = data_dst.getSOM(data_paths, so_axis,
-                                         roi_file=bkg_roi)
-                b_som1.rekeyNxPars(dataset_type)
-                
+                if dst_type == "application/x-NeXus":
+                    b_som1 = data_dst.getSOM(data_paths, so_axis,
+                                             roi_file=bkg_roi)
+                    b_som1.rekeyNxPars(dataset_type)
+                else:
+                    b_som1 = data_dst.getSOM(data_paths, roi_file=bkg_roi)
                 if verbose:
-                    print "# Background SO:",len(b_som1)
+                    print "# Background SO:", len(b_som1)
 
             else:
                 b_som1 = None
@@ -151,22 +173,34 @@ def add_files(filelist, **kwargs):
                 timer.getTime(msg="After reading data")
 
         else:
-            d_som_t = data_dst.getSOM(data_paths, so_axis,
-                                      roi_file=signal_roi)
-            d_som_t.rekeyNxPars(dataset_type)
-
+            if dst_type == "application/x-NeXus":
+                d_som_t = data_dst.getSOM(data_paths, so_axis,
+                                          roi_file=signal_roi)
+                d_som_t.rekeyNxPars(dataset_type)
+                add_nxpars_sig = True
+            else:
+                d_som_t = data_dst.getSOM(data_paths, roi_file=signal_roi)
+                add_nxpars_sig = False
+                
             if bkg_roi is not None:
-                b_som_t = data_dst.getSOM(data_paths, so_axis,
-                                          roi_file=bkg_roi)
-                b_som_t.rekeyNxPars(dataset_type)
+                if dst_type == "application/x-NeXus":
+                    b_som_t = data_dst.getSOM(data_paths, so_axis,
+                                              roi_file=bkg_roi)
+                    b_som_t.rekeyNxPars(dataset_type)
+                    add_nxpars_bkg = True
+                else:
+                    b_som_t = data_dst.getSOM(data_paths, roi_file=bkg_roi)
+                    add_nxpars_bkg = False
             else:
                 b_som_t = None
             if timer is not None:
                 timer.getTime(msg="After reading data")
 
-            d_som1 = common_lib.add_ncerr(d_som_t, d_som1, add_nxpars=True)
+            d_som1 = common_lib.add_ncerr(d_som_t, d_som1,
+                                          add_nxpars=add_nxpars_sig)
             if bkg_roi is not None:
-                b_som1 = common_lib.add_ncerr(b_som_t, b_som1, add_nxpars=True)
+                b_som1 = common_lib.add_ncerr(b_som_t, b_som1,
+                                              add_nxpars=add_nxpars_bkg)
 
             if timer is not None:
                 timer.getTime(msg="After adding spectra")
@@ -185,12 +219,16 @@ def add_files(filelist, **kwargs):
         if timer is not None:
             timer.getTime(msg="After resource release and DST deletion")
 
-        som_key_parts = [dataset_type, "filename"]
-        som_key = "-".join(som_key_parts)
+        if dst_type == "application/x-NeXus":
+            som_key_parts = [dataset_type, "filename"]
+            som_key = "-".join(som_key_parts)
 
-        d_som1.attr_list[som_key] = filelist
-        if b_som1 is not None:
-            b_som1.attr_list[som_key] = filelist
+            d_som1.attr_list[som_key] = filelist
+            if b_som1 is not None:
+                b_som1.attr_list[som_key] = filelist
+        else:
+            # Previously written files already have this structure imposed
+            pass
 
     return (d_som1, b_som1)
 
@@ -202,8 +240,8 @@ if __name__ == "__main__":
 
     my_paths = ("/entry/bank1", 1)
 
-    signal_roi_file = "../../hlr_test/files/REF_L_1845_signal_Pid.txt"
-    bkg_roi_file = "../../hlr_test/files/REF_L_1845_background_Pid.txt"
+    signal_roi_file = "../hlr_test/files/REF_L_1845_signal_Pid.txt"
+    bkg_roi_file = "../hlr_test/files/REF_L_1845_background_Pid.txt"
 
     (d_som, b_som) = add_files(my_files, Data_Paths=my_paths,
                                Signal_ROI=signal_roi_file,
