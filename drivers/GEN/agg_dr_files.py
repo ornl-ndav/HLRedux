@@ -42,7 +42,7 @@ def run(config, tim):
     import sys
 
     import common_lib
-    import DST
+    import dr_lib
     
     if tim is not None:
         tim.getTime(False)
@@ -57,60 +57,9 @@ def run(config, tim):
     if config.verbose:
         print "Initial file type:", dst_type
 
-    d_som1 = None
-    counter = 0
-
-    for filename in config.data:
-        if config.verbose:
-            print "File:", filename
-
-        resource = open(filename, "r")
-            
-        try:
-            data_dst = DST.getInstance(dst_type, resource) 
-        except SystemError:
-            print "ERROR: Failed to data read file %s" % filename
-            sys.exit(-1)
-
-        if config.verbose:
-            print "Reading data file %d" % counter
-
-        if counter == 0:
-            d_som1 = data_dst.getSOM()
-
-            if config.verbose:
-                print "Data Size:", len(d_som1[0])
-                print "X-Axis:", len(d_som1[0].axis[0].val)
-                try:
-                    print "Y-Axis:", len(d_som1[0].axis[1].val)
-                except IndexError:
-                    pass
-
-            if tim is not None:
-                tim.getTime(msg="After reading data")
-
-        else:
-            d_som_t = data_dst.getSOM()
-
-            if tim is not None:
-                tim.getTime(msg="After reading data")
-
-            d_som1 = common_lib.add_ncerr(d_som_t, d_som1)
-    
-            if tim is not None:
-                tim.getTime(msg="After adding spectra")
-
-            del d_som_t
-
-            if tim is not None:
-                tim.getTime(msg="After SOM deletion")
-
-        data_dst.release_resource()
-        del data_dst
-        counter += 1
-
-        if tim is not None:
-            tim.getTime(msg="After resource release and DST deletion")
+    d_som1 = dr_lib.add_files(config.data, dst_type=dst_type,
+                              Verbose=config.verbose,
+                              Timer=tim)[0]
 
     hlr_utils.write_file(config.output, dst_type, d_som1,
                          verbose=config.verbose,
