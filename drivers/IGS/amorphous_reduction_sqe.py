@@ -308,7 +308,7 @@ def run(config, tim=None):
     if config.verbose and n_som3 is not None and not config.pre_norm:
         print "Integrating normalization spectra"
 
-    if config.pre_norm:
+    if not config.pre_norm:
         norm_int = dr_lib.integrate_spectra(n_som3, start=config.norm_start,
                                             end=config.norm_end, norm=True)
     else:
