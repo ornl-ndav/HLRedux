@@ -115,14 +115,18 @@ def process_igs_data(datalist, conf, **kwargs):
             # If file_peeker succeeds, the DST is different than the function
             # returns
             dst_type = "text/num-info"
+            # Let ROI file handle filtering
+            data_paths = None
         except RuntimeError:
             # It's a NeXus file
             dst_type = "application/x-NeXus"
+            data_paths = conf.data_paths.toPath()
     else:
         dst_type = "application/x-NeXus"
+        data_paths = conf.data_paths.toPath()
 
     # The [0] is to get the data SOM and ignore the None background SOM
-    dp_som0 = dr_lib.add_files(datalist, Data_Paths=conf.data_paths.toPath(),
+    dp_som0 = dr_lib.add_files(datalist, Data_Paths=data_paths,
                                SO_Axis=so_axis, Signal_ROI=conf.roi_file,
                                dataset_type=dataset_type,
                                dst_type=dst_type,
