@@ -128,7 +128,11 @@ def add_files(filelist, **kwargs):
             print "File:", filename
             
         try:
-            data_dst = DST.getInstance(dst_type, filename) 
+            if dst_type == "application/x-NeXus":
+                data_dst = DST.getInstance(dst_type, filename)
+            else:
+                resource = open(filename, "r")
+                data_dst = DST.getInstance(dst_type, resource) 
         except SystemError:
             print "ERROR: Failed to data read file %s" % filename
             sys.exit(-1)
@@ -148,6 +152,7 @@ def add_files(filelist, **kwargs):
                 print "# Signal SO:", len(d_som1)
                 if dst_type == "application/x-NeXus":
                     print "# TOF:", len(d_som1[0])
+                    print "# TOF Axis:", len(d_som1[0].axis[0].val)
                 else:
                     print "# Data Size:", len(d_som1[0])
                     print "# X-Axis:", len(d_som1[0].axis[0].val)
@@ -220,6 +225,7 @@ def add_files(filelist, **kwargs):
             timer.getTime(msg="After resource release and DST deletion")
 
         if dst_type == "application/x-NeXus":
+            print "Got here"
             som_key_parts = [dataset_type, "filename"]
             som_key = "-".join(som_key_parts)
 
