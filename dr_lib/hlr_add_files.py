@@ -153,7 +153,7 @@ def add_files(filelist, **kwargs):
                 if dst_type == "application/x-NeXus":
                     print "# TOF:", len(d_som1[0])
                     print "# TOF Axis:", len(d_som1[0].axis[0].val)
-                else:
+                elif dst_type != "text/num-info":
                     print "# Data Size:", len(d_som1[0])
                     print "# X-Axis:", len(d_som1[0].axis[0].val)
                     try:
