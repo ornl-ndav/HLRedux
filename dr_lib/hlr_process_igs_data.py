@@ -108,14 +108,37 @@ def process_igs_data(datalist, conf, **kwargs):
     if conf.verbose:
         print "Reading %s file" % dataset_type
 
+    if dataset_type == "normalization":
+        try:
+            # Check the first incoming file
+            dst_type = hlr_utils.file_peeker(datalist[0])
+            # If file_peeker succeeds, the DST is different than the function
+            # returns
+            dst_type = "text/num-info"
+        except RuntimeError:
+            # It's a NeXus file
+            dst_type = "application/x-NeXus"
+    else:
+        dst_type = "application/x-NeXus"
+
     # The [0] is to get the data SOM and ignore the None background SOM
     dp_som0 = dr_lib.add_files(datalist, Data_Paths=conf.data_paths.toPath(),
                                SO_Axis=so_axis, Signal_ROI=conf.roi_file,
                                dataset_type=dataset_type,
+                               dst_type=dst_type,
                                Verbose=conf.verbose, Timer=t)[0]
 
     if t is not None:
         t.getTime(msg="After reading %s " % dataset_type)
+
+    if dst_type == "text/num-info":
+        # Since we have a pre-calculated normalization dataset, set the flag
+        # and return the SOM now
+        conf.pre_norm = True
+        return dp_som0
+    else:
+        # Since we have a NeXus file, we need to continue
+        conf.pre_norm = False
 
     # Step 2: Sum all pixel TOF spectra
     if conf.verbose:
@@ -292,6 +315,8 @@ def process_igs_data(datalist, conf, **kwargs):
         dm_som2 = None
 
     # Convert detector pixels
+    print "A:", len(dp_som4[0])
+    print "B:", len(dp_som4[0].axis[0].val)
     dp_som5 = common_lib.tof_to_initial_wavelength_igs_lin_time_zero(
         dp_som4,
         units="microsecond",
