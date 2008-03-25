@@ -320,8 +320,6 @@ def process_igs_data(datalist, conf, **kwargs):
         dm_som2 = None
 
     # Convert detector pixels
-    print "A:", len(dp_som4[0])
-    print "B:", len(dp_som4[0].axis[0].val)
     dp_som5 = common_lib.tof_to_initial_wavelength_igs_lin_time_zero(
         dp_som4,
         units="microsecond",
