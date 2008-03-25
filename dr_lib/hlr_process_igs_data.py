@@ -141,8 +141,9 @@ def process_igs_data(datalist, conf, **kwargs):
         conf.pre_norm = True
         return dp_som0
     else:
-        # Since we have a NeXus file, we need to continue
-        conf.pre_norm = False
+        if dataset_type == "normalization":
+            # Since we have a NeXus file, we need to continue
+            conf.pre_norm = False
 
     # Step 2: Sum all pixel TOF spectra
     if conf.verbose:
