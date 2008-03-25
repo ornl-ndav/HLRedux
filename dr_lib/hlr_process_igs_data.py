@@ -108,6 +108,8 @@ def process_igs_data(datalist, conf, **kwargs):
     if conf.verbose:
         print "Reading %s file" % dataset_type
 
+    # Special case handling for normalization data. Dynamically trying to
+    # determine if incoming file is a previously calculated one.
     if dataset_type == "normalization":
         try:
             # Check the first incoming file
@@ -139,6 +141,10 @@ def process_igs_data(datalist, conf, **kwargs):
         # Since we have a pre-calculated normalization dataset, set the flag
         # and return the SOM now
         conf.pre_norm = True
+        # Make the labels and units compatible with a NeXus file based SOM
+        dp_som0.setAxisLabel(0, "wavelength")
+        dp_som0.setAxisUnits(0, "Angstroms")
+        dp_som0.setYUnits("Counts/A")
         return dp_som0
     else:
         if dataset_type == "normalization":
