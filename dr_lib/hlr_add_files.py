@@ -146,7 +146,10 @@ def add_files(filelist, **kwargs):
                                          roi_file=signal_roi)
                 d_som1.rekeyNxPars(dataset_type)
             else:
-                d_som1 = data_dst.getSOM(data_paths, roi_file=signal_roi)
+                if dst_type != "text/Dave2d":
+                    d_som1 = data_dst.getSOM(data_paths, roi_file=signal_roi)
+                else:
+                    d_som1 = data_dst.getSOM(data_paths)
 
             if verbose:
                 print "# Signal SO:", len(d_som1)
@@ -167,7 +170,10 @@ def add_files(filelist, **kwargs):
                                              roi_file=bkg_roi)
                     b_som1.rekeyNxPars(dataset_type)
                 else:
-                    b_som1 = data_dst.getSOM(data_paths, roi_file=bkg_roi)
+                    if dst_type != "text/Dave2d":
+                        b_som1 = data_dst.getSOM(data_paths, roi_file=bkg_roi)
+                    else:
+                        b_som1 = data_dst.getSOM(data_paths)
                 if verbose:
                     print "# Background SO:", len(b_som1)
 
@@ -184,7 +190,10 @@ def add_files(filelist, **kwargs):
                 d_som_t.rekeyNxPars(dataset_type)
                 add_nxpars_sig = True
             else:
-                d_som_t = data_dst.getSOM(data_paths, roi_file=signal_roi)
+                if dst_type != "text/Dave2d":
+                    d_som_t = data_dst.getSOM(data_paths, roi_file=signal_roi)
+                else:
+                    d_som_t = data_dst.getSOM(data_paths)
                 add_nxpars_sig = False
                 
             if bkg_roi is not None:
@@ -194,7 +203,10 @@ def add_files(filelist, **kwargs):
                     b_som_t.rekeyNxPars(dataset_type)
                     add_nxpars_bkg = True
                 else:
-                    b_som_t = data_dst.getSOM(data_paths, roi_file=bkg_roi)
+                    if dst_type != "text/Dave2d":
+                        b_som_t = data_dst.getSOM(data_paths, roi_file=bkg_roi)
+                    else:
+                        b_som_t = data_dst.getSOM(data_paths)
                     add_nxpars_bkg = False
             else:
                 b_som_t = None
