@@ -269,12 +269,15 @@ def run(config, tim=None):
                                            scale=config.scale_bcn)
 
     # Steps 24-25: Subtract background spectrum from normalization spectrum
-    n_som2 = dr_lib.subtract_bkg_from_data(n_som1, b_som1,
-                                           verbose=config.verbose,
-                                           timer=tim,
-                                           dataset1="normalization",
-                                           dataset2="background",
-                                           scale=config.scale_bn)
+    if not config.pre_norm:
+        n_som2 = dr_lib.subtract_bkg_from_data(n_som1, b_som1,
+                                               verbose=config.verbose,
+                                               timer=tim,
+                                               dataset1="normalization",
+                                               dataset2="background",
+                                               scale=config.scale_bn)
+    else:
+        n_som2 = n_som1
 
     del b_som1, e_som1, bcs_som, cs_som
 
@@ -289,21 +292,27 @@ def run(config, tim=None):
     del d_som2, e_som2
     
     # Steps 28-29: Subtract empty can spectrum from normalization spectrum
-    n_som3 = dr_lib.subtract_bkg_from_data(n_som2, e_som3,
-                                           verbose=config.verbose,
-                                           timer=tim,
-                                           dataset1="normalization",
-                                           dataset2="empty_can",
-                                           scale=config.scale_cn)    
+    if not config.pre_norm:
+        n_som3 = dr_lib.subtract_bkg_from_data(n_som2, e_som3,
+                                               verbose=config.verbose,
+                                               timer=tim,
+                                               dataset1="normalization",
+                                               dataset2="empty_can",
+                                               scale=config.scale_cn)
+    else:
+        n_som3 = n_som2
 
     del n_som2, e_som3
 
     # Step 30-32: Integrate normalization spectra
-    if config.verbose and n_som3 is not None:
+    if config.verbose and n_som3 is not None and not config.pre_norm:
         print "Integrating normalization spectra"
 
-    norm_int = dr_lib.integrate_spectra(n_som3, start=config.norm_start,
-                                        end=config.norm_end, norm=True)
+    if config.pre_norm:
+        norm_int = dr_lib.integrate_spectra(n_som3, start=config.norm_start,
+                                            end=config.norm_end, norm=True)
+    else:
+        norm_int = n_som3
 
     del n_som3
         
