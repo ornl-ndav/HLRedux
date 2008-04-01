@@ -194,9 +194,9 @@ def BasicConfiguration(parser, configure, options, args):
     if configure.verbose and options.output:
         print "Using %s as output file" % configure.output
 
-class SNSOptions(BasicOptions):
+class InstOptions(BasicOptions):
     """
-    This class provides options more inline with neutron scattering data.
+    This class provides options more in line with neutron scattering data.
     It provides various instrument characterization options that can be
     tailored to the various instrument classes by using keyword arguments.
     """
@@ -205,7 +205,7 @@ class SNSOptions(BasicOptions):
                  version=None, conflict_handler='error', description=None,
                  **kwargs):
         """
-        Constructor for C{SNSOptions}
+        Constructor for C{InstOptions}
 
         @param usage: (OPTIONAL) The correct usage of program in which the
                                  option class is used
@@ -275,21 +275,21 @@ class SNSOptions(BasicOptions):
         else:
             pass
 
-def SnsConfiguration(parser, configure, options, args, **kwargs):
+def InstConfiguration(parser, configure, options, args, **kwargs):
     """
     This function sets the incoming C{Configure} object with all the options
-    that have been specified via the C{SNSOptions} object.
+    that have been specified via the C{InstOptions} object.
 
     @param parser: The parser object
-    @type parser: L{hlr_utils.SNSOptions}
+    @type parser: L{hlr_utils.InstOptions}
     
     @param configure: The configuration object
     @type configure: L{hlr_utils.Configure}
     
-    @param options: The parsed options from C{SNSOptions}
+    @param options: The parsed options from C{InstOptions}
     @type options: C{Option}
 
-    @param args: The parsed arguments from C{SNSOptions}
+    @param args: The parsed arguments from C{InstOptions}
     @type args: C{list}
 
     @param kwargs: A list of keyword arguments that the function accepts:
