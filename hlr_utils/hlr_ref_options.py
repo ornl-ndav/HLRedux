@@ -26,7 +26,7 @@ from optparse import Option
 import hlr_options
 import hlr_utils
 
-class RefOptions(hlr_options.SNSOptions):
+class RefOptions(hlr_options.InstOptions):
     """
     This class provides options for the REF class of instruments for use in
     reducing neutron scattering data with the data reduction drivers.
@@ -62,9 +62,9 @@ class RefOptions(hlr_options.SNSOptions):
         @param kwargs: A list of keyword arguments that the function accepts:
         """
         # parent constructor
-        hlr_options.SNSOptions.__init__(self, usage, option_list,
-                                        Option, version, conflict_handler,
-                                        description, inst="REF")
+        hlr_options.InstOptions.__init__(self, usage, option_list,
+                                         Option, version, conflict_handler,
+                                         description, inst="REF")
 
         # Remove inst-geom option since we'll duplicate it below
         self.remove_option("--inst-geom")
@@ -196,8 +196,8 @@ def RefConfiguration(parser, configure, options, args):
     @type args: C{list}
     """
 
-    # Call the configuration setter for SNSOptions
-    hlr_options.SnsConfiguration(parser, configure, options, args, inst="REF")
+    # Call the configuration setter for InstOptions
+    hlr_options.InstConfiguration(parser, configure, options, args, inst="REF")
 
     # Set the data instrument geometry file
     if hlr_utils.cli_provide_override(configure, "data_inst_geom",

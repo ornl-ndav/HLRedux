@@ -26,7 +26,7 @@ from optparse import Option
 import hlr_options
 import hlr_utils
 
-class IgsOptions(hlr_options.SNSOptions):
+class IgsOptions(hlr_options.InstOptions):
     """
     This class provides options for the IGS class of instruments for use in
     reducing neutron scattering data with the data reduction drivers.
@@ -62,9 +62,9 @@ class IgsOptions(hlr_options.SNSOptions):
         @param kwargs: A list of keyword arguments that the function accepts:
         """
         # parent constructor
-        hlr_options.SNSOptions.__init__(self, usage, option_list,
-                                        Option, version, conflict_handler,
-                                        description, inst="IGS")
+        hlr_options.InstOptions.__init__(self, usage, option_list,
+                                         Option, version, conflict_handler,
+                                         description, inst="IGS")
 
         self.add_option("", "--dead-time", dest="dead_time",
                         help="Dead time with units (no spaces)")
@@ -258,8 +258,8 @@ def IgsConfiguration(parser, configure, options, args):
     @type args: C{list}
     """
 
-    # Call the configuration setter for SNSOptions
-    hlr_options.SnsConfiguration(parser, configure, options, args, inst="IGS")
+    # Call the configuration setter for InstOptions
+    hlr_options.InstConfiguration(parser, configure, options, args, inst="IGS")
 
     # Set the ROI file
     if hlr_utils.cli_provide_override(configure, "roi_file", "--roi-file"):
