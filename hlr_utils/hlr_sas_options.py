@@ -24,7 +24,7 @@
 
 import hlr_utils
 
-class SansOptions(hlr_util.InstOptions):
+class SansOptions(hlr_utils.InstOptions):
     """
     This class provides options for the SAS class of instruments for use in
     reducing neutron scattering data with the data reduction drivers.
@@ -60,10 +60,10 @@ class SansOptions(hlr_util.InstOptions):
         @param kwargs: A list of keyword arguments that the function accepts:
         """
         # parent constructor
-        hlr_options.InstOptions.__init__(self, usage, option_list,
-                                         Option, version, conflict_handler,
-                                         description, inst="SAS")
-
+        hlr_utils.InstOptions.__init__(self, usage, option_list,
+                                       Option, version, conflict_handler,
+                                       description, inst="SAS")
+        
 def SansConfiguration(parser, configure, options, args):
     """
     This function sets the incoming C{Configure} object with all the options
@@ -83,4 +83,4 @@ def SansConfiguration(parser, configure, options, args):
     """
 
     # Call the configuration setter for InstOptions
-    hlr_options.InstConfiguration(parser, configure, options, args, inst="SAS")
+    hlr_utils.InstConfiguration(parser, configure, options, args, inst="SAS")
