@@ -269,6 +269,12 @@ def run(config, tim=None):
                                            scale=config.scale_bcn)
 
     # Steps 24-25: Subtract background spectrum from normalization spectrum
+
+    try:
+        config.pre_norm
+    except AttributeError:
+        config.pre_norm = False
+    
     if not config.pre_norm:
         n_som2 = dr_lib.subtract_bkg_from_data(n_som1, b_som1,
                                                verbose=config.verbose,
