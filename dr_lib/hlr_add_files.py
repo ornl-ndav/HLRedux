@@ -237,7 +237,6 @@ def add_files(filelist, **kwargs):
             timer.getTime(msg="After resource release and DST deletion")
 
         if dst_type == "application/x-NeXus":
-            print "Got here"
             som_key_parts = [dataset_type, "filename"]
             som_key = "-".join(som_key_parts)
 
