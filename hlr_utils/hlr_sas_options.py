@@ -63,6 +63,31 @@ class SansOptions(hlr_utils.InstOptions):
         hlr_utils.InstOptions.__init__(self, usage, option_list,
                                        Option, version, conflict_handler,
                                        description, inst="SAS")
+
+        self.add_option("", "--mom-trans-bins", dest="Q_bins",
+                        help="Specify the minimum and maximum momentum "\
+                        +"transfer values, the momentum transfer bin "\
+                        +"width in Angstroms^-1 and the type (lin or log)")
+
+        self.add_option("", "--time-zero-offset-det",
+                        dest="time_zero_offset_det",
+                        help="Specify the time zero offset, err^2 in "\
+                        +"microseconds for the detector")
+
+        self.add_option("", "--time-zero-offset-mon",
+                        dest="time_zero_offset_mon",
+                        help="Specify the time zero offset, err^2 in "\
+                        +"microseconds for the monitor")        
+
+        self.add_option("", "--lambda-bins", dest="lambda_bins",
+                        help="Specify the minimum and maximum wavelength "\
+                        +"values and the wavelength bin width in Angstroms")
+        self.set_defaults(lambda_bins="0,10,0.1")
+
+        self.add_option("", "--dump-all", action="store_true", dest="dump_all",
+                        help="Flag to dump combined information")
+        self.set_defaults(dump_all=False)
+        
         
 def SansConfiguration(parser, configure, options, args):
     """
@@ -84,3 +109,25 @@ def SansConfiguration(parser, configure, options, args):
 
     # Call the configuration setter for InstOptions
     hlr_utils.InstConfiguration(parser, configure, options, args, inst="SAS")
+
+    # Set the time-zero offset for the detector
+    if hlr_utils.cli_provide_override(configure, "time_zero_offset_det",
+                                      "--time-zero-offset-det"):    
+        configure.time_zero_offset = hlr_utils.DrParameterFromString(\
+            options.time_zero_offset_det, True)
+
+    # Set the time-zero offset for the monitor
+    if hlr_utils.cli_provide_override(configure, "time_zero_offset_mon",
+                                      "--time-zero-offset-mon"):    
+        configure.time_zero_offset = hlr_utils.DrParameterFromString(\
+            options.time_zero_offset_mon, True)        
+
+    # Set the lambda bins for use with dump-mnorm-wave
+    if hlr_utils.cli_provide_override(configure, "lambda_bins",
+                                      "--lambda-bins"):    
+        configure.lambda_bins = hlr_utils.AxisFromString(options.lambda_bins)
+
+    if hlr_utils.cli_provide_override(configure, "dump_all", "--dump-all"):
+        if options.dump_all:
+            pass
+        
