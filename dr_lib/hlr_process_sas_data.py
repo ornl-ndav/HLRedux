@@ -127,8 +127,6 @@ def process_sas_data(datalist, conf, **kwargs):
         dm_som1,
         units="microsecond",
         time_zero_offset=conf.time_zero_offset_mon.toValErrTuple())
-    else:
-        dm_som2 = None
 
     # Convert detector pixels
     dp_som2 = common_lib.tof_to_wavelength_lin_time_zero(
