@@ -132,7 +132,8 @@ def process_sas_data(datalist, conf, **kwargs):
     dp_som2 = common_lib.tof_to_wavelength_lin_time_zero(
         dp_som1,
         units="microsecond",
-        time_zero_offset=conf.time_zero_offset_det.toValErrTuple())
+        time_zero_offset=conf.time_zero_offset_det.toValErrTuple(),
+        inst_param="total")
 
     if t is not None:
         t.getTime(msg="After converting TOF to wavelength ")
