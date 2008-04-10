@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
     # Set up the options available
     parser = hlr_utils.SansOptions("usage: %prog [options] <datafile>", None,
-                                  hlr_utils.program_version(), 'error',
+                                  None, hlr_utils.program_version(), 'error',
                                   " ".join(result))
 
     # Set defaults for imported options
