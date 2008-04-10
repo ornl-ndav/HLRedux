@@ -272,6 +272,19 @@ class InstOptions(BasicOptions):
                             help="Specify the direct scattering background "\
                             +"(sample data at baseline temperature) file") 
 
+        elif instrument == "SAS":
+            self.add_option("", "--ecan",
+                            help="Specify the empty sample container file")
+
+            self.add_option("", "--solv",
+                            help="Specify the solvent/buffer only file")
+
+            self.add_option("", "--open",
+                            help="Specify the open beam file")
+
+            self.add_option("", "--dkcur",
+                            help="Specify the dark current file")            
+
         else:
             pass
 
@@ -343,7 +356,25 @@ def InstConfiguration(parser, configure, options, args, **kwargs):
         if hlr_utils.cli_provide_override(configure, "dsback", "--dsback"):
             configure.dsback = hlr_utils.determine_files(options.dsback,
                                                          configure.inst)
+    elif instrument == "SAS":
+        # Set the empty can file list
+        if hlr_utils.cli_provide_override(configure, "ecan", "--ecan"):
+            configure.ecan = hlr_utils.determine_files(options.ecan,
+                                                       configure.inst)
+        # Set the empty can file list
+        if hlr_utils.cli_provide_override(configure, "solv", "--solv"):
+            configure.solv = hlr_utils.determine_files(options.solv,
+                                                       configure.inst)
+        # Set the empty can file list
+        if hlr_utils.cli_provide_override(configure, "open", "--open"):
+            configure.open = hlr_utils.determine_files(options.open,
+                                                       configure.inst)
 
+        # Set the empty can file list
+        if hlr_utils.cli_provide_override(configure, "dkcur", "--dkcur"):
+            configure.dkcur = hlr_utils.determine_files(options.dkcur,
+                                                        configure.inst)
+            
     else:
         pass
 
