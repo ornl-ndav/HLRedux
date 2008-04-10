@@ -156,3 +156,18 @@ def process_sas_data(datalist, conf, **kwargs):
         
     del dp_som1, dbm_som1
 
+    # Step 2: Efficiency correct beam monitor
+
+    # Step 3: Efficiency correct transmission monitor    
+
+    # Step 4: Efficiency correct detector pixels
+
+    # Step 5: Rebin beam monitor axis onto detector pixel axis
+
+    # Step 6: Normalize data by beam monitor
+
+    # Step 7: Rebin transmission monitor axis onto detector pixel axis
+
+    # Step 8: Normalize data by transmission monitor    
+
+    # Step 9: Convert wavelength to Q for data
