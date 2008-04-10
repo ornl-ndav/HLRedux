@@ -84,6 +84,10 @@ class SansOptions(hlr_utils.InstOptions):
                         +"correction")
         self.set_defaults(mon_eff=False)
 
+        self.add_option("", "--roi-file", dest="roi_file",
+                        help="Specify a file that contains a list of pixel "\
+                        +"ids to be read from the data")
+
         self.add_option("", "--mom-trans-bins", dest="Q_bins",
                         help="Specify the minimum and maximum momentum "\
                         +"transfer values, the momentum transfer bin "\
@@ -176,6 +180,11 @@ def SansConfiguration(parser, configure, options, args):
     # Set mon_effc flag
     if hlr_utils.cli_provide_override(configure, "mon_effc", "--mon-effc"):
         configure.mon_effc = options.mon_effc
+
+    # Set the ROI file
+    if hlr_utils.cli_provide_override(configure, "roi_file", "--roi-file"):
+        configure.roi_file = hlr_utils.determine_files(options.roi_file,
+                                                       one_file=True)
 
     # Set the momentum transfer bins
     if hlr_utils.cli_provide_override(configure, "Q_bins", "--mom-trans-bins"):
