@@ -93,18 +93,18 @@ def process_sas_data(datalist, conf, **kwargs):
         print "Reading in monitor data from %s file" % dataset_type
         
     # The [0] is to get the data SOM and ignore the None background SOM
-    dm_som0 = dr_lib.add_files(datalist, Data_Paths=conf.mon_path.toPath(),
-                               SO_Axis=conf.so_axis,
-                               dataset_type=dataset_type,
-                               Verbose=conf.verbose,
-                               Timer=t)[0]
+    dbm_som0 = dr_lib.add_files(datalist, Data_Paths=conf.bmon_path.toPath(),
+                                SO_Axis=conf.so_axis,
+                                dataset_type=dataset_type,
+                                Verbose=conf.verbose,
+                                Timer=t)[0]
         
     if t is not None:
         t.getTime(msg="After reading monitor data ")
 
-    dm_som1 = dr_lib.fix_bin_contents(dm_som0)
+    dbm_som1 = dr_lib.fix_bin_contents(dbm_som0)
     
-    del dm_som0
+    del dbm_som0
     
     # Note: time_zero_offset_det MUST be a tuple
     if conf.time_zero_offset_det is not None:
@@ -112,7 +112,7 @@ def process_sas_data(datalist, conf, **kwargs):
                                      conf.time_zero_offset_det.toValErrTuple()
     # Note: time_zero_offset_mon MUST be a tuple
     if conf.time_zero_offset_mon is not None:
-        dm_som1.attr_list["Time_zero_offset_mon"] = \
+        dbm_som1.attr_list["Time_zero_offset_mon"] = \
                                      conf.time_zero_offset_mon.toValErrTuple()
 
     # Step 1: Convert TOF to wavelength for data and monitor
@@ -123,8 +123,8 @@ def process_sas_data(datalist, conf, **kwargs):
         t.getTime(False)
 
     # Convert monitor
-    dm_som2 = common_lib.tof_to_wavelength_lin_time_zero(
-        dm_som1,
+    dbm_som2 = common_lib.tof_to_wavelength_lin_time_zero(
+        dbm_som1,
         units="microsecond",
         time_zero_offset=conf.time_zero_offset_mon.toValErrTuple())
 
@@ -146,7 +146,7 @@ def process_sas_data(datalist, conf, **kwargs):
                              path_replacement=conf.path_replacement,
                              message="pixel wavelength information")
     if conf.dump_mon_wave:
-        hlr_utils.write_file(conf.output, "text/Spec", dm_som2,
+        hlr_utils.write_file(conf.output, "text/Spec", dbm_som2,
                              output_ext="mxl",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
@@ -154,5 +154,5 @@ def process_sas_data(datalist, conf, **kwargs):
                              path_replacement=conf.path_replacement,
                              message="monitor wavelength information")
         
-    del dp_som1, dm_som1
+    del dp_som1, dbm_som1
 
