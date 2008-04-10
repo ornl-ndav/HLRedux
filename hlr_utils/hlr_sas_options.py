@@ -80,7 +80,7 @@ class SansOptions(hlr_utils.InstOptions):
 
         self.add_option("", "--mon-effc", action="store_true",
                         dest="mon_effc",
-                        help="Flag for turning off monitor efficiency "\
+                        help="Flag for turning on monitor efficiency "\
                         +"correction")
         self.set_defaults(mon_eff=False)
 
@@ -110,11 +110,34 @@ class SansOptions(hlr_utils.InstOptions):
                         +" pixels. Creates a *.pxl file for each dataset.")
         self.set_defaults(dump_wave=False)
         
-        self.add_option("", "--dump-mon-wave", action="store_true",
-                        dest="dump_mon_wave",
+        self.add_option("", "--dump-bmon-wave", action="store_true",
+                        dest="dump_bmon_wave",
                         help="Flag to dump the wavelength information for the"\
-                        +" monitor. Creates a *.mxl file for each dataset.")
-        self.set_defaults(dump_mon_wave=False)    
+                        +" beam monitor. Creates a *.bmxl file for each "\
+                        +"dataset.")
+        self.set_defaults(dump_bmon_wave=False)    
+
+        self.add_option("", "--dump-bmon-effc", action="store_true",
+                        dest="dump_bmon_effc",
+                        help="Flag to dump the wavelength information for the"\
+                        +" efficiency corrected beam monitor. Creates a "\
+                        +"*.bmel file for each dataset.")
+        self.set_defaults(dump_bmon_effc=False)
+
+        self.add_option("", "--dump-bmon-rebin", action="store_true",
+                        dest="dump_bmon_rebin",
+                        help="Flag to dump the wavelength information for the"\
+                        +" rebinned beam monitor. Creates a *.bmrl file for "\
+                        +"each dataset")
+        self.set_defaults(dump_bmon_rebin=False)
+
+        self.add_option("", "--dump-wave-bmnorm", action="store_true",
+                        dest="dump_wave_bmnorm",
+                        help="Flag to dump the combined wavelength "\
+                        +"information for all pixels after beam monitor "\
+                        +"normalization. Creates a *.pbml file for each "\
+                        +"dataset.")
+        self.set_defaults(dump_wave_bmnorm=False)
 
         self.add_option("", "--dump-all", action="store_true", dest="dump_all",
                         help="Flag to dump combined information")
@@ -170,22 +193,41 @@ def SansConfiguration(parser, configure, options, args):
         configure.time_zero_offset = hlr_utils.DrParameterFromString(\
             options.time_zero_offset_mon, True)        
 
-    # Set the lambda bins for use with dump-mnorm-wave
+    # Set the lambda bins for use with dump-bmnorm-wave
     if hlr_utils.cli_provide_override(configure, "lambda_bins",
                                       "--lambda-bins"):    
         configure.lambda_bins = hlr_utils.AxisFromString(options.lambda_bins)
 
-    # Set the ability to dump the wavelength information
+    # Set the ability to dump the detector pixel wavelength information
     if hlr_utils.cli_provide_override(configure, "dump_wave", "--dump-wave"):
         configure.dump_wave = options.dump_wave
 
-    # Set the ability to dump the monitor wavelength information
-    if hlr_utils.cli_provide_override(configure, "dump_mon_wave",
-                                      "--dump-mon-wave"):
-        configure.dump_mon_wave = options.dump_mon_wave    
+    # Set the ability to dump the beam monitor wavelength information
+    if hlr_utils.cli_provide_override(configure, "dump_bmon_wave",
+                                      "--dump-bmon-wave"):
+        configure.dump_bmon_wave = options.dump_bmon_wave    
+
+    # Set the ability to dump the efficiency corrected beam monitor wavelength
+    # information
+    if hlr_utils.cli_provide_override(configure, "dump_bmon_effc",
+                                      "--dump-bmon-effc"):
+        configure.dump_bmon_effc = options.dump_bmon_effc
+
+    # Set the ability to dump the rebinned beam monitor wavelength information
+    if hlr_utils.cli_provide_override(configure, "dump_bmon_rebin",
+                                      "--dump-bmon-rebin"):
+        configure.dump_bmon_rebin = options.dump_bmon_rebin
+
+    # Set the ability to dump the wavelength information after beam monitor
+    # normalization
+    if hlr_utils.cli_provide_override(configure, "dump_wave_bmnorm",
+                                      "--dump-wave-bmnorm"):
+        configure.dump_wave_bmnorm = options.dump_wave_bmnorm
 
     if hlr_utils.cli_provide_override(configure, "dump_all", "--dump-all"):
         if options.dump_all:
             configure.dump_wave = True
-            configure.dump_mon_wave = True
-        
+            configure.dump_bmon_wave = True
+            configure.dump_bmon_effc = True
+            configure.dump_bmon_rebin = True
+            configure.dump_wave_bmnorm = True
