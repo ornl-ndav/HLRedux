@@ -64,6 +64,12 @@ class SansOptions(hlr_utils.InstOptions):
                                        Option, version, conflict_handler,
                                        description, inst="SAS")
 
+        self.add_option("", "--mon-effc", action="store_true",
+                        dest="mon_effc",
+                        help="Flag for turning off monitor efficiency "\
+                        +"correction")
+        self.defaults(mon_eff=False)
+
         self.add_option("", "--mom-trans-bins", dest="Q_bins",
                         help="Specify the minimum and maximum momentum "\
                         +"transfer values, the momentum transfer bin "\
@@ -83,6 +89,18 @@ class SansOptions(hlr_utils.InstOptions):
                         help="Specify the minimum and maximum wavelength "\
                         +"values and the wavelength bin width in Angstroms")
         self.set_defaults(lambda_bins="0,10,0.1")
+
+        self.add_option("", "--dump-wave", action="store_true",
+                        dest="dump_wave",
+                        help="Flag to dump the wavelength information for all"\
+                        +" pixels. Creates a *.pxl file for each dataset.")
+        self.set_defaults(dump_wave=False)
+        
+        self.add_option("", "--dump-mon-wave", action="store_true",
+                        dest="dump_mon_wave",
+                        help="Flag to dump the wavelength information for the"\
+                        +" monitor. Creates a *.mxl file for each dataset.")
+        self.set_defaults(dump_mon_wave=False)    
 
         self.add_option("", "--dump-all", action="store_true", dest="dump_all",
                         help="Flag to dump combined information")
@@ -110,6 +128,14 @@ def SansConfiguration(parser, configure, options, args):
     # Call the configuration setter for InstOptions
     hlr_utils.InstConfiguration(parser, configure, options, args, inst="SAS")
 
+    # Set mon_effc flag
+    if hlr_utils.cli_provide_override(configure, "mon_effc", "--mon-effc"):
+        configure.mon_effc = options.mon_effc
+
+    # Set the momentum transfer bins
+    if hlr_utils.cli_provide_override(configure, "Q_bins", "--mom-trans-bins"):
+        configure.Q_bins = hlr_utils.AxisFromString(options.Q_bins)
+
     # Set the time-zero offset for the detector
     if hlr_utils.cli_provide_override(configure, "time_zero_offset_det",
                                       "--time-zero-offset-det"):    
@@ -127,7 +153,17 @@ def SansConfiguration(parser, configure, options, args):
                                       "--lambda-bins"):    
         configure.lambda_bins = hlr_utils.AxisFromString(options.lambda_bins)
 
+    # Set the ability to dump the wavelength information
+    if hlr_utils.cli_provide_override(configure, "dump_wave", "--dump-wave"):
+        configure.dump_wave = options.dump_wave
+
+    # Set the ability to dump the monitor wavelength information
+    if hlr_utils.cli_provide_override(configure, "dump_mon_wave",
+                                      "--dump-mon-wave"):
+        configure.dump_mon_wave = options.dump_mon_wave    
+
     if hlr_utils.cli_provide_override(configure, "dump_all", "--dump-all"):
         if options.dump_all:
-            pass
+            configure.dump_wave = True
+            configure.dump_mon_wave = True
         
