@@ -40,7 +40,63 @@ def run(config, tim=None):
                            timing evaluations.
     @type tim: C{sns_time.DiffTime}
     """
-    pass
+    import DST
+    
+    if tim is not None:
+        tim.getTime(False)
+        old_time = tim.getOldTime()
+
+    if config.data is None:
+        raise RuntimeError("Need to pass a data filename to the driver "\
+                           +"script.")
+
+    # Read in geometry if one is provided
+    if config.inst_geom is not None:
+        if config.verbose:
+            print "Reading in instrument geometry file"
+            
+        inst_geom_dst = DST.getInstance("application/x-NxsGeom",
+                                        config.inst_geom)
+    else:
+        inst_geom_dst = None
+
+    # Perform Steps 1-9 on sample data
+    d_som1 = dr_lib.process_sas_data(config.data, config, timer=tim,
+                                     inst_geom_dst=inst_geom_dst)
+
+
+    if config.verbose:
+        print "Rebinning and summing for final spectrum"
+
+    if tim is not None:
+        tim.getTime(False)
+
+    d_som2 = dr_lib.sum_all_spectra(d_som1,
+                                    rebin_axis=config.Q_bins.toNessiList())
+
+    if tim is not None:
+        tim.getTime(msg="After rebinning and summing for spectrum")    
+
+    del d_som1
+    
+    hlr_utils.write_file(config.output, "text/Spec", d_som2,
+                         verbose=config.verbose,
+                         replace_path=False,
+                         replace_ext=False,
+                         message="combined S(Q) information")
+
+    d_som2.attr_list["config"] = config
+
+    hlr_utils.write_file(config.output, "text/rmd", d_som2,
+                         output_ext="rmd",
+                         data_ext=config.ext_replacement,         
+                         path_replacement=config.path_replacement,
+                         verbose=config.verbose,
+                         message="metadata")
+
+    if tim is not None:
+        tim.setOldTime(old_time)
+        tim.getTime(msg="Total Running Time")
 
 if __name__ == "__main__":
     import hlr_utils
