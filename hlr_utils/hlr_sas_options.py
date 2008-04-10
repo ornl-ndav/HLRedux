@@ -22,6 +22,8 @@
 
 # $Id$
 
+from optparse import Option
+
 import hlr_utils
 
 class SansOptions(hlr_utils.InstOptions):
@@ -61,8 +63,12 @@ class SansOptions(hlr_utils.InstOptions):
         """
         # parent constructor
         hlr_utils.InstOptions.__init__(self, usage, option_list,
-                                       Option, version, conflict_handler,
-                                       description, inst="SAS")
+                                       Option, version,
+                                       conflict_handler, description,
+                                       inst="SAS")
+        
+        # Remove norm option since it is not necessary
+        self.remove_option("--norm")
 
         self.add_option("", "--bmon-path", dest="bmon_path",
                         help="Specify the comma separated list of the beam "\
@@ -76,7 +82,7 @@ class SansOptions(hlr_utils.InstOptions):
                         dest="mon_effc",
                         help="Flag for turning off monitor efficiency "\
                         +"correction")
-        self.defaults(mon_eff=False)
+        self.set_defaults(mon_eff=False)
 
         self.add_option("", "--mom-trans-bins", dest="Q_bins",
                         help="Specify the minimum and maximum momentum "\
