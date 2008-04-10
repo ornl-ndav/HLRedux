@@ -122,7 +122,7 @@ def process_sas_data(datalist, conf, **kwargs):
     if t is not None:
         t.getTime(False)
 
-    # Convert monitor
+    # Convert beam monitor
     dbm_som2 = common_lib.tof_to_wavelength_lin_time_zero(
         dbm_som1,
         units="microsecond",
@@ -145,29 +145,120 @@ def process_sas_data(datalist, conf, **kwargs):
                              data_ext=conf.ext_replacement,
                              path_replacement=conf.path_replacement,
                              message="pixel wavelength information")
-    if conf.dump_mon_wave:
+    if conf.dump_bmon_wave:
         hlr_utils.write_file(conf.output, "text/Spec", dbm_som2,
-                             output_ext="mxl",
+                             output_ext="bmxl",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
                              data_ext=conf.ext_replacement,
                              path_replacement=conf.path_replacement,
-                             message="monitor wavelength information")
+                             message="beam monitor wavelength information")
         
     del dp_som1, dbm_som1
 
     # Step 2: Efficiency correct beam monitor
+    if conf.verbose and conf.no_mon_effc:
+        print "Efficiency correct beam monitor data"
+
+    if t is not None:
+        t.getTime(False)
+
+    if conf.mon_effc:
+        dbm_som3 = dr_lib.feff_correct_mon(dbm_som2)
+    else:
+        dbm_som3 = dbm_som2
+
+    if t is not None and conf.mon_effc:
+        t.getTime(msg="After efficiency correcting beam monitor ")
+
+    if conf.dump_bmon_effc and conf.mon_effc:   
+        hlr_utils.write_file(conf.output, "text/Spec", dbm_som3,
+                             output_ext="bmel",
+                             extra_tag=dataset_type,
+                             verbose=conf.verbose,
+                             data_ext=conf.ext_replacement,
+                             path_replacement=conf.path_replacement,
+                             message="beam monitor wavelength information "\
+                             +"(efficiency)")
+
+    del dbm_som2
 
     # Step 3: Efficiency correct transmission monitor    
 
     # Step 4: Efficiency correct detector pixels
 
     # Step 5: Rebin beam monitor axis onto detector pixel axis
+    if conf.verbose:
+        print "Rebin beam monitor axis to detector pixel axis"
+
+    if t is not None:
+        t.getTime(False)
+
+    dbm_som4 = dr_lib.rebin_monitor(dbm_som3, dp_som2)
+
+    if t is not None:
+        t.getTime(msg="After rebinning beam monitor ")
+
+    del dbm_som3
+
+    if conf.dump_bmon_rebin:
+        hlr_utils.write_file(conf.output, "text/Spec", dbm_som4,
+                             output_ext="bmrl",
+                             extra_tag=dataset_type,
+                             verbose=conf.verbose,
+                             data_ext=conf.ext_replacement,
+                             path_replacement=conf.path_replacement,
+                             message="beam monitor wavelength information "\
+                             +"(rebinned)")
+
 
     # Step 6: Normalize data by beam monitor
+    if conf.verbose:
+        print "Normalizing data by beam monitor"
+
+    if t is not None:
+        t.getTime(False)
+
+    dp_som3 = common_lib.div_ncerr(dp_som2, dbm_som4)
+
+    if t is not None:
+        t.getTime(msg="After normalizing data by beam monitor ")
+
+    del dp_som2
+
+    if conf.dump_wave_bmnorm:
+        dp_som2_1 = dr_lib.sum_all_spectra(dp_som2,\
+                                   rebin_axis=conf.lambda_bins.toNessiList())
+
+        write_message = "combined pixel wavelength information"
+        if dm_som5 is not None:
+            write_message += " (beam monitor normalized)"
+        
+        hlr_utils.write_file(conf.output, "text/Spec", dp_som2_1,
+                             output_ext="pbml",
+                             extra_tag=dataset_type,
+                             verbose=conf.verbose,
+                             data_ext=conf.ext_replacement,
+                             path_replacement=conf.path_replacement,
+                             message=write_message)
+        del dp_som2_1
 
     # Step 7: Rebin transmission monitor axis onto detector pixel axis
 
     # Step 8: Normalize data by transmission monitor    
 
     # Step 9: Convert wavelength to Q for data
+    if conf.verbose:
+        print "Converting data from wavelength to scalar Q"
+    
+    if t is not None:
+        t.getTime(False)
+
+    dp_som4 = common_lib.wavelength_to_scalar_Q(dp_som3)
+
+    if t is not None:
+        t.getTime(msg="After converting wavelength to scalar Q ")
+        
+    del dp_som3
+ 
+    return dp_som4
