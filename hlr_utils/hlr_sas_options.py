@@ -64,6 +64,14 @@ class SansOptions(hlr_utils.InstOptions):
                                        Option, version, conflict_handler,
                                        description, inst="SAS")
 
+        self.add_option("", "--bmon-path", dest="bmon_path",
+                        help="Specify the comma separated list of the beam "\
+                        +"monitor path and signal.")
+
+        self.add_option("", "--tmon-path", dest="tmon_path",
+                        help="Specify the comma separated list of the "\
+                        +"transmission monitor path and signal.")        
+
         self.add_option("", "--mon-effc", action="store_true",
                         dest="mon_effc",
                         help="Flag for turning off monitor efficiency "\
@@ -127,6 +135,14 @@ def SansConfiguration(parser, configure, options, args):
 
     # Call the configuration setter for InstOptions
     hlr_utils.InstConfiguration(parser, configure, options, args, inst="SAS")
+
+    # Set the beam monitor path
+    if hlr_utils.cli_provide_override(configure, "bmon_path", "--bmon-path"):
+        configure.bmon_path = hlr_utils.NxPath(options.bmon_path)
+
+    # Set the transmission monitor path
+    if hlr_utils.cli_provide_override(configure, "tmon_path", "--tmon-path"):
+        configure.tmon_path = hlr_utils.NxPath(options.tmon_path)        
 
     # Set mon_effc flag
     if hlr_utils.cli_provide_override(configure, "mon_effc", "--mon-effc"):
