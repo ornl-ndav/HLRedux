@@ -63,6 +63,11 @@ def process_sas_data(datalist, conf, **kwargs):
         dataset_type = "data"
 
     try:
+        i_geom_dst = kwargs["inst_geom_dst"]
+    except KeyError:
+        i_geom_dst = None
+
+    try:
         t = kwargs["timer"]
     except KeyError:
         t = None
@@ -88,6 +93,9 @@ def process_sas_data(datalist, conf, **kwargs):
     dp_som1 = dr_lib.fix_bin_contents(dp_som0)
 
     del dp_som0    
+
+    if conf.inst_geom is not None:
+        i_geom_dst.setGeometry(conf.data_paths.toPath(), dp_som1)
 
     if conf.verbose:
         print "Reading in monitor data from %s file" % dataset_type
