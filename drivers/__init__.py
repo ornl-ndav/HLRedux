@@ -37,5 +37,8 @@ from IGS import igs_diff_reduction
 # REF drivers
 from REF import reflect_reduction
 
+# SAS drivers
+from SAS import sas_reduction1
+
 #version
 __id__ = "$Id$"

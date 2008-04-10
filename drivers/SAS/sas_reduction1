@@ -1,0 +1,4 @@
+#!/bin/sh
+
+loc=`python -c "import drivers.SAS; print drivers.SAS.__path__[0]"`
+python $loc/sas_reduction1.py $@
