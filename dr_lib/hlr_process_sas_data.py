@@ -23,6 +23,33 @@
 
 def process_sas_data(datalist, conf, **kwargs):
     """
+    This function combines Steps 1 through 9 of the data reduction process for
+    Small-Angle Scattering section 2.5.1 as specified by the documents at
+    U{http://neutrons.ornl.gov/asg/projects/SCL/reqspec/DR_Lib_RS.doc}. The
+    function takes a list of file names, a L{hlr_utils.Configure} object and
+    processes the data accordingly. This function should really only be used in
+    the context of I{sas_reduction}.
+
+    @param datalist: A list containing the filenames of the data to be
+    processed.
+    @type datalist: C{list} of C{string}s
+    
+    @param conf: Object that contains the current setup of the driver.
+    @type conf: L{hlr_utils.Configure}
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
+    
+    @keyword inst_geom_dst: File object that contains instrument geometry
+    information.
+    @type inst_geom_dst: C{DST.GeomDST}
+    
+    @keyword dataset_type: The practical name of the dataset being processed.
+    The default value is I{data}.
+    @type dataset_type: C{string}
+
+    @keyword timer: Timing object so the function can perform timing estimates.
+    @type timer: C{sns_timer.DiffTime}
+
 
     @return: Object that has undergone all requested processing steps
     @rtype: C{SOM.SOM}
