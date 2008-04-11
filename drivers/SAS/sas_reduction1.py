@@ -40,6 +40,7 @@ def run(config, tim=None):
                            timing evaluations.
     @type tim: C{sns_time.DiffTime}
     """
+    import dr_lib
     import DST
     
     if tim is not None:
@@ -118,6 +119,8 @@ if __name__ == "__main__":
     # Set defaults for imported options
     parser.set_defaults(data_paths="/entry/bank1,1")
     parser.set_defaults(bmon_path="/entry/monitor1,1")
+    # FIXME
+    parser.set_defaults(tmon_path="/entry/monitor1,1")
     
     # Add amorphous_reduction specific options
     parser.add_option("", "--timing", action="store_true", dest="timing",
