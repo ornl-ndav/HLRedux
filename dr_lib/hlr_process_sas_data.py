@@ -53,7 +53,9 @@ def process_sas_data(datalist, conf, **kwargs):
 
     @return: Object that has undergone all requested processing steps
     @rtype: C{SOM.SOM}
-    """    
+    """
+    import common_lib
+    import dr_lib
     import hlr_utils
 
     # Check keywords
@@ -81,10 +83,9 @@ def process_sas_data(datalist, conf, **kwargs):
         print "Reading %s file" % dataset_type
 
     # The [0] is to get the data SOM and ignore the None background SOM
-    dp_som0 = dr_lib.add_files(datalist, Data_Paths=data_paths,
+    dp_som0 = dr_lib.add_files(datalist, Data_Paths=conf.data_paths.toPath(),
                                SO_Axis=conf.so_axis, Signal_ROI=conf.roi_file,
                                dataset_type=dataset_type,
-                               dst_type=dst_type,
                                Verbose=conf.verbose, Timer=t)[0]
 
     if t is not None:
@@ -166,7 +167,7 @@ def process_sas_data(datalist, conf, **kwargs):
     del dp_som1, dbm_som1
 
     # Step 2: Efficiency correct beam monitor
-    if conf.verbose and conf.no_mon_effc:
+    if conf.verbose and conf.mon_effc:
         print "Efficiency correct beam monitor data"
 
     if t is not None:
