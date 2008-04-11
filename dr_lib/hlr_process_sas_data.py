@@ -237,21 +237,20 @@ def process_sas_data(datalist, conf, **kwargs):
     del dp_som2
 
     if conf.dump_wave_bmnorm:
-        dp_som2_1 = dr_lib.sum_all_spectra(dp_som2,\
+        dp_som3_1 = dr_lib.sum_all_spectra(dp_som3,\
                                    rebin_axis=conf.lambda_bins.toNessiList())
 
         write_message = "combined pixel wavelength information"
-        if dm_som5 is not None:
-            write_message += " (beam monitor normalized)"
+        write_message += " (beam monitor normalized)"
         
-        hlr_utils.write_file(conf.output, "text/Spec", dp_som2_1,
+        hlr_utils.write_file(conf.output, "text/Spec", dp_som3_1,
                              output_ext="pbml",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
                              data_ext=conf.ext_replacement,
                              path_replacement=conf.path_replacement,
                              message=write_message)
-        del dp_som2_1
+        del dp_som3_1
 
     # Step 7: Rebin transmission monitor axis onto detector pixel axis
 
