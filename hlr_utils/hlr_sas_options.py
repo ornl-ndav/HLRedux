@@ -193,13 +193,13 @@ def SansConfiguration(parser, configure, options, args):
     # Set the time-zero offset for the detector
     if hlr_utils.cli_provide_override(configure, "time_zero_offset_det",
                                       "--time-zero-offset-det"):    
-        configure.time_zero_offset = hlr_utils.DrParameterFromString(\
+        configure.time_zero_offset_det = hlr_utils.DrParameterFromString(\
             options.time_zero_offset_det, True)
 
     # Set the time-zero offset for the monitor
     if hlr_utils.cli_provide_override(configure, "time_zero_offset_mon",
                                       "--time-zero-offset-mon"):    
-        configure.time_zero_offset = hlr_utils.DrParameterFromString(\
+        configure.time_zero_offset_mon = hlr_utils.DrParameterFromString(\
             options.time_zero_offset_mon, True)        
 
     # Set the lambda bins for use with dump-bmnorm-wave
