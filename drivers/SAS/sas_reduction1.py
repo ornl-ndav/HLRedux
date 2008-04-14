@@ -65,30 +65,98 @@ def run(config, tim=None):
     d_som1 = dr_lib.process_sas_data(config.data, config, timer=tim,
                                      inst_geom_dst=inst_geom_dst)
 
+    # Perform Steps 1-9 on buffer/solvent only data
+    if config.solv is not None:
+        s_som1 = dr_lib.process_sas_data(config.solv, config, timer=tim,
+                                         inst_geom_dst=inst_geom_dst,
+                                         dataset_type="solvent")
+    else:
+        s_som1 = None
 
+    # Step 10: Subtract buffer/solvent only spectrum from sample spectrum
+    d_som2 = dr_lib.subtract_bkg_from_data(d_som1, s_som1,
+                                           verbose=config.verbose,
+                                           timer=tim,
+                                           dataset1="data",
+                                           dataset2="solvent")
+    
+    del s_som1, d_som1
+
+    # Perform Steps 1-9 on empty-can data
+    if config.ecan is not None:
+        e_som1 = dr_lib.process_sas_data(config.ecan, config, timer=tim,
+                                         inst_geom_dst=inst_geom_dst,
+                                         dataset_type="empty_can")
+    else:
+        e_som1 = None
+
+    # Step 11: Subtract empty-can spectrum from sample spectrum
+    d_som3 = dr_lib.subtract_bkg_from_data(d_som2, e_som1,
+                                           verbose=config.verbose,
+                                           timer=tim,
+                                           dataset1="data",
+                                           dataset2="empty_can")
+    
+    del e_som1, d_som2
+
+    # Perform Steps 1-9 on open beam data
+    if config.open is not None:
+        o_som1 = dr_lib.process_sas_data(config.open, config, timer=tim,
+                                         inst_geom_dst=inst_geom_dst,
+                                         dataset_type="open_beam")
+    else:
+        o_som1 = None
+        
+    # Step 12: Subtract open beam spectrum from sample spectrum
+    d_som4 = dr_lib.subtract_bkg_from_data(d_som3, o_som1,
+                                           verbose=config.verbose,
+                                           timer=tim,
+                                           dataset1="data",
+                                           dataset2="open_beam")
+    
+    del o_som1, d_som3
+
+    # Perform Steps 1-9 on dark current data
+    if config.dkcur is not None:
+        dc_som1 = dr_lib.process_sas_data(config.open, config, timer=tim,
+                                          inst_geom_dst=inst_geom_dst,
+                                          dataset_type="dark_current")
+    else:
+        dc_som1 = None
+        
+    # Step 13: Subtract dark current spectrum from sample spectrum
+    d_som5 = dr_lib.subtract_bkg_from_data(d_som4, dc_som1,
+                                           verbose=config.verbose,
+                                           timer=tim,
+                                           dataset1="data",
+                                           dataset2="dark_current")
+    
+    del dc_som1, d_som4    
+
+    # Steps 14 and 15: Rebin and sum all spectra
     if config.verbose:
         print "Rebinning and summing for final spectrum"
 
     if tim is not None:
         tim.getTime(False)
 
-    d_som2 = dr_lib.sum_all_spectra(d_som1,
+    d_som6 = dr_lib.sum_all_spectra(d_som5,
                                     rebin_axis=config.Q_bins.toNessiList())
 
     if tim is not None:
         tim.getTime(msg="After rebinning and summing for spectrum")    
 
-    del d_som1
+    del d_som5
     
-    hlr_utils.write_file(config.output, "text/Spec", d_som2,
+    hlr_utils.write_file(config.output, "text/Spec", d_som6,
                          verbose=config.verbose,
                          replace_path=False,
                          replace_ext=False,
                          message="combined S(Q) information")
 
-    d_som2.attr_list["config"] = config
+    d_som6.attr_list["config"] = config
 
-    hlr_utils.write_file(config.output, "text/rmd", d_som2,
+    hlr_utils.write_file(config.output, "text/rmd", d_som6,
                          output_ext="rmd",
                          data_ext=config.ext_replacement,         
                          path_replacement=config.path_replacement,
