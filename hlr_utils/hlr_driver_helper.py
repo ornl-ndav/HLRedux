@@ -682,7 +682,7 @@ def __run_findnexus(nums, inst, facility):
     """
     cmd = "findnexus -s -i %s" % inst
     if facility is not None:
-        cmd += "-f %s" % facility
+        cmd += " -f %s" % facility
     cmd += " %s" % nums
         
     filestring = __clean_str(__run_cmd(cmd, False))
