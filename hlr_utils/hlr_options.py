@@ -85,11 +85,11 @@ class BasicOptions(optparse.OptionParser):
                         +"as the basis for the output file names.")
 
         # specify the instrument
-        self.add_option("", "--inst", dest="inst",
+        self.add_option("-i", "--inst", dest="inst",
                         help="Specify the short name for the instrument.")
 
         # specify the facility
-        self.add_option("", "--facility", dest="facility",
+        self.add_option("-f", "--facility", dest="facility",
                         help="Specify the short name for the facility.")
         
         # specifying data sets
