@@ -541,7 +541,7 @@ def create_pixel_id(thing):
 
     return (mylist[0], (int(mylist[1]), int(mylist[2])))
 
-def determine_files(inputlist, inst=None, **kwargs):
+def determine_files(inputlist, inst=None, facility=None, **kwargs):
     """
     This function takes either a list of comma-separated file names or a list
     of runs in the syntax of findnexus. If the input list begins with /, ~, $,
@@ -555,6 +555,9 @@ def determine_files(inputlist, inst=None, **kwargs):
     
     @param inst: The name of the instrument for file lookup
     @type inst: C{string}
+
+    @param facility: The name of the facility for file lookup
+    @type facility: C{string}
     
     @param kwargs: A list of keyword arguments that the function accepts:
     
