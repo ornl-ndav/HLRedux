@@ -149,9 +149,11 @@ def BasicConfiguration(parser, configure, options, args):
     if options.data is not None:
         configure.data = hlr_utils.determine_files(options.data,
                                                    configure.inst,
+                                                   configure.facility,
                                                    stop_on_none=True)
     elif len(args) > 0:
         configure.data = hlr_utils.determine_files(args, configure.inst,
+                                                   configure.facility,
                                                    stop_on_none=True)
     elif configure.data:
         # We have data from the config file, so everything is OK.
@@ -346,40 +348,48 @@ def InstConfiguration(parser, configure, options, args, **kwargs):
     # Set the normalization file list
     if hlr_utils.cli_provide_override(configure, "norm", "--norm"):
         configure.norm = hlr_utils.determine_files(options.norm,
-                                                   configure.inst)
+                                                   configure.inst,
+                                                   configure.facility)
 
     if instrument == "IGS":
         # Set the empty can file list
         if hlr_utils.cli_provide_override(configure, "ecan", "--ecan"):
             configure.ecan = hlr_utils.determine_files(options.ecan,
-                                                       configure.inst)
+                                                       configure.inst,
+                                                       configure.facility)
         # Set the background file list
         if hlr_utils.cli_provide_override(configure, "back", "--back"):
             configure.back = hlr_utils.determine_files(options.back,
-                                                       configure.inst)
+                                                       configure.inst,
+                                                       configure.facility)
 
         # Set the direct scattering background file list
         if hlr_utils.cli_provide_override(configure, "dsback", "--dsback"):
             configure.dsback = hlr_utils.determine_files(options.dsback,
-                                                         configure.inst)
+                                                         configure.inst,
+                                                         configure.facility)
     elif instrument == "SAS":
         # Set the empty can file list
         if hlr_utils.cli_provide_override(configure, "ecan", "--ecan"):
             configure.ecan = hlr_utils.determine_files(options.ecan,
-                                                       configure.inst)
+                                                       configure.inst,
+                                                       configure.facility)
         # Set the empty can file list
         if hlr_utils.cli_provide_override(configure, "solv", "--solv"):
             configure.solv = hlr_utils.determine_files(options.solv,
-                                                       configure.inst)
+                                                       configure.inst,
+                                                       configure.facility)
         # Set the empty can file list
         if hlr_utils.cli_provide_override(configure, "open", "--open"):
             configure.open = hlr_utils.determine_files(options.open,
-                                                       configure.inst)
+                                                       configure.inst,
+                                                       configure.facility)
 
         # Set the empty can file list
         if hlr_utils.cli_provide_override(configure, "dkcur", "--dkcur"):
             configure.dkcur = hlr_utils.determine_files(options.dkcur,
-                                                        configure.inst)
+                                                        configure.inst,
+                                                        configure.facility)
             
     else:
         pass
