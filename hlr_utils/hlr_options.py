@@ -84,6 +84,10 @@ class BasicOptions(optparse.OptionParser):
                         +"current working directory and the first data file "\
                         +"as the basis for the output file names.")
 
+        # specify the instrument
+        self.add_option("", "--inst", dest="inst",
+                        help="Specify the short name for the instrument.")
+
         # specifying data sets
         self.add_option("", "--data", help="Specify the data file")
 
@@ -128,6 +132,10 @@ def BasicConfiguration(parser, configure, options, args):
         else: 
             # No flags present, do nothing
             pass 
+
+    # Define instrument short name first as stuff below depends on it
+    if hlr_utils.cli_provide_override(configure, "inst", "--inst"):
+        configure.inst = options.inst
 
     # Get the datafile name and check it
     if options.data is not None:
@@ -254,9 +262,6 @@ class InstOptions(BasicOptions):
                         help="Specify the comma separated list of detector "\
                         +"data paths and signals.")
 
-        self.add_option("", "--inst", dest="inst",
-                        help="Specify the short name for the instrument.")
-
         # Instrument characterization file options
         self.add_option("", "--norm", help="Specify the normalization file")
         
@@ -317,13 +322,6 @@ def InstConfiguration(parser, configure, options, args, **kwargs):
         instrument = kwargs["inst"]
     except KeyError:
         instrument = ""
-
-    # Define instrument short name first as stuff below depends on it
-    if hlr_utils.cli_provide_override(configure, "inst", "--inst"):
-        configure.inst = options.inst
-    else:
-        import sns_inst_util
-        configure.inst = sns_inst_util.getInstrument()
 
     # Call the configuration setter for BasicOptions
     BasicConfiguration(parser, configure, options, args)
