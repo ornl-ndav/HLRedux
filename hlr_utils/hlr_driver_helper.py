@@ -596,7 +596,7 @@ def determine_files(inputlist, inst=None, facility=None, **kwargs):
         if __check_for_path(inputlist):
             filelist = inputlist.split(',')
         elif __check_for_digit(inputlist):
-            filelist = __run_findnexus(inputlist, inst)
+            filelist = __run_findnexus(inputlist, inst, facility)
         else:
             raise RuntimeError("Do not know how to interpret %s" % inputlist)
     except AttributeError:
@@ -605,7 +605,7 @@ def determine_files(inputlist, inst=None, facility=None, **kwargs):
         elif __check_for_digit(inputlist[0]):
             filelist = []
             for number in inputlist:
-                filelist.extend(__run_findnexus(number, inst))
+                filelist.extend(__run_findnexus(number, inst, facility))
         else:
             raise RuntimeError("Do not know how to interpret %s" % inputlist)
 
@@ -676,11 +676,15 @@ def __run_cmd(cmd, lines=True):
     else:
         return streams[1].read()
         
-def __run_findnexus(nums, inst):
+def __run_findnexus(nums, inst, facility):
     """
     This function runs the findnexus command and returns the discovered files.
     """
-    cmd = "findnexus -s -i %s %s" % (inst, nums)
+    cmd = "findnexus -s -i %s" % inst
+    if facility is not None:
+        cmd += "-f %s" % facility
+    cmd += " %s" % nums
+        
     filestring = __clean_str(__run_cmd(cmd, False))
     return filestring.split(' ')
     
