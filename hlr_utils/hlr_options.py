@@ -88,6 +88,10 @@ class BasicOptions(optparse.OptionParser):
         self.add_option("", "--inst", dest="inst",
                         help="Specify the short name for the instrument.")
 
+        # specify the facility
+        self.add_option("", "--facility", dest="facility",
+                        help="Specify the short name for the facility.")
+        
         # specifying data sets
         self.add_option("", "--data", help="Specify the data file")
 
@@ -136,6 +140,10 @@ def BasicConfiguration(parser, configure, options, args):
     # Define instrument short name first as stuff below depends on it
     if hlr_utils.cli_provide_override(configure, "inst", "--inst"):
         configure.inst = options.inst
+
+    # Define facility short name as stuff below depends on it
+    if hlr_utils.cli_provide_override(configure, "facility", "--facility"):
+        configure.facility = options.facility        
 
     # Get the datafile name and check it
     if options.data is not None:
