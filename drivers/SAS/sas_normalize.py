@@ -52,9 +52,11 @@ def normalize_to_monitor(fileName,time_offset_detector,time_offset_monitor,**kwa
     mon_eff    = False
     verbose    = False
     debug      = False
-    if kwargs.has_key('mon_eff'): mon_eff = kwargs['mon_eff']
-    if kwargs.has_key('verbose'): verbose = kwargs['verbose']
-    if kwargs.has_key('debug'  ): debug   = kwargs['debug']
+    signal_roi = None
+    if kwargs.has_key('mon_eff'):    mon_eff    = kwargs['mon_eff']
+    if kwargs.has_key('signal_roi'): signal_roi = kwargs['signal_roi']
+    if kwargs.has_key('verbose'):    verbose    = kwargs['verbose']
+    if kwargs.has_key('debug'  ):    debug      = kwargs['debug']
     # -------------------------------------------------------------------
     if verbose:
         print ctime(),'normalize_to_monitor:',os.path.basename(fileName)
@@ -66,7 +68,7 @@ def normalize_to_monitor(fileName,time_offset_detector,time_offset_monitor,**kwa
     # -------------------------------------------------------------------
     if verbose:
         print ctime(),"normalize_to_monitor: getting spectrum object"
-    s1 = data_dst.getSOM(config.data_paths, so_axis)
+    s1 = data_dst.getSOM(config.data_paths, so_axis, roi_file=signal_roi)
     m1 = data_dst.getSOM(config.bmon_path , so_axis)
     # -------------------------------------------------------------------
     if verbose:
