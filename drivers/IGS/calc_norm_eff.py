@@ -27,7 +27,7 @@ This driver repeats the procedures found in B{Section 2.2.1 Powder or
 amorphous material reduction} of 
 U{http://neutrons.ornl.gov/asg/projects/SCL/reqspec/DR_Lib_RS.doc} to find the 
 normalization efficiency on a per-pixel basis from a vanadium run file. It 
-will repeat steps 1-9,16-19,22-24
+will repeat steps 1-9,16-19,22-25
 """
 
 def run(config, tim):
@@ -81,14 +81,14 @@ def run(config, tim):
     else:
         bkg_som = None
 
-    # Perform Steps 1-15 on normalization data            
+    # Perform Steps 1-9 on normalization data            
     n_som1 = dr_lib.process_igs_data(config.data, config, timer=tim,
                                      inst_geom_dst=inst_geom_dst,
                                      dataset_type="normalization",
                                      tib_const=config.tib_norm_const,
                                      bkg_som=bkg_som)
     
-    # Perform Steps 1-15 on empty can data
+    # Perform Steps 1-9 on empty can data
     if config.ecan is not None:
         e_som1 = dr_lib.process_igs_data(config.ecan, config, timer=tim,
                                          inst_geom_dst=inst_geom_dst,
@@ -98,7 +98,7 @@ def run(config, tim):
     else:
         e_som1 = None
 
-    # Perform Steps 1-15 on background data
+    # Perform Steps 1-9 on background data
     if config.back is not None and not config.hwfix:
         b_som1 = dr_lib.process_igs_data(config.back, config, timer=tim,
                                          inst_geom_dst=inst_geom_dst,
@@ -110,7 +110,7 @@ def run(config, tim):
     if inst_geom_dst is not None:
         inst_geom_dst.release_resource()
 
-    # Steps 22-23: Subtract background spectrum from empty can spectrum for
+    # Steps 16-17: Subtract background spectrum from empty can spectrum for
     #              normalization
     e_som2 = dr_lib.subtract_bkg_from_data(e_som1, b_som1,
                                            verbose=config.verbose,
@@ -119,7 +119,7 @@ def run(config, tim):
                                            dataset2="background",
                                            scale=config.scale_bcn)
 
-    # Step 24-25: Subtract background spectrum from normalization spectrum
+    # Step 18-19: Subtract background spectrum from normalization spectrum
     n_som2 = dr_lib.subtract_bkg_from_data(n_som1, b_som1,
                                            verbose=config.verbose,
                                            timer=tim,
@@ -128,7 +128,7 @@ def run(config, tim):
                                            scale=config.scale_bn)
     del b_som1
 
-    # Step 28-29: Subtract empty can spectrum from normalization spectrum
+    # Step 22-23: Subtract empty can spectrum from normalization spectrum
     n_som3 = dr_lib.subtract_bkg_from_data(n_som2, e_som2,
                                            verbose=config.verbose,
                                            timer=tim,
@@ -138,7 +138,7 @@ def run(config, tim):
 
     del n_som2, e_som2
 
-    # Step 30-32: Integrate normalization spectra
+    # Step 24-25: Integrate normalization spectra
     if config.verbose:
         print "Integrating normalization spectra"
 

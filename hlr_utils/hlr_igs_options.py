@@ -147,13 +147,6 @@ class IgsOptions(hlr_options.InstOptions):
                         +"file for each dataset.")
         self.set_defaults(dump_mon_effc=False)
 
-        self.add_option("", "--dump-mon-diml", action="store_true",
-                        dest="dump_mon_diml",
-                        help="Flag to dump the wavelength information for the"\
-                        +" dimensionless monitor. Creates a *.mdl "\
-                        +"file for each dataset.")
-        self.set_defaults(dump_mon_diml=False)
-        
         self.add_option("", "--dump-wave-mnorm", action="store_true",
                         dest="dump_wave_mnorm",
                         help="Flag to dump the combined wavelength "\
@@ -376,11 +369,6 @@ def IgsConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "dump_mon_effc",
                                       "--dump-mon-effc"):
         configure.dump_mon_effc = options.dump_mon_effc
-
-    # Set the ability to dump the dimensionless monitor wavelength information
-    if hlr_utils.cli_provide_override(configure, "dump_mon_diml",
-                                      "--dump-mon-diml"):
-        configure.dump_mon_diml = options.dump_mon_diml        
 
     # Set the ability to dump the wavelength information
     if hlr_utils.cli_provide_override(configure, "dump_wave_mnorm",

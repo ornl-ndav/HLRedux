@@ -151,20 +151,6 @@ def process_igs_data(datalist, conf, **kwargs):
             # Since we have a NeXus file, we need to continue
             conf.pre_norm = False
 
-    # Step 2: Sum all pixel TOF spectra
-    if conf.verbose:
-        print "Summing all TOF spectra for extent finding"
-        
-    dp_som0_1 = dr_lib.sum_all_spectra(dp_som0)
-
-    # Step 3: Find the non-zero data TOF extents
-    if conf.verbose:
-        print "Finding non-zero data TOF extents"
-        
-    nz_tof_extents = dr_lib.find_nz_extent(dp_som0_1)
-
-    del dp_som0_1
-
     dp_som1 = dr_lib.fix_bin_contents(dp_som0)
 
     del dp_som0    
@@ -218,10 +204,10 @@ def process_igs_data(datalist, conf, **kwargs):
 
     del dp_som1
 
-    # Step 4: Dead Time Correction
+    # Step 2: Dead Time Correction
     # No dead time correction is being applied to the data yet
 
-    # Step 5: Time-independent background determination
+    # Step 3: Time-independent background determination
     if conf.verbose and conf.tib_tofs is not None:
         print "Determining time-independent background from data"
 
@@ -252,7 +238,7 @@ def process_igs_data(datalist, conf, **kwargs):
                              comments=[file_comment])
         del dp_som2.attr_list[attr_name]
 
-    # Step 6: Subtract time-independent background
+    # Step 4: Subtract time-independent background
     if conf.verbose and B is not None:
         print "Subtracting time-independent background from data"
 
@@ -269,7 +255,7 @@ def process_igs_data(datalist, conf, **kwargs):
 
     del dp_som2, B
 
-    # Step 7: Subtract time-independent background constant
+    # Step 5: Subtract time-independent background constant
     if conf.verbose and tib_const is not None:
         print "Subtracting time-independent background constant from data"
             
@@ -310,7 +296,7 @@ def process_igs_data(datalist, conf, **kwargs):
             dm_som1.attr_list["Time_zero_offset"] = \
                                       conf.time_zero_offset.toValErrTuple()    
 
-    # Step 8: Convert TOF to wavelength for data and monitor
+    # Step 6: Convert TOF to wavelength for data and monitor
     if conf.verbose:
         print "Converting TOF to wavelength"
 
@@ -353,36 +339,7 @@ def process_igs_data(datalist, conf, **kwargs):
         
     del dp_som4, dm_som1
 
-    # Step 9: Convert TOF extents to wavelength at monitor
-    if dm_som2 is not None:
-        pathlength = hlr_utils.get_parameter("primary", dm_som2[0],
-                                             dm_som2.attr_list.instrument)
-
-        # Note: time_zero_slope MUST be a tuple
-        if conf.time_zero_slope is not None:
-            time_zero_slope = conf.time_zero_slope.toValErrTuple()
-        else:
-            time_zero_slope = None
-
-        # Note: time_zero_offset MUST be a tuple
-        if conf.time_zero_offset is not None:
-            time_zero_offset = conf.time_zero_offset.toValErrTuple()
-        else:
-            time_zero_offset = None
-
-        lambda_ext_min = common_lib.tof_to_wavelength_lin_time_zero(
-            (nz_tof_extents[0], 0.0), pathlength=pathlength,
-            time_zero_slope=time_zero_slope, time_zero_offset=time_zero_offset)
-        
-        lambda_ext_max = common_lib.tof_to_wavelength_lin_time_zero(
-            (nz_tof_extents[1], 0.0), pathlength=pathlength,
-            time_zero_slope=time_zero_slope, time_zero_offset=time_zero_offset)
-    else:
-        lambda_ext_min = None
-        lambda_ext_max = None
-        
-
-    # Step 10: Efficiency correct monitor
+    # Step 7: Efficiency correct monitor
     if conf.verbose and dm_som2 is not None and not conf.no_mon_effc:
         print "Efficiency correct monitor data"
 
@@ -409,46 +366,22 @@ def process_igs_data(datalist, conf, **kwargs):
 
     del dm_som2
 
-    # Steps 11-13: Create dimensionless monitor
+    # Step 8: Rebin monitor axis onto detector pixel axis
     if conf.verbose and dm_som3 is not None:
-        print "Making monitor spectrum dimensionless"
-
-    if t is not None:
-        t.getTime(False)
-        
-    dm_som4 = dr_lib.dimensionless_mon(dm_som3, lambda_ext_min, lambda_ext_max)
-
-    if t is not None and dm_som3 is not None:
-        t.getTime(msg="After making dimensionless monitor ")
-
-    if conf.dump_mon_diml and dm_som4 is not None:
-        hlr_utils.write_file(conf.output, "text/Spec", dm_som4,
-                             output_ext="mdl",
-                             extra_tag=dataset_type,
-                             verbose=conf.verbose,
-                             data_ext=conf.ext_replacement,
-                             path_replacement=conf.path_replacement,
-                             message="dimensionless monitor wavelength "\
-                             +"information")
-
-    del dm_som3
-    
-    # Step 14: Rebin monitor axis onto detector pixel axis
-    if conf.verbose and dm_som4 is not None:
         print "Rebin monitor axis to detector pixel axis"
 
     if t is not None:
         t.getTime(False)
 
-    dm_som5 = dr_lib.rebin_monitor(dm_som4, dp_som5)
+    dm_som4 = dr_lib.rebin_monitor(dm_som3, dp_som5)
 
     if t is not None and dm_som4 is not None:
         t.getTime(msg="After rebinning monitor ")
 
-    del dm_som4
+    del dm_som3
 
-    if conf.dump_mon_rebin and dm_som5 is not None:        
-        hlr_utils.write_file(conf.output, "text/Spec", dm_som5,
+    if conf.dump_mon_rebin and dm_som4 is not None:        
+        hlr_utils.write_file(conf.output, "text/Spec", dm_som4,
                              output_ext="mrl",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
@@ -457,15 +390,15 @@ def process_igs_data(datalist, conf, **kwargs):
                              message="monitor wavelength information "\
                              +"(rebinned)")
 
-    # Step 15: Normalize data by monitor
-    if conf.verbose and dm_som5 is not None:
+    # Step 9: Normalize data by monitor
+    if conf.verbose and dm_som4 is not None:
         print "Normalizing data by monitor"
 
     if t is not None:
         t.getTime(False)
 
-    if dm_som5 is not None:
-        dp_som6 = common_lib.div_ncerr(dp_som5, dm_som5)
+    if dm_som4 is not None:
+        dp_som6 = common_lib.div_ncerr(dp_som5, dm_som4)
 
         if t is not None:
             t.getTime(msg="After normalizing data by monitor ")
@@ -477,7 +410,7 @@ def process_igs_data(datalist, conf, **kwargs):
                                    rebin_axis=conf.lambda_bins.toNessiList())
 
         write_message = "combined pixel wavelength information"
-        if dm_som5 is not None:
+        if dm_som4 is not None:
             write_message += " (monitor normalized)"
         
         hlr_utils.write_file(conf.output, "text/Spec", dp_som6_1,
@@ -489,7 +422,7 @@ def process_igs_data(datalist, conf, **kwargs):
                              message=write_message)
         del dp_som6_1
 
-    del dm_som5, dp_som5
+    del dm_som4, dp_som5
 
     return dp_som6
 

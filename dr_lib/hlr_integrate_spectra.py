@@ -192,7 +192,7 @@ def integrate_spectra(obj, **kwargs):
 
         hlr_utils.result_insert(result, res_descr, value1, obj1, "yonly")
 
-    if not norm and not total:
+    if not total:
         return result
     else:
         # Sum all integration counts
@@ -203,41 +203,16 @@ def integrate_spectra(obj, **kwargs):
             total_counts += hlr_utils.get_value(result, j, res_descr, "y")
             total_err2 += hlr_utils.get_err2(result, j, res_descr, "y")
 
-        if norm:
-            total_counts /= num_pixels
-            total_err2 /= (num_pixels * num_pixels)
-
         # Create new result object
         (result2, res2_descr) = hlr_utils.empty_result(result)
 
         result2 = hlr_utils.copy_som_attr(result2, res2_descr,
                                           result, res_descr)
-        if total:
-            res1 = hlr_utils.get_value(result, 0, res_descr, "all")
-            hlr_utils.result_insert(result2, res2_descr,
-                                    (total_counts, total_err2),
-                                    res1, "yonly")
-            return result2
 
-        # Normalize integration counts
-        for k in xrange(hlr_utils.get_length(result)):
-            res1 = hlr_utils.get_value(result, k, res_descr, "all")
-            
-            counts =  hlr_utils.get_value(result, k, res_descr, "y")
-            counts_err2 =  hlr_utils.get_err2(result, k, res_descr, "y")
-
-            norm_counts = counts / total_counts
-            total_counts2 = total_counts * total_counts
-            norm_counts_err2 = ((norm_counts * total_err2) / total_counts)
-            norm_counts_err2 += counts_err2
-            norm_counts_err2 /= total_counts2
-
-            hlr_utils.result_insert(result2, res2_descr,
-                                    (norm_counts, norm_counts_err2),
-                                    res1, "yonly")
-
-        del result
-
+        res1 = hlr_utils.get_value(result, 0, res_descr, "all")
+        hlr_utils.result_insert(result2, res2_descr,
+                                (total_counts, total_err2),
+                                res1, "yonly")
         return result2
 
 if __name__ == "__main__":
@@ -253,4 +228,4 @@ if __name__ == "__main__":
     print "som            :", integrate_spectra(som1)
     print "som (1.5, 3.5) :", integrate_spectra(som1, start=1.5, end=3.5)
     print "som (0.5, 2.75):", integrate_spectra(som1, start=0.5, end=2.75)
-    print "som (norm)     :", integrate_spectra(som1, norm=True)
+    print "som (total)     :", integrate_spectra(som1, total=True)
