@@ -541,7 +541,7 @@ def create_pixel_id(thing):
 
     return (mylist[0], (int(mylist[1]), int(mylist[2])))
 
-def determine_files(inputlist, inst=None, facility=None, **kwargs):
+def determine_files(inputlist, inst=None, **kwargs):
     """
     This function takes either a list of comma-separated file names or a list
     of runs in the syntax of findnexus. If the input list begins with /, ~, $,
@@ -555,9 +555,6 @@ def determine_files(inputlist, inst=None, facility=None, **kwargs):
     
     @param inst: The name of the instrument for file lookup
     @type inst: C{string}
-
-    @param facility: The name of the facility for file lookup
-    @type facility: C{string}
     
     @param kwargs: A list of keyword arguments that the function accepts:
     
@@ -596,7 +593,7 @@ def determine_files(inputlist, inst=None, facility=None, **kwargs):
         if __check_for_path(inputlist):
             filelist = inputlist.split(',')
         elif __check_for_digit(inputlist):
-            filelist = __run_findnexus(inputlist, inst, facility)
+            filelist = __run_findnexus(inputlist, inst)
         else:
             raise RuntimeError("Do not know how to interpret %s" % inputlist)
     except AttributeError:
@@ -605,7 +602,7 @@ def determine_files(inputlist, inst=None, facility=None, **kwargs):
         elif __check_for_digit(inputlist[0]):
             filelist = []
             for number in inputlist:
-                filelist.extend(__run_findnexus(number, inst, facility))
+                filelist.extend(__run_findnexus(number, inst))
         else:
             raise RuntimeError("Do not know how to interpret %s" % inputlist)
 
@@ -676,15 +673,11 @@ def __run_cmd(cmd, lines=True):
     else:
         return streams[1].read()
         
-def __run_findnexus(nums, inst, facility):
+def __run_findnexus(nums, inst):
     """
     This function runs the findnexus command and returns the discovered files.
     """
-    cmd = "findnexus -s -i %s" % inst
-    if facility is not None:
-        cmd += " -f %s" % facility
-    cmd += " %s" % nums
-        
+    cmd = "findnexus -s -i %s %s" % (inst, nums)
     filestring = __clean_str(__run_cmd(cmd, False))
     return filestring.split(' ')
     
@@ -762,36 +755,3 @@ def cli_provide_override(config, param, opt1, opt2=None):
     except KeyError:
         return True
         
-def file_peeker(filename):
-    """
-    This function opens a file and reads out the first 2 bytes looking for the
-    signature of a data reduction produced file. The signatures are I{# } for
-    a C{Dave2dDST} and I{#F} for a C{Ascii3ColDST}.
-
-    @param filename: The name of the file to peek into
-    @type filename: C{string}
-
-
-    @return: The DST type of the peeked file
-    @rtype: C{string}
-
-
-    @raise RuntimeError: If the file isn't data reduction produced
-    @raise RuntimeError: If the file looks like a DR prodcued one, but still
-                         isn't recognized
-    """
-    pfile = open(filename, "r")
-    peek = pfile.read(2)
-    pfile.close()
-
-    if peek.startswith('#'):
-        if peek[1] == " ":
-            return "text/Dave2d"
-        elif peek[1] == "F":
-            return "text/Spec"
-        else:
-            raise RuntimeError("Signature of second byte %s not recognized." \
-                               % peek[1])
-    else:
-        raise RuntimeError("File %s is not a data reduction produced file." \
-                           % filename)

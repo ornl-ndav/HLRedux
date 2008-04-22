@@ -41,9 +41,9 @@ def run(config):
     import DST
 
     try:
-        data_dst = DST.getInstance("application/x-NeXus", config.data[0])
+        data_dst = DST.getInstance("application/x-NeXus", config.data)
     except SystemError:
-        print "ERROR: Failed to data read file %s" % config.data[0]
+        print "ERROR: Failed to data read file %s" % config.data
         sys.exit(-1)
 
     so_axis = "time_of_flight"
@@ -52,15 +52,15 @@ def run(config):
         print "Reading data file"
 
     if config.roi_file is None:
-        d_som1 = data_dst.getSOM(config.data_paths.toPath(), so_axis,
+        d_som1 = data_dst.getSOM(config.data_paths, so_axis,
                                  start_id=config.starting_ids,
                                  end_id=config.ending_ids)
     else:
-        d_som1 = data_dst.getSOM(config.data_paths.toPath(), so_axis,
+        d_som1 = data_dst.getSOM(config.data_paths, so_axis,
                                  roi_file=config.roi_file)
 
     if config.dump_pxl:
-        hlr_utils.write_file(config.data[0], "text/Spec", d_som1,
+        hlr_utils.write_file(config.data, "text/Spec", d_som1,
                              output_ext="tfp", verbose=config.verbose,
                              message="pixel TOF information")
     else:
@@ -71,7 +71,7 @@ def run(config):
         d_som2 = common_lib.sub_ncerr(d_som1, config.tib_const.toValErrTuple())
 
         if config.dump_sxl:
-            hlr_utils.write_file(config.data[0], "text/Spec", d_som2,
+            hlr_utils.write_file(config.data, "text/Spec", d_som2,
                                  output_ext="tsp", verbose=config.verbose,
                                  message="TIB const sub pixel TOF information")
         
@@ -111,16 +111,14 @@ if __name__ == "__main__":
     result.append("in the option documentation.")
     
     # set up the options available
-    parser = hlr_utils.InstOptions("usage: %prog [options] <datafile>", None,
+    parser = hlr_utils.BasicOptions("usage: %prog [options] <datafile>", None,
                                     None, hlr_utils.program_version(), 'error',
                                     " ".join(result))
-
-    # Defaults
+    
+    parser.add_option("", "--data-paths", dest="data_paths",
+                      help="Specify the comma separated list of detector data"\
+                      +" paths and signals. Default is /entry/bank1,1")
     parser.set_defaults(data_paths="/entry/bank1,1")
-
-    # Remove unneeded options
-    parser.remove_option("--norm")
-    parser.remove_option("--inst-geom")
     
     parser.add_option("", "--starting-ids", dest="starting_ids",
                       help="Specify the comma separated list of i and j pixel"\
@@ -154,47 +152,66 @@ if __name__ == "__main__":
 
     # set up the configuration
     configure = hlr_utils.Configure()
+    
+    # get the datafile name and check it
+    if len(args) == 1:
+        configure.data = args[0]
+        if not hlr_utils.file_exists(configure.data):
+            parser.error("Data file [%s] does not exist" % configure.data)
+    else:
+        if options.data is not None:
+            configure.data = hlr_utils.fix_filename(options.data)
+            if not hlr_utils.file_exists(configure.data):
+                parser.error("Data file [%s] does not exist" % configure.data)
+        else:
+            parser.error("Did not specify a datafile")
+    # create the output file name if there isn't one supplied
+    if options.output:
+        configure.output = hlr_utils.fix_filename(options.output)
+    else:
+        outfile = os.path.basename(configure.data)
+        path = os.path.join(os.getcwd(), outfile)
+        configure.output = hlr_utils.ext_replace(path, "nxs", "tof")
+        print "Using %s as output file" % configure.output
 
-    # Call the configuration setter for InstOptions
-    hlr_utils.InstConfiguration(parser, configure, options, args)
+    # get the roi file name and check it 
+    configure.roi_file = hlr_utils.fix_filename(options.roi_file)
+    if configure.roi_file is not None:
+        if not hlr_utils.file_exists(configure.roi_file):
+            parser.error("Pixel roi file [%s] does not exist" \
+                         % configure.roi_file)
 
-    # Set the ROI file
-    if hlr_utils.cli_provide_override(configure, "roi_file", "--roi-file"):
-        configure.roi_file = hlr_utils.determine_files(options.roi_file,
-                                                       one_file=True)
+    # set the verbosity
+    configure.verbose = options.verbose
+
+    # set the data paths
+    configure.data_paths = hlr_utils.create_data_paths(options.data_paths)
 
     # set the starting ids
-    if hlr_utils.cli_provide_override(configure, "starting_ids",
-                                      "--starting-ids"):
-        if options.starting_ids is not None:
-            configure.starting_ids = hlr_utils.create_id_pairs(\
+    if options.starting_ids is not None:
+        configure.starting_ids = hlr_utils.create_id_pairs(\
             options.starting_ids,\
             options.data_paths)
-        else:
-            configure.starting_ids = options.starting_ids
+    else:
+        configure.starting_ids = options.starting_ids
 
     # set the ending ids
-    if hlr_utils.cli_provide_override(configure, "ending_ids", "--ending-ids"):
-        if options.ending_ids is not None:
-            configure.ending_ids = hlr_utils.create_id_pairs(\
-                options.ending_ids,
-                options.data_paths,
-                inc=True)
-        else:
-            configure.ending_ids = options.ending_ids
+    if options.ending_ids is not None:
+        configure.ending_ids = hlr_utils.create_id_pairs(options.ending_ids,
+                                                         options.data_paths,
+                                                         inc=True)
+    else:
+        configure.ending_ids = options.ending_ids
 
     # set the dump all TOF pixel information
-    if hlr_utils.cli_provide_override(configure, "dump_pxl", "--dump-pxl"):
-        configure.dump_pxl = options.dump_pxl
+    configure.dump_pxl = options.dump_pxl
 
     # set the dump all TOF pixel information after TIB subtraction
-    if hlr_utils.cli_provide_override(configure, "dump_sxl", "--dump-sxl"):
-        configure.dump_sxl = options.dump_sxl
+    configure.dump_sxl = options.dump_sxl    
 
-    # Set the time-independent background constant
-    if hlr_utils.cli_provide_override(configure, "tib_const", "--tib-const"): 
-        configure.tib_const = hlr_utils.DrParameterFromString(\
-                    options.tib_const, True)
+    # Set the time-independent backgroun constant
+    configure.tib_const = hlr_utils.DrParameterFromString(options.tib_const,
+                                                          True)
 
     # run the program
     run(configure)

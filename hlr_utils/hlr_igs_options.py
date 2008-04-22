@@ -26,7 +26,7 @@ from optparse import Option
 import hlr_options
 import hlr_utils
 
-class IgsOptions(hlr_options.InstOptions):
+class IgsOptions(hlr_options.SNSOptions):
     """
     This class provides options for the IGS class of instruments for use in
     reducing neutron scattering data with the data reduction drivers.
@@ -62,9 +62,9 @@ class IgsOptions(hlr_options.InstOptions):
         @param kwargs: A list of keyword arguments that the function accepts:
         """
         # parent constructor
-        hlr_options.InstOptions.__init__(self, usage, option_list,
-                                         Option, version, conflict_handler,
-                                         description, inst="IGS")
+        hlr_options.SNSOptions.__init__(self, usage, option_list,
+                                        Option, version, conflict_handler,
+                                        description, inst="IGS")
 
         self.add_option("", "--dead-time", dest="dead_time",
                         help="Dead time with units (no spaces)")
@@ -147,13 +147,6 @@ class IgsOptions(hlr_options.InstOptions):
                         +"file for each dataset.")
         self.set_defaults(dump_mon_effc=False)
 
-        self.add_option("", "--dump-mon-diml", action="store_true",
-                        dest="dump_mon_diml",
-                        help="Flag to dump the wavelength information for the"\
-                        +" dimensionless monitor. Creates a *.mdl "\
-                        +"file for each dataset.")
-        self.set_defaults(dump_mon_diml=False)
-        
         self.add_option("", "--dump-wave-mnorm", action="store_true",
                         dest="dump_wave_mnorm",
                         help="Flag to dump the combined wavelength "\
@@ -258,8 +251,8 @@ def IgsConfiguration(parser, configure, options, args):
     @type args: C{list}
     """
 
-    # Call the configuration setter for InstOptions
-    hlr_options.InstConfiguration(parser, configure, options, args, inst="IGS")
+    # Call the configuration setter for SNSOptions
+    hlr_options.SnsConfiguration(parser, configure, options, args, inst="IGS")
 
     # Set the ROI file
     if hlr_utils.cli_provide_override(configure, "roi_file", "--roi-file"):
@@ -376,11 +369,6 @@ def IgsConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "dump_mon_effc",
                                       "--dump-mon-effc"):
         configure.dump_mon_effc = options.dump_mon_effc
-
-    # Set the ability to dump the dimensionless monitor wavelength information
-    if hlr_utils.cli_provide_override(configure, "dump_mon_diml",
-                                      "--dump-mon-diml"):
-        configure.dump_mon_diml = options.dump_mon_diml        
 
     # Set the ability to dump the wavelength information
     if hlr_utils.cli_provide_override(configure, "dump_wave_mnorm",
