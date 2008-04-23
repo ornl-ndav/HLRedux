@@ -21,7 +21,6 @@
 #
 
 # GEN drivers
-from GEN import agg_dr_files
 from GEN import mask_generator
 from GEN import tof_slicer
 
@@ -36,9 +35,6 @@ from IGS import igs_diff_reduction
 
 # REF drivers
 from REF import reflect_reduction
-
-# SAS drivers
-from SAS import sas_reduction1
 
 #version
 __id__ = "$Id$"

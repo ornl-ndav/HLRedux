@@ -84,14 +84,6 @@ class BasicOptions(optparse.OptionParser):
                         +"current working directory and the first data file "\
                         +"as the basis for the output file names.")
 
-        # specify the instrument
-        self.add_option("-i", "--inst", dest="inst",
-                        help="Specify the short name for the instrument.")
-
-        # specify the facility
-        self.add_option("-f", "--facility", dest="facility",
-                        help="Specify the short name for the facility.")
-        
         # specifying data sets
         self.add_option("", "--data", help="Specify the data file")
 
@@ -137,23 +129,13 @@ def BasicConfiguration(parser, configure, options, args):
             # No flags present, do nothing
             pass 
 
-    # Define instrument short name first as stuff below depends on it
-    if hlr_utils.cli_provide_override(configure, "inst", "--inst"):
-        configure.inst = options.inst
-
-    # Define facility short name as stuff below depends on it
-    if hlr_utils.cli_provide_override(configure, "facility", "--facility"):
-        configure.facility = options.facility        
-
     # Get the datafile name and check it
     if options.data is not None:
         configure.data = hlr_utils.determine_files(options.data,
                                                    configure.inst,
-                                                   configure.facility,
                                                    stop_on_none=True)
     elif len(args) > 0:
         configure.data = hlr_utils.determine_files(args, configure.inst,
-                                                   configure.facility,
                                                    stop_on_none=True)
     elif configure.data:
         # We have data from the config file, so everything is OK.
@@ -212,9 +194,9 @@ def BasicConfiguration(parser, configure, options, args):
     if configure.verbose and options.output:
         print "Using %s as output file" % configure.output
 
-class InstOptions(BasicOptions):
+class SNSOptions(BasicOptions):
     """
-    This class provides options more in line with neutron scattering data.
+    This class provides options more inline with neutron scattering data.
     It provides various instrument characterization options that can be
     tailored to the various instrument classes by using keyword arguments.
     """
@@ -223,7 +205,7 @@ class InstOptions(BasicOptions):
                  version=None, conflict_handler='error', description=None,
                  **kwargs):
         """
-        Constructor for C{InstOptions}
+        Constructor for C{SNSOptions}
 
         @param usage: (OPTIONAL) The correct usage of program in which the
                                  option class is used
@@ -272,6 +254,9 @@ class InstOptions(BasicOptions):
                         help="Specify the comma separated list of detector "\
                         +"data paths and signals.")
 
+        self.add_option("", "--inst", dest="inst",
+                        help="Specify the short name for the instrument.")
+
         # Instrument characterization file options
         self.add_option("", "--norm", help="Specify the normalization file")
         
@@ -287,37 +272,24 @@ class InstOptions(BasicOptions):
                             help="Specify the direct scattering background "\
                             +"(sample data at baseline temperature) file") 
 
-        elif instrument == "SAS":
-            self.add_option("", "--ecan",
-                            help="Specify the empty sample container file")
-
-            self.add_option("", "--solv",
-                            help="Specify the solvent/buffer only file")
-
-            self.add_option("", "--open",
-                            help="Specify the open beam file")
-
-            self.add_option("", "--dkcur",
-                            help="Specify the dark current file")            
-
         else:
             pass
 
-def InstConfiguration(parser, configure, options, args, **kwargs):
+def SnsConfiguration(parser, configure, options, args, **kwargs):
     """
     This function sets the incoming C{Configure} object with all the options
-    that have been specified via the C{InstOptions} object.
+    that have been specified via the C{SNSOptions} object.
 
     @param parser: The parser object
-    @type parser: L{hlr_utils.InstOptions}
+    @type parser: L{hlr_utils.SNSOptions}
     
     @param configure: The configuration object
     @type configure: L{hlr_utils.Configure}
     
-    @param options: The parsed options from C{InstOptions}
+    @param options: The parsed options from C{SNSOptions}
     @type options: C{Option}
 
-    @param args: The parsed arguments from C{InstOptions}
+    @param args: The parsed arguments from C{SNSOptions}
     @type args: C{list}
 
     @param kwargs: A list of keyword arguments that the function accepts:
@@ -332,6 +304,13 @@ def InstConfiguration(parser, configure, options, args, **kwargs):
         instrument = kwargs["inst"]
     except KeyError:
         instrument = ""
+
+    # Define instrument short name first as stuff below depends on it
+    if hlr_utils.cli_provide_override(configure, "inst", "--inst"):
+        configure.inst = options.inst
+    else:
+        import sns_inst_util
+        configure.inst = sns_inst_util.getInstrument()
 
     # Call the configuration setter for BasicOptions
     BasicConfiguration(parser, configure, options, args)
@@ -348,49 +327,23 @@ def InstConfiguration(parser, configure, options, args, **kwargs):
     # Set the normalization file list
     if hlr_utils.cli_provide_override(configure, "norm", "--norm"):
         configure.norm = hlr_utils.determine_files(options.norm,
-                                                   configure.inst,
-                                                   configure.facility)
+                                                   configure.inst)
 
     if instrument == "IGS":
         # Set the empty can file list
         if hlr_utils.cli_provide_override(configure, "ecan", "--ecan"):
             configure.ecan = hlr_utils.determine_files(options.ecan,
-                                                       configure.inst,
-                                                       configure.facility)
+                                                       configure.inst)
         # Set the background file list
         if hlr_utils.cli_provide_override(configure, "back", "--back"):
             configure.back = hlr_utils.determine_files(options.back,
-                                                       configure.inst,
-                                                       configure.facility)
+                                                       configure.inst)
 
         # Set the direct scattering background file list
         if hlr_utils.cli_provide_override(configure, "dsback", "--dsback"):
             configure.dsback = hlr_utils.determine_files(options.dsback,
-                                                         configure.inst,
-                                                         configure.facility)
-    elif instrument == "SAS":
-        # Set the empty can file list
-        if hlr_utils.cli_provide_override(configure, "ecan", "--ecan"):
-            configure.ecan = hlr_utils.determine_files(options.ecan,
-                                                       configure.inst,
-                                                       configure.facility)
-        # Set the empty can file list
-        if hlr_utils.cli_provide_override(configure, "solv", "--solv"):
-            configure.solv = hlr_utils.determine_files(options.solv,
-                                                       configure.inst,
-                                                       configure.facility)
-        # Set the empty can file list
-        if hlr_utils.cli_provide_override(configure, "open", "--open"):
-            configure.open = hlr_utils.determine_files(options.open,
-                                                       configure.inst,
-                                                       configure.facility)
+                                                         configure.inst)
 
-        # Set the empty can file list
-        if hlr_utils.cli_provide_override(configure, "dkcur", "--dkcur"):
-            configure.dkcur = hlr_utils.determine_files(options.dkcur,
-                                                        configure.inst,
-                                                        configure.facility)
-            
     else:
         pass
 

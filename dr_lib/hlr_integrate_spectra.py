@@ -61,16 +61,6 @@ def integrate_spectra(obj, **kwargs):
                    width via the I{width} flag in L{integrate_axis}. The
                    default value of the flag is I{False}.
     @type norm: C{boolean}
-
-    @keyword total: This is a flag to turn on the summation of all individual
-                    spectrum integrations. The default value of the flag is
-                    I{False}.
-    @type total: C{boolean}
-
-    @keyword width: This is a flag to turn on the removal of the individual bin
-                    width in the L{integrate_axis} function while doing the
-                    integrations. The default value of the flag is I{False}. 
-    @type width: C{boolean}
     
     
     @return: Object containing the integration and the uncertainty squared
@@ -122,18 +112,6 @@ def integrate_spectra(obj, **kwargs):
             width = False
     except KeyError:
         norm = False
-        width = False
-
-    # Check for total keyword argument
-    try:
-        total = kwargs["total"]
-    except KeyError:
-        total = False
-
-    # Check for width keyword argument
-    try:
-        width = kwargs["width"]
-    except KeyError:
         width = False
 
     # If the integration start bound is not given, assume the 1st bin
@@ -192,28 +170,7 @@ def integrate_spectra(obj, **kwargs):
 
         hlr_utils.result_insert(result, res_descr, value1, obj1, "yonly")
 
-    if not total:
-        return result
-    else:
-        # Sum all integration counts
-        total_counts = 0
-        total_err2 = 0
-
-        for j in xrange(hlr_utils.get_length(result)):
-            total_counts += hlr_utils.get_value(result, j, res_descr, "y")
-            total_err2 += hlr_utils.get_err2(result, j, res_descr, "y")
-
-        # Create new result object
-        (result2, res2_descr) = hlr_utils.empty_result(result)
-
-        result2 = hlr_utils.copy_som_attr(result2, res2_descr,
-                                          result, res_descr)
-
-        res1 = hlr_utils.get_value(result, 0, res_descr, "all")
-        hlr_utils.result_insert(result2, res2_descr,
-                                (total_counts, total_err2),
-                                res1, "yonly")
-        return result2
+    return result
 
 if __name__ == "__main__":
     import hlr_test
@@ -228,4 +185,4 @@ if __name__ == "__main__":
     print "som            :", integrate_spectra(som1)
     print "som (1.5, 3.5) :", integrate_spectra(som1, start=1.5, end=3.5)
     print "som (0.5, 2.75):", integrate_spectra(som1, start=0.5, end=2.75)
-    print "som (total)     :", integrate_spectra(som1, total=True)
+    print "som (norm)     :", integrate_spectra(som1, norm=True)

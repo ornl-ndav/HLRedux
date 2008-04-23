@@ -37,7 +37,6 @@ from hlr_math_compatible import *
 from hlr_nxpath import *
 from hlr_options import *
 from hlr_ref_options import RefOptions, RefConfiguration
-from hlr_sas_options import SansOptions, SansConfiguration
 from hlr_data_helper import *
 from hlr_driver_helper import *
 

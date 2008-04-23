@@ -43,8 +43,7 @@ PACKAGE = "HLRedux"
 VERSION = __version__
 
 package_list = ['', 'common_lib', 'dr_lib', 'drivers', 'drivers.GEN',
-                'drivers.IGS', 'drivers.REF', 'drivers.SAS', 'hlr_utils',
-                'hlr_test']
+                'drivers.IGS', 'drivers.REF', 'hlr_utils', 'hlr_test']
 
 instrument_scripts = {
     "ASG" : [
@@ -57,7 +56,6 @@ instrument_scripts = {
     "DGS" : [
     ],
     "GEN" : [
-    'agg_dr_files',
     'mask_generator',
     'tof_slicer'
     ],
@@ -76,7 +74,6 @@ instrument_scripts = {
     'reflect_reduction'
     ],
     "SAS" : [
-    'sas_reduction1'
     ],
     "SCD" : [
     ]

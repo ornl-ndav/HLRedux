@@ -340,23 +340,17 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
             dT.__delslice__(0, k_i_cutbin)
             zero_vec.__delslice__(0, k_i_cutbin)
 
-        try:
-            if inst_name == "BSS":
-                ((Q_1, E_t_1),
-                 (Q_2, E_t_2),
-                 (Q_3, E_t_3),
-                 (Q_4, E_t_4)) = dr_lib.calc_BSS_EQ_verticies((E_t, E_t_err2),
-                                                              (Q, Q_err2), x_1,
-                                                              x_2, x_3, x_4,
-                                                              dT, dh, zero_vec)
-            else:
-                raise RuntimeError("Do not know how to calculate (Q_i, "\
-                                   +"E_t_i) verticies for instrument %s" \
-                                   % inst_name)
-
-        except IndexError:
-            # All the data got Q filtered, move on
-            continue
+        if inst_name == "BSS":
+            ((Q_1, E_t_1),
+             (Q_2, E_t_2),
+             (Q_3, E_t_3),
+             (Q_4, E_t_4)) = dr_lib.calc_BSS_EQ_verticies((E_t, E_t_err2),
+                                                          (Q, Q_err2), x_1,
+                                                          x_2, x_3, x_4,
+                                                          dT, dh, zero_vec)
+        else:
+            raise RuntimeError("Do not know how to calculate (Q_i, E_t_i) "\
+                               +"verticies for instrument %s" % inst_name)
 
         try:
             (y_2d, y_2d_err2,

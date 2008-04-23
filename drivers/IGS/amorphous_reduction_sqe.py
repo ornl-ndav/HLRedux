@@ -269,21 +269,12 @@ def run(config, tim=None):
                                            scale=config.scale_bcn)
 
     # Steps 18-19: Subtract background spectrum from normalization spectrum
-
-    try:
-        config.pre_norm
-    except AttributeError:
-        config.pre_norm = False
-    
-    if not config.pre_norm:
-        n_som2 = dr_lib.subtract_bkg_from_data(n_som1, b_som1,
-                                               verbose=config.verbose,
-                                               timer=tim,
-                                               dataset1="normalization",
-                                               dataset2="background",
-                                               scale=config.scale_bn)
-    else:
-        n_som2 = n_som1
+    n_som2 = dr_lib.subtract_bkg_from_data(n_som1, b_som1,
+                                           verbose=config.verbose,
+                                           timer=tim,
+                                           dataset1="normalization",
+                                           dataset2="background",
+                                           scale=config.scale_bn)
 
     del b_som1, e_som1, bcs_som, cs_som
 
@@ -298,27 +289,21 @@ def run(config, tim=None):
     del d_som2, e_som2
     
     # Steps 22-23: Subtract empty can spectrum from normalization spectrum
-    if not config.pre_norm:
-        n_som3 = dr_lib.subtract_bkg_from_data(n_som2, e_som3,
-                                               verbose=config.verbose,
-                                               timer=tim,
-                                               dataset1="normalization",
-                                               dataset2="empty_can",
-                                               scale=config.scale_cn)
-    else:
-        n_som3 = n_som2
+    n_som3 = dr_lib.subtract_bkg_from_data(n_som2, e_som3,
+                                           verbose=config.verbose,
+                                           timer=tim,
+                                           dataset1="normalization",
+                                           dataset2="empty_can",
+                                           scale=config.scale_cn)    
 
     del n_som2, e_som3
 
     # Step 24-25: Integrate normalization spectra
-    if config.verbose and n_som3 is not None and not config.pre_norm:
+    if config.verbose and n_som3 is not None:
         print "Integrating normalization spectra"
 
-    if not config.pre_norm:
-        norm_int = dr_lib.integrate_spectra(n_som3, start=config.norm_start,
-                                            end=config.norm_end, norm=True)
-    else:
-        norm_int = n_som3
+    norm_int = dr_lib.integrate_spectra(n_som3, start=config.norm_start,
+                                        end=config.norm_end, norm=True)
 
     del n_som3
         
@@ -357,21 +342,29 @@ def run(config, tim=None):
     if tim is not None:
         tim.getTime(msg="After creation of final spectrum ")
 
+    del d_som4
+
+    # If rescaling factor present, rescale the data
+    if config.rescale_final is not None:
+        d_som6 = common_lib.mult_ncerr(d_som5, (config.rescale_final, 0.0))
+    else:
+        d_som6 = d_som5
+
     if not __name__ == "amorphous_reduction_sqe":
 
-        del d_som4
+        del d_som5
 
         # Writing 2D DAVE file
 
-        hlr_utils.write_file(config.output, "text/Dave2d", d_som5,
+        hlr_utils.write_file(config.output, "text/Dave2d", d_som6,
                              verbose=config.verbose,
                              message="data",
                              replace_path=False,
                              replace_ext=False)
         
-        d_som5.attr_list["config"] = config
+        d_som6.attr_list["config"] = config
 
-        hlr_utils.write_file(config.output, "text/rmd", d_som5,
+        hlr_utils.write_file(config.output, "text/rmd", d_som6,
                              output_ext="rmd",
                              data_ext=config.ext_replacement,         
                              path_replacement=config.path_replacement,
@@ -383,7 +376,7 @@ def run(config, tim=None):
             tim.getTime(msg="Total Running Time")
 
     else:
-        return d_som5
+        return d_som6
     
 if __name__ == "__main__":
     import hlr_utils

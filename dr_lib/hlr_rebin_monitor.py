@@ -22,29 +22,16 @@
 
 # $Id$
 
-def rebin_monitor(obj1, obj2, **kwargs):
+def rebin_monitor(obj1, obj2):
     """
     This function takes objects (1st is the monitor, 2nd is the detector data)
-    and rebins the data for obj1 onto the axis provided by obj2. The pixel ID
-    can be transferred as the pixel ID of the rebinned monitor histogram. A
-    prefix is placed on the bank ID to dilineate that this is a rebinned
-    monitor spectrum for that pixel.
+    and rebins the data for obj1 onto the axis provided by obj2. 
 
     @param obj1: Monitor object that will be rebinned
     @type obj1: C{SOM.SOM} or C{SOM.SO}
     
     @param obj2: Detector data object that will provide the axis for rebinning
     @type obj2: C{SOM.SOM} or C{SOM.SO}
-
-    @param kwargs: A list of keyword arguments that the function accepts
-
-    @keyword use_pix_id: A flag that specifies if the pixel ID is to be used
-    in the rebinned monitor spectrum. The default is I{False}.
-    @type use_pix_id: C{boolean}
-
-    @keyword prefix: Allows one to specify a prefix for the bank ID. The
-                     default is I{m}.
-    @type prefix: C{string}
 
     
     @return: Object that has been rebinned
@@ -80,17 +67,6 @@ def rebin_monitor(obj1, obj2, **kwargs):
     else:
         pass
 
-    # Check for keywords
-    try:
-        prefix = kwargs["prefix"]
-    except KeyError:
-        prefix = "m"
-
-    try: 
-        use_pix_id = kwargs["use_pix_id"]
-    except KeyError:
-        use_pix_id = False
-
     result = hlr_utils.copy_som_attr(result, res_descr, obj1, o1_descr)
 
     # iterate through the values
@@ -102,13 +78,6 @@ def rebin_monitor(obj1, obj2, **kwargs):
         val2 = hlr_utils.get_value(obj2, i, o2_descr, "x")
         
         value = common_lib.rebin_axis_1D(val1, val2)
-        if use_pix_id:
-            # Set the pixel ID to the spectrum with modified bank ID
-            try:
-                value.id = (prefix+obj2[i].id[0],
-                            (obj2[i].id[1][0], obj2[i].id[1][1]))
-            except TypeError:
-                value.id = prefix+str(obj2[i].id)
         
         hlr_utils.result_insert(result, res_descr, value, None, "all")
 

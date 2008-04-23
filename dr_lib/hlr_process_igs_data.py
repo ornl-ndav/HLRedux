@@ -108,48 +108,14 @@ def process_igs_data(datalist, conf, **kwargs):
     if conf.verbose:
         print "Reading %s file" % dataset_type
 
-    # Special case handling for normalization data. Dynamically trying to
-    # determine if incoming file is a previously calculated one.
-    if dataset_type == "normalization":
-        try:
-            # Check the first incoming file
-            dst_type = hlr_utils.file_peeker(datalist[0])
-            # If file_peeker succeeds, the DST is different than the function
-            # returns
-            dst_type = "text/num-info"
-            # Let ROI file handle filtering
-            data_paths = None
-        except RuntimeError:
-            # It's a NeXus file
-            dst_type = "application/x-NeXus"
-            data_paths = conf.data_paths.toPath()
-    else:
-        dst_type = "application/x-NeXus"
-        data_paths = conf.data_paths.toPath()
-
     # The [0] is to get the data SOM and ignore the None background SOM
-    dp_som0 = dr_lib.add_files(datalist, Data_Paths=data_paths,
+    dp_som0 = dr_lib.add_files(datalist, Data_Paths=conf.data_paths.toPath(),
                                SO_Axis=so_axis, Signal_ROI=conf.roi_file,
                                dataset_type=dataset_type,
-                               dst_type=dst_type,
                                Verbose=conf.verbose, Timer=t)[0]
 
     if t is not None:
         t.getTime(msg="After reading %s " % dataset_type)
-
-    if dst_type == "text/num-info":
-        # Since we have a pre-calculated normalization dataset, set the flag
-        # and return the SOM now
-        conf.pre_norm = True
-        # Make the labels and units compatible with a NeXus file based SOM
-        dp_som0.setAxisLabel(0, "wavelength")
-        dp_som0.setAxisUnits(0, "Angstroms")
-        dp_som0.setYUnits("Counts/A")
-        return dp_som0
-    else:
-        if dataset_type == "normalization":
-            # Since we have a NeXus file, we need to continue
-            conf.pre_norm = False
 
     dp_som1 = dr_lib.fix_bin_contents(dp_som0)
 
