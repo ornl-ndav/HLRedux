@@ -160,7 +160,8 @@ def add_files(filelist, **kwargs):
                     print "# Data Size:", len(d_som1[0])
                     print "# X-Axis:", len(d_som1[0].axis[0].val)
                     try:
-                        print "# Y-Axis:", len(d_som1[0].axis[1].val)
+                        axis_len = len(d_som1[0].axis[1].val)
+                        print "# Y-Axis:", axis_len
                     except IndexError:
                         pass
 
