@@ -101,6 +101,11 @@ class AmrOptions(hlr_igs_options.IgsOptions):
                         help="Flag to dump the initial energy information for"\
                         +" all pixels. Creates a *.ixl file.")
         self.set_defaults(dump_ei=False)
+
+        self.add_option("", "--split", action="store_true", dest="split",
+                        help="Special flag for running driver in split mode. "\
+                        +"Only necessary for parallel computing environment.")
+        self.set_defaults(split=False)
         
 def AmrConfiguration(parser, configure, options, args):
     """
@@ -181,3 +186,6 @@ def AmrConfiguration(parser, configure, options, args):
             configure.dump_dslin = True
             configure.dump_energy = True
             configure.dump_initial_energy = True
+
+    if hlr_utils.cli_provide_override(configure, "split", "--split"):
+        configure.split = options.split
