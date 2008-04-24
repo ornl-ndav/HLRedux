@@ -402,6 +402,12 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
                                                           area_new,
                                                           area_sum_err2)
 
+    # Check for so_id keyword argument
+    try:
+        so_dim.id = kwargs["so_id"]
+    except KeyError:
+        so_dim.id = 0
+
     if split:
         pass
 
@@ -412,47 +418,60 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
                                                          area_sum,
                                                          area_sum_err2)
 
-    # Check for so_id keyword argument
-    try:
-        so_dim.id = kwargs["so_id"]
-    except KeyError:
-        so_dim.id = 0
+        comb_som = SOM.SOM()
+        comb_som.copyAttributes(som)
 
-    comb_som = SOM.SOM()
-    comb_som.copyAttributes(som)
+        comb_som = __set_som_attributes(comb_som, inst_name, **kwargs)
 
+        comb_som.append(so_dim)
+
+        del so_dim
+        
+        return comb_som
+
+def __set_som_attributes(tsom, inst_name, **kwargs):
+    """
+    This is a helper function that sets attributes for the final S(Q,E)
+    C{SOM.SOM}.
+
+    @param tsom: The input object for attribute setting
+    @type tsom: C{SOM.SOM}
+
+    @param inst_name: The short name for an instrument
+    @type inst_name: C{string}
+
+
+    @return: The C{SOM.SOM} with attributes set
+    @rtype: C{SOM.SOM}
+    """
     # Check for y_label keyword argument
     try:
-        comb_som.setYLabel(kwargs["y_label"])
+        tsom.setYLabel(kwargs["y_label"])
     except KeyError:
-        comb_som.setYLabel("Counts")
+        tsom.setYLabel("Counts")
 
     # Check for y_units keyword argument
     try:
-        comb_som.setYUnits(kwargs["y_units"])
+        tsom.setYUnits(kwargs["y_units"])
     except KeyError:
         if inst_name == "BSS":
-            comb_som.setYUnits("Counts / ueV A^-1")
+            tsom.setYUnits("Counts / ueV A^-1")
         else:
-            comb_som.setYUnits("Counts / meV A^-1")
+            tsom.setYUnits("Counts / meV A^-1")
 
     # Check for x_labels keyword argument
     try:
-        comb_som.setAllAxisLabels(kwargs["x_labels"])
+        tsom.setAllAxisLabels(kwargs["x_labels"])
     except KeyError:
-        comb_som.setAllAxisLabels(["Momentum transfer", "Energy transfer"])
+        tsom.setAllAxisLabels(["Momentum transfer", "Energy transfer"])
 
     # Check for x_units keyword argument
     try:
-        comb_som.setAllAxisUnits(kwargs["x_units"])
+        tsom.setAllAxisUnits(kwargs["x_units"])
     except KeyError:
         if inst_name == "BSS":
-            comb_som.setAllAxisUnits(["A^-1", "ueV"])
+            tsom.setAllAxisUnits(["A^-1", "ueV"])
         else:
-            comb_som.setAllAxisUnits(["A^-1", "meV"])
+            tsom.setAllAxisUnits(["A^-1", "meV"])
 
-    comb_som.append(so_dim)
-
-    del so_dim
-
-    return comb_som
+    return tsom
