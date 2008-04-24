@@ -352,7 +352,8 @@ def run(config, tim=None):
                                       y_units="counts / (ueV * A^-1)",
                                       x_labels=["Q transfer",
                                                 "energy transfer"],
-                                      x_units=["1/Angstroms","ueV"])
+                                      x_units=["1/Angstroms","ueV"],
+                                      split=config.split)
     
     if tim is not None:
         tim.getTime(msg="After creation of final spectrum ")
@@ -360,7 +361,7 @@ def run(config, tim=None):
     del d_som4
 
     # If rescaling factor present, rescale the data
-    if config.rescale_final is not None:
+    if config.rescale_final is not None and not config.split:
         d_som6 = common_lib.mult_ncerr(d_som5, (config.rescale_final, 0.0))
     else:
         d_som6 = d_som5
@@ -370,12 +371,12 @@ def run(config, tim=None):
         del d_som5
 
         # Writing 2D DAVE file
-
-        hlr_utils.write_file(config.output, "text/Dave2d", d_som6,
-                             verbose=config.verbose,
-                             message="data",
-                             replace_path=False,
-                             replace_ext=False)
+        if not config.split:
+            hlr_utils.write_file(config.output, "text/Dave2d", d_som6,
+                                 verbose=config.verbose,
+                                 message="data",
+                                 replace_path=False,
+                                 replace_ext=False)
         
         d_som6.attr_list["config"] = config
 
