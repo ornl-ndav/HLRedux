@@ -86,6 +86,10 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
                     be written out into separate files.
     @type split: C{boolean}
 
+    @keyword configure: This is the object containing the driver configuration.
+    @type configure: C{Configure}
+
+
     @return: Object containing a 2D C{SO} with E and Q axes
     @rtype: C{SOM.SOM}
 
@@ -162,6 +166,12 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
         split = kwargs["split"]
     except KeyError:
         split = False
+
+    # Check for configure keyword
+    try:
+        configure = kwargs["configure"]
+    except KeyError:
+        configure = False
 
     so_dim = SOM.SO(dim)
 
@@ -408,8 +418,33 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
     except KeyError:
         so_dim.id = 0
 
+    comb_som = SOM.SOM()
+    comb_som.copyAttributes(som)
+
+    comb_som = __set_som_attributes(comb_som, inst_name, **kwargs)
+
     if split:
-        pass
+        comb_som.append(so_dim)
+        
+        # Write out summed counts into file
+        hlr_utils.write_file(configure.output, "text/Dave2d", comb_som,
+                             output_ext="cnt",
+                             verbose=configure.verbose,
+                             data_ext=configure.ext_replacement,         
+                             path_replacement=configure.path_replacement,
+                             message="summed counts")
+
+        # Replace counts data with fractional area. The axes remain the same
+        comb_som[0].y = area_sum
+        comb_som[0].var_y = area_sum_err2
+
+        # Write out summed counts into file
+        hlr_utils.write_file(configure.output, "text/Dave2d", comb_som,
+                             output_ext="fra",
+                             verbose=configure.verbose,
+                             data_ext=configure.ext_replacement,         
+                             path_replacement=configure.path_replacement,
+                             message="fractional area")        
 
     else:
         # Divide summed fractional counts by the sum of the fractional areas
@@ -418,16 +453,12 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
                                                          area_sum,
                                                          area_sum_err2)
 
-        comb_som = SOM.SOM()
-        comb_som.copyAttributes(som)
-
-        comb_som = __set_som_attributes(comb_som, inst_name, **kwargs)
 
         comb_som.append(so_dim)
 
-        del so_dim
+    del so_dim
         
-        return comb_som
+    return comb_som
 
 def __set_som_attributes(tsom, inst_name, **kwargs):
     """
