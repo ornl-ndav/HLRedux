@@ -81,7 +81,10 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
     @keyword x_units: This is a list of names that sets the individual x axis
     units
     @type x_units: C{list} of C{string}s
-    
+
+    @keyword split: This flag causes the counts and the fractional area to
+                    be written out into separate files.
+    @type split: C{boolean}
 
     @return: Object containing a 2D C{SO} with E and Q axes
     @rtype: C{SOM.SOM}
@@ -153,6 +156,12 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
         Q_filter = kwargs["Q_filter"]
     except KeyError:
         Q_filter = True
+
+    # Check for split keyword
+    try:
+        split = kwargs["split"]
+    except KeyError:
+        split = False
 
     so_dim = SOM.SO(dim)
 
@@ -392,12 +401,16 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
                                                           area_sum_err2,
                                                           area_new,
                                                           area_sum_err2)
-        
-    # Divide summed fractional counts by the sum of the fractional areas
-    (so_dim.y, so_dim.var_y) = array_manip.div_ncerr(so_dim.y,
-                                                     so_dim.var_y,
-                                                     area_sum,
-                                                     area_sum_err2)
+
+    if split:
+        pass
+
+    else:
+        # Divide summed fractional counts by the sum of the fractional areas
+        (so_dim.y, so_dim.var_y) = array_manip.div_ncerr(so_dim.y,
+                                                         so_dim.var_y,
+                                                         area_sum,
+                                                         area_sum_err2)
 
     # Check for so_id keyword argument
     try:
