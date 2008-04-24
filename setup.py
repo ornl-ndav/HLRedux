@@ -59,7 +59,8 @@ instrument_scripts = {
     "GEN" : [
     'agg_dr_files',
     'mask_generator',
-    'tof_slicer'
+    'tof_slicer',
+    'two_file_math'
     ],
     "IGS" : [
     'amorphous_reduction',
