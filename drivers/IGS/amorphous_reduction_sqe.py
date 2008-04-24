@@ -353,7 +353,8 @@ def run(config, tim=None):
                                       x_labels=["Q transfer",
                                                 "energy transfer"],
                                       x_units=["1/Angstroms","ueV"],
-                                      split=config.split)
+                                      split=config.split,
+                                      configure=config)
     
     if tim is not None:
         tim.getTime(msg="After creation of final spectrum ")
