@@ -440,6 +440,8 @@ def __set_som_attributes(tsom, inst_name, **kwargs):
     @param inst_name: The short name for an instrument
     @type inst_name: C{string}
 
+    @param kwargs: These are keywords that are specified by the main function.
+    
 
     @return: The C{SOM.SOM} with attributes set
     @rtype: C{SOM.SOM}
