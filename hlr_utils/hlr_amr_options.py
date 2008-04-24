@@ -79,6 +79,10 @@ class AmrOptions(hlr_igs_options.IgsOptions):
                         +"transfer values and the momentum transfer bin "\
                         +"width in Angstroms^-1")
 
+        self.add_option("", "--rescale-final", dest="rescale_final",
+                        help="Specify the constant with which to scale the "\
+                        +"final data.")
+
         self.add_option("", "--dump-dslin", action="store_true",
                         dest="dump_dslin",
                         help="Flag to dump the linearly interpolated direct "\
@@ -148,6 +152,14 @@ def AmrConfiguration(parser, configure, options, args):
     if configure.Q_bins is None:
         parser.error("You must provide Q binning via the mom-trans-bins "\
                      +"option")
+
+    # Set the final data rescaling constant
+    if hlr_utils.cli_provide_override(configure, "rescale_final",
+                                      "--rescale-final"):
+        try:
+            configure.rescale_final = float(options.rescale_final)
+        except TypeError:
+            configure.rescale_final = options.rescale_final
 
     # Set the ability to dump the energy transfer information
     if hlr_utils.cli_provide_override(configure, "dump_dslin",

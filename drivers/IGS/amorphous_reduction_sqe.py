@@ -357,21 +357,29 @@ def run(config, tim=None):
     if tim is not None:
         tim.getTime(msg="After creation of final spectrum ")
 
+    del d_som4
+
+    # If rescaling factor present, rescale the data
+    if config.rescale_final is not None:
+        d_som6 = common_lib.mult_ncerr(d_som5, (config.rescale_final, 0.0))
+    else:
+        d_som6 = d_som5
+
     if not __name__ == "amorphous_reduction_sqe":
 
-        del d_som4
+        del d_som5
 
         # Writing 2D DAVE file
 
-        hlr_utils.write_file(config.output, "text/Dave2d", d_som5,
+        hlr_utils.write_file(config.output, "text/Dave2d", d_som6,
                              verbose=config.verbose,
                              message="data",
                              replace_path=False,
                              replace_ext=False)
         
-        d_som5.attr_list["config"] = config
+        d_som6.attr_list["config"] = config
 
-        hlr_utils.write_file(config.output, "text/rmd", d_som5,
+        hlr_utils.write_file(config.output, "text/rmd", d_som6,
                              output_ext="rmd",
                              data_ext=config.ext_replacement,         
                              path_replacement=config.path_replacement,
@@ -383,7 +391,7 @@ def run(config, tim=None):
             tim.getTime(msg="Total Running Time")
 
     else:
-        return d_som5
+        return d_som6
     
 if __name__ == "__main__":
     import hlr_utils
