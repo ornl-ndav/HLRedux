@@ -766,7 +766,7 @@ def file_peeker(filename):
     """
     This function opens a file and reads out the first 2 bytes looking for the
     signature of a data reduction produced file. The signatures are I{# } for
-    a C{Dave2dDST} and I{#F} for a C{Ascii3ColDST}.
+    a C{Dave2dDST}, I{#F} for a C{Ascii3ColDST} and I{#I} for a C{NumInfoDST}.
 
     @param filename: The name of the file to peek into
     @type filename: C{string}
@@ -777,7 +777,7 @@ def file_peeker(filename):
 
 
     @raise RuntimeError: If the file isn't data reduction produced
-    @raise RuntimeError: If the file looks like a DR prodcued one, but still
+    @raise RuntimeError: If the file looks like a DR produced one, but still
                          isn't recognized
     """
     pfile = open(filename, "r")
@@ -789,6 +789,8 @@ def file_peeker(filename):
             return "text/Dave2d"
         elif peek[1] == "F":
             return "text/Spec"
+        elif peek[1] == "I":
+            return "text/num-info"
         else:
             raise RuntimeError("Signature of second byte %s not recognized." \
                                % peek[1])
