@@ -52,11 +52,14 @@ def normalize_to_monitor(fileName,time_offset_detector,time_offset_monitor,**kwa
     mon_eff    = False
     verbose    = False
     debug      = False
+    normalize  = True
     signal_roi = None
+
     if kwargs.has_key('mon_eff'):    mon_eff    = kwargs['mon_eff']
     if kwargs.has_key('signal_roi'): signal_roi = kwargs['signal_roi']
     if kwargs.has_key('verbose'):    verbose    = kwargs['verbose']
     if kwargs.has_key('debug'  ):    debug      = kwargs['debug']
+    if kwargs.has_key('normalize'):  normalize  = kwargs['normalize']
     # -------------------------------------------------------------------
     if verbose:
         print ctime(),'normalize_to_monitor:',os.path.basename(fileName)
@@ -93,13 +96,15 @@ def normalize_to_monitor(fileName,time_offset_detector,time_offset_monitor,**kwa
         m4 = m3
 
     # -------------------------------------------------------------------
-    if verbose:
-        print ctime(),"normalize_to_monitor: rebinning beam monitor"
-    m5 = dr_lib.rebin_monitor(m4, s3)
-    # -------------------------------------------------------------------
-    if verbose:
-        print ctime(),"normalize_to_monitor: normalizing data to monitor"
-    s4 = common_lib.div_ncerr(s3,m5)
+    if normalize:
+        if verbose:
+            print ctime(),"normalize_to_monitor: rebinning beam monitor"
+        m5 = dr_lib.rebin_monitor(m4, s3)
+        if verbose:
+            print ctime(),"normalize_to_monitor: normalizing data to monitor"
+        s4 = common_lib.div_ncerr(s3,m5)
+    else:
+        s4 = s3
     # -------------------------------------------------------------------
     if verbose:
         print ctime(),"normalize_to_monitor: done."
