@@ -46,6 +46,10 @@ def rebin_monitor(obj1, obj2, **kwargs):
                      default is I{m}.
     @type prefix: C{string}
 
+    @keyword interpolate: A flag to use linear interpolation during rebinning.
+                          The default is I{False}.
+    @type interpolate: C{boolean}
+
     
     @return: Object that has been rebinned
     @rtype: C{SOM.SOM} or C{SOM.SO}
@@ -91,6 +95,11 @@ def rebin_monitor(obj1, obj2, **kwargs):
     except KeyError:
         use_pix_id = False
 
+    try: 
+        interpolate = kwargs["interpolate"]
+    except KeyError:
+        interpolate = False        
+
     result = hlr_utils.copy_som_attr(result, res_descr, obj1, o1_descr)
 
     # iterate through the values
@@ -100,8 +109,11 @@ def rebin_monitor(obj1, obj2, **kwargs):
 
     for i in xrange(hlr_utils.get_length(obj2)):
         val2 = hlr_utils.get_value(obj2, i, o2_descr, "x")
-        
-        value = common_lib.rebin_axis_1D(val1, val2)
+
+        if interpolate:
+            value = common_lib.rebin_axis_1D_linint(val1, val2)
+        else:
+            value = common_lib.rebin_axis_1D(val1, val2)
         if use_pix_id:
             # Set the pixel ID to the spectrum with modified bank ID
             try:
@@ -140,6 +152,6 @@ if __name__ == "__main__":
 
     print "********** rebin_monitor"
     print "* som+som :", rebin_monitor(som1, som2)
-    print "* so +so  :", rebin_monitor(som1[0], som2[0])
+    print "* so +so  :", rebin_monitor(som1[0], som2[0], interpolate=True)
 
     
