@@ -34,9 +34,6 @@ def run(config):
                    information.
     @type config: L{hlr_utils.Configure}
     """
-    import numpy
-    import pylab
-    
     import dr_lib
 
     if config.data is None:
@@ -74,17 +71,26 @@ def __plot_dave(som, conf):
     """
     info = som.toXY()
 
-    Nx = len(info[0])
-    Ny = len(info[1])
+    Nx = len(info[0][0])
+    Ny = len(info[0][1])
     
-    #yn = numpy.nan_to_num(info[2])
-    z = numpy.reshape(info[2], (Nx, Ny))
+    # Y values are filtered since plotting has trouble with NaNs
+    z = numpy.reshape(numpy.nan_to_num(info[0][2]), (Nx, Ny))
 
     import matplotlib.cm as cm
 
-    pylab.contourf(info[1], info[0], z, cmap=cm.hot)
-    pylab.xlabel(som.getAxisLabel(1))
-    pylab.ylabel(som.getAxisLabel(0))
+    pylab.contourf(info[0][1], info[0][0], z, cmap=cm.hot)
+
+    energy_units = som.getAxisUnits(1)
+    if energy_units == "ueV":
+        energy_units = "$\mu$eV"
+
+    q_units = som.getAxisUnits(0)
+    if q_units == "1/Angstroms":
+        q_units = "1/$\AA$"
+    
+    pylab.xlabel(som.getAxisLabel(1) + " [" + energy_units + "]")
+    pylab.ylabel(som.getAxisLabel(0) + " [" + q_units + "]")
 
     pylab.colorbar()
 
@@ -97,6 +103,9 @@ def __plot_numinfo(som, conf):
 if __name__ == "__main__":
     import hlr_utils
 
+    import numpy
+    import pylab
+    
     # Make description for driver
     description = []
     description.append("")
