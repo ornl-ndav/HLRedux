@@ -72,39 +72,68 @@ def __plot_a3c(som, conf):
         num_figs = len_som / 10 + 1
         # Get left over plots if length isn't evenly divisible
         left_over = len_som % 10
-
-        for i in xrange(num_figs):
-            pylab.figure(i+1)
-            if i+1 == num_figs:
-                extent = left_over
-            else:
-                extent = 10
-
-            for j in xrange(extent):
-                pylab.subplot(2,5,j+1)
-                index = (i*10) + j
-
-                __plot_one_a3c(info[index][0], info[index][1],
-                               numpy.sqrt(info[index][2]),
-                               som.getAllAxisLabels(), som.getAllAxisUnits(),
-                               som.getYLabel(), som.getYUnits(),
-                               som[index].id)
     else:
-        __plot_one_a3c(info[0][0], info[0][1], numpy.sqrt(info[0][2]),
-                       som.getAllAxisLabels(), som.getAllAxisUnits(),
-                       som.getYLabel(), som.getYUnits())
+        num_figs = 1
+        left_over = 1
 
-def __plot_one_a3c(x, y, var_y, *args):
+    for i in xrange(num_figs):
+        if len_som > 1:
+            pylab.figure(i+1)
+        if i+1 == num_figs:
+            extent = left_over
+        else:
+            extent = 10
+
+        for j in xrange(extent):
+            if len_som > 1:
+                pylab.subplot(2,5,j+1)
+            index = (i*10) + j
+
+            if conf.logy:
+                indicies = info[index][1].nonzero()
+                y = info[index][1][indicies]
+                var_y = info[index][2][indicies]
+                x = info[index][0][indicies]
+            else:
+                y = info[index][1]
+                var_y = info[index][2]
+                x = info[index][0]
+
+            if len_som > 1:
+                pid = som[index].id
+            else:
+                pid = None
+                
+            __plot_one_a3c(x, y, numpy.sqrt(var_y),
+                           som.getAllAxisLabels(), som.getAllAxisUnits(),
+                           som.getYLabel(), som.getYUnits(),
+                           pid, logy=conf.logy)
+
+def __plot_one_a3c(x, y, var_y, *args, **kwargs):
     """
     This subroutine is responsible for making a single 3-column ASCII dataset
     """
-    pylab.errorbar(x, y, var_y, fmt='o', mec='b', ls='None')
+    try:
+        logy = kwargs["logy"]
+    except KeyError:
+        logy = False
+    
+    try:
+        pylab.errorbar(x, y, var_y, fmt='o', mec='b', ls='None')
+    except ValueError:
+        # All data got filtered
+        pass
+    
     pylab.xlabel(args[0][0] + " [" + args[1][0] + "]")
     pylab.ylabel(args[2] + " [" + args[3] + "]")
-    try:
+    if args[4] is not None:
         pylab.title(args[4])
-    except IndexError:
+    else:
         pass
+
+    if logy:
+        ax = pylab.gca()
+        ax.set_yscale("log")
 
 def __plot_dave(som, conf):
     """
@@ -165,6 +194,9 @@ if __name__ == "__main__":
     parser = hlr_utils.BasicOptions("usage: %prog [options]", None, None,
                                     hlr_utils.program_version(), 'error',
                                     " ".join(description))
+
+    parser.add_option("", "--logy", dest="logy", action="store_true")
+    parser.set_defaults(logy=False)
     
     # Do not need to use the following options
     parser.remove_option("--config")
@@ -191,6 +223,9 @@ if __name__ == "__main__":
 
     # Reset verbosity
     configure.verbose = old_verbosity
+
+    # Set the logarithmic y-axis
+    configure.logy = options.logy
 
     # Run the program
     run(configure)
