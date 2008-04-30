@@ -59,6 +59,7 @@ instrument_scripts = {
     "GEN" : [
     'agg_dr_files',
     'mask_generator',
+    'plot_file',
     'tof_slicer',
     'two_file_math'
     ],
