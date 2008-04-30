@@ -98,7 +98,17 @@ def __plot_numinfo(som, conf):
     """
     This subroutine is responsible for plotting a NumInfo file.
     """
-    pass
+    info = som.toXY(withYvar=True)
+
+    # Data is stored as floats and pixel IDs, so everything needs conversion
+    x = numpy.arange(len(info))
+    y = numpy.array([s[1] for s in info])
+    ey = numpy.sqrt([s[2] for s in info])
+    pid = numpy.array([str(s[0]) for s in info])
+
+    pylab.errorbar(x, y, ey, fmt='o', mec='b', ls='None')
+    pylab.xticks(x, pid, rotation='vertical')
+    pylab.ylabel(som.getYLabel() + " [" + som.getYUnits() + "]")
 
 if __name__ == "__main__":
     import hlr_utils
