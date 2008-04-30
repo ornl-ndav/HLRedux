@@ -52,9 +52,9 @@ def run(config):
                              Verbose=config.verbose)[0]
 
     if dst_type == "text/Spec":
-        __plot_a3c(d_som, config):
+        __plot_a3c(d_som, config)
     elif dst_type == "text/Dave2d":
-        __plot_dave(d_som, config):
+        __plot_dave(d_som, config)
     elif dst_type == "text/num-info":
         __plot_numinfo(d_som, config)
     else:
