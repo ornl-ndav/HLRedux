@@ -60,6 +60,8 @@ def run(config):
     else:
         raise RuntimeError("Do not know how to plot file type %s" % dst_type)
 
+    pylab.show()
+
 def __plot_a3c(som, conf):
     """
     This subroutine is responsible for plotting a 3-column ASCII file.
@@ -70,7 +72,21 @@ def __plot_dave(som, conf):
     """
     This subroutine is responsible for plotting a Dave 2D file.
     """
-    pass
+    info = som.toXY()
+
+    Nx = len(info[0])
+    Ny = len(info[1])
+    
+    #yn = numpy.nan_to_num(info[2])
+    z = numpy.reshape(info[2], (Nx, Ny))
+
+    import matplotlib.cm as cm
+
+    pylab.contourf(info[1], info[0], z, cmap=cm.hot)
+    pylab.xlabel(som.getAxisLabel(1))
+    pylab.ylabel(som.getAxisLabel(0))
+
+    pylab.colorbar()
 
 def __plot_numinfo(som, conf):
     """
