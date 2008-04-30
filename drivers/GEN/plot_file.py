@@ -39,7 +39,7 @@ def run(config):
     
     import dr_lib
 
-    if config.data:
+    if config.data is None:
         raise RuntimeError("Need to pass a data filename(s) to the driver "\
                            +"script.")
 
@@ -121,10 +121,6 @@ if __name__ == "__main__":
 
     # Need to set the facility parameter to None to spoof data file finder
     configure.facility = None
-
-    # Need to spoof the data check
-    configure.data = [""]
-    options.data = None
 
     # Temporarily silence verbosity
     old_verbosity = options.verbose
