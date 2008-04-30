@@ -1,28 +1,28 @@
 #!/usr/bin/env python
 
 import os, sys, math
+import numpy
+import common_lib
 import hlr_utils
+import nessi_list
+
 
 def nexusFilePath(archiveDir,proposal,run):
     "probably redundant"
     return "%s/%s/1/%s/NeXus/SANS_%s.nxs"    % (archiveDir,proposal,run,run)
 
-def remove_badpoints(x,y,e):
-    """Remove bad points from x,y,e arrays
-    Required by matplotlib in log mode."""
-    nx = len(x)
-    ny = len(y)
-    ne = len(e)
-    if nx!=ny: raise 'len(y)!=len(x)'
-    if ne!=ny: raise 'len(e)!=len(y)'
-    xn,yn,en=([],[],[])
-    for k in xrange(ny):
-        if y[k]!=y[k] or y[k]<=0: continue
-        if e[k]>=y[k]: e[k]=y[k]*0.9999
-        xn.append(x[k])
-        yn.append(y[k])
-        en.append(e[k])
-    return xn,yn,en
+def div_ncerr2(s1,s2,to_num=True):
+    s = common_lib.div_ncerr(s1,s2)
+    if to_num:
+        # remove NaN results of division
+        for i in xrange(len(s)):
+            y     = numpy.nan_to_num(list(s[i].y))
+            var_y = numpy.nan_to_num(list(s[i].var_y))
+            s[i].y      = nessi_list.NessiList()
+            s[i].var_y  = nessi_list.NessiList()
+            s[i].y.extend(y) 
+            s[i].var_y.extend(var_y) 
+    return s
 
 def getXY(s,histo=False):
     y=list(s[0].y[:])
@@ -33,14 +33,27 @@ def getXY(s,histo=False):
         x=list(s[0].axis[0].val[:-1])
     return x,y
 
-def getXYE(s,cleanup=False):
+def getXYE(s,non_nan=True,non_zero=True):
     x=list(s[0].axis[0].val[:-1])        
     y=list(s[0].y[:])
-    e=list(s[0].var_y[:])
-    # matplotlib does not handle 0,NaN in log scale
-    if cleanup:
-        return remove_badpoints(x,y,e)
-    return x,y,e
+    v=list(s[0].var_y[:])
+    if non_nan:
+        y=numpy.nan_to_num(y)
+        v=numpy.nan_to_num(v)
+    if non_zero:
+        xn = []
+        yn = []
+        vn = []
+        for i in xrange(len(y)):
+            y2 = y[i]*y[i]
+            if y[i]>0 and v[i]<y2:
+                xn.append(x[i])
+                yn.append(y[i])
+                vn.append(v[i])
+        return xn,yn,vn
+    return x,y,v
+
+
 
 def sas_resolution(wavelength,radius,source_aperture,sample_aperture,primary, secondary):
     """Mildner-Carpenter Formula 
