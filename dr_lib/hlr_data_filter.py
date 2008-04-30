@@ -184,6 +184,8 @@ def data_filter(obj, **kwargs):
                 to_filter = __filter_sns_bss(yval, yerr2)
             elif inst_name == "REF_L" or inst_name == "REF_M":
                 to_filter = __filter_sns_ref(yval, yerr2)
+            elif inst_name == "SANS":
+                to_filter = __filter_ieee(yval, yerr2)
 
             if to_filter:
                 y_val_new[counter] = 0.0
