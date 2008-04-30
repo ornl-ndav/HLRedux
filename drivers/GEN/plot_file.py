@@ -63,7 +63,48 @@ def __plot_a3c(som, conf):
     """
     This subroutine is responsible for plotting a 3-column ASCII file.
     """
-    pass
+    len_som = len(som)
+
+    info = som.toXY(withYvar=True)
+
+    if len_som > 1:
+        # Get the number of figures needed
+        num_figs = len_som / 10 + 1
+        # Get left over plots if length isn't evenly divisible
+        left_over = len_som % 10
+
+        for i in xrange(num_figs):
+            pylab.figure(i+1)
+            if i+1 == num_figs:
+                extent = left_over
+            else:
+                extent = 10
+
+            for j in xrange(extent):
+                pylab.subplot(2,5,j+1)
+                index = (i*10) + j
+
+                __plot_one_a3c(info[index][0], info[index][1],
+                               numpy.sqrt(info[index][2]),
+                               som.getAllAxisLabels(), som.getAllAxisUnits(),
+                               som.getYLabel(), som.getYUnits(),
+                               som[index].id)
+    else:
+        __plot_one_a3c(info[0][0], info[0][1], numpy.sqrt(info[0][2]),
+                       som.getAllAxisLabels(), som.getAllAxisUnits(),
+                       som.getYLabel(), som.getYUnits())
+
+def __plot_one_a3c(x, y, var_y, *args):
+    """
+    This subroutine is responsible for making a single 3-column ASCII dataset
+    """
+    pylab.errorbar(x, y, var_y, fmt='o', mec='b', ls='None')
+    pylab.xlabel(args[0][0] + " [" + args[1][0] + "]")
+    pylab.ylabel(args[2] + " [" + args[3] + "]")
+    try:
+        pylab.title(args[4])
+    except IndexError:
+        pass
 
 def __plot_dave(som, conf):
     """
