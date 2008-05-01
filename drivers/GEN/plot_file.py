@@ -46,6 +46,7 @@ def run(config):
         print "Initial file type (data set):", dst_type
 
     d_som = dr_lib.add_files(config.data, dst_type=dst_type,
+                             Signal_ROI=config.roi_file,
                              Verbose=config.verbose)[0]
 
     if dst_type == "text/Spec":
@@ -195,6 +196,11 @@ if __name__ == "__main__":
                                     hlr_utils.program_version(), 'error',
                                     " ".join(description))
 
+    parser.add_option("", "--roi-file", dest="roi_file",
+                      help="Specify a file that contains a list of pixel "\
+                      +"ids to be read from the data")
+
+
     parser.add_option("", "--logy", dest="logy", action="store_true")
     parser.set_defaults(logy=False)
     
@@ -223,6 +229,10 @@ if __name__ == "__main__":
 
     # Reset verbosity
     configure.verbose = old_verbosity
+
+    # Set the ROI file
+    configure.roi_file = hlr_utils.determine_files(options.roi_file,
+                                                   one_file=True)
 
     # Set the logarithmic y-axis
     configure.logy = options.logy
