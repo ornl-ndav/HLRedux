@@ -55,11 +55,12 @@ def integrate_spectra(obj, **kwargs):
     @type bin_index: C{boolean}
 
     @keyword norm: This is a flag to turn on the division of the individual
-                   spectrum integrations by the sum of the integrations from
-                   all spectra. This also activates the multiplication of the
-                   individual spectrum bin values by their corresponding bin
-                   width via the I{width} flag in L{integrate_axis}. The
-                   default value of the flag is I{False}.
+                   spectrum integrations by the solid angle of the
+                   corresponding pixel. This also activates the multiplication
+                   of the individual spectrum bin values by their
+                   corresponding bin width via the I{width} flag in
+                   L{integrate_axis}. The default value of the flag is
+                   I{False}.
     @type norm: C{boolean}
 
     @keyword total: This is a flag to turn on the summation of all individual
