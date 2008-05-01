@@ -43,8 +43,8 @@ PACKAGE = "HLRedux"
 VERSION = __version__
 
 package_list = ['', 'common_lib', 'dr_lib', 'drivers', 'drivers.GEN',
-                'drivers.IGS', 'drivers.REF', 'drivers.SAS', 'hlr_utils',
-                'hlr_test']
+                'drivers.IGS', 'drivers.REF', 'drivers.SAS', 'drplot',
+                'hlr_utils', 'hlr_test']
 
 instrument_scripts = {
     "ASG" : [

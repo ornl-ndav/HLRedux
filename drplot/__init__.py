@@ -20,11 +20,11 @@
 # its use would not infringe privately owned rights.
 #
 
-from common_lib import *
-from dr_lib import *
-from drivers import *
-from drplot import *
-from hlr_utils import *
+"""
+This module contains functions that simplify the task of plotting data.
+"""
+
+from HLR_version import version as __version__
 
 #version
 __id__ = "$Id$"
