@@ -188,6 +188,9 @@ def integrate_spectra(obj, **kwargs):
                 dOmega = dr_lib.calc_BSS_solid_angle(map_so, inst)
         
                 value1 = (value[0] / dOmega, value[1] / (dOmega * dOmega))
+            else:
+                raise RuntimeError("Do not know how to get solid angle from "\
+                                   +"%s" % inst.get_name())
         else:
             value1 = value
 
