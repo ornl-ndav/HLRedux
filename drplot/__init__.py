@@ -24,6 +24,8 @@
 This module contains functions that simplify the task of plotting data.
 """
 
+from hlr_plot_1D import *
+
 from HLR_version import version as __version__
 
 #version
