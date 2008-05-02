@@ -42,7 +42,8 @@ def plot_1D_so(som, pix_id, **kwargs):
     @param pix_id: The pixel ID for the C{SOM.SO} to plot.
     @type pix_id: various
     """
-    pass
+
+    drplot
 
 def plot_1D_arr(x, y, var_y=None, var_x=None, **kwargs):
     """
@@ -132,6 +133,6 @@ def plot_1D_arr(x, y, var_y=None, var_x=None, **kwargs):
     if logy or logx:
         ax = pylab.gca()
         if logy:
-            ax.set_yscale("logy")
+            ax.set_yscale("log")
         if logx:
-            ax.set_xscale("logx")
+            ax.set_xscale("log")
