@@ -24,6 +24,8 @@
 import numpy
 import pylab
 
+import drplot
+
 def plot_2D_so(som, **kwargs):
     """
     This function plots a 2D dataset that is held in a single C{SOM.SO} inside
@@ -61,7 +63,6 @@ def plot_2D_so(som, **kwargs):
     xlabel = som.getAxisLabel(1) + " [" + som.getAxisUnits(1) + "]"
     ylabel = som.getAxisLabel(0) + " [" + som.getAxisUnits(0) + "]"
 
-    import drplot
     drplot.plot_2D_arr(y, x, z, xlabel=xlabel, ylabel=ylabel, **kwargs)
 
 def plot_2D_arr(x, y, z, **kwargs):
@@ -152,5 +153,85 @@ def plot_1D_slice(som, axis, xslice, yslice, **kwargs):
 
     @param kwargs: A list of keyword arguments that the function accepts. The
                    function also takes keywords for L{drplot.plot_1D_arr}.
+    
+    @keyword index: A flag that tells the function that the slice ranges are
+                    indicies and not axis values. The default is I{False}.
+    @type index: C{boolean}
+
+
+    @raise RuntimeError: The axis value is not recognized
     """
-    pass
+    # Lookup all the keywords
+    try:
+        index = kwargs["index"]
+    except KeyError:
+        index = False
+
+    [(x, y, z, var_z)] = som.toXY(withYvar=True)
+
+    # Get dimensions of data
+    Nx = x.size
+    Ny = y.size
+
+    # z values are filtered since plotting has trouble with NaNs. The
+    # I{nan_to_num} function zeros NaNs and sets (-)Inf to the largest
+    # (negative) positive value.
+    z = numpy.reshape(numpy.nan_to_num(z), (Nx, Ny))
+    var_z = numpy.reshape(numpy.nan_to_num(var_z), (Nx, Ny))
+
+    # Find the x and y slice ranges in terms of array indicies
+    if index:
+        if xslice[0] is None:
+            if xslice[1] is None:
+                sx = slice(Nx)
+            else:
+                if Nx == xslice[1]:
+                    sx = slice(xslice[1])
+                else:
+                    sx = slice(xslice[1] + 1)
+        else:
+            if xslice[1] is None:
+                sx = slice(xslice[0], Nx)
+            else:
+                if Nx == xslice[1]:
+                    sx = slice(xslice[0], xslice[1])
+                else:
+                    sx = slice(xslice[0], xslice[1] + 1)
+
+        if yslice[0] is None:
+            if yslice[1] is None:
+                sy = slice(Ny)
+            else:
+                if Ny == yslice[1]:
+                    sy = slice(yslice[1])
+                else:
+                    sy = slice(yslice[1] + 1)
+        else:
+            if yslice[1] is None:
+                sy = slice(yslice[0], Ny)
+            else:
+                if Ny == yslice[1]:
+                    sy = slice(yslice[0], yslice[1])
+                else:
+                    sy = slice(yslice[0], yslice[1] + 1)                    
+                    
+    else:
+        pass
+
+    # Setup axis specific values
+    if axis == "y":
+         naxis = 0
+         xlabel = som.getAxisLabel(1) + " [" + som.getAxisUnits(1) + "]"
+         xp = y[sy]
+    elif axis == "x":
+        naxis = 1
+        xlabel = som.getAxisLabel(0) + " [" + som.getAxisUnits(0) + "]"
+        xp = x[sx]
+    else:
+        raise RuntimeError("Only understand x or y for axis and not: %s" \
+                           % axis)
+
+    yp = z[sx, sy].sum(axis=naxis)
+    var_yp = var_z[sx, sy].sum(axis=naxis)
+
+    drplot.plot_1D_arr(xp, yp, var_yp, xlabel=xlabel, **kwargs)
