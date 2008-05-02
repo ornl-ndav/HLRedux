@@ -36,6 +36,7 @@ def plot_2D_so(som, **kwargs):
     """
     info = som.toXY()
 
+    # Get the independent axes
     x = info[0][0]
     y = info[0][1]
 
@@ -43,15 +44,25 @@ def plot_2D_so(som, **kwargs):
     Nx = x.size
     Ny = y.size
 
-    # z values are filtered since plotting has trouble with NaNs
+    # z values are filtered since plotting has trouble with NaNs. The
+    # I{nan_to_num} function zeros NaNs and sets (-)Inf to the largest
+    # (negative) positive value.
     z = numpy.reshape(numpy.nan_to_num(info[0][2]), (Nx, Ny))
 
+    # Matplotlib and NumPy don't agree on how our 2D data is actually
+    # distributed. We use the notion that the fastest running index is the
+    # y axis for a given data set. NumPy creates a 2D array that has
+    # Nrows = Nx and Ncols = Ny which is agrees with our designation. However,
+    # Matplotlib requires that Ncols is actually the x direction for the plot.
+    # This means the labels are created in reverse order and the original x
+    # and y arrays are plotted in reverse. 
+
     # Set plot attributes
-    xlabel = som.getAxisLabel(0) + " [" + som.getAxisUnits(0) + "]"
-    ylabel = som.getAxisLabel(1) + " [" + som.getAxisUnits(1) + "]"
+    xlabel = som.getAxisLabel(1) + " [" + som.getAxisUnits(1) + "]"
+    ylabel = som.getAxisLabel(0) + " [" + som.getAxisUnits(0) + "]"
 
     import drplot
-    drplot.plot_2D_arr(x, y, z, xlabel=xlabel, ylabel=ylabel, **kwargs)
+    drplot.plot_2D_arr(y, x, z, xlabel=xlabel, ylabel=ylabel, **kwargs)
 
 def plot_2D_arr(x, y, z, **kwargs):
     """
@@ -105,3 +116,11 @@ def plot_2D_arr(x, y, z, **kwargs):
     except KeyError:
         import matplotlib
         colormap = matplotlib.cm.hot
+
+    pylab.contourf(x, y, z, cmap=colormap)
+    pylab.xlabel(xlabel)
+    pylab.ylabel(ylabel)
+    pylab.title(title)
+
+    # Add the color scale
+    pylab.colorbar()
