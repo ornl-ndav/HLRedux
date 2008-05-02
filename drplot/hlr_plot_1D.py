@@ -42,11 +42,28 @@ def plot_1D_so(som, pix_id, **kwargs):
     @param pix_id: The pixel ID for the C{SOM.SO} to plot.
     @type pix_id: various
     """
+    # Retrieve the SO
     so = som.getSO(pix_id)
+    
+    # Get the data type
+    dataset_type = som.getDataSetType()
 
-    drplot.plot_1D_arr(so.axis[0].val.toNumPy(), so.y.toNumPy(),
-                       so.var_y.toNumPy(), so.axis[0].var.toNumPy(),
-                       **kwargs)
+    # Get data arrays
+    if dataset_type == "histogram":
+        x = so.axis[0].val.toNumPy(True)
+    else:
+        x = so.axis[0].val.toNumPy()
+    y = so.y.toNumPy()
+    var_y = so.var_y.toNumPy()
+    try:
+        var_x = so.axis[0].var.toNumPy()
+    except AttributeError:
+        var_x = None
+
+    # Set plot attributes
+    title = str(pix_id)
+
+    drplot.plot_1D_arr(x, y, var_y, var_x, title=title, **kwargs)
 
 def plot_1D_arr(x, y, var_y=None, var_x=None, **kwargs):
     """
