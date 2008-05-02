@@ -42,8 +42,11 @@ def plot_1D_so(som, pix_id, **kwargs):
     @param pix_id: The pixel ID for the C{SOM.SO} to plot.
     @type pix_id: various
     """
+    so = som.getSO(pix_id)
 
-    drplot
+    drplot.plot_1D_arr(so.axis[0].val.toNumPy(), so.y.toNumPy(),
+                       so.var_y.toNumPy(), so.axis[0].var.toNumPy(),
+                       **kwargs)
 
 def plot_1D_arr(x, y, var_y=None, var_x=None, **kwargs):
     """
