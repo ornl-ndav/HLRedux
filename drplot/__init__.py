@@ -25,6 +25,7 @@ This module contains functions that simplify the task of plotting data.
 """
 
 from hlr_plot_1D import *
+from hlr_plot_2D import *
 from hlr_plot_numinfo import *
 from hlr_plot_utils import *
 
