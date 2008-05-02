@@ -140,9 +140,11 @@ def plot_1D_arr(x, y, var_y=None, var_x=None, **kwargs):
 
     # Need to clean data if logarithimic scale is necessary
     if logy:
-        (x, y, var_y, var_x) = drplot.clean_data("y", x, y, var_y, var_x)
+        (x, y, var_y, var_x) = drplot.clean_1D_data("nonzero", "y",
+                                                    x, y, var_y, var_x)
     if logx:
-        (x, y, var_y, var_x) = drplot.clean_data("x", x, y, var_y, var_x)
+        (x, y, var_y, var_x) = drplot.clean_1D_data("nonzero", "x",
+                                                    x, y, var_y, var_x)
         
     pylab.errorbar(x, y, var_y, var_x, fmt='o', mec='b', ls='None')
     pylab.xlabel(xlabel)
