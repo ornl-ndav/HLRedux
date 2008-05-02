@@ -50,7 +50,9 @@ def plot_1D_arr(x, y, var_y=None, var_x=None, **kwargs):
     uncertainties in the x-axis and y-axis are not required to make a plot.
     Since this function is most likely run from command-line and the data
     reduction software carries around squares for the uncertainties, the
-    uncertainty arrays will be square-rooted before plotting.
+    uncertainty arrays will be square-rooted before plotting. NOTE: This
+    function only creates the plot. Viewing the actual plot requires invoking
+    I{pylab.show()}.
 
     @param x: The independent axis
     @type x: C{NumPy} array
