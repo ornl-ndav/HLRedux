@@ -20,15 +20,19 @@
 # its use would not infringe privately owned rights.
 #
 
-"""
-This module contains functions that simplify the task of plotting data.
-"""
+# $Id$
 
-from hlr_plot_1D import *
-from hlr_plot_numinfo import *
-from hlr_plot_utils import *
+import numpy
+import pylab
 
-from HLR_version import version as __version__
+def plot_numinfo(som):
+    """
+    This function allows one to plot data that is the result of integrating
+    a C{SOM.SOM} via a function like L{dr_lib.integrate_spectra}. NOTE: This
+    function only creates the plot. Viewing the actual plot requires invoking
+    I{pylab.show()}.
 
-#version
-__id__ = "$Id$"
+    @param som: The object containing the data to plot.
+    @type som: C{SOM.SOM}
+    """
+    pass
