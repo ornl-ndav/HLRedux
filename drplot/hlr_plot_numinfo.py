@@ -35,4 +35,16 @@ def plot_numinfo(som):
     @param som: The object containing the data to plot.
     @type som: C{SOM.SOM}
     """
-    pass
+    info = som.toXY(withYvar=True)
+
+    # Data is stored as floats and pixel IDs, so everything needs conversion
+    x = numpy.arange(len(info))
+    y = numpy.array([s[1] for s in info])
+    ey = numpy.sqrt([s[2] for s in info])
+    pid = numpy.array([str(s[0]) for s in info])
+
+    pylab.errorbar(x, y, ey, fmt='o', mec='b', ls='None')
+
+    pylab.xticks(x, pid, rotation='vertical')
+    pylab.ylabel(som.getYLabel() + " [" + som.getYUnits() + "]")
+
