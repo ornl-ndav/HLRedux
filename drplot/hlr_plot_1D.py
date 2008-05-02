@@ -61,9 +61,13 @@ def plot_1D_so(som, pix_id, **kwargs):
         var_x = None
 
     # Set plot attributes
+    xlabel = som.getAxisLabel(0) + " [" + som.getAxisUnits(0) + "]"
+    ylabel = som.getYLabel() + " [" + som.getYUnits() + "]"
     title = str(pix_id)
 
-    drplot.plot_1D_arr(x, y, var_y, var_x, title=title, **kwargs)
+    # Make 1D plot
+    drplot.plot_1D_arr(x, y, var_y, var_x, xlabel=xlabel, ylabel=ylabel,
+                       title=title, **kwargs)
 
 def plot_1D_arr(x, y, var_y=None, var_x=None, **kwargs):
     """
@@ -145,7 +149,7 @@ def plot_1D_arr(x, y, var_y=None, var_x=None, **kwargs):
     if logx:
         (x, y, var_y, var_x) = drplot.clean_1D_data("nonzero", "x",
                                                     x, y, var_y, var_x)
-        
+
     pylab.errorbar(x, y, var_y, var_x, fmt='o', mec='b', ls='None')
     pylab.xlabel(xlabel)
     pylab.ylabel(ylabel)
