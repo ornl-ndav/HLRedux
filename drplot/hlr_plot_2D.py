@@ -124,3 +124,33 @@ def plot_2D_arr(x, y, z, **kwargs):
 
     # Add the color scale
     pylab.colorbar()
+
+def plot_1D_slice(som, axis, xslice, yslice, **kwargs):
+    """
+    This function plots a 1D slice from a 2D spectrum. The function requires
+    the axis to project onto and a set of slice ranges. NOTE: This
+    function only creates the plot. Viewing the actual plot requires invoking
+    I{pylab.show()}.
+
+    @param som: The object containing the data to plot.
+    @type som: C{SOM.SOM}
+
+    @param axis: The particular axis to clean. This is either I{x} or I{y}.
+    @type axis: C{string}
+
+    @param xslice: A set of axis values that determine the x-axis values to
+                   get the slice over in the format of (min, max). Passing
+                   I{None} for either min or max gets the first or last bin
+                   respectively.
+    @type xslice: C{tuple} of two numbers
+
+    @param yslice: A set of axis values that determine the y-axis values to
+                   get the slice over in the format of (min, max). Passing
+                   I{None} for either min or max gets the first or last bin
+                   respectively.
+    @type yslice: C{tuple} of two numbers
+
+    @param kwargs: A list of keyword arguments that the function accepts. The
+                   function also takes keywords for L{drplot.plot_1D_arr}.
+    """
+    pass
