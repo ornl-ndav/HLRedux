@@ -34,7 +34,24 @@ def plot_2D_so(som, **kwargs):
     @param som: The object containing the data to plot.
     @type som: C{SOM.SOM}
     """
-    pass
+    info = som.toXY()
+
+    x = info[0][0]
+    y = info[0][1]
+
+    # Get dimensions of data
+    Nx = x.size
+    Ny = y.size
+
+    # z values are filtered since plotting has trouble with NaNs
+    z = numpy.reshape(numpy.nan_to_num(info[0][2]), (Nx, Ny))
+
+    # Set plot attributes
+    xlabel = som.getAxisLabel(0) + " [" + som.getAxisUnits(0) + "]"
+    ylabel = som.getAxisLabel(1) + " [" + som.getAxisUnits(1) + "]"
+
+    import drplot
+    drplot.plot_2D_arr(x, y, z, xlabel=xlabel, ylabel=ylabel, **kwargs)
 
 def plot_2D_arr(x, y, z, **kwargs):
     """
@@ -66,4 +83,25 @@ def plot_2D_arr(x, y, z, **kwargs):
     @keyword title: The title for the plot
     @type title: C{string}
     """
-    pass
+    # Lookup all the keywords
+
+    try:
+        xlabel = kwargs["xlabel"]
+    except KeyError:
+        xlabel = ""
+
+    try:
+        ylabel = kwargs["ylabel"]
+    except KeyError:
+        ylabel = ""        
+
+    try:
+        title = kwargs["title"]
+    except KeyError:
+        title = ""
+
+    try:
+        colormap = kwargs["colormap"]
+    except KeyError:
+        import matplotlib
+        colormap = matplotlib.cm.hot
