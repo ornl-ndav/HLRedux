@@ -22,7 +22,10 @@
 
 # $Id$
 
+import numpy
 import pylab
+
+import drplot
 
 def plot_1D_so(som, pix_id, **kwargs):
     """
@@ -78,6 +81,55 @@ def plot_1D_arr(x, y, var_y=None, var_x=None, **kwargs):
     @keyword logx: Set the independent axis to logarithmic
     @type logx: C{boolean}    
     """
-    pass
+    # Lookup all the keywords
 
-    
+    try:
+        xlabel = kwargs["xlabel"]
+    except KeyError:
+        xlabel = ""
+
+    try:
+        ylabel = kwargs["ylabel"]
+    except KeyError:
+        ylabel = ""        
+
+    try:
+        title = kwargs["title"]
+    except KeyError:
+        title = ""
+
+    try:
+        logy = kwargs["logy"]
+    except KeyError:
+        logy = False
+
+    try:
+        logx = kwargs["logx"]
+    except KeyError:
+        logx = False
+
+    # Square-root incoming uncertainty arrays
+    if var_y is not None:
+        var_y = numpy.sqrt(var_y)
+
+    if var_x is not None:
+        var_x = numpy.sqrt(var_x)        
+
+    # Need to clean data if logarithimic scale is necessary
+    if logy:
+        (x, y, var_y, var_x) = drplot.clean_data("y", x, y, var_y, var_x)
+    if logx:
+        (x, y, var_y, var_x) = drplot.clean_data("x", x, y, var_y, var_x)
+        
+    pylab.errorbar(x, y, var_y, var_x, fmt='o', mec='b', ls='None')
+    pylab.xlabel(xlabel)
+    pylab.ylabel(ylabel)
+    pylab.title(title)
+
+    # Set the axes to logarithimic scale, if necessary
+    if logy or logx:
+        ax = pylab.gca()
+        if logy:
+            ax.set_yscale("logy")
+        if logx:
+            ax.set_xscale("logx")
