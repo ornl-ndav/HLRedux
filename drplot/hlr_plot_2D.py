@@ -52,7 +52,7 @@ def plot_2D_so(som, **kwargs):
     # Matplotlib and NumPy don't agree on how our 2D data is actually
     # distributed. We use the notion that the fastest running index is the
     # y axis for a given data set. NumPy creates a 2D array that has
-    # Nrows = Nx and Ncols = Ny which is agrees with our designation. However,
+    # Nrows = Nx and Ncols = Ny which agrees with our designation. However,
     # Matplotlib requires that Ncols is actually the x direction for the plot.
     # This means the labels are created in reverse order and the original x
     # and y arrays are plotted in reverse. 
