@@ -1,4 +1,3 @@
-#                  High-Level Reduction Functions
 #           A part of the SNS Analysis Software Suite.
 #
 #                  Spallation Neutron Source
@@ -20,14 +19,19 @@
 # its use would not infringe privately owned rights.
 #
 
-"""
-This module contains functions that simplify the task of plotting data.
-"""
+# $Id$
 
-from hlr_plot_1D import *
-from hlr_plot_utils import *
+import numpy
 
-from HLR_version import version as __version__
+def clean_data(axis, x, y, var_y=None, var_x=None):
+    """
+    This function cleans data for plotting.
 
-#version
-__id__ = "$Id$"
+    @param axis: The particular axis to clean. This is either I{x} or I{y}.
+    @type axis:
+
+
+    @return: The cleaned arrays. The order is I{(x, y, var_y, var_x)}.
+    @rtype: C{tuple} of C{NumPy} arrays
+    """
+    return (x, y, var_y, var_x)
