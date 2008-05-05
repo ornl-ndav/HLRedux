@@ -181,40 +181,8 @@ def plot_1D_slice(som, axis, xslice, yslice, **kwargs):
 
     # Find the x and y slice ranges in terms of array indicies
     if index:
-        if xslice[0] is None:
-            if xslice[1] is None:
-                sx = slice(Nx)
-            else:
-                if Nx == xslice[1]:
-                    sx = slice(xslice[1])
-                else:
-                    sx = slice(xslice[1] + 1)
-        else:
-            if xslice[1] is None:
-                sx = slice(xslice[0], Nx)
-            else:
-                if Nx == xslice[1]:
-                    sx = slice(xslice[0], xslice[1])
-                else:
-                    sx = slice(xslice[0], xslice[1] + 1)
-
-        if yslice[0] is None:
-            if yslice[1] is None:
-                sy = slice(Ny)
-            else:
-                if Ny == yslice[1]:
-                    sy = slice(yslice[1])
-                else:
-                    sy = slice(yslice[1] + 1)
-        else:
-            if yslice[1] is None:
-                sy = slice(yslice[0], Ny)
-            else:
-                if Ny == yslice[1]:
-                    sy = slice(yslice[0], yslice[1])
-                else:
-                    sy = slice(yslice[0], yslice[1] + 1)                    
-                    
+        sx = __get_slice(xslice, Nx)
+        sy = __get_slice(yslice, Ny)
     else:
         pass
 
@@ -235,3 +203,36 @@ def plot_1D_slice(som, axis, xslice, yslice, **kwargs):
     var_yp = var_z[sx, sy].sum(axis=naxis)
 
     drplot.plot_1D_arr(xp, yp, var_yp, xlabel=xlabel, **kwargs)
+
+def __get_slice(islice, isize):
+    """
+    This helper function creates a slice based on a tuple of two numbers. If
+    the extremes of the slice are desired, use I{None} to signify that request.
+
+    @param islice: The object containing the requested slice
+    @type islice: C{tuple} of two C{int}s
+    
+    @param isize: The total size of the array being sliced
+    @type isize: C{int}
+    
+
+    @return: The slice based on the requested information
+    @rtype: C{slice}
+    """
+    if islice[0] is None:
+        if islice[1] is None:
+            return slice(isize)
+        else:
+            if isize == islice[1]:
+                return slice(islice[1])
+            else:
+                return slice(islice[1] + 1)
+    else:
+        if islice[1] is None:
+            return slice(islice[0], isize)
+        else:
+            if isize == islice[1]:
+                return slice(islice[0], islice[1])
+            else:
+                return slice(islice[0], islice[1] + 1)
+    
