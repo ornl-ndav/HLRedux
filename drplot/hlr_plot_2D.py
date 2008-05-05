@@ -192,8 +192,6 @@ def plot_1D_slice(som, axis, xslice, yslice, **kwargs):
         sx = __get_slice((x_min, x_max), Nx)
         sy = __get_slice((y_min, y_max), Ny)
 
-    print sx, sy
-
     # Setup axis specific values
     if axis == "y":
          naxis = 0
