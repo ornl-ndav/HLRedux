@@ -72,13 +72,13 @@ def plot_2D_arr(x, y, z, **kwargs):
     I{pylab.show()}.
 
     @param x: The first independent axis
-    @type x: C{NumPy} array
+    @type x: C{NumPy.array}
 
     @param y: The second independent axis
-    @type y: C{NumPy} array
+    @type y: C{NumPy.array}
 
     @param z: The dependent axis
-    @type z: C{NumPy} array
+    @type z: C{NumPy.array}
 
     @kwargs: A list of keyword arguments that the function accepts.
 
@@ -184,7 +184,15 @@ def plot_1D_slice(som, axis, xslice, yslice, **kwargs):
         sx = __get_slice(xslice, Nx)
         sy = __get_slice(yslice, Ny)
     else:
-        pass
+        x_min = __find_index(x, xslice[0])
+        x_max = __find_index(x, xslice[1])
+        y_min = __find_index(y, yslice[0])
+        y_max = __find_index(y, yslice[1])        
+            
+        sx = __get_slice((x_min, x_max), Nx)
+        sy = __get_slice((y_min, y_max), Ny)
+
+    print sx, sy
 
     # Setup axis specific values
     if axis == "y":
@@ -203,6 +211,26 @@ def plot_1D_slice(som, axis, xslice, yslice, **kwargs):
     var_yp = var_z[sx, sy].sum(axis=naxis)
 
     drplot.plot_1D_arr(xp, yp, var_yp, xlabel=xlabel, **kwargs)
+
+def __find_index(arr, val):
+    """
+    This helper function searches an array for a particular value returning
+    the index where the value could be inserted into the array.
+
+    @param arr: The object containing the information to be searched
+    @type arr: C{NumPy.array}
+
+    @param val: The value to search the array for
+    @type val: C{float} or C{int}
+
+
+    @return: The index where the value could be inserted into the array
+    @rtype: C{int}
+    """
+    if val is not None:
+        return numpy.searchsorted(arr, val)
+    else:
+        return val
 
 def __get_slice(islice, isize):
     """
