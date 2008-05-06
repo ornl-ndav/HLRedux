@@ -171,6 +171,13 @@ def run(config, tim=None):
 
         del ctof_elastic_low, ctof_elastic_high
 
+        if config.split:
+            lambda_filter = [(d_som1[i].axis[0].val[0],
+                              d_som1[i].axis[0].val[-1])
+                             for i in xrange(len(d_som1))]
+        else:
+            lambda_filter = None
+
         # Now interpolate spectra between TOF elastic range (converted to
         # initial wavelength)
         if config.verbose:
@@ -179,7 +186,8 @@ def run(config, tim=None):
         if tim is not None:
             tim.getTime(False)
             
-        ds_som2 = dr_lib.lin_interpolate_spectra(ds_som1, ctof_elastic_range)
+        ds_som2 = dr_lib.lin_interpolate_spectra(ds_som1, ctof_elastic_range,
+                                                 filter=lambda_filter)
 
         if tim is not None:
             tim.getTime(msg="After linearly interpolating direct scattering "\
