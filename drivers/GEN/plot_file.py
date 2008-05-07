@@ -118,6 +118,9 @@ def __plot_one_a3c(x, y, var_y, *args, **kwargs):
         logy = kwargs["logy"]
     except KeyError:
         logy = False
+
+    y = numpy.nan_to_num(y)
+    var_y = numpy.nan_to_num(var_y)
     
     try:
         pylab.errorbar(x, y, var_y, fmt='o', mec='b', ls='None')
