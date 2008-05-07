@@ -79,8 +79,11 @@ def zero_spectra(obj, nz_range):
         i_end = bisect.bisect(x_axis, nz_range[i][1]) - 1
         
         for j in xrange(i_start, i_end+1):
-            y_new[j] = y_val[j]
-            var_y_new[j] = y_err2[j]
+            try:
+                y_new[j] = y_val[j]
+                var_y_new[j] = y_err2[j]
+            except IndexError:
+                continue
 
         hlr_utils.result_insert(result, res_descr, (y_new, var_y_new),
                                 map_so, "y")
