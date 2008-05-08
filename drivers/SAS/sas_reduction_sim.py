@@ -15,14 +15,13 @@ if __name__ == "__main__":
     import optparse
     from   pylab import *
     bragg_edge  = 4.04          # Beryllium Bragg edge - for display purposes
-    vycor_peak  = 0.0171	#
 
     #FIXME: hard-coded axis ranges and binning
     lambda_axis = hlr_utils.Axis(4.00,20.00,0.10,
                                  units='Angstrom',
                                  title='lambda', bintype='lin') # lambda axis [Angstroms]
 
-    q_axis      = hlr_utils.Axis(0.001,1.0,0.01,
+    q_axis      = hlr_utils.Axis(0.001,1.0,0.10,
                                  units='1/Angstrom',
                                  title='q', bintype='log')      # q axis [1/Angstroms]
 
@@ -54,11 +53,15 @@ if __name__ == "__main__":
 
     nexusFile = arguments[0]
 
+
     print 'NeXus file',nexusFile, 'exists?',os.path.exists(nexusFile)
     print 'l axis:',lambda_axis
     print 'q axis:',q_axis
     print 'tof_offset_2d =',tof_2d
     print 'tof_offset_bm =',tof_bm
+
+    base      = os.path.basename(nexusFile).split('.')[0]
+    print base
 
     # Result of normalize_to_monitor is a tuple (m1,s1,s2)
     # m1 - beam monitor spectrum (wavelength)
@@ -68,6 +71,7 @@ if __name__ == "__main__":
     m1,s1,s2 = normalize_to_monitor(nexusFile,
                                     time_offset_detector=(tof_2d,0.0),
                                     time_offset_monitor =(tof_bm,0.0),
+                                    signal_roi='roi_0_0_8_32.dat',
                                     verbose=True, debug=True,
                                     normalize=options.normalize)
 
@@ -101,22 +105,28 @@ if __name__ == "__main__":
 
     if options.qplot:
         subtit='Q'
-        xq,yq,eq = getXYE(sq,cleanup=True)
+        xq,yq,eq = getXYE(sq)
         #xq,yq = getXY(sq)
 
         subplot(111)
         title("%s: %s" % (os.path.basename(nexusFile),run_title))        
-        semilogy(xq,yq,'s')
+        loglog(xq,yq,'s')
         #plot(xq,yq,'s')
         #axvline(vycor_peak)
         xlabel(r'q [1/$\AA$]')
         ylabel('Intensity')
 
+        hlr_utils.write_file(base+'_q.txt', "text/Spec", sq,
+                             verbose=True,
+                             replace_path=False,
+                             replace_ext=False)
+
+
     else:
         subtit='L'
-        xm,ym = getXY(bm)
-        xs,ys = getXY(sl)
-        xq,yq = getXY(sq)
+        xm,ym,dum = getXYE(bm)
+        xs,ys,dum = getXYE(sl)
+        xq,yq,dum = getXYE(sq)
    
         subplot(311)
         title("%s: %s" % (os.path.basename(nexusFile),run_title))        
@@ -134,6 +144,11 @@ if __name__ == "__main__":
         axvline(bragg_edge)
         xlabel(r'$\lambda$ [$\AA$]')
         ylabel('Intensity (2D/BM)')
+
+        hlr_utils.write_file(base+'_l.txt', "text/Spec", sq,
+                             verbose=True,
+                             replace_path=False,
+                             replace_ext=False)
 
        
     show()                #

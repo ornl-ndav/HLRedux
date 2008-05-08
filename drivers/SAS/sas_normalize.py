@@ -35,8 +35,8 @@ def normalize_to_monitor(fileName,time_offset_detector,time_offset_monitor,**kwa
     @keyword signal_roi:
     @type signal_roi: C{string}
 
-    @keyword tib_rate: 
-    @type tib_rate: C{float}
+    @keyword bg_coeff: 
+    @type bg_coeff: C{float}
     
     @keyword mon_eff: if True, 1/v efficiency correction will be applied
     to beam monitor spectrum
@@ -52,6 +52,7 @@ def normalize_to_monitor(fileName,time_offset_detector,time_offset_monitor,**kwa
     @rtype: C{SOM.SOM}
     """
 
+
     import numpy
     # -------------------------------------------------------------------
     #TODO: move these constants to config/options
@@ -62,17 +63,26 @@ def normalize_to_monitor(fileName,time_offset_detector,time_offset_monitor,**kwa
     # process keyword arguments
     lam_cut    = None
     signal_roi = None
-    tib_rate   = None
+    bg_coeff     = None
     mon_eff    = False
     verbose    = False
     debug      = False
+    normalize  = True
 
     if kwargs.has_key('lam_cut'):    lam_cut    = kwargs['lam_cut']
     if kwargs.has_key('signal_roi'): signal_roi = kwargs['signal_roi']
-    if kwargs.has_key('tib_rate'):   tib_rate   = kwargs['tib_rate']
+    if kwargs.has_key('bg_coeff'):   bg_coeff   = kwargs['bg_coeff']
     if kwargs.has_key('mon_eff'):    mon_eff    = kwargs['mon_eff']
+    if kwargs.has_key('normalize'):  normalize  = kwargs['normalize']
     if kwargs.has_key('verbose'):    verbose    = kwargs['verbose']
     if kwargs.has_key('debug'  ):    debug      = kwargs['debug']
+
+    # -------------------------------------------------------------------
+    if bg_coeff:
+        bg=bg_coeff.split(',')
+        for i in range(len(bg)):
+            bg[i]=float(bg[i])
+        
 
     # -------------------------------------------------------------------
     if verbose:
@@ -105,19 +115,20 @@ def normalize_to_monitor(fileName,time_offset_detector,time_offset_monitor,**kwa
         s1 = sn
         del sn
 
-
-    #duration = s1.attr_list['duration'].getValue()
-    #bmcounts = (dr_lib.integrate_spectra(m1)[0].y,
-    #            dr_lib.integrate_spectra(m1)[0].var_y)
-
+    # -------------------------------------------------------------------
+    if bg_coeff:
+        if verbose:
+            print ctime(),"normalize_to_monitor: subtracting background",
+            print "B=%g+%g*tof" % (bg[0],bg[1])
+        sn = sas_utils.subtract_wavelength_depentent_bkg(s1,bg[0],bg[1])
+        s1 = sn
+        
     # -------------------------------------------------------------------
     if verbose:
         print ctime(),"normalize_to_monitor: fixing bin contents"
     s2 = dr_lib.fix_bin_contents(s1)
     m2 = dr_lib.fix_bin_contents(m1)
-
-    #duration = s2.attr_list['duration'].getValue()
-    #bmcounts = (dr_lib.integrate_spectra(m2)[0].y, dr_lib.integrate_spectra(m2)[0].var_y)
+  
 
     # -------------------------------------------------------------------
     if verbose:
@@ -128,7 +139,7 @@ def normalize_to_monitor(fileName,time_offset_detector,time_offset_monitor,**kwa
     m3 = common_lib.tof_to_wavelength_lin_time_zero(m2,units="microsecond",
                                      time_zero_offset=time_offset_monitor,
                                      inst_param='primary')
-
+   
     # -------------------------------------------------------------------
     if mon_eff:
         if verbose:
@@ -137,20 +148,17 @@ def normalize_to_monitor(fileName,time_offset_detector,time_offset_monitor,**kwa
     else:
         m4 = m3
 
-    
-  
 
     # -------------------------------------------------------------------
-    if verbose:
+    if normalize:
+      if verbose:
         print ctime(),"normalize_to_monitor: rebinning beam monitor"
-    m5 = dr_lib.rebin_monitor(m4, s3)
-
-    # -------------------------------------------------------------------
-    if verbose:
+      m5 = dr_lib.rebin_monitor(m4, s3)
+      if verbose:
         print ctime(),"normalize_to_monitor: normalizing data to monitor"
-    #s4 = common_lib.div_ncerr(s3,m5)
-    s4 = sas_utils.div_ncerr2(s3,m5)
-      
+      s4 = sas_utils.div_ncerr2(s3,m5)
+    else:
+      s4 = s3  
 
     # -------------------------------------------------------------------
     if verbose:

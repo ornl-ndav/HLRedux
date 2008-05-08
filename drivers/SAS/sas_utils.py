@@ -1,17 +1,21 @@
 #!/usr/bin/env python
 
 import os, sys, math
-import numpy
+import numpy, pylab
 import common_lib
 import hlr_utils
 import nessi_list
+import DST
 
+HUGE_NUMBER=1.0e33  # FIXME here
 
 def nexusFilePath(archiveDir,proposal,run):
     "probably redundant"
-    return "%s/%s/1/%s/NeXus/SANS_%s.nxs"    % (archiveDir,proposal,run,run)
+    run = str(run)
+    return os.path.join(archiveDir,proposal,'1',run,'NeXus','SANS_%s.nxs' % run)
 
 def div_ncerr2(s1,s2,to_num=True):
+    """Divide and clean """
     s = common_lib.div_ncerr(s1,s2)
     if to_num:
         # remove NaN results of division
@@ -24,16 +28,41 @@ def div_ncerr2(s1,s2,to_num=True):
             s[i].var_y.extend(var_y) 
     return s
 
-def getXY(s,histo=False):
-    y=list(s[0].y[:])
-    if histo:
-        x=list(s[0].axis[0].val[:])
-        y.append(s[0].y[-1])
-    else:
-        x=list(s[0].axis[0].val[:-1])
-    return x,y
 
-def getXYE(s,non_nan=True,non_zero=True):
+def subtract_wavelength_depentent_bkg(obj,c0,c1):
+    (result, res_descr) = hlr_utils.empty_result(obj)
+    o_descr = hlr_utils.get_descr(obj)
+    result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
+
+    for i in xrange(hlr_utils.get_length(obj)):
+        axis   = hlr_utils.get_value(obj, i, o_descr, "x", 0)
+        val    = hlr_utils.get_value(obj, i, o_descr, "y", 0)
+        err2   = hlr_utils.get_err2 (obj, i, o_descr, "y", 0)
+        map_so = hlr_utils.get_map_so(obj, None, i)
+
+        for k in xrange(len(val)):
+            #dx = axis[k+1]-axis[k]
+            val[k] -= c0 + c1*axis[k]
+        value  = (val,err2)
+        hlr_utils.result_insert(result, res_descr, value, map_so,"y",0)
+    return result
+
+
+
+
+
+def get_monitor(fileName):
+    """Read monitor from a 3 column ASCII file"""
+    fd  = open(fileName, "r")
+    a3c = DST.Ascii3ColDST(fd)
+    m   = a3c.getSOM()
+    a3c.release_resource()
+    fd.close()
+    return m
+
+
+def getXYE(s,non_nan=True,non_zero=True,non_huge=True):
+    """Get x,y,var_y from a SOM and clean-up the data for plotting """
     x=list(s[0].axis[0].val[:-1])        
     y=list(s[0].y[:])
     v=list(s[0].var_y[:])
@@ -41,17 +70,85 @@ def getXYE(s,non_nan=True,non_zero=True):
         y=numpy.nan_to_num(y)
         v=numpy.nan_to_num(v)
     if non_zero:
-        xn = []
-        yn = []
-        vn = []
+        xn,yn,vn = ([],[],[])
         for i in xrange(len(y)):
             y2 = y[i]*y[i]
             if y[i]>0 and v[i]<y2:
                 xn.append(x[i])
                 yn.append(y[i])
                 vn.append(v[i])
-        return xn,yn,vn
+        x,y,v=(xn,yn,vn)
+    if non_huge:
+        xn,yn,vn = ([],[],[])
+        for i in xrange(len(y)):
+            if abs(y[i])<HUGE_NUMBER and abs(v[i])<HUGE_NUMBER:
+                xn.append(x[i])
+                yn.append(y[i])
+                vn.append(v[i])
+        x,y,v=(xn,yn,vn)
     return x,y,v
+
+def in_circle(x,y,x0,y0,r,inside=True):
+    x -= x0
+    y -= y0
+    ra2 = x**2 + y**2
+    rc2 = r*r
+    if inside:
+        return bool(ra2<=rc2)
+    else:
+        return bool(rc2<=ra2)
+
+
+def create_roi(x0,y0,r1,r2,nx=80,ny=80,include=True):
+    x0  += nx/2.0
+    y0  += ny/2.0
+    roi=[]
+    exclude = not bool(include)
+    for i in range(nx):
+        for j in range(ny):
+            cond1 = in_circle(i,j,x0,y0,r1,inside=False)
+            cond2 = in_circle(i,j,x0,y0,r2,inside=True)
+            cond  = bool(cond1 and cond2)
+            if cond ^ exclude:
+                roi.append((i,j))
+    return roi
+
+def write_roi(filename,roi,bank='bank1'):
+    roi_file= open(filename,'wt')
+    for id in roi:
+        print >> roi_file,"%s_%s_%s" % (bank,id[0],id[1])
+    roi_file.close()
+
+
+def read_roi(filename,bank='bank1'):
+    roi = []
+    roi_file = open(filename,'rt')
+    for line in roi_file.readlines():
+        if not line.startswith(bank): continue
+        id = line.strip().split('_')
+        roi.append((int(id[1]),int(id[2])))
+    roi_file.close()
+    return roi
+
+
+def errorplot(ax,s,marker='s',logxscale=False,logyscale=False):
+    """ """
+    x,y,e = getXYE(s)
+    if len(y)<1:
+        print "*** NO GOOD DATA TO PLOT"
+        return None
+    e  = numpy.sqrt(numpy.array(e))
+    if logyscale:
+        for i in xrange(len(e)):
+            # TODO: FIXME here
+            # At the moment 'clip' the error bar so that is does not go below zero
+            if  e[i]>=y[i]: 
+                e[i]=y[i]*0.99
+        ax.set_yscale('log')
+    if logxscale:
+        ax.set_xscale('log')
+    
+    return pylab.errorbar(x,y,yerr=e,marker=marker,fmt=' ')
 
 
 

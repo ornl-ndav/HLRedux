@@ -3,11 +3,12 @@
 # $Id$
 
 import os, sys
+from   time          import ctime,time
 import hlr_utils
 from   sas_normalize import *
 from   sas_utils     import *
 
-VERSION="0.01"
+VERSION="0.05"
 
 if __name__ == "__main__":
     """TODO: Cleanup this mess below"""
@@ -19,8 +20,9 @@ if __name__ == "__main__":
     argv0   = os.path.basename(sys.argv[0])
     usage   = "%s [options] <run_number1> <run_number2" % argv0
     version = "%s %s" % (argv0,VERSION)
-    tof_2d  = 1000
-    tof_bm  = 1100
+    tof_2d  = 500 # 1000
+    tof_bm  = 500 # 1100
+
     opt = optparse.OptionParser(usage=usage,version=version)
     opt.add_option('--time-offset-2d','-d', dest='tof_2d', default=tof_2d,
                    help='set area detector TOF offset, default:%s' % tof_2d)
@@ -28,12 +30,23 @@ if __name__ == "__main__":
                    help='set beam monitor  TOF offset, default:%s' % tof_bm)
     opt.add_option('--wavelength-cut','-l', dest='lam_cut', default=bragg_edge,
                    help='set wavelength cut (lambda_min), default:%s' % bragg_edge)
+
+    opt.add_option('--lambda-bins', dest='l_bins', default=None,
+                   help="""Specify the minimum and maximum wavelength values and
+                   the wavelength bin width in Angstroms""")
+    
     opt.add_option('--roi_file','-r', dest='roi_file', default=None ,
                    help='select roi file')
+
     opt.add_option('--output'  ,'-o', dest='output'  , default=None,
-                   help='write transmission spectrum to a file')
+                   help='use specified spectrum file name, default: trans-<run1>-<run2>.dat')
     opt.add_option('--print'   ,'-p', dest='printfig', default=False, action='store_true',
-                   help='save figure(s) into *.jpeg file(s)')
+                   help='save figure into a PDF file')
+    opt.add_option('--no-display','-n', dest='display'  , default=True , action='store_false',
+                   help='do not display figures')
+    opt.add_option('--logscale','-L', dest='logscale'   , default=False, action='store_true',
+                   help='plot using logarithmic scale')
+    
     opt.add_option('--proposal','-P', dest='proposal', default='2008_01_COM',
                    help='set SANS proposal id, default:2008_01_COM')
     opt.add_option('--archive' ,'-A', dest='archive' , default='/LENS/SANS',
@@ -47,13 +60,11 @@ if __name__ == "__main__":
     lam_cut = float(options.lam_cut)
 
     #FIXME: hard-coded axis ranges and binning
-    lambda_axis = hlr_utils.Axis(lam_cut,20.00,0.4,
-                                 units='Angstrom',
-                                 title='lambda', bintype='lin') # lambda axis [Angstroms]
+    l_axis = hlr_utils.Axis(lam_cut,20.00,0.4,
+                            units='Angstrom',
+                            title='lambda', bintype='lin') # lambda axis [Angstroms]
 
-    print ctime(),"start"
-
-    # for now only single run allowed
+    # for now only two run allowed
     if len(arguments)!=2:
         print "%s: exactly two run numbers required" % argv0
         opt.print_help()
@@ -65,14 +76,45 @@ if __name__ == "__main__":
     nexusFile1 = nexusFilePath(options.archive,options.proposal,runI1)
     nexusFile0 = nexusFilePath(options.archive,options.proposal,runI0)
 
-    print 'NeXus file'     , nexusFile1, 'exists?',os.path.exists(nexusFile1)
-    print 'NeXus file'     , nexusFile0, 'exists?',os.path.exists(nexusFile0)
-    print 'l axis:'        , lambda_axis
-    print 'tof_offset_2d =', tof_2d
-    print 'tof_offset_bm =', tof_bm
-    print 'wavelength_cut=', lam_cut
-    print 'roi_files='     , options.roi_file
-    print 'output='        , options.output
+    if not os.path.exists(nexusFile1):
+            print '*** ERROR *** ',
+            print 'file',nexusFile1,'does not exist'
+            sys.exit(-1)
+    if not os.path.exists(nexusFile0):
+            print '*** ERROR *** ',
+            print 'file',nexusFile0,'does not exist'
+            sys.exit(-1)
+
+    outfile='trans-%s-%s.dat' % (runI1,runI0)
+    prnfile='trans-%s-%s.pdf' % (runI1,runI0)
+    if options.output:
+        outfile=options.output
+        prnfile=options.output+'.pdf'
+
+    if options.l_bins is not None:
+        l_axis = hlr_utils.AxisFromString(options.l_bins)
+
+    t0=time()
+    print ctime(),argv0,"start"
+    print '  Signal    :', nexusFile1
+    print '  Background:', nexusFile0
+    print '  L:',l_axis
+    print '  TOF Offset 2D ='   , tof_2d, 'usec,'
+    print '  TOF Offset BM ='   , tof_bm, 'usec'
+    print '  Wavelength Cut='   , options.lam_cut,'Angstroms'
+    print '  ROI file='         , options.roi_file
+    print '  Out File='         , outfile
+
+    #print 'NeXus file'     , nexusFile1, 'exists?',os.path.exists(nexusFile1)
+    #print 'NeXus file'     , nexusFile0, 'exists?',os.path.exists(nexusFile0)
+    #print 'Ll axis:'        , l_axis
+    #print 'tof_offset_2d =', tof_2d
+    #print 'tof_offset_bm =', tof_bm
+    #print 'wavelength_cut=', lam_cut
+    #print 'roi_files='     , options.roi_file
+    #print 'output='        , outfile
+    
+ 
 
 
     # -------------------------------------------------------------------
@@ -93,15 +135,14 @@ if __name__ == "__main__":
                               verbose=True)
     
     print ctime(),"summing transmission wavelength spectrum"
-    m1s = dr_lib.sum_all_spectra(m1,rebin_axis=lambda_axis.toNessiList())
-    m0s = dr_lib.sum_all_spectra(m0,rebin_axis=lambda_axis.toNessiList())
+    m1s = dr_lib.sum_all_spectra(m1,rebin_axis=l_axis.toNessiList())
+    m0s = dr_lib.sum_all_spectra(m0,rebin_axis=l_axis.toNessiList())
 
     #m2  = common_lib.div_ncerr(m1s,m0s)
     m2  = sas_utils.div_ncerr2(m1s,m0s)
 
-    outfile='trans-%s-%s.dat' % (runI1,runI0)
-    if options.output:
-        outfile=options.output
+   
+    
     hlr_utils.write_file(outfile, "text/Spec", m2,
                          verbose=True,
                          replace_path=False,
@@ -111,17 +152,11 @@ if __name__ == "__main__":
   
     # lets' plot
     print ctime(),"plotting results"
-    xm,ym,yem = getXYE(m2)
-    yem = sqrt(array(yem))
     ax = subplot(111)
-    errorbar(xm,ym,yerr=yem,marker='s',fmt=' ')
+    errorplot(ax,m2,marker='s',logyscale=options.logscale)
     
-    ax.set_xlim(2.0,20.0)
-    ax.set_ylim(0.0,1.2)
-    
-    if options.printfig:
-        savefig('trans-%s-%s.pdf' % (runI1,runI0),format='pdf')
+    if options.printfig: savefig(prnfile,format='pdf')
 
-    show()
+    if options.display: show()
 
 

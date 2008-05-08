@@ -3,7 +3,6 @@
 import os, sys, math
 import dr_lib
 import hlr_utils
-from   sas_utils  import *
 
 import matplotlib
 matplotlib.use('WXAgg')
@@ -15,51 +14,14 @@ from   matplotlib.figure import Figure
 import numpy 
 import wx
 
-VERSION="0.01"
+from   sas_utils  import *
+
+VERSION="0.05"
 SMALLNUM=0.1
 
 
-def signum(x):
-    if x:
-        return 100 #abs(x)/x
-    else:
-        return 0
-
-def in_circle(x,y,x0,y0,r,inside=True):
-    x -= x0
-    y -= y0
-    
-    ra2 = x**2 + y**2
-    rc2 = r*r
-        
-    if inside:
-        return bool(ra2<=rc2)
-    else:
-        return bool(rc2<=ra2)
-
-
-def in_ellipse(x,y,x0,y0,a,b,inside=True):
-    x -= x0
-    y -= y0
-    re2 = 1.0
-    if a and b:
-        ra2 = (x/a)**2 + (y/b)**2
-    elif abs(b)>SMALLNUM:
-        ra2 = signum(x)**2 + (y/b)**2
-    elif abs(a)>SMALLNUM:
-        ra2 = (x/a)**2     + signum(y)**2 
-    else:
-        ra2 = signum(x)**2 + signum(y)**2
-        
-    if inside:
-        return bool(ra2 <= re2)
-    else:
-        return bool(ra2 <= re2)
-
-
-
 class RoiFrame(wx.Frame):
-    def __init__(self,data,run):
+    def __init__(self,data,run,roi_file=None):
         wx.Frame.__init__(self,None, -1, 'LENS SANS Roi Selector', size=(500, 500))
         # data
         self.data = data
@@ -72,8 +34,11 @@ class RoiFrame(wx.Frame):
         self.msizer.Add(self.csizer, 0, 0, wx.EXPAND)
         # canvas
         self.fig     = Figure(figsize=(8,8))
-        self.axes    = self.fig.add_axes([0.1,0.1,0.8,0.8])
+        self.axes    = self.fig.add_axes([0.100,0.100,0.750,0.750])
+        self.cax     = self.fig.add_axes([0.875,0.100,0.025,0.750])
         self.canvas  = FigureCanvas(self,-1,self.fig)
+        self.im      = None
+        self.cbar    = None
         self.msizer.Add(self.canvas, 1, 0, wx.EXPAND)
 
         self.bplot   = wx.Button  (self,100, label="Plot"   )
@@ -81,10 +46,8 @@ class RoiFrame(wx.Frame):
         self.cinvert = wx.CheckBox(self, -1, label="Include")
         self.txtx0   = wx.TextCtrl(self, -1, "0")
         self.txty0   = wx.TextCtrl(self, -1, "0")
-        self.txtrx1  = wx.TextCtrl(self, -1, "1")
-        self.txtrx2  = wx.TextCtrl(self, -1, "5")
-        #self.txtry1  = wx.TextCtrl(self, -1, "1")
-        #self.txtry2  = wx.TextCtrl(self, -1, "5")
+        self.txtrx1  = wx.TextCtrl(self, -1, "5")
+        self.txtrx2  = wx.TextCtrl(self, -1, "40")
 
         self.mainmenu = wx.MenuBar()
         self.menu = wx.Menu()
@@ -120,7 +83,11 @@ class RoiFrame(wx.Frame):
         self.Bind(wx.EVT_CLOSE , self.OnCloseWindow)
         self.SetSizer(self.msizer)
         self.Fit()
-        self.PlotData()
+        self.roi = None
+        if roi_file:
+            self.roi = read_roi(roi_file,self.bank)
+            print self.roi
+        self.PlotData(self.roi)
 
     def OnCloseWindow(self, event):
         self.OnSave(None)
@@ -134,10 +101,7 @@ class RoiFrame(wx.Frame):
         self.fig.savefig('SANS-%s-img.png' % (self.run),format='png')
 
     def OnSave(self, event):
-        roi_file= open('roi_%s.dat' % self.run ,'wt')
-        for id in self.roi:
-            print >> roi_file,id
-        roi_file.close()
+        write_roi('roi_%s.dat' % self.run,self.roi,self.bank)
 
     def OnPlot(self,event):        
         self.PlotData()
@@ -145,34 +109,25 @@ class RoiFrame(wx.Frame):
     def OnClear(self, event):
         self.axes.clear()
         self.Refresh()
-        #self.axes.imshow(numpy.zeros(self.data.shape),cmap=cm.hot)
+   
+    def PlotData(self,roi=None):
+        nx,ny = self.data.shape
+        c = numpy.zeros((nx,ny))
 
-    def PlotData(self):
-        c = self.data.copy()
-        nx,ny = c.shape
+        if not roi:
+            rx1 = float(self.txtrx1.GetValue()) 
+            rx2 = float(self.txtrx2.GetValue())
+            x0  = float(self.txtx0.GetValue()) 
+            y0  = float(self.txty0.GetValue()) 
+            include  = self.cinvert.IsChecked()
+            self.roi = create_roi(x0,y0,rx1,rx2,nx,nx,include)
 
-        rx1 = float(self.txtrx1.GetValue()) 
-        rx2 = float(self.txtrx2.GetValue())
-        #ry1 = float(self.txtry1.GetValue()) 
-        #ry2 = float(self.txtry2.GetValue())
-        x0  = float(self.txtx0.GetValue()) + nx/2.0
-        y0  = float(self.txty0.GetValue()) + ny/2.0
-
-        exclude = self.cinvert.IsChecked()
-        self.roi=[]
-        for i in range(nx):
-
-            for j in range(ny):
-                cond1 = in_circle(i,j,x0,y0,rx1,inside=False)
-                cond2 = in_circle(i,j,x0,y0,rx2,inside=True)
-                cond  = bool(cond1 and cond2)
-                if cond ^ exclude:
-                    c[i,j]= 0 # math.log(SMALLNUM)
-                else:
-                    self.roi.append("%s_%d_%d" % (self.bank,i,j))
-        self.axes.imshow(c.T,extent=(-40,40,-40,40),interpolation='nearest',cmap=cm.hot)
-        self.Refresh()
+        for pix in self.roi: c[pix] = self.data[pix]
         
+        im = self.axes.imshow(c.T,extent=(-40,40,-40,40),interpolation='nearest',cmap=cm.hot)
+	self.fig.colorbar(im,cax=self.cax,orientation='vertical') 
+	self.axes.set_title('RUN %s' % self.run)
+        self.Refresh()
         
 
 class RoiApp(wx.App):
@@ -203,7 +158,7 @@ if __name__ == "__main__":
     version = "%s %s" % (argv0,VERSION)
     opt = optparse.OptionParser(usage=usage,version=version)
     
-    opt.add_option('--log','-l', dest='logscale', default=False, action='store_true',
+    opt.add_option('--logscale','-L', dest='logscale', default=False, action='store_true',
                    help='display in log scale')
     opt.add_option('--proposal','-P', dest='proposal', default='2008_01_COM',
                    help='set SANS proposal id, default:2008_01_COM')
@@ -218,12 +173,15 @@ if __name__ == "__main__":
         c = debug_image(c,nx,ny)
     else:
         # for now only single run allowed
-        if len(arguments)!=1:
-            print "%s: exactly one run number required" % argv0
+        if len(arguments)<1:
+            print "%s: at least one run number required" % argv0
             opt.print_help()
             sys.exit(-1)
-        run = arguments[0]
+        run       = arguments[0]
+        roi_file  = None
+        if len(arguments)>1: roi_file  = arguments[1]
         nexusFile = nexusFilePath(options.archive,options.proposal,run)
+        
         if not os.path.exists(nexusFile):
             print 'NeXus file',nexusFile, 'does not exist!'
             sys.exit(-1)
@@ -240,7 +198,7 @@ if __name__ == "__main__":
     	c = numpy.log(c + numpy.ones((nx,ny)))
     
     app = wx.PySimpleApp()
-    frame = RoiFrame(c,run)
+    frame = RoiFrame(c,run,roi_file)
     frame.Show()
     app.MainLoop()
     
