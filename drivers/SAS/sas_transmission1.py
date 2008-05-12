@@ -41,7 +41,41 @@ def run(config, tim=None):
                            timing evaluations.
     @type tim: C{sns_time.DiffTime}
     """
-    pass
+    import dr_lib
+    import DST
+    
+    if tim is not None:
+        tim.getTime(False)
+        old_time = tim.getOldTime()
+
+    if config.data is None:
+        raise RuntimeError("Need to pass a data filename to the driver "\
+                           +"script.")
+
+    # Read in geometry if one is provided
+    if config.inst_geom is not None:
+        if config.verbose:
+            print "Reading in instrument geometry file"
+            
+        inst_geom_dst = DST.getInstance("application/x-NxsGeom",
+                                        config.inst_geom)
+    else:
+        inst_geom_dst = None
+
+    # Perform Steps 1,2,4-6 on sample data
+    d_som1 = dr_lib.process_sas_data(config.data, config, timer=tim,
+                                     inst_geom_dst=inst_geom_dst,
+                                     transmission=True)
+
+    # Perform Steps 1,2,4-6 on background data
+    s_som1 = dr_lib.process_sas_data(config.back, config, timer=tim,
+                                     inst_geom_dst=inst_geom_dst,
+                                     dataset_type="background",
+                                     transmission=True)
+
+    # Put the datasets on the same axis
+
+    
 
 if __name__ == "__main__":
     import hlr_utils
@@ -60,10 +94,21 @@ if __name__ == "__main__":
     # Set defaults for imported options
     parser.set_defaults(data_paths="/entry/bank1,1")
     parser.set_defaults(bmon_path="/entry/monitor1,1")
-    # FIXME
-    parser.set_defaults(tmon_path="/entry/monitor1,1")
+
+    # Remove unnecessary options
+    parser.remove_option("--tmon-path")
+    parser.remove_option("--ecan")
+    parser.remove_option("--solv")
+    parser.remove_option("--open")
+    parser.remove_option("--dkcur")
+    parser.remove_option("--mom-trans-bins")
+    parser.remove_option("--dump-wave-bmnorm")
     
-    # Add amorphous_reduction specific options
+    # Add sas_transmission specific options
+    parser.add_option("", "--back",
+                      help="Specify the background file that will divide the "\
+                      +"data.")
+    
     parser.add_option("", "--timing", action="store_true", dest="timing",
                       help="Flag to turn on timing of code")
     parser.set_defaults(timing=False)
@@ -75,6 +120,19 @@ if __name__ == "__main__":
 
     # Call the configuration setter for SansOptions
     hlr_utils.SansConfiguration(parser, configure, options, args)
+
+    # Set the background file list
+    if hlr_utils.cli_provide_override(configure, "back", "--back"):
+        configure.back = hlr_utils.determine_files(options.back,
+                                                   configure.inst,
+                                                   configure.facility)
+
+    if configure.back is None:
+        parser.error("Please specify the background file for creating the "\
+                     +"transmission spectrum!")
+
+    if configure.lambda_bins is None:
+        parser.error("Please specify the final wavelength axis!")
 
     # Set timer object if timing option is used
     if options.timing:
