@@ -190,7 +190,9 @@ if __name__ == "__main__":
     # FIXME
     parser.set_defaults(tmon_path="/entry/monitor1,1")
     
-    # Add amorphous_reduction specific options
+    # Add sas_reduction specific options
+    
+    
     parser.add_option("", "--timing", action="store_true", dest="timing",
                       help="Flag to turn on timing of code")
     parser.set_defaults(timing=False)
