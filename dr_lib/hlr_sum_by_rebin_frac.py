@@ -22,7 +22,7 @@
 
 # $Id$
 
-def sum_by_rebin_frac(obj, axis_out):
+def sum_by_rebin_frac(obj, axis_out, **kwargs):
     """
     This function uses the C{axis_manip.rebin_axis_1D_frac} function from the
     SCL to perform the rebinning. The function tracks the counts and fractional
@@ -34,6 +34,13 @@ def sum_by_rebin_frac(obj, axis_out):
     
     @param axis_out: The axis to rebin the C{SOM} or C{SO} to
     @type axis_out: C{NessiList}
+
+    @param kwargs: A list of keyword arguments that the function accepts:
+    
+    @keyword configure: This is the object containing the driver configuration.
+                        This will signal the function to write out the counts
+                        and fractional area to files.
+    @type configure: C{Configure}
 
 
     @return: Object that has been rebinned and summed according to the
@@ -71,6 +78,12 @@ def sum_by_rebin_frac(obj, axis_out):
         if obj.dim() != 1:
             raise TypeError("The input object must be 1D!. This one is "\
                             +"%dD." % obj.dim())
+
+    # Check for keywords
+    try:
+        config = kwargs["configure"]
+    except KeyError:
+        config = None
 
     (result, res_descr) = hlr_utils.empty_result(obj)
 
@@ -115,6 +128,55 @@ def sum_by_rebin_frac(obj, axis_out):
     hlr_utils.result_insert(result, res_descr, value1, map_so, "all",
                             0, xvals)
 
+    #import pylab
+    #import drplot
+    #f1 = pylab.figure()
+    #pylab.subplot(311)
+    #drplot.plot_1D_arr(axis_out.toNumPy(True), counts.toNumPy(),
+    #                   counts_err2.toNumPy(), xlabel="Q ($\AA^{-1}$)",
+    #                   ylabel="Counts", logy=True, logx=True)
+    #pylab.subplot(312)
+    #drplot.plot_1D_arr(axis_out.toNumPy(True), frac_area.toNumPy(),
+    #                   frac_area_err2.toNumPy(), xlabel="Q ($\AA^{-1}$)",
+    #                   ylabel="Fractional Area", logy=True, logx=True)
+
+    #pylab.subplot(313)
+    #drplot.plot_1D_arr(axis_out.toNumPy(True), value1[0].toNumPy(),
+    #                   value1[1].toNumPy(), xlabel="Q ($\AA^{-1}$)",
+    #                   ylabel="Rebinned Counts", logy=True, logx=True)
+
+    if config is not None:
+        if o_descr == "SOM":
+            import SOM
+            o_som = SOM.SOM()
+            o_som.copyAttributes(obj)
+
+            so = hlr_utils.get_map_so(obj, None, 0)
+            so.y = counts
+            so.var_y = counts_err2
+            o_som.append(so)
+
+            # Write out summed counts into file
+            hlr_utils.write_file(config.output, "text/Spec", o_som,
+                                 output_ext="cnt",
+                                 verbose=config.verbose,
+                                 data_ext=config.ext_replacement,         
+                                 path_replacement=config.path_replacement,
+                                 message="summed counts")
+            
+            # Replace counts data with fractional area. The axes remain the
+            # same
+            o_som[0].y = frac_area
+            o_som[0].var_y = frac_area_err2
+            
+            # Write out summed fractional area into file
+            hlr_utils.write_file(config.output, "text/Spec", o_som,
+                                 output_ext="fra",
+                                 verbose=config.verbose,
+                                 data_ext=config.ext_replacement,         
+                                 path_replacement=config.path_replacement,
+                                 message="fractional area")        
+            
     return result
 
 if __name__ == "__main__":
