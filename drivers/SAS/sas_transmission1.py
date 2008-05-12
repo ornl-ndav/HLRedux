@@ -41,6 +41,7 @@ def run(config, tim=None):
                            timing evaluations.
     @type tim: C{sns_time.DiffTime}
     """
+    import common_lib
     import dr_lib
     import DST
     
@@ -68,14 +69,42 @@ def run(config, tim=None):
                                      transmission=True)
 
     # Perform Steps 1,2,4-6 on background data
-    s_som1 = dr_lib.process_sas_data(config.back, config, timer=tim,
+    b_som1 = dr_lib.process_sas_data(config.back, config, timer=tim,
                                      inst_geom_dst=inst_geom_dst,
                                      dataset_type="background",
                                      transmission=True)
 
     # Put the datasets on the same axis
+    d_som2 = dr_lib.sum_spectra_by_frac(d_som1, lambda_bins.toNessiList())
+    del d_som1
 
+    b_som2 = dr_lib.sum_spectra_by_frac(b_som1, lambda_bins.toNessiList())
+    del b_som1    
     
+    # Divide the data spectrum by the background spectrum
+    d_som3 = common_lib.div_ncerr(d_som2, b_som2)
+
+    del d_som2, b_som2
+
+    # Write out the transmission spectrum
+    hlr_utils.write_file(config.output, "text/Spec", d_som3,
+                         verbose=config.verbose,
+                         replace_path=False,
+                         replace_ext=False,
+                         message="transmission spectrum")
+
+    d_som6.attr_list["config"] = config
+
+    hlr_utils.write_file(config.output, "text/rmd", d_som3,
+                         output_ext="rmd",
+                         data_ext=config.ext_replacement,         
+                         path_replacement=config.path_replacement,
+                         verbose=config.verbose,
+                         message="metadata")
+
+    if tim is not None:
+        tim.setOldTime(old_time)
+        tim.getTime(msg="Total Running Time")    
 
 if __name__ == "__main__":
     import hlr_utils
