@@ -78,7 +78,8 @@ instrument_scripts = {
     'reflect_reduction'
     ],
     "SAS" : [
-    'sas_reduction1'
+    'sas_reduction1',
+    'sas_transmission1'
     ],
     "SCD" : [
     ]
