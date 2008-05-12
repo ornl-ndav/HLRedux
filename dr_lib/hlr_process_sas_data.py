@@ -47,6 +47,10 @@ def process_sas_data(datalist, conf, **kwargs):
     The default value is I{data}.
     @type dataset_type: C{string}
 
+    @keyword transmission: A flag that signals the function to stop after
+                           doing the conversion from TOF to wavelength.
+    @type transmission: C{boolean}
+
     @keyword timer: Timing object so the function can perform timing estimates.
     @type timer: C{sns_timer.DiffTime}
 
@@ -73,6 +77,11 @@ def process_sas_data(datalist, conf, **kwargs):
         t = kwargs["timer"]
     except KeyError:
         t = None
+
+    try:
+        transmission = kwargs["transmission"]
+    except KeyError:
+        transmission = False
 
     # Add so_axis to Configure object
     conf.so_axis = "time_of_flight"
@@ -235,6 +244,9 @@ def process_sas_data(datalist, conf, **kwargs):
         t.getTime(msg="After normalizing data by beam monitor ")
 
     del dp_som2
+
+    if transmission:
+        return dp_som3
 
     if conf.dump_wave_bmnorm:
         dp_som3_1 = dr_lib.sum_all_spectra(dp_som3,\
