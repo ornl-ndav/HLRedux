@@ -78,6 +78,10 @@ class SansOptions(hlr_utils.InstOptions):
                         help="Specify the comma separated list of the "\
                         +"transmission monitor path and signal.")        
 
+        self.add_option("", "--trans", dest="trans", help="Specify the "\
+                        +"filename for a transmission spectrum. Use this "\
+                        +"option in the absence of transmission monitors.")
+
         self.add_option("", "--mon-effc", action="store_true",
                         dest="mon_effc",
                         help="Flag for turning on monitor efficiency "\
@@ -177,6 +181,10 @@ def SansConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "tmon_path", "--tmon-path"):
         configure.tmon_path = hlr_utils.NxPath(options.tmon_path)        
 
+    # Set the Transmission spectrum file
+    if hlr_utils.cli_provide_override(configure, "trans", "--trans"):
+        configure.trans = hlr_utils.determine_files(options.trans,
+                                                    one_file=True)
     # Set mon_effc flag
     if hlr_utils.cli_provide_override(configure, "mon_effc", "--mon-effc"):
         configure.mon_effc = options.mon_effc
