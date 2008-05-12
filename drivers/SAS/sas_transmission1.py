@@ -75,10 +75,10 @@ def run(config, tim=None):
                                      transmission=True)
 
     # Put the datasets on the same axis
-    d_som2 = dr_lib.sum_spectra_by_frac(d_som1, lambda_bins.toNessiList())
+    d_som2 = dr_lib.sum_by_rebin_frac(d_som1, config.lambda_bins.toNessiList())
     del d_som1
 
-    b_som2 = dr_lib.sum_spectra_by_frac(b_som1, lambda_bins.toNessiList())
+    b_som2 = dr_lib.sum_by_rebin_frac(b_som1, config.lambda_bins.toNessiList())
     del b_som1    
     
     # Divide the data spectrum by the background spectrum
@@ -93,7 +93,7 @@ def run(config, tim=None):
                          replace_ext=False,
                          message="transmission spectrum")
 
-    d_som6.attr_list["config"] = config
+    d_som3.attr_list["config"] = config
 
     hlr_utils.write_file(config.output, "text/rmd", d_som3,
                          output_ext="rmd",
@@ -123,6 +123,7 @@ if __name__ == "__main__":
     # Set defaults for imported options
     parser.set_defaults(data_paths="/entry/bank1,1")
     parser.set_defaults(bmon_path="/entry/monitor1,1")
+    parser.set_defaults(tmon_path="/entry/monitor1,1")
 
     # Remove unnecessary options
     parser.remove_option("--tmon-path")
@@ -130,6 +131,7 @@ if __name__ == "__main__":
     parser.remove_option("--solv")
     parser.remove_option("--open")
     parser.remove_option("--dkcur")
+    parser.remove_option("--trans")
     parser.remove_option("--mom-trans-bins")
     parser.remove_option("--dump-wave-bmnorm")
     
