@@ -52,6 +52,10 @@ def process_sas_data(datalist, conf, **kwargs):
                            default is I{False}.
     @type transmission: C{boolean}
 
+    @keyword bkg_subtract: A list of coefficients that help determine the
+    wavelength dependent background subtraction.
+    @type bkg_subtract: C{list}
+
     @keyword timer: Timing object so the function can perform timing estimates.
     @type timer: C{sns_timer.DiffTime}
 
@@ -83,6 +87,11 @@ def process_sas_data(datalist, conf, **kwargs):
         transmission = kwargs["transmission"]
     except KeyError:
         transmission = False
+
+    try:
+        bkg_subtract = kwargs["bkg_subtract"]
+    except KeyError:
+        bkg_subtract = None        
 
     # Add so_axis to Configure object
     conf.so_axis = "time_of_flight"
