@@ -235,10 +235,8 @@ def tof_to_wavelength_lin_time_zero(obj, **kwargs):
                                                            t_0_offset,
                                                            t_0_offset_err2)
         if lojac:
-            y_val = hlr_utils.get_value(obj, i, o_descr, "y")
-            y_err2 = hlr_utils.get_err2(obj, i, o_descr, "y")
             counts = utils.linear_order_jacobian(val, value[0],
-                                                 y_val, y_err2)
+                                                 map_so.y, map_so.var_y)
             hlr_utils.result_insert(result, res_descr, counts, map_so,
                                     "all", axis, [value[0]])
 
