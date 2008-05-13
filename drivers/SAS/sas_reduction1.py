@@ -63,7 +63,8 @@ def run(config, tim=None):
 
     # Perform Steps 1-9 on sample data
     d_som1 = dr_lib.process_sas_data(config.data, config, timer=tim,
-                                     inst_geom_dst=inst_geom_dst)
+                                     inst_geom_dst=inst_geom_dst,
+                                     bkg_subtract=config.bkg_coeff)
 
     # Perform Steps 1-9 on buffer/solvent only data
     if config.solv is not None:
