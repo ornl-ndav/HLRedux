@@ -112,6 +112,10 @@ class SansOptions(hlr_utils.InstOptions):
                         +"values and the wavelength bin width in Angstroms")
         self.set_defaults(lambda_bins="0,10,0.1")
 
+        self.add_option("", "--lambda-cut", dest="lambda_cut",
+                        help="Specify the wavelength at which to cut the "\
+                        +"spectra (Angstroms).")
+
         self.add_option("", "--dump-wave", action="store_true",
                         dest="dump_wave",
                         help="Flag to dump the wavelength information for all"\
@@ -215,6 +219,14 @@ def SansConfiguration(parser, configure, options, args):
                                       "--lambda-bins"):    
         configure.lambda_bins = hlr_utils.AxisFromString(options.lambda_bins)
 
+    # Set the lambda cut for cutting wavelength spectra
+    if hlr_utils.cli_provide_override(configure, "lambda_cut",
+                                      "--lambda-cut"):
+        try:
+            configure.lambda_cut = float(options.lambda_cut)
+        except TypeError:
+            configure.lambda_cut = options.lambda_cut
+        
     # Set the ability to dump the detector pixel wavelength information
     if hlr_utils.cli_provide_override(configure, "dump_wave", "--dump-wave"):
         configure.dump_wave = options.dump_wave
