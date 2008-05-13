@@ -181,7 +181,8 @@ def process_sas_data(datalist, conf, **kwargs):
         dp_som1,
         units="microsecond",
         time_zero_offset=conf.time_zero_offset_det.toValErrTuple(),
-        inst_param="total")
+        inst_param="total",
+        cut_val=conf.lambda_cut)
 
     if dtm_som1 is not None:
         # Convert beam monitor
