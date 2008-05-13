@@ -60,7 +60,14 @@ def tof_to_wavelength_lin_time_zero(obj, **kwargs):
     @keyword units: The expected units for this function. The default for this
                     function is I{microseconds}.
     @type units: C{string}
- 
+
+    @keyword cut_val: Specify a wavelength to cut the spectra at.
+    @type cut_val: C{float}
+
+    @keyword cut_less: A flag that specifies cutting the spectra less than
+                       C{cut_val}. The default is C{True}.
+    @type cut_less: C{boolean}
+
 
     @return: Object with a primary axis in time-of-flight converted to
              wavelength
@@ -120,6 +127,16 @@ def tof_to_wavelength_lin_time_zero(obj, **kwargs):
         units = kwargs["units"]
     except KeyError:
         units = "microseconds"
+
+    try:
+        cut_val = kwargs["cut_val"]
+    except KeyError:
+        cut_val = None
+
+    try:
+        cut_less = kwargs["cut_less"]
+    except KeyError:
+        cut_less = True
 
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
