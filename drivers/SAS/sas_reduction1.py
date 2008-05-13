@@ -140,8 +140,7 @@ def run(config, tim=None):
     if tim is not None:
         tim.getTime(False)
 
-    d_som6 = dr_lib.sum_all_spectra(d_som5,
-                                    rebin_axis=config.Q_bins.toNessiList())
+    d_som6 = dr_lib.sum_by_rebin_frac(d_som5, config.Q_bins.toNessiList())
 
     if tim is not None:
         tim.getTime(msg="After rebinning and summing for spectrum")    
