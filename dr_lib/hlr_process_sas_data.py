@@ -89,6 +89,7 @@ def process_sas_data(datalist, conf, **kwargs):
 
     # Step 0: Open appropriate data files
 
+    # Data
     if conf.verbose:
         print "Reading %s file" % dataset_type
 
@@ -108,9 +109,10 @@ def process_sas_data(datalist, conf, **kwargs):
     if conf.inst_geom is not None:
         i_geom_dst.setGeometry(conf.data_paths.toPath(), dp_som1)
 
+    # Beam monitor
     if conf.verbose:
-        print "Reading in monitor data from %s file" % dataset_type
-        
+        print "Reading in beam monitor data from %s file" % dataset_type
+
     # The [0] is to get the data SOM and ignore the None background SOM
     dbm_som0 = dr_lib.add_files(datalist, Data_Paths=conf.bmon_path.toPath(),
                                 SO_Axis=conf.so_axis,
@@ -119,12 +121,36 @@ def process_sas_data(datalist, conf, **kwargs):
                                 Timer=t)[0]
         
     if t is not None:
-        t.getTime(msg="After reading monitor data ")
+        t.getTime(msg="After reading beam monitor data ")
 
     dbm_som1 = dr_lib.fix_bin_contents(dbm_som0)
     
     del dbm_som0
-    
+
+    # Transmission monitor
+    if conf.trans is None:
+        if conf.verbose:
+            print "Reading in transmission monitor data from %s file" \
+                  % dataset_type
+        try:
+            dtm_som0 = dr_lib.add_files(datalist,
+                                        Data_Paths=conf.tmon_path.toPath(),
+                                        SO_Axis=conf.so_axis,
+                                        dataset_type=dataset_type,
+                                        Verbose=conf.verbose,
+                                        Timer=t)[0]
+            if t is not None:
+                t.getTime(msg="After reading transmission monitor data ")
+
+            dtm_som1 = dr_lib.fix_bin_contents(dtm_som0)
+                
+            del dtm_som0
+        # Transmission monitor cannot be found
+        except KeyError:
+            if conf.verbose:
+                print "Transmission monitor not found"
+            dtm_som1 = None
+
     # Note: time_zero_offset_det MUST be a tuple
     if conf.time_zero_offset_det is not None:
         dp_som1.attr_list["Time_zero_offset_det"] = \
@@ -132,6 +158,9 @@ def process_sas_data(datalist, conf, **kwargs):
     # Note: time_zero_offset_mon MUST be a tuple
     if conf.time_zero_offset_mon is not None:
         dbm_som1.attr_list["Time_zero_offset_mon"] = \
+                                     conf.time_zero_offset_mon.toValErrTuple()
+        if conf.trans is None and dtm_som1 is not None:
+            dtm_som1.attr_list["Time_zero_offset_mon"] = \
                                      conf.time_zero_offset_mon.toValErrTuple()
 
     # Step 1: Convert TOF to wavelength for data and monitor
@@ -154,6 +183,15 @@ def process_sas_data(datalist, conf, **kwargs):
         time_zero_offset=conf.time_zero_offset_det.toValErrTuple(),
         inst_param="total")
 
+    if dtm_som1 is not None:
+        # Convert beam monitor
+        dtm_som2 = common_lib.tof_to_wavelength_lin_time_zero(
+            dtm_som1,
+            units="microsecond",
+            time_zero_offset=conf.time_zero_offset_mon.toValErrTuple())
+    else:
+        dtm_som2 = dtm_som1
+        
     if t is not None:
         t.getTime(msg="After converting TOF to wavelength ")
 
@@ -174,7 +212,7 @@ def process_sas_data(datalist, conf, **kwargs):
                              path_replacement=conf.path_replacement,
                              message="beam monitor wavelength information")
         
-    del dp_som1, dbm_som1
+    del dp_som1, dbm_som1, dtm_som1
 
     # Step 2: Efficiency correct beam monitor
     if conf.verbose and conf.mon_effc:
@@ -204,6 +242,22 @@ def process_sas_data(datalist, conf, **kwargs):
     del dbm_som2
 
     # Step 3: Efficiency correct transmission monitor    
+    if dtm_som2 is not None:
+        if conf.verbose and conf.mon_effc:
+            print "Efficiency correct transmission monitor data"
+
+        if t is not None:
+            t.getTime(False)
+
+        if conf.mon_effc:
+            dtm_som3 = dr_lib.feff_correct_mon(dtm_som2)
+        else:
+            dtm_som3 = dtm_som2
+    else:
+        dtm_som3 = dtm_som2            
+
+    if t is not None and conf.mon_effc and dtm_som2 is not None:
+        t.getTime(msg="After efficiency correcting beam monitor ")
 
     # Step 4: Efficiency correct detector pixels
 
@@ -266,8 +320,47 @@ def process_sas_data(datalist, conf, **kwargs):
         del dp_som3_1
 
     # Step 7: Rebin transmission monitor axis onto detector pixel axis
+    if conf.trans is not None:
+        print "Reading in transmission monitor data from file"
+
+        dtm_som3 = dr_lib.add_files(datalist,
+                                    Data_Paths=conf.bmon_path.toPath(),
+                                    SO_Axis=conf.so_axis,
+                                    dataset_type=dataset_type,
+                                    dst_type="text/Spec",
+                                    Verbose=conf.verbose,
+                                    Timer=t)[0]
+
+    
+    if conf.verbose and dtm_som3 is not None:
+        print "Rebin transmission monitor axis to detector pixel axis"
+        
+    if t is not None:
+        t.getTime(False)
+
+    dtm_som4 = dr_lib.rebin_monitor(dtm_som3, dp_som3)
+
+    if t is not None and dtm_som3 is not None:
+        t.getTime(msg="After rebinning transmission monitor ")
+
+    del dtm_som3
 
     # Step 8: Normalize data by transmission monitor    
+    if conf.verbose and dtm_som4 is not None:
+        print "Normalizing data by beam monitor"
+
+    if t is not None:
+        t.getTime(False)
+
+    if dtm_som4 is not None:
+        dp_som4 = common_lib.div_ncerr(dp_som3, dtm_som4)
+    else:
+        dp_som4 = dp_som3
+
+    if t is not None and dtm_som4 is not None:
+        t.getTime(msg="After normalizing data by beam monitor ")
+
+    del dp_som3
 
     # Step 9: Convert wavelength to Q for data
     if conf.verbose:
@@ -276,11 +369,11 @@ def process_sas_data(datalist, conf, **kwargs):
     if t is not None:
         t.getTime(False)
 
-    dp_som4 = common_lib.wavelength_to_scalar_Q(dp_som3)
+    dp_som5 = common_lib.wavelength_to_scalar_Q(dp_som4)
 
     if t is not None:
         t.getTime(msg="After converting wavelength to scalar Q ")
         
-    del dp_som3
+    del dp_som4
  
-    return dp_som4
+    return dp_som5
