@@ -197,7 +197,7 @@ def tof_to_wavelength_lin_time_zero(obj, **kwargs):
 
     # iterate through the values
     import axis_manip
-    if lojac:
+    if lojac or cut_val is not None:
         import utils
     
     for i in xrange(hlr_utils.get_length(obj)):
@@ -234,6 +234,31 @@ def tof_to_wavelength_lin_time_zero(obj, **kwargs):
                                                            t_0_slope_err2,
                                                            t_0_offset,
                                                            t_0_offset_err2)
+        
+        if cut_val is not None:
+            index = utils.bisect_helper(value[0], cut_val)
+            if cut_less:
+                # Need to cut at this index, so increment by one
+                index += 1
+                value[0].__delslice__(0, index)
+                value[1].__delslice__(0, index)
+                map_so.y.__delslice__(0, index)
+                map_so.var_y.__delslice__(0, index)
+                if lojac:
+                    val.__delslice__(0, index)
+                    err2.__delslice__(0, index)
+            else:
+                len_data = len(value[0])
+                # All axis arrays need starting index adjusted by one since
+                # they always carry one more bin than the data
+                value[0].__delslice__(index + 1, len_data)
+                value[1].__delslice__(index + 1, len_data)
+                map_so.y.__delslice__(index, len_data)
+                map_so.var_y.__delslice__(index, len_data)
+                if lojac:
+                    val.__delslice__(index + 1, len_data)
+                    err2.__delslice__(index + 1, len_data)
+        
         if lojac:
             counts = utils.linear_order_jacobian(val, value[0],
                                                  map_so.y, map_so.var_y)
