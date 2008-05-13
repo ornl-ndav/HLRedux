@@ -224,6 +224,14 @@ def process_sas_data(datalist, conf, **kwargs):
         
     del dp_som1, dbm_som1, dtm_som1
 
+    # Subtract wavelength dependent background if necessary
+    if bkg_subtract is not None:
+        dp_som3 = dr_lib.subtract_axis_dep_bkg(dp_som2, bkg_subtract)
+    else:
+        dp_som3 = dp_som2
+
+    del dp_som2
+
     # Step 2: Efficiency correct beam monitor
     if conf.verbose and conf.mon_effc:
         print "Efficiency correct beam monitor data"
@@ -278,7 +286,7 @@ def process_sas_data(datalist, conf, **kwargs):
     if t is not None:
         t.getTime(False)
 
-    dbm_som4 = dr_lib.rebin_monitor(dbm_som3, dp_som2)
+    dbm_som4 = dr_lib.rebin_monitor(dbm_som3, dp_som3)
 
     if t is not None:
         t.getTime(msg="After rebinning beam monitor ")
@@ -303,31 +311,31 @@ def process_sas_data(datalist, conf, **kwargs):
     if t is not None:
         t.getTime(False)
 
-    dp_som3 = common_lib.div_ncerr(dp_som2, dbm_som4)
+    dp_som4 = common_lib.div_ncerr(dp_som3, dbm_som4)
 
     if t is not None:
         t.getTime(msg="After normalizing data by beam monitor ")
 
-    del dp_som2
+    del dp_som3
 
     if transmission:
-        return dp_som3
+        return dp_som4
 
     if conf.dump_wave_bmnorm:
-        dp_som3_1 = dr_lib.sum_all_spectra(dp_som3,\
+        dp_som4_1 = dr_lib.sum_all_spectra(dp_som4,\
                                    rebin_axis=conf.lambda_bins.toNessiList())
 
         write_message = "combined pixel wavelength information"
         write_message += " (beam monitor normalized)"
         
-        hlr_utils.write_file(conf.output, "text/Spec", dp_som3_1,
+        hlr_utils.write_file(conf.output, "text/Spec", dp_som4_1,
                              output_ext="pbml",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
                              data_ext=conf.ext_replacement,
                              path_replacement=conf.path_replacement,
                              message=write_message)
-        del dp_som3_1
+        del dp_som4_1
 
     # Step 7: Rebin transmission monitor axis onto detector pixel axis
     if conf.trans is not None:
@@ -348,7 +356,7 @@ def process_sas_data(datalist, conf, **kwargs):
     if t is not None:
         t.getTime(False)
 
-    dtm_som4 = dr_lib.rebin_monitor(dtm_som3, dp_som3)
+    dtm_som4 = dr_lib.rebin_monitor(dtm_som3, dp_som4)
 
     if t is not None and dtm_som3 is not None:
         t.getTime(msg="After rebinning transmission monitor ")
@@ -363,14 +371,14 @@ def process_sas_data(datalist, conf, **kwargs):
         t.getTime(False)
 
     if dtm_som4 is not None:
-        dp_som4 = common_lib.div_ncerr(dp_som3, dtm_som4)
+        dp_som5 = common_lib.div_ncerr(dp_som4, dtm_som4)
     else:
-        dp_som4 = dp_som3
+        dp_som5 = dp_som4
 
     if t is not None and dtm_som4 is not None:
         t.getTime(msg="After normalizing data by beam monitor ")
 
-    del dp_som3
+    del dp_som4
 
     # Step 9: Convert wavelength to Q for data
     if conf.verbose:
@@ -379,11 +387,11 @@ def process_sas_data(datalist, conf, **kwargs):
     if t is not None:
         t.getTime(False)
 
-    dp_som5 = common_lib.wavelength_to_scalar_Q(dp_som4)
+    dp_som6 = common_lib.wavelength_to_scalar_Q(dp_som5)
 
     if t is not None:
         t.getTime(msg="After converting wavelength to scalar Q ")
         
-    del dp_som4
+    del dp_som5
  
-    return dp_som5
+    return dp_som6
