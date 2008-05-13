@@ -116,6 +116,12 @@ class SansOptions(hlr_utils.InstOptions):
                         help="Specify the wavelength at which to cut the "\
                         +"spectra (Angstroms).")
 
+        self.add_option("", "--bkg-coeff", dest="bkg_coeff",
+                        help="Specify the polynomial coefficients for a "\
+                        +"wavelength dependent background subtraction. The "\
+                        +"should be lowest to highest: c0 + c1 * x + "\
+                        +"c2 * x**2 + ...")
+        
         self.add_option("", "--dump-wave", action="store_true",
                         dest="dump_wave",
                         help="Flag to dump the wavelength information for all"\
@@ -226,6 +232,13 @@ def SansConfiguration(parser, configure, options, args):
             configure.lambda_cut = float(options.lambda_cut)
         except TypeError:
             configure.lambda_cut = options.lambda_cut
+
+    # Set the coefficients for the wavelength dependent background correction
+    if hlr_utils.cli_provide_override(configure, "bkg_coeff", "--bkg-coeff"):
+        try:
+            configure.bkg_coeff = options.bkg_coeff.split(',')
+        except TypeError:
+            configure.bkg_coeff = options.bkg_coeff
         
     # Set the ability to dump the detector pixel wavelength information
     if hlr_utils.cli_provide_override(configure, "dump_wave", "--dump-wave"):
