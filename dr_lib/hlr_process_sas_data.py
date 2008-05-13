@@ -40,15 +40,16 @@ def process_sas_data(datalist, conf, **kwargs):
     @param kwargs: A list of keyword arguments that the function accepts:
     
     @keyword inst_geom_dst: File object that contains instrument geometry
-    information.
+                            information.
     @type inst_geom_dst: C{DST.GeomDST}
     
     @keyword dataset_type: The practical name of the dataset being processed.
-    The default value is I{data}.
+                           The default value is I{data}.
     @type dataset_type: C{string}
 
     @keyword transmission: A flag that signals the function to stop after
-                           doing the conversion from TOF to wavelength.
+                           doing the conversion from TOF to wavelength. The
+                           default is I{False}.
     @type transmission: C{boolean}
 
     @keyword timer: Timing object so the function can perform timing estimates.
