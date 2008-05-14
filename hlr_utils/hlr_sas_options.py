@@ -237,7 +237,7 @@ def SansConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "bkg_coeff", "--bkg-coeff"):
         try:
             configure.bkg_coeff = options.bkg_coeff.split(',')
-        except TypeError:
+        except AttributeError:
             configure.bkg_coeff = options.bkg_coeff
         
     # Set the ability to dump the detector pixel wavelength information
