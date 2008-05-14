@@ -66,12 +66,13 @@ def run(config, tim=None):
     # Perform Steps 1,2,4-6 on sample data
     d_som1 = dr_lib.process_sas_data(config.data, config, timer=tim,
                                      inst_geom_dst=inst_geom_dst,
+                                     dataset_type="transmission",
                                      transmission=True)
 
     # Perform Steps 1,2,4-6 on background data
     b_som1 = dr_lib.process_sas_data(config.back, config, timer=tim,
                                      inst_geom_dst=inst_geom_dst,
-                                     dataset_type="background",
+                                     dataset_type="trans_bkg",
                                      transmission=True)
 
     # Put the datasets on the same axis
