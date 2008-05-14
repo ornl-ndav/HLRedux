@@ -356,7 +356,12 @@ def process_sas_data(datalist, conf, **kwargs):
     if t is not None:
         t.getTime(False)
 
-    dtm_som4 = dr_lib.rebin_monitor(dtm_som3, dp_som4)
+    if conf.trans is not None:
+        use_linint = True
+    else:
+        use_linint = False
+
+    dtm_som4 = dr_lib.rebin_monitor(dtm_som3, dp_som4, interpolate=use_linint)
 
     if t is not None and dtm_som3 is not None:
         t.getTime(msg="After rebinning transmission monitor ")
