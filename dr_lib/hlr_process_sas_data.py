@@ -159,6 +159,8 @@ def process_sas_data(datalist, conf, **kwargs):
             if conf.verbose:
                 print "Transmission monitor not found"
             dtm_som1 = None
+    else:
+        dtm_som1 = None
 
     # Note: time_zero_offset_det MUST be a tuple
     if conf.time_zero_offset_det is not None:
@@ -341,9 +343,7 @@ def process_sas_data(datalist, conf, **kwargs):
     if conf.trans is not None:
         print "Reading in transmission monitor data from file"
 
-        dtm_som3 = dr_lib.add_files(datalist,
-                                    Data_Paths=conf.bmon_path.toPath(),
-                                    SO_Axis=conf.so_axis,
+        dtm_som3 = dr_lib.add_files([conf.trans],
                                     dataset_type=dataset_type,
                                     dst_type="text/Spec",
                                     Verbose=conf.verbose,
