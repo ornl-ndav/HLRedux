@@ -306,7 +306,7 @@ def tof_to_initial_wavelength_igs_lin_time_zero(obj, **kwargs):
             try:
                 counts = utils.linear_order_jacobian(val, value[0],
                                                      map_so.y, map_so.var_y)
-            except (Exception, e):
+            except Exception, e:
                 # Lets us know offending pixel ID
                 raise Exception(str(map_so.id) + " " + str(e))
             
