@@ -34,7 +34,6 @@ from hlr_frequency_to_energy import *
 from hlr_init_scatt_wavevector_to_scalar_Q import *
 from hlr_mult_ncerr import *
 from hlr_rebin_axis_1D import *
-from hlr_rebin_axis_1D_frac import *
 from hlr_rebin_axis_1D_linint import *
 from hlr_rebin_axis_2D import *
 from hlr_reverse_array_cp import *
