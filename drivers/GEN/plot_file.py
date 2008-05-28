@@ -52,9 +52,9 @@ def run(config):
     if dst_type == "text/Spec":
         __plot_a3c(d_som, config)
     elif dst_type == "text/Dave2d":
-        __plot_dave(d_som, config)
+        __plot_dave(d_som)
     elif dst_type == "text/num-info":
-        __plot_numinfo(d_som, config)
+        __plot_numinfo(d_som)
     else:
         raise RuntimeError("Do not know how to plot file type %s" % dst_type)
 
@@ -139,7 +139,7 @@ def __plot_one_a3c(x, y, var_y, *args, **kwargs):
         ax = pylab.gca()
         ax.set_yscale("log")
 
-def __plot_dave(som, conf):
+def __plot_dave(som):
     """
     This subroutine is responsible for plotting a Dave 2D file.
     """
@@ -168,7 +168,7 @@ def __plot_dave(som, conf):
 
     pylab.colorbar()
 
-def __plot_numinfo(som, conf):
+def __plot_numinfo(som):
     """
     This subroutine is responsible for plotting a NumInfo file.
     """
