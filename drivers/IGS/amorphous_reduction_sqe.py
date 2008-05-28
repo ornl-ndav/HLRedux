@@ -187,7 +187,7 @@ def run(config, tim=None):
             tim.getTime(False)
             
         ds_som2 = dr_lib.lin_interpolate_spectra(ds_som1, ctof_elastic_range,
-                                                 filter=lambda_filter)
+                                                 filter_axis=lambda_filter)
 
         if tim is not None:
             tim.getTime(msg="After linearly interpolating direct scattering "\
