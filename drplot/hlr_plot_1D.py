@@ -91,7 +91,7 @@ def plot_1D_arr(x, y, var_y=None, var_x=None, **kwargs):
     @param var_x: The uncertainty of the independent axis
     @type var_x: C{NumPy} array
 
-    @kwargs: A list of keyword arguments that the function accepts.
+    @param kwargs: A list of keyword arguments that the function accepts.
 
     @keyword xlabel: The label for the independent axis.
     @type xlabel: C{string}
