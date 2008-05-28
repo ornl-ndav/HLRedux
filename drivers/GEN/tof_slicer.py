@@ -97,8 +97,6 @@ def run(config):
                          message="combined TOF information")
 
 if __name__ == "__main__":
-    import os
-
     import dr_lib
     import hlr_utils
 
