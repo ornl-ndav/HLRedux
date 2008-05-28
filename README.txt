@@ -24,10 +24,10 @@ Installation Instructions
   work under OSX. The following lists the current versions of software that 
   HLRedux has been known to work under.
 
-    1. Python       - 2.3.4
-    2. DOM          - 1.0.0iqc6
-    3. SCL          - 1.1.0iqc4
-    4. ASGUtils     - 0.3
+    1. Python       - >= 2.3.4
+    2. DOM          - >= 1.1.0
+    3. SCL          - 1.1.1
+    4. ASGUtils     - >= 0.11
     5. Epydoc       - 3.0beta1
 
   Installation
