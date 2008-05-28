@@ -117,7 +117,6 @@ def integrate_spectra(obj, **kwargs):
                 raise RuntimeError("Cannot use norm keyword with SO!")
             
             width = True
-            num_pixels = len(obj)
             inst = obj.attr_list.instrument
         else:
             width = False
