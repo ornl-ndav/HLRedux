@@ -191,7 +191,8 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
         peak_excl = conf.norm_peak_excl
 
     if b_som3 is not None:
-        B = dr_lib.calculate_ref_background(d_som3, no_bkg, conf.inst)
+        B = dr_lib.calculate_ref_background(b_som3, no_bkg, conf.inst, None,
+                                            aobj=d_som3)
     else:
         B = dr_lib.calculate_ref_background(d_som3, no_bkg, conf.inst,
                                             peak_excl)
