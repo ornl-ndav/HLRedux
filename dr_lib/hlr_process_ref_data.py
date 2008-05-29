@@ -107,14 +107,14 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
     if conf.verbose:
         print "Reading %s file" % dataset_type
 
-    (d_som1, db_som1) = dr_lib.add_files(datalist,
-                                         Data_Paths=conf.data_paths.toPath(),
-                                         SO_Axis=so_axis,
-                                         dataset_type=dataset_type,
-                                         Signal_ROI=signal_roi_file,
-                                         Bkg_ROI=bkg_roi_file,
-                                         Verbose=conf.verbose,
-                                         Timer=t)
+    (d_som1, b_som1) = dr_lib.add_files(datalist,
+                                        Data_Paths=conf.data_paths.toPath(),
+                                        SO_Axis=so_axis,
+                                        dataset_type=dataset_type,
+                                        Signal_ROI=signal_roi_file,
+                                        Bkg_ROI=bkg_roi_file,
+                                        Verbose=conf.verbose,
+                                        Timer=t)
 
     if t is not None:
         t.getTime(msg="After reading %s " % dataset_type)
@@ -146,6 +146,13 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
                                     pixel_fix=127)
 
     del d_som1
+    
+    if b_som1 is not None:
+        b_som2 = dr_lib.sum_all_spectra(b_som1, y_sort=y_sort, stripe=True,
+                                        pixel_fix=127)
+        del b_som1
+    else:
+        b_som2 = b_som1
 
     # Fix TOF cuts to make them list of integers
     try:
@@ -157,6 +164,11 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
     d_som3 = dr_lib.zero_bins(d_som2, tof_cuts)
 
     del d_som2
+
+    if b_som2 is not None:
+        b_som3 = dr_lib.zero_bins(b_som2, tof_cuts)
+        
+        del b_som2
         
     if conf.dump_specular:
         hlr_utils.write_file(conf.output, "text/Spec", d_som3,
