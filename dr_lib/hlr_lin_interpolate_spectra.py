@@ -36,9 +36,10 @@ def lin_interpolate_spectra(obj, lint_range, **kwargs):
 
     @param kwargs: A list of keyword arguments that the function accepts
 
-    @keyword filter: Range pairs that denote the boundary of the data. All data
-                     outside this range will be filtered from the spectrum.
-    @type filter: C{list} of C{tuple}s
+    @keyword filter_axis: Range pairs that denote the boundary of the data.
+                          All data outside this range will be filtered from
+                          the spectrum.
+    @type filter_axis: C{list} of C{tuple}s
 
 
     @return: Object containing the linearly interpolated spectra
@@ -62,9 +63,9 @@ def lin_interpolate_spectra(obj, lint_range, **kwargs):
 
     # Check for keywords
     try:
-        filter = kwargs["filter"]
+        filter_axis = kwargs["filter_axis"]
     except KeyError:
-        filter = None
+        filter_axis = None
 
     # set up for working through data
     (result, res_descr) = hlr_utils.empty_result(obj)
@@ -101,10 +102,10 @@ def lin_interpolate_spectra(obj, lint_range, **kwargs):
             y_new[j] = (slope * x_axis[j]) + offset
             var_y_new[j] = y_err2[i_start]
 
-        if filter is not None:
+        if filter_axis is not None:
             # Find the bins to filter the data
-            f_start = bisect.bisect(x_axis, filter[i][0]) - 1
-            f_end = bisect.bisect(x_axis, filter[i][1]) - 1
+            f_start = bisect.bisect(x_axis, filter_axis[i][0]) - 1
+            f_end = bisect.bisect(x_axis, filter_axis[i][1]) - 1
 
             len_axis = len(x_axis)
 

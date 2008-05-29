@@ -171,7 +171,7 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
     try:
         configure = kwargs["configure"]
     except KeyError:
-        configure = False
+        configure = None
 
     so_dim = SOM.SO(dim)
 

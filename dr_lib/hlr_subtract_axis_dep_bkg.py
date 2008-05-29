@@ -70,7 +70,6 @@ def subtract_axis_dep_bkg(obj, coeffs):
 
     obj_len = hlr_utils.get_length(obj)
 
-    import array_manip
     import utils
     
     # iterate through the values

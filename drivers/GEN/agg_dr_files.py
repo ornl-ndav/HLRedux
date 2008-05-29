@@ -39,9 +39,6 @@ def run(config, tim):
                 evaluations.
     @type tim: C{sns_time.DiffTime}    
     """
-    import sys
-
-    import common_lib
     import dr_lib
     
     if tim is not None:
