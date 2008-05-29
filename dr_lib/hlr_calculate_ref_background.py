@@ -136,11 +136,11 @@ def calculate_ref_background(obj, no_bkg, inst, peak_excl, **kwargs):
 
             if peak_excl is None:
                 filter_pixel = False
-
-            if cur_pix_id < peak_excl[0] or cur_pix_id > peak_excl[1]:
-                filter_pixel = False
             else:
-                filter_pixel = True
+                if cur_pix_id < peak_excl[0] or cur_pix_id > peak_excl[1]:
+                    filter_pixel = False
+                else:
+                    filter_pixel = True
 
             if not filter_pixel:
                 if not (utils.compare(obj1.var_y[i], 0.0) == 0 and \
