@@ -80,7 +80,7 @@ def plot_2D_arr(x, y, z, **kwargs):
     @param z: The dependent axis
     @type z: C{NumPy.array}
 
-    @kwargs: A list of keyword arguments that the function accepts.
+    @param kwargs: A list of keyword arguments that the function accepts.
 
     @keyword colormap: A I{matplotlib} colormap for plotting the data. The
                        default is I{cm.hot}.
