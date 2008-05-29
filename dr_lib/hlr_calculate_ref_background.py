@@ -82,7 +82,8 @@ def calculate_ref_background(obj, no_bkg, inst, peak_excl):
 
     # Setup pixel axes
     pix_axis = nessi_list.NessiList()
-    pix_axis_no_peak = nessi_list.NessiList()
+    if peak_excl is not None:
+        pix_axis_no_peak = nessi_list.NessiList()
 
     # Fill pixel axes and background SOs
     for k in xrange(hlr_utils.get_length(obj)):
@@ -91,8 +92,9 @@ def calculate_ref_background(obj, no_bkg, inst, peak_excl):
         cur_pix_id = map_so.id[1][inst_pix_id]
 
         pix_axis.append(cur_pix_id)
-        if cur_pix_id < peak_excl[0] or cur_pix_id > peak_excl[1]:
-            pix_axis_no_peak.append(cur_pix_id)
+        if peak_excl is not None:
+            if cur_pix_id < peak_excl[0] or cur_pix_id > peak_excl[1]:
+                pix_axis_no_peak.append(cur_pix_id)
 
         so = SOM.SO()
         hlr_utils.result_insert(so, "SO", map_so, None, "all")
@@ -108,7 +110,15 @@ def calculate_ref_background(obj, no_bkg, inst, peak_excl):
             obj1 = hlr_utils.get_value(obj, j, o_descr, "all")
             cur_pix_id = obj1.id[1][inst_pix_id]
 
+            if peak_excl is None:
+                filter_pixel = False
+
             if cur_pix_id < peak_excl[0] or cur_pix_id > peak_excl[1]:
+                filter_pixel = False
+            else:
+                filter_pixel = True
+
+            if not filter_pixel:
                 if not (utils.compare(obj1.var_y[i], 0.0) == 0 and \
                         utils.compare(obj1.y[i], 0.0) == 0):
                     sliced_data.append(obj1.y[i])
