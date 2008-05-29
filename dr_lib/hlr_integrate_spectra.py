@@ -130,11 +130,12 @@ def integrate_spectra(obj, **kwargs):
     except KeyError:
         total = False
 
-    # Check for width keyword argument
-    try:
-        width = kwargs["width"]
-    except KeyError:
-        width = False
+    # Check for width keyword argument only if norm isn't present
+    if not norm:
+        try:
+            width = kwargs["width"]
+        except KeyError:
+            width = False
 
     # If the integration start bound is not given, assume the 1st bin
     try:
