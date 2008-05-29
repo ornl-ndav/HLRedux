@@ -22,7 +22,8 @@
 
 # $Id$
 
-def process_ref_data(datalist, conf, signal_roi_file, no_bkg=False, **kwargs):
+def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
+                     no_bkg=False, **kwargs):
     """
     This function combines Steps 1 through 6 in section 2.4.5 of the data
     reduction process for Reflectometers (without Monitors) as specified by
@@ -41,9 +42,13 @@ def process_ref_data(datalist, conf, signal_roi_file, no_bkg=False, **kwargs):
     @param signal_roi_file: The file containing the list of pixel IDs for the
                             signal region of interest.
     @type signal_roi_file: C{string}
+
+    @param bkg_roi_file: The file containing the list of pixel IDs for the
+                         (possible) background region of interest.
+    @type bkg_roi_file: C{string}    
     
     @param no_bkg: (OPTIONAL) Flag which determines if the background will be
-                              calculated nad subtracted.
+                              calculated and subtracted.
     @type no_bkg: C{boolean}
     
     @param kwargs: A list of keyword arguments that the function accepts:
@@ -98,17 +103,18 @@ def process_ref_data(datalist, conf, signal_roi_file, no_bkg=False, **kwargs):
     
     so_axis = "time_of_flight"
 
-    # Step 0: Open data files and select signal ROIs
+    # Step 0: Open data files and select signal (and possible background) ROIs
     if conf.verbose:
         print "Reading %s file" % dataset_type
 
-    d_som1 = dr_lib.add_files(datalist,
-                              Data_Paths=conf.data_paths.toPath(),
-                              SO_Axis=so_axis,
-                              dataset_type=dataset_type,
-                              Signal_ROI=signal_roi_file,
-                              Verbose=conf.verbose,
-                              Timer=t)[0]
+    (d_som1, db_som1) = dr_lib.add_files(datalist,
+                                         Data_Paths=conf.data_paths.toPath(),
+                                         SO_Axis=so_axis,
+                                         dataset_type=dataset_type,
+                                         Signal_ROI=signal_roi_file,
+                                         Bkg_ROI=bkg_roi_file,
+                                         Verbose=conf.verbose,
+                                         Timer=t)
 
     if t is not None:
         t.getTime(msg="After reading %s " % dataset_type)
