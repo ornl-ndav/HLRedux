@@ -169,6 +169,8 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
         b_som3 = dr_lib.zero_bins(b_som2, tof_cuts)
         
         del b_som2
+    else:
+        b_som3 = b_som2
         
     if conf.dump_specular:
         hlr_utils.write_file(conf.output, "text/Spec", d_som3,
@@ -188,8 +190,11 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
     elif dataset_type == "norm":
         peak_excl = conf.norm_peak_excl
 
-    B = dr_lib.calculate_ref_background(d_som3, no_bkg, conf.inst,
-                                        peak_excl)
+    if b_som3 is not None:
+        B = dr_lib.calculate_ref_background(d_som3, no_bkg, conf.inst)
+    else:
+        B = dr_lib.calculate_ref_background(d_som3, no_bkg, conf.inst,
+                                            peak_excl)
 
     if t is not None:
         t.getTime(msg="After background determination")
