@@ -54,6 +54,33 @@ def calc_solid_angle(inst, pix, **kwargs):
 
     pix_area = 0.0
 
+    import SOM
+    npix = SOM.SO()
+
+    import math
+
+    # Get x pixel size
+    x1 = hlr_utils.get_parameter("x-offset", pix, inst)
+
+    # Make the neighboring pixel ID in the x direction
+    npix.id = (pix.id[0], (pix.id[1][0]+1, pix.id[1][1]))
+    x2 = hlr_utils.get_parameter("x-offset", npix, inst)
+
+    # Pixel offsets are in centimeters
+    xdiff = math.fabs(x2 - x1) / 100.0
+
+    # Get y pixel size
+    y1 = hlr_utils.get_parameter("y-offset", pix, inst)
+
+    # Make the neighboring pixel ID in the y direction
+    npix.id = (pix.id[0], (pix.id[1][0], pix.id[1][1]+1))
+    y2 = hlr_utils.get_parameter("y-offset", npix, inst)
+
+    # Pixel offsets are in centimeters
+    ydiff = math.fabs(y2 - y1) / 100.0    
+
+    pix_area = xdiff * ydiff
+
     return pix_area / pl2
     
     
