@@ -81,6 +81,10 @@ def calc_solid_angle(inst, pix, **kwargs):
 
     pix_area = xdiff * ydiff
 
-    return pix_area / pl2
+    solid_angle = pix_area / pl2
+
+    #print "A:", pix.id, xdiff, ydiff, pl2, solid_angle
+
+    return solid_angle
     
     
