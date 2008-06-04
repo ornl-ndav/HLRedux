@@ -92,7 +92,11 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
     try:
         norm = kwargs["norm"]
     except KeyError:
-        norm = None
+        norm = False
+
+    if norm:
+        if o_descr == "SOM":
+            inst = obj.attr_list.instrument
         
     (result, res_descr) = hlr_utils.empty_result(obj)
 
@@ -100,6 +104,7 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
 
     import array_manip
     import axis_manip
+    import dr_lib
     import nessi_list
 
     len_data = len(axis_out) - 1
@@ -117,6 +122,17 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
         value = axis_manip.rebin_axis_1D_frac(axis_in, val, err2, axis_out)
 
         frac_err = nessi_list.NessiList(len(value[2]))
+
+        if norm:
+            map_so = hlr_utils.get_map_so(obj, None, i)
+            dOmega = dr_lib.calc_solid_angle(inst, map_so)
+            (nfrac_area, nfrac_area_err2) = array_manip.div_ncerr(value[2],
+                                                                  frac_err,
+                                                                  (dOmega,
+                                                                   0.0))
+        else:
+            nfrac_area = value[2]
+            nfrac_area_err2 = frac_err
         
         (counts, counts_err2) = array_manip.add_ncerr(counts, counts_err2,
                                                       value[0], value[1])
