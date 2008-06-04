@@ -138,8 +138,8 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
                                                       value[0], value[1])
         (frac_area, frac_area_err2) = array_manip.add_ncerr(frac_area,
                                                             frac_area_err2,
-                                                            value[2],
-                                                            frac_err)
+                                                            nfrac_area,
+                                                            nfrac_area_err2)
 
     # Divide the total counts by the total fractional area
     value1 = array_manip.div_ncerr(counts, counts_err2, frac_area,
