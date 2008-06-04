@@ -42,6 +42,18 @@ def calc_solid_angle(inst, pix, **kwargs):
     """
     import hlr_utils
 
-    return 0.0
+    # Check for keywords
+    try:
+        pathtype = kwargs["pathtype"]
+    except KeyError:
+        pathtype = "total"
+
+    # Get pixel pathlength and square it (this is in meters)
+    (pl, pl_err2) = hlr_utils.get_parameter(pathtype, pix, inst)
+    pl2 = pl * pl
+
+    pix_area = 0.0
+
+    return pix_area / pl2
     
     
