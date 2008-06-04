@@ -128,8 +128,8 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
             dOmega = dr_lib.calc_solid_angle(inst, map_so)
             (nfrac_area, nfrac_area_err2) = array_manip.div_ncerr(value[2],
                                                                   frac_err,
-                                                                  (dOmega,
-                                                                   0.0))
+                                                                  dOmega,
+                                                                  0.0)
         else:
             nfrac_area = value[2]
             nfrac_area_err2 = frac_err
@@ -153,22 +153,21 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
     hlr_utils.result_insert(result, res_descr, value1, map_so, "all",
                             0, xvals)
 
-    #import pylab
-    #import drplot
-    #f1 = pylab.figure()
-    #pylab.subplot(311)
-    #drplot.plot_1D_arr(axis_out.toNumPy(True), counts.toNumPy(),
-    #                   counts_err2.toNumPy(), xlabel="Q ($\AA^{-1}$)",
-    #                   ylabel="Counts", logy=True, logx=True)
-    #pylab.subplot(312)
-    #drplot.plot_1D_arr(axis_out.toNumPy(True), frac_area.toNumPy(),
-    #                   frac_area_err2.toNumPy(), xlabel="Q ($\AA^{-1}$)",
-    #                   ylabel="Fractional Area", logy=True, logx=True)
-
-    #pylab.subplot(313)
-    #drplot.plot_1D_arr(axis_out.toNumPy(True), value1[0].toNumPy(),
-    #                   value1[1].toNumPy(), xlabel="Q ($\AA^{-1}$)",
-    #                   ylabel="Rebinned Counts", logy=True, logx=True)
+    import pylab
+    import drplot
+    f1 = pylab.figure()
+    pylab.subplot(311)
+    drplot.plot_1D_arr(axis_out.toNumPy(True), counts.toNumPy(),
+                       counts_err2.toNumPy(), xlabel="Q ($\AA^{-1}$)",
+                       ylabel="Counts", logy=True, logx=True)
+    pylab.subplot(312)
+    drplot.plot_1D_arr(axis_out.toNumPy(True), frac_area.toNumPy(),
+                       frac_area_err2.toNumPy(), xlabel="Q ($\AA^{-1}$)",
+                       ylabel="Fractional Area", logy=True, logx=True)
+    pylab.subplot(313)
+    drplot.plot_1D_arr(axis_out.toNumPy(True), value1[0].toNumPy(),
+                       value1[1].toNumPy(), xlabel="Q ($\AA^{-1}$)",
+                       ylabel="Rebinned Counts", logy=True, logx=True)
 
     if config is not None:
         if o_descr == "SOM":
