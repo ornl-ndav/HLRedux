@@ -42,6 +42,10 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
                         and fractional area to files.
     @type configure: C{Configure}
 
+    @keyword norm: This flag will trigger the function to normalize the final
+                   spectrum by the solid angle distribution of all the pixels.
+    @type norm: C{boolean}
+    
 
     @return: Object that has been rebinned and summed according to the
              provided axis
@@ -85,6 +89,11 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
     except KeyError:
         config = None
 
+    try:
+        norm = kwargs["norm"]
+    except KeyError:
+        norm = None
+        
     (result, res_descr) = hlr_utils.empty_result(obj)
 
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
