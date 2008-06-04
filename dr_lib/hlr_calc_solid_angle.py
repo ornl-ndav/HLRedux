@@ -36,8 +36,8 @@ def calc_solid_angle(inst, pix, **kwargs):
     @param kwargs: A list of keyword arguments that the function accepts:
 
     @keyword pathtype: The pathlength type from which to calculate the solid
-    angle. The possible values are I{total} and I{primary}. The default is
-    I{total}.
+                       angle. The possible values are I{total}, I{primary} and
+                       I{secondary}. The default is I{secondary}.
     @type pathtype: C{string}
     """
     import hlr_utils
@@ -46,7 +46,7 @@ def calc_solid_angle(inst, pix, **kwargs):
     try:
         pathtype = kwargs["pathtype"]
     except KeyError:
-        pathtype = "total"
+        pathtype = "secondary"
 
     # Get pixel pathlength and square it (this is in meters)
     (pl, pl_err2) = hlr_utils.get_parameter(pathtype, pix, inst)
