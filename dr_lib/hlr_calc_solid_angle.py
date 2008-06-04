@@ -66,8 +66,8 @@ def calc_solid_angle(inst, pix, **kwargs):
     npix.id = (pix.id[0], (pix.id[1][0]+1, pix.id[1][1]))
     x2 = hlr_utils.get_parameter("x-offset", npix, inst)
 
-    # Pixel offsets are in centimeters
-    xdiff = math.fabs(x2 - x1) / 100.0
+    # Pixel offsets are in meters
+    xdiff = math.fabs(x2 - x1)
 
     # Get y pixel size
     y1 = hlr_utils.get_parameter("y-offset", pix, inst)
@@ -76,8 +76,8 @@ def calc_solid_angle(inst, pix, **kwargs):
     npix.id = (pix.id[0], (pix.id[1][0], pix.id[1][1]+1))
     y2 = hlr_utils.get_parameter("y-offset", npix, inst)
 
-    # Pixel offsets are in centimeters
-    ydiff = math.fabs(y2 - y1) / 100.0    
+    # Pixel offsets are in meters
+    ydiff = math.fabs(y2 - y1)
 
     pix_area = xdiff * ydiff
 
