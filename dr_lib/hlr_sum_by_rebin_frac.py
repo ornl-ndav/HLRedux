@@ -176,6 +176,7 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
             o_som.copyAttributes(obj)
 
             so = hlr_utils.get_map_so(obj, None, 0)
+            so.axis[0].val = axis_out
             so.y = counts
             so.var_y = counts_err2
             o_som.append(so)
