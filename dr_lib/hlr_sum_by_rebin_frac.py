@@ -113,7 +113,9 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
     counts_err2 = nessi_list.NessiList(len_data)
     frac_area = nessi_list.NessiList(len_data)
     frac_area_err2 = nessi_list.NessiList(len_data)
-            
+    bin_counts = nessi_list.NessiList(len_data)
+    bin_counts_err2 = nessi_list.NessiList(len_data)
+    
     for i in xrange(hlr_utils.get_length(obj)):
         axis_in = hlr_utils.get_value(obj, i, o_descr, "x", 0)
         val = hlr_utils.get_value(obj, i, o_descr)
@@ -130,16 +132,26 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
                                                                   frac_err,
                                                                   dOmega,
                                                                   0.0)
+            nbin_counts = value[3]
+            nbin_counts_err2 = frac_err            
         else:
+            nbin_counts = value[3]
+            nbin_counts_err2 = frac_err
             nfrac_area = value[2]
-            nfrac_area_err2 = frac_err
+            nfrac_area_err2 = frac_err            
         
         (counts, counts_err2) = array_manip.add_ncerr(counts, counts_err2,
                                                       value[0], value[1])
+        
         (frac_area, frac_area_err2) = array_manip.add_ncerr(frac_area,
                                                             frac_area_err2,
                                                             nfrac_area,
                                                             nfrac_area_err2)
+
+        (bin_counts, bin_counts_err2) = array_manip.add_ncerr(bin_counts,
+                                                              bin_counts_err2,
+                                                              nbin_counts,
+                                                              nbin_counts_err2)
 
     # Divide the total counts by the total fractional area
     value1 = array_manip.div_ncerr(counts, counts_err2, frac_area,
@@ -156,15 +168,19 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
     import pylab
     import drplot
     f1 = pylab.figure()
-    pylab.subplot(311)
+    pylab.subplot(221)
     drplot.plot_1D_arr(axis_out.toNumPy(True), counts.toNumPy(),
                        counts_err2.toNumPy(), xlabel="Q ($\AA^{-1}$)",
                        ylabel="Counts", logy=True, logx=True)
-    pylab.subplot(312)
+    pylab.subplot(222)
     drplot.plot_1D_arr(axis_out.toNumPy(True), frac_area.toNumPy(),
                        frac_area_err2.toNumPy(), xlabel="Q ($\AA^{-1}$)",
                        ylabel="Fractional Area", logy=True, logx=True)
-    pylab.subplot(313)
+    pylab.subplot(223)
+    drplot.plot_1D_arr(axis_out.toNumPy(True), bin_counts.toNumPy(),
+                       bin_counts_err2.toNumPy(), xlabel="Q ($\AA^{-1}$)",
+                       ylabel="Bin Counts", logy=True, logx=True)    
+    pylab.subplot(224)
     drplot.plot_1D_arr(axis_out.toNumPy(True), value1[0].toNumPy(),
                        value1[1].toNumPy(), xlabel="Q ($\AA^{-1}$)",
                        ylabel="Rebinned Counts", logy=True, logx=True)
