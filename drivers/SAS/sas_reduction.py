@@ -8,7 +8,8 @@ import hlr_utils
 from   sas_normalize import *
 from   sas_utils     import *
 
-VERSION="0.05"
+VERSION="0.1"
+
 
 
 if __name__ == "__main__":
@@ -54,6 +55,10 @@ if __name__ == "__main__":
                    help='select roi file')
     opt.add_option('--transmission-file','-t', dest='trans_file', default=None ,
                    help='select transmission file')
+
+    opt.add_option('--acceptance-file','-a', dest='qacc_file', default=None ,
+                   help='select q acceptance file')
+    
     opt.add_option('--monitor-eff','-e', dest='mon_eff' , default=False, action='store_true',
                    help='correct for 1/v monitor efficiency')
 
@@ -74,9 +79,12 @@ if __name__ == "__main__":
                    help='set SANS proposal id, default:2008_01_COM')
     opt.add_option('--archive' ,'-A', dest='archive' , default='/LENS/SANS',
                    help='set SANS archive directory, default=/LENS/SANS')    
-   
+
+    opt.add_option('--debug', dest='debug'   , default=False, action='store_true',
+                   help='turn on debugging')
     options, arguments = opt.parse_args()
 
+   
 
     
     tof_2d  = int(options.tof_2d)  # TOF offset for 2D (area detector) 
@@ -91,6 +99,10 @@ if __name__ == "__main__":
         print '*** ERROR ***  ',
         print "%s: at most two run numbers allowed" % argv0
         sys.exit(-1)
+
+    if options.debug:
+        sas_utils.debug=True
+        sas_utils.logfile="debug-%s.log" % arguments[0]
 
 
     runS = arguments[0]
@@ -125,6 +137,8 @@ if __name__ == "__main__":
         subtit += 'L'
     if runB:
         subtit += 'B'
+    if options.qacc_file:
+        subtit += 'A'
 
     outfile='SANS-%s-%s.txt' % (subtit,runS)
     prnfile='SANS-%s-%s.pdf' % (subtit,runS)
@@ -145,7 +159,8 @@ if __name__ == "__main__":
     print '  Wavelength Cut='   , options.lam_cut,'Angstroms'
     print '  Background Coeff=',  options.bg_coeff
     print '  ROI file='         , options.roi_file
-    print '  Transmission File=', options.trans_file    
+    print '  Transmission File=', options.trans_file
+    print '  Q-Acceptance File=', options.qacc_file
     print '  Out File='         , outfile
 
     # Result of normalize_to_monitor is a tuple (m1,s1,s2)
@@ -202,7 +217,16 @@ if __name__ == "__main__":
         s5 = common_lib.wavelength_to_scalar_Q(s4)
 
         print ctime(),"summing q spectrum"
-        sq = dr_lib.sum_all_spectra(s5,rebin_axis=q_axis.toNessiList())
+        s6 = dr_lib.sum_all_spectra(s5,rebin_axis=q_axis.toNessiList())
+
+        if options.qacc_file:
+            print ctime(),"getting q acceptance spectrum"
+            ta = get_monitor(options.qacc_file)
+            print ctime(),"normalizing to q acceptance spectrum"
+            sq = sas_utils.div_ncerr2(s6  , ta)
+        else:
+            sq = s6
+        
         
     else:
         print ctime(),"rebinning beam monitor wavelength spectrum"

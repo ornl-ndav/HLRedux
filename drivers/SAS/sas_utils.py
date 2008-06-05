@@ -7,7 +7,10 @@ import hlr_utils
 import nessi_list
 import DST
 
-HUGE_NUMBER=1.0e33  # FIXME here
+HUGE_NUMBER = 1.0e33  # FIXME here
+debug       = False
+logfile     = 'log'
+
 
 def nexusFilePath(archiveDir,proposal,run):
     "probably redundant"
@@ -17,15 +20,34 @@ def nexusFilePath(archiveDir,proposal,run):
 def div_ncerr2(s1,s2,to_num=True):
     """Divide and clean """
     s = common_lib.div_ncerr(s1,s2)
+    if debug:
+        f = open(logfile,"at")
+        nremoved=0
+        ntotal=0
     if to_num:
         # remove NaN results of division
         for i in xrange(len(s)):
+            if debug:
+                datastr=""
+
+                y0 = s[i].y
+                nremoved=0
+                ntotal=len(y0)
+                for k in xrange(len(y0)):
+                    xx = s[i].axis[0].val[k]
+                    yy = y0[k]
+                    if yy!=yy:
+                        datastr  += ", %d,%.3f" % (k,xx)
+                        nremoved += 1
             y     = numpy.nan_to_num(list(s[i].y))
             var_y = numpy.nan_to_num(list(s[i].var_y))
             s[i].y      = nessi_list.NessiList()
             s[i].var_y  = nessi_list.NessiList()
             s[i].y.extend(y) 
-            s[i].var_y.extend(var_y) 
+            s[i].var_y.extend(var_y)
+            if debug:
+                print >> f,"%s,%d,%d%s" % (s[i].id[1],nremoved,ntotal,datastr)
+    if debug: f.close()
     return s
 
 
