@@ -52,8 +52,6 @@ def calc_solid_angle(inst, pix, **kwargs):
     (pl, pl_err2) = hlr_utils.get_parameter(pathtype, pix, inst)
     pl2 = pl * pl
 
-    pix_area = 0.0
-
     import SOM
     npix = SOM.SO()
 
@@ -79,11 +77,22 @@ def calc_solid_angle(inst, pix, **kwargs):
     # Pixel offsets are in meters
     ydiff = math.fabs(y2 - y1)
 
+    # Make pixel area
     pix_area = xdiff * ydiff
 
-    solid_angle = pix_area / pl2
+    # Square the pixel offsets
+    x1_2 = x1 * x1
+    y1_2 = y1 * y1
 
-    #print "A:", pix.id, xdiff, ydiff, pl2, solid_angle
+    # Make the scattering length
+    scatt_length = pl2 + x1_2 + y1_2
+
+    # Make the scattering angle
+    scatt_angle = math.atan2(math.sqrt(x1_2 + y1_2), pl)
+
+    solid_angle = (pix_area * math.cos(scatt_angle)) / scatt_length
+
+    print "A:", pix.id, pix_area, scatt_angle, solid_angle
 
     return solid_angle
     
