@@ -73,6 +73,7 @@ def run(config, tim):
     # Perform Steps 1-5 on sample data
     d_som1 = dr_lib.process_ref_data(config.data, config,
                                      config.data_roi_file,
+                                     config.dbkg_roi_file,
                                      config.no_bkg,
                                      tof_cuts=config.tof_cuts,
                                      inst_geom_dst=data_inst_geom_dst,
@@ -82,6 +83,7 @@ def run(config, tim):
     if config.norm is not None:
         n_som1 = dr_lib.process_ref_data(config.norm, config,
                                          config.norm_roi_file,
+                                         config.nbkg_roi_file,
                                          config.no_norm_bkg,
                                          dataset_type="norm",
                                          tof_cuts=config.tof_cuts,

@@ -90,6 +90,14 @@ class RefOptions(hlr_options.InstOptions):
         self.add_option("", "--norm-roi-file", dest="norm_roi_file",
                         help="Specify the file containing the list pixel IDs "\
                         +"for the normalization data region.")
+
+        self.add_option("", "--dbkg-roi-file", dest="dbkg_roi_file",
+                        help="Specify the file containing the list pixel IDs "\
+                        +"for the sample data background region.")
+        
+        self.add_option("", "--nbkg-roi-file", dest="nbkg_roi_file",
+                        help="Specify the file containing the list pixel IDs "\
+                        +"for the normalization background region.")        
         
         self.add_option("", "--no-bkg", action="store_true", dest="no_bkg",
                         help="Flag to turn off background estimation and "\
@@ -229,6 +237,23 @@ def RefConfiguration(parser, configure, options, args):
                      one_file=True)
         else:
             configure.norm_roi_file = configure.data_roi_file
+
+    # Get the data path for the sample data background ROI file
+    if hlr_utils.cli_provide_override(configure, "dbkg_roi_file",
+                                      "--dbkg-roi-file"):
+        configure.dbkg_roi_file = hlr_utils.determine_files(\
+                     options.dbkg_roi_file,
+                     one_file=True)
+    
+    # Get the data path for the normalization background ROI file
+    if hlr_utils.cli_provide_override(configure, "nbkg_roi_file",
+                                      "--nbkg-roi-file"):
+        if options.nbkg_roi_file is not None:
+            configure.nbkg_roi_file = hlr_utils.determine_files(\
+                     options.nbkg_roi_file,
+                     one_file=True)
+        else:
+            configure.nbkg_roi_file = configure.dbkg_roi_file            
     
     # Get the polar angle offset
     if hlr_utils.cli_provide_override(configure, "angle_offset",

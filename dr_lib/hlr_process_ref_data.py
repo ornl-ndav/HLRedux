@@ -22,7 +22,8 @@
 
 # $Id$
 
-def process_ref_data(datalist, conf, signal_roi_file, no_bkg=False, **kwargs):
+def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
+                     no_bkg=False, **kwargs):
     """
     This function combines Steps 1 through 6 in section 2.4.5 of the data
     reduction process for Reflectometers (without Monitors) as specified by
@@ -41,9 +42,13 @@ def process_ref_data(datalist, conf, signal_roi_file, no_bkg=False, **kwargs):
     @param signal_roi_file: The file containing the list of pixel IDs for the
                             signal region of interest.
     @type signal_roi_file: C{string}
+
+    @param bkg_roi_file: The file containing the list of pixel IDs for the
+                         (possible) background region of interest.
+    @type bkg_roi_file: C{string}    
     
     @param no_bkg: (OPTIONAL) Flag which determines if the background will be
-                              calculated nad subtracted.
+                              calculated and subtracted.
     @type no_bkg: C{boolean}
     
     @param kwargs: A list of keyword arguments that the function accepts:
@@ -98,17 +103,18 @@ def process_ref_data(datalist, conf, signal_roi_file, no_bkg=False, **kwargs):
     
     so_axis = "time_of_flight"
 
-    # Step 0: Open data files and select signal ROIs
+    # Step 0: Open data files and select signal (and possible background) ROIs
     if conf.verbose:
         print "Reading %s file" % dataset_type
 
-    d_som1 = dr_lib.add_files(datalist,
-                              Data_Paths=conf.data_paths.toPath(),
-                              SO_Axis=so_axis,
-                              dataset_type=dataset_type,
-                              Signal_ROI=signal_roi_file,
-                              Verbose=conf.verbose,
-                              Timer=t)[0]
+    (d_som1, b_som1) = dr_lib.add_files(datalist,
+                                        Data_Paths=conf.data_paths.toPath(),
+                                        SO_Axis=so_axis,
+                                        dataset_type=dataset_type,
+                                        Signal_ROI=signal_roi_file,
+                                        Bkg_ROI=bkg_roi_file,
+                                        Verbose=conf.verbose,
+                                        Timer=t)
 
     if t is not None:
         t.getTime(msg="After reading %s " % dataset_type)
@@ -140,6 +146,13 @@ def process_ref_data(datalist, conf, signal_roi_file, no_bkg=False, **kwargs):
                                     pixel_fix=127)
 
     del d_som1
+    
+    if b_som1 is not None:
+        b_som2 = dr_lib.sum_all_spectra(b_som1, y_sort=y_sort, stripe=True,
+                                        pixel_fix=127)
+        del b_som1
+    else:
+        b_som2 = b_som1
 
     # Fix TOF cuts to make them list of integers
     try:
@@ -151,6 +164,13 @@ def process_ref_data(datalist, conf, signal_roi_file, no_bkg=False, **kwargs):
     d_som3 = dr_lib.zero_bins(d_som2, tof_cuts)
 
     del d_som2
+
+    if b_som2 is not None:
+        b_som3 = dr_lib.zero_bins(b_som2, tof_cuts)
+        
+        del b_som2
+    else:
+        b_som3 = b_som2
         
     if conf.dump_specular:
         hlr_utils.write_file(conf.output, "text/Spec", d_som3,
@@ -170,8 +190,12 @@ def process_ref_data(datalist, conf, signal_roi_file, no_bkg=False, **kwargs):
     elif dataset_type == "norm":
         peak_excl = conf.norm_peak_excl
 
-    B = dr_lib.calculate_ref_background(d_som3, no_bkg, conf.inst,
-                                        peak_excl)
+    if b_som3 is not None:
+        B = dr_lib.calculate_ref_background(b_som3, no_bkg, conf.inst, None,
+                                            aobj=d_som3)
+    else:
+        B = dr_lib.calculate_ref_background(d_som3, no_bkg, conf.inst,
+                                            peak_excl)
 
     if t is not None:
         t.getTime(msg="After background determination")

@@ -22,7 +22,7 @@
 
 # $Id$
 
-def calculate_ref_background(obj, no_bkg, inst, peak_excl):
+def calculate_ref_background(obj, no_bkg, inst, peak_excl, **kwargs):
     """
     This function takes a set of reflectometer data spectra in TOF, slices the
     data along TOF channels, fits a linear function to the slice to determine
@@ -39,6 +39,12 @@ def calculate_ref_background(obj, no_bkg, inst, peak_excl):
 
     @param peak_excl: The bounding pixel IDs for peak exclusion from fit
     @type peak_excl: C{tuple} containging the minimum and maximum pixel ID
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
+
+    @keyword aobj: An alternate data object containing the sizing information
+                   for the constructed background spectra.
+    @type aobj: C{SOM.SOM} or C{SOM.SO}
     
 
     @return: Background spectra
@@ -61,15 +67,33 @@ def calculate_ref_background(obj, no_bkg, inst, peak_excl):
     else:
         raise RuntimeError("Do not know how to deal with instrument %s" % inst)
 
+    # Check keywords
+    try:
+        aobj = kwargs["aobj"]
+    except KeyError:
+        aobj = None
+
     # set up for working through data
     (result, res_descr) = hlr_utils.empty_result(obj)
     o_descr = hlr_utils.get_descr(obj)
 
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
 
-    # Get the number of spectra
+    # Set spectrum object to obtain background SOs from
+    if aobj is None:
+        bobj = obj
+    else:
+        bobj = aobj
+
+    # Get the number of spectra for background calculation
     len_som = len(obj)
 
+    # Get the number of spectra for final background object
+    if aobj is None:
+        len_bsom = len(obj)
+    else:
+        len_bsom = len(aobj)
+        
     # Get the number of TOF channels
     len_tof = len(obj[0])
 
@@ -82,17 +106,19 @@ def calculate_ref_background(obj, no_bkg, inst, peak_excl):
 
     # Setup pixel axes
     pix_axis = nessi_list.NessiList()
-    pix_axis_no_peak = nessi_list.NessiList()
+    if peak_excl is not None:
+        pix_axis_no_peak = nessi_list.NessiList()
 
     # Fill pixel axes and background SOs
-    for k in xrange(hlr_utils.get_length(obj)):
-        map_so = hlr_utils.get_map_so(obj, None, k)
+    for k in xrange(len_bsom):
+        map_so = hlr_utils.get_map_so(bobj, None, k)
 
         cur_pix_id = map_so.id[1][inst_pix_id]
 
         pix_axis.append(cur_pix_id)
-        if cur_pix_id < peak_excl[0] or cur_pix_id > peak_excl[1]:
-            pix_axis_no_peak.append(cur_pix_id)
+        if peak_excl is not None:
+            if cur_pix_id < peak_excl[0] or cur_pix_id > peak_excl[1]:
+                pix_axis_no_peak.append(cur_pix_id)
 
         so = SOM.SO()
         hlr_utils.result_insert(so, "SO", map_so, None, "all")
@@ -108,7 +134,15 @@ def calculate_ref_background(obj, no_bkg, inst, peak_excl):
             obj1 = hlr_utils.get_value(obj, j, o_descr, "all")
             cur_pix_id = obj1.id[1][inst_pix_id]
 
-            if cur_pix_id < peak_excl[0] or cur_pix_id > peak_excl[1]:
+            if peak_excl is None:
+                filter_pixel = False
+            else:
+                if cur_pix_id < peak_excl[0] or cur_pix_id > peak_excl[1]:
+                    filter_pixel = False
+                else:
+                    filter_pixel = True
+
+            if not filter_pixel:
                 if not (utils.compare(obj1.var_y[i], 0.0) == 0 and \
                         utils.compare(obj1.y[i], 0.0) == 0):
                     sliced_data.append(obj1.y[i])
@@ -122,11 +156,11 @@ def calculate_ref_background(obj, no_bkg, inst, peak_excl):
             value = utils.weighted_average(sliced_data, sliced_data_err2,
                                            0, len_fit-1)
 
-        for j in xrange(len_som):
+        for j in xrange(len_bsom):
             so_list[j].y[i] = value[0]
             so_list[j].var_y[i] = value[1]
 
-    for m in xrange(len_som):
+    for m in xrange(len_bsom):
         hlr_utils.result_insert(result, res_descr, so_list[m], None, "all")
 
     return result
