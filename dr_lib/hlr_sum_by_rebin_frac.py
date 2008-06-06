@@ -118,7 +118,7 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
 
     import pylab
     import drplot
-    f1 = pylab.figure()
+
     for i in xrange(hlr_utils.get_length(obj)):
         axis_in = hlr_utils.get_value(obj, i, o_descr, "x", 0)
         val = hlr_utils.get_value(obj, i, o_descr)
