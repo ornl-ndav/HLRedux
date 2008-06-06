@@ -88,19 +88,12 @@ def calc_solid_angle(inst, pix, **kwargs):
     # Make pixel area
     pix_area = xdiff * ydiff
 
-    # Square the pixel offsets
-    x1_2 = x1 * x1
-    y1_2 = y1 * y1
+    # Get the polar angle
+    (polar, polar_err2) = hlr_utils.get_parameter("polar", pix, inst)
+    
+    solid_angle = (pix_area * math.cos(polar)) / pl2
 
-    # Make the scattering length
-    scatt_length = pl2 + x1_2 + y1_2
-
-    # Make the scattering angle
-    scatt_angle = math.atan2(math.sqrt(x1_2 + y1_2), pl)
-
-    solid_angle = (pix_area * math.cos(scatt_angle)) / scatt_length
-
-    print "A:", pix.id, pix_area, scatt_angle, scatt_length, solid_angle
+    print "A:", pix.id, pl, pix_area, polar, pl2, solid_angle
 
     return solid_angle
     
