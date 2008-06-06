@@ -61,8 +61,12 @@ def calc_solid_angle(inst, pix, **kwargs):
     x1 = hlr_utils.get_parameter("x-offset", pix, inst)
 
     # Make the neighboring pixel ID in the x direction
-    npix.id = (pix.id[0], (pix.id[1][0]+1, pix.id[1][1]))
-    x2 = hlr_utils.get_parameter("x-offset", npix, inst)
+    try:
+        npix.id = (pix.id[0], (pix.id[1][0]+1, pix.id[1][1]))
+        x2 = hlr_utils.get_parameter("x-offset", npix, inst)
+    except IndexError:
+        npix.id = (pix.id[0], (pix.id[1][0]-1, pix.id[1][1]))
+        x2 = hlr_utils.get_parameter("x-offset", npix, inst)
 
     # Pixel offsets are in meters
     xdiff = math.fabs(x2 - x1)
@@ -71,8 +75,12 @@ def calc_solid_angle(inst, pix, **kwargs):
     y1 = hlr_utils.get_parameter("y-offset", pix, inst)
 
     # Make the neighboring pixel ID in the y direction
-    npix.id = (pix.id[0], (pix.id[1][0], pix.id[1][1]+1))
-    y2 = hlr_utils.get_parameter("y-offset", npix, inst)
+    try:
+        npix.id = (pix.id[0], (pix.id[1][0], pix.id[1][1]+1))
+        y2 = hlr_utils.get_parameter("y-offset", npix, inst)
+    except IndexError:
+        npix.id = (pix.id[0], (pix.id[1][0], pix.id[1][1]-1))
+        y2 = hlr_utils.get_parameter("y-offset", npix, inst)
 
     # Pixel offsets are in meters
     ydiff = math.fabs(y2 - y1)
@@ -92,7 +100,7 @@ def calc_solid_angle(inst, pix, **kwargs):
 
     solid_angle = (pix_area * math.cos(scatt_angle)) / scatt_length
 
-    print "A:", pix.id, pix_area, scatt_angle, solid_angle
+    print "A:", pix.id, pix_area, scatt_angle, scatt_length, solid_angle
 
     return solid_angle
     
