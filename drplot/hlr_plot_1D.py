@@ -106,7 +106,10 @@ def plot_1D_arr(x, y, var_y=None, var_x=None, **kwargs):
     @type logy: C{boolean}
 
     @keyword logx: Set the independent axis to logarithmic
-    @type logx: C{boolean}    
+    @type logx: C{boolean}
+
+    @keyword llabel: Set the legend label for the plot
+    @type llabel: C{string}
     """
     # Lookup all the keywords
 
@@ -163,7 +166,8 @@ def plot_1D_arr(x, y, var_y=None, var_x=None, **kwargs):
         if logx:
             ax.set_xscale("log")
 
-    pylab.errorbar(x, y, var_y, var_x, fmt='o', mec='b', ls='None', label=llabel)
+    pylab.errorbar(x, y, var_y, var_x, fmt='o', mec='b', ls='None',
+                   label=llabel)
     pylab.xlabel(xlabel)
     pylab.ylabel(ylabel)
     pylab.title(title)
