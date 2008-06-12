@@ -25,7 +25,8 @@
 def calc_solid_angle(inst, pix, **kwargs):
     """
     This function calculates the solid angle of a given pixel by taking the
-    area of the pixel and dividing it by the square of the pathlength.
+    area of the pixel and the cosine of the polar angle and dividing it by the
+    square of the pathlength.
 
     @param inst: The object containing the geometry information.
     @type inst: C{Instrument} or C{CompositeInstrument}
@@ -52,6 +53,7 @@ def calc_solid_angle(inst, pix, **kwargs):
     (pl, pl_err2) = hlr_utils.get_parameter(pathtype, pix, inst)
     pl2 = pl * pl
 
+    # Make object for neighboring pixel
     import SOM
     npix = SOM.SO()
 
@@ -92,8 +94,6 @@ def calc_solid_angle(inst, pix, **kwargs):
     (polar, polar_err2) = hlr_utils.get_parameter("polar", pix, inst)
     
     solid_angle = (pix_area * math.cos(polar)) / pl2
-
-    print "A:", pix.id, pl, pix_area, polar, pl2, solid_angle
 
     return solid_angle
     
