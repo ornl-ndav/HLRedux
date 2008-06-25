@@ -83,6 +83,21 @@ class AmrOptions(hlr_igs_options.IgsOptions):
                         help="Specify the constant with which to scale the "\
                         +"final data.")
 
+        self.add_option("", "--ldb-const", "ldb_const", help="Specify the "\
+                        +"constant with which to scale the lambda-dependent "
+                        +"background.")
+
+        self.add_option("", "tof-least-bkg", "tof_least_bkg", help="Specify "\
+                        +"the time-of-flight channel (microseconds) that "\
+                        +"corresponds to the least level of background.")
+
+        self.add_option("", "--chopper-freq", "chopper_freq", help="Specify "\
+                        +"the chopper frequency (Hz).")
+
+        self.add_option("", "--chopper-lambda-cent", "chopper_lambda_cent",
+                        help="Specify the wavelength center (Angstroms) of "\
+                        +"the chopper.")
+
         self.add_option("", "--dump-dslin", action="store_true",
                         dest="dump_dslin",
                         help="Flag to dump the linearly interpolated direct "\
