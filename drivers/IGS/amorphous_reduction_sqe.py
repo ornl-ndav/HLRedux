@@ -269,20 +269,23 @@ def run(config, tim=None):
 
     # Steps 16-17: Subtract background spectrum from empty can spectrum for
     #              normalization
-    e_som3 = dr_lib.subtract_bkg_from_data(e_som1, b_som1,
-                                           verbose=config.verbose,
-                                           timer=tim,
-                                           dataset1="empty_can",
-                                           dataset2="background",
-                                           scale=config.scale_bcn)
-
-    # Steps 18-19: Subtract background spectrum from normalization spectrum
 
     try:
         config.pre_norm
     except AttributeError:
         config.pre_norm = False
-    
+
+    if not config.pre_norm:
+        e_som3 = dr_lib.subtract_bkg_from_data(e_som1, b_som1,
+                                               verbose=config.verbose,
+                                               timer=tim,
+                                               dataset1="empty_can",
+                                               dataset2="background",
+                                               scale=config.scale_bcn)
+    else:
+        e_som3 = None
+
+    # Steps 18-19: Subtract background spectrum from normalization spectrum
     if not config.pre_norm:
         n_som2 = dr_lib.subtract_bkg_from_data(n_som1, b_som1,
                                                verbose=config.verbose,
