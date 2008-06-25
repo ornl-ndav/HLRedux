@@ -188,6 +188,12 @@ def AmrConfiguration(parser, configure, options, args):
         configure.lbd_const = hlr_utils.DrParameterFromString(\
                     options.lbd_const, True)
 
+    # Set the TOF least background channel
+    if hlr_utils.cli_provide_override(configure, "tof_least_bkg",
+                                      "--tof-least-bkg"):
+        configure.tof_least_bkg = hlr_utils.DrParameterFromString(\
+                    options.tof_least_bkg, True)        
+
     # Set the ability to dump the energy transfer information
     if hlr_utils.cli_provide_override(configure, "dump_dslin",
                                       "--dump-dslin"):
