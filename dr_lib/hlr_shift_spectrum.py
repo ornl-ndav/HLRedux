@@ -22,7 +22,7 @@
 
 # $Id$
 
-def shift_spectrum(obj, **kwargs):
+def shift_spectrum(obj, shift_point, min_ext, max_ext):
     """
     This function takes a given spectrum and a central value and creates
     a spectrum that is shifted about that point. Values greater than the point
@@ -32,6 +32,42 @@ def shift_spectrum(obj, **kwargs):
     @param obj: Monitor object that will be shifted
     @type obj: C{SOM.SOM} or C{SOM.SO}
 
-    @param kwargs: A list of keyword arguments that the function accepts    
+    @param shift_point: The point in the spectrum about which to shift the
+    data.
+    @type shift_point: C{list} of C{floats}
+
+    @param min_ext: The minimum extent of the axis to shift.
+    @type min_ext: C{list} of C{floats}
+
+    @param max_ext: The maximum extent of the axis to shift.
+    @type max_ext: C{list} of C{floats}
+    
+
+    @return: Monitor spectrum that have been shifted
+    @rtype: C{SOM.SOM} or C{SOM.SO}
     """
-    pass
+    # import the helper functions
+    import hlr_utils
+
+    # set up for working through data
+    (result, res_descr) = hlr_utils.empty_result(obj)
+    o_descr = hlr_utils.get_descr(obj)
+    s_descr = hlr_utils.get_descr(shift_point)
+    ie_descr = hlr_utils.get_descr(min_ext)
+    ae_descr = hlr_utils.get_descr(max_ext)
+
+    result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
+
+    import utils
+
+    len_obj = hlr_utils.get_length(obj)
+    for i in xrange(len_obj):
+        val = hlr_utils.get_value(obj, i, o_descr, "y")
+        err2 = hlr_utils.get_err2(obj, i, o_descr, "y")
+        x_axis = hlr_utils.get_value(obj, i, o_descr, "x", axis)
+        x_err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
+        map_so = hlr_utils.get_map_so(obj, None, i)
+
+        bin_center = utils.calc_bin_centers(x_axis, x_err2)
+
+    return result
