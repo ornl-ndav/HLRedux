@@ -184,9 +184,9 @@ def AmrConfiguration(parser, configure, options, args):
             configure.rescale_final = options.rescale_final
 
     # Set the lambda-dependent background constant for data
-    if hlr_utils.cli_provide_override(configure, "lbd_const", "--lbd-const"):
-        configure.lbd_const = hlr_utils.DrParameterFromString(\
-                    options.lbd_const, True)
+    if hlr_utils.cli_provide_override(configure, "ldb_const", "--ldb-const"):
+        configure.ldb_const = hlr_utils.DrParameterFromString(\
+                    options.ldb_const, True)
 
     # Set the TOF least background channel
     if hlr_utils.cli_provide_override(configure, "tof_least_bkg",
