@@ -181,6 +181,11 @@ def AmrConfiguration(parser, configure, options, args):
         except TypeError:
             configure.rescale_final = options.rescale_final
 
+    # Set the lambda-dependent background constant for data
+    if hlr_utils.cli_provide_override(configure, "lbd_const", "--lbd-const"):
+        configure.lbd_const = hlr_utils.DrParameterFromString(\
+                    options.lbd_const, True)
+
     # Set the ability to dump the energy transfer information
     if hlr_utils.cli_provide_override(configure, "dump_dslin",
                                       "--dump-dslin"):
