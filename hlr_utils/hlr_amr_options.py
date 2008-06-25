@@ -192,7 +192,19 @@ def AmrConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "tof_least_bkg",
                                       "--tof-least-bkg"):
         configure.tof_least_bkg = hlr_utils.DrParameterFromString(\
-                    options.tof_least_bkg, True)        
+                    options.tof_least_bkg, True)
+
+    # Set the Chopper frequency
+    if hlr_utils.cli_provide_override(configure, "chopper_freq",
+                                      "--chopper-freq"):
+        configure.chopper_freq = hlr_utils.DrParameterFromString(\
+                    options.chopper_freq, True)
+
+    # Set the wavelength center for the Chopper
+    if hlr_utils.cli_provide_override(configure, "chopper_lambda_cent",
+                                      "--chopper-lambda-cent"):
+        configure.chopper_lambda_cent = hlr_utils.DrParameterFromString(\
+                    options.chopper_lambda_cent, True)
 
     # Set the ability to dump the energy transfer information
     if hlr_utils.cli_provide_override(configure, "dump_dslin",
