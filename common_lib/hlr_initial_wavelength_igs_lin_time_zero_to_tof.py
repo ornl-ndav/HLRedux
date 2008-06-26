@@ -24,6 +24,14 @@
 
 def initial_wavelength_igs_lin_time_zero_to_tof(obj, **kwargs):
     """
+    This function converts a primary axis of a C{SOM} or C{SO} from
+    initial_wavelength_igs_lin_time_zero to time-of-flight. The
+    initial_wavelength_igs_lin_time_zero axis for a C{SOM} must be in units of
+    I{Angstroms}. The primary axis of a C{SO} is assumed to be in units of
+    I{Angstroms}. A C{tuple} of C{(initial_wavelength_igs_lin_time_zero,
+    initial_wavelength_igs_lin_time_zero_err2)} (assumed to be in units of
+    I{Angstroms}) can be converted to C{(tof, tof_err2)}.
+
     @param obj: Object to be converted
     @type obj: C{SOM.SOM}, C{SOM.SO} or C{tuple}
 
@@ -67,7 +75,7 @@ def initial_wavelength_igs_lin_time_zero_to_tof(obj, **kwargs):
 
     @raise TypeError: The incoming object is not a type the function recognizes
 
-    @raise RuntimeError: The C{SOM} x-axis units are not I{microseconds}
+    @raise RuntimeError: The C{SOM} x-axis units are not I{Angstroms}
     """
     result = None
 
