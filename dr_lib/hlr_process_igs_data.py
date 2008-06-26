@@ -389,8 +389,24 @@ def process_igs_data(datalist, conf, **kwargs):
                              path_replacement=conf.path_replacement,
                              message="monitor wavelength information "\
                              +"(rebinned)")
+        
+    if config.inst == "BSS" and config.ldb_const is not None:
+        # Step 9: Convert chopper center wavelength to TOF center
 
-    # Step 9: Normalize data by monitor
+        # Step 10: Calculate beginning and end of detector TOF spectrum
+
+        # Step 11: Convert TOF_being and TOF_end to wavelength
+
+        # Step 12: tof-least-bkg to lambda-least-bkg
+
+        # Step 13: Create lambda-dependent background spectrum
+
+        # Step 14: 
+        pass
+    else:
+        dp_som6 = dp_som5
+
+    # Step 15: Normalize data by monitor
     if conf.verbose and dm_som4 is not None:
         print "Normalizing data by monitor"
 
@@ -398,33 +414,33 @@ def process_igs_data(datalist, conf, **kwargs):
         t.getTime(False)
 
     if dm_som4 is not None:
-        dp_som6 = common_lib.div_ncerr(dp_som5, dm_som4)
+        dp_som7 = common_lib.div_ncerr(dp_som6, dm_som4)
 
         if t is not None:
             t.getTime(msg="After normalizing data by monitor ")
     else:
-        dp_som6 = dp_som5
+        dp_som7 = dp_som6
 
     if conf.dump_wave_mnorm:
-        dp_som6_1 = dr_lib.sum_all_spectra(dp_som6,\
+        dp_som7_1 = dr_lib.sum_all_spectra(dp_som7,\
                                    rebin_axis=conf.lambda_bins.toNessiList())
 
         write_message = "combined pixel wavelength information"
         if dm_som4 is not None:
             write_message += " (monitor normalized)"
         
-        hlr_utils.write_file(conf.output, "text/Spec", dp_som6_1,
+        hlr_utils.write_file(conf.output, "text/Spec", dp_som7_1,
                              output_ext="pml",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
                              data_ext=conf.ext_replacement,
                              path_replacement=conf.path_replacement,
                              message=write_message)
-        del dp_som6_1
+        del dp_som7_1
 
-    del dm_som4, dp_som5
+    del dm_som4, dp_som6
 
-    return dp_som6
+    return dp_som7
 
 
 
