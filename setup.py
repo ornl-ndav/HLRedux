@@ -60,6 +60,7 @@ instrument_scripts = {
     'agg_dr_files',
     'mask_generator',
     'plot_file',
+    'plot_multi',
     'tof_slicer',
     'two_file_math'
     ],
