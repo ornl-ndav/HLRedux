@@ -54,10 +54,6 @@ def initial_wavelength_igs_lin_time_zero_to_tof(obj, **kwargs):
                                    and its associated error^2
     @type dist_sample_detector: C{tuple} or C{list} of C{tuple}s
 
-    @keyword run_filter: This determines if the filter on the negative
-                         wavelengths is run. The default setting is True.
-    @type run_filter: C{boolean}
-
     @keyword lojac: A flag that allows one to turn off the calculation of the
                     linear-order Jacobian. The default action is True for
                     histogram data.
@@ -77,7 +73,13 @@ def initial_wavelength_igs_lin_time_zero_to_tof(obj, **kwargs):
 
     @raise RuntimeError: The C{SOM} x-axis units are not I{Angstroms}
     """
-    result = None
+    # import the helper functions
+    import hlr_utils
+
+    # set up for working through data
+    (result, res_descr) = hlr_utils.empty_result(obj)
+    o_descr = hlr_utils.get_descr(obj)
+
 
     return result
     
