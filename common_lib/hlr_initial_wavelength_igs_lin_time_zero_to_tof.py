@@ -291,7 +291,7 @@ def initial_wavelength_igs_lin_time_zero_to_tof(obj, **kwargs):
                                                 (eterm1 + eterm2))
 
         hlr_utils.result_insert(result, res_descr, (tof, tof_err2), None,
-                                "all"))
+                                "all")
 
     return result
 
