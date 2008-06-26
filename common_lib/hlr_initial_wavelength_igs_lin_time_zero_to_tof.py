@@ -227,6 +227,7 @@ def initial_wavelength_igs_lin_time_zero_to_tof(obj, **kwargs):
     len_obj = hlr_utils.get_length(obj)
 
     MNEUT_OVER_H = 1.0 / 0.003956034
+    MNEUT_OVER_H2 = MNEUT_OVER_H * MNEUT_OVER_H
 
     for i in xrange(len_obj):
         val = hlr_utils.get_value(obj, i, o_descr, "x", axis)
@@ -234,6 +235,63 @@ def initial_wavelength_igs_lin_time_zero_to_tof(obj, **kwargs):
 
         map_so = hlr_utils.get_map_so(obj, None, i)
 
+        if dist_source_sample is None:
+            (L_s, L_s_err2) = hlr_utils.get_parameter("primary", map_so, inst)
+        else:
+            L_s = hlr_utils.get_value(dist_source_sample, i, ls_descr)
+            L_s_err2 = hlr_utils.get_err2(dist_source_sample, i, ls_descr)
+
+        if dist_sample_detector is None:
+            (L_d, L_d_err2) = hlr_utils.get_parameter("secondary", map_so,
+                                                      inst)
+        else:
+            L_d = hlr_utils.get_value(dist_sample_detector, i, ld_descr)
+            L_d_err2 = hlr_utils.get_err2(dist_sample_detector, i, ld_descr)
+
+        if lambda_f is not None:
+            l_f = hlr_utils.get_value(lambda_f, i, l_descr)
+            l_f_err2 = hlr_utils.get_err2(lambda_f, i, l_descr)
+        else:
+            l_f_tuple = hlr_utils.get_special(som_l_f, map_so)
+            l_f = l_f_tuple[0]
+            l_f_err2 = l_f_tuple[1]
+
+        if time_zero_slope is not None:
+            t_0_slope = hlr_utils.get_value(time_zero_slope, i,
+                                            t_0_slope_descr)
+            t_0_slope_err2 = hlr_utils.get_err2(time_zero_slope, i,
+                                                t_0_slope_descr)
+        else:
+            pass
+
+        if time_zero_offset is not None:
+            t_0_offset = hlr_utils.get_value(time_zero_offset, i,
+                                             t_0_offset_descr)
+            t_0_offset_err2 = hlr_utils.get_err2(time_zero_offset, i,
+                                                 t_0_offset_descr)
+        else:
+            pass
+
+        # Going to violate rules since the current usage is with a single
+        # number. When an SCL equivalent function arises, this code can be
+        # fixed. 
+        front_const = MNEUT_OVER_H * L_s + t_0_slope
+        term2 = MNEUT_OVER_H * l_f * L_d
+
+        tof = (front_const * val) + term2 + t_0_offset
+        
+        front_const2 = front_const * front_const
+
+        eterm1 = l_f * l_f * L_d_err2
+        eterm2 = L_d * L_d * l_f_err2
+        eterm3 = MNEUT_OVER_H2 * L_s_err2
+
+        tof_err2 = (front_const2 * err2) + (val * val) * \
+                   (eterm3 + t_0_slope_err2) + (MNEUT_OVER_H2 * \
+                                                (eterm1 + eterm2))
+
+        hlr_utils.result_insert(result, res_descr, (tof, tof_err2), None,
+                                "all"))
 
     return result
 
