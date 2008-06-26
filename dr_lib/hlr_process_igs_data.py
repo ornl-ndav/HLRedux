@@ -395,20 +395,40 @@ def process_igs_data(datalist, conf, **kwargs):
     if config.inst == "BSS" and config.ldb_const is not None and \
            dataset_type == "data":
         # Step 9: Convert chopper center wavelength to TOF center
+        tof_center = dr_lib.convert_single_to_list(\
+            "initial_wavelength_igs_lin_time_zero_to_tof",
+            config.chopper_lambda_cent.toValErrTuple(), dp_som5)
 
         # Step 10: Calculate beginning and end of detector TOF spectrum
+        half_inv_chop_freq = 0.5 / config.chopper_freq.toValErrTuple()[0]
+
+        tof_begin = array_manip.sub_ncerr(tof_center[0], tof_center[1],
+                                          half_inv_chop_freq, 0.0)
+        tof_end = array_manip.add_ncerr(tof_center[0], tof_center[1],
+                                        half_inv_chop_freq, 0.0)        
 
         # Step 11: Convert TOF_being and TOF_end to wavelength
+        l_begin = common_lib.tof_to_initial_wavelength_igs_lin_time_zero(\
+            tof_begin)
+        l_end = common_lib.tof_to_initial_wavelength_igs_lin_time_zero(\
+            tof_end)
 
         # Step 12: tof-least-bkg to lambda-least-bkg
+        lambda_least_bkg = dr_lib.convert_single_to_list(\
+            "tof_initial_wavelength_igs_lin_time_zero",
+            config.tof_least_bkg.toValErrTuple(), dp_som5)
 
         # Step 13: Create lambda-dependent background spectrum
+        ldb_som = dr_lib.shift_spectrum(dm_som4, lambda_least_bkg, l_begin,
+                                        l_end)
 
         # Step 14: Subtract lamdba-dependent background from sample data
-        pass
+        dp_som6 = common_lib.sub_ncerr(dp_som5, ldb_som)
     else:
         dp_som6 = dp_som5
 
+    del dp_som5
+    
     # Step 15: Normalize data by monitor
     if conf.verbose and dm_som4 is not None:
         print "Normalizing data by monitor"
