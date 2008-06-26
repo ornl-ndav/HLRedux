@@ -389,8 +389,11 @@ def process_igs_data(datalist, conf, **kwargs):
                              path_replacement=conf.path_replacement,
                              message="monitor wavelength information "\
                              +"(rebinned)")
-        
-    if config.inst == "BSS" and config.ldb_const is not None:
+
+    # The lambda-dependent background is only done on sample data (aka data)
+    # for the BSS instrument at the SNS
+    if config.inst == "BSS" and config.ldb_const is not None and \
+           dataset_type == "data":
         # Step 9: Convert chopper center wavelength to TOF center
 
         # Step 10: Calculate beginning and end of detector TOF spectrum
@@ -401,7 +404,7 @@ def process_igs_data(datalist, conf, **kwargs):
 
         # Step 13: Create lambda-dependent background spectrum
 
-        # Step 14: 
+        # Step 14: Subtract lamdba-dependent background from sample data
         pass
     else:
         dp_som6 = dp_som5
