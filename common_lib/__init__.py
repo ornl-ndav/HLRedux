@@ -31,6 +31,7 @@ from hlr_d_spacing_to_tof_focused_det import *
 from hlr_energy_to_wavelength import *
 from hlr_energy_transfer import *
 from hlr_frequency_to_energy import *
+from hlr_initial_wavelength_igs_lin_time_zero_to_tof import *
 from hlr_init_scatt_wavevector_to_scalar_Q import *
 from hlr_mult_ncerr import *
 from hlr_rebin_axis_1D import *
