@@ -392,15 +392,15 @@ def process_igs_data(datalist, conf, **kwargs):
 
     # The lambda-dependent background is only done on sample data (aka data)
     # for the BSS instrument at the SNS
-    if config.inst == "BSS" and config.ldb_const is not None and \
+    if conf.inst == "BSS" and conf.ldb_const is not None and \
            dataset_type == "data":
         # Step 9: Convert chopper center wavelength to TOF center
         tof_center = dr_lib.convert_single_to_list(\
             "initial_wavelength_igs_lin_time_zero_to_tof",
-            config.chopper_lambda_cent.toValErrTuple(), dp_som5)
+            conf.chopper_lambda_cent.toValErrTuple(), dp_som5)
 
         # Step 10: Calculate beginning and end of detector TOF spectrum
-        half_inv_chop_freq = 0.5 / config.chopper_freq.toValErrTuple()[0]
+        half_inv_chop_freq = 0.5 / conf.chopper_freq.toValErrTuple()[0]
 
         tof_begin = array_manip.sub_ncerr(tof_center[0], tof_center[1],
                                           half_inv_chop_freq, 0.0)
@@ -409,23 +409,23 @@ def process_igs_data(datalist, conf, **kwargs):
 
         # Step 11: Convert TOF_being and TOF_end to wavelength
         l_begin = common_lib.tof_to_initial_wavelength_igs_lin_time_zero(\
-            tof_begin, time_zero_slope=config.time_zero_slope.toValErrTuple(),
-            time_zero_offset=config.time_zero_offset.toValErrTuple())
+            tof_begin, time_zero_slope=conf.time_zero_slope.toValErrTuple(),
+            time_zero_offset=conf.time_zero_offset.toValErrTuple())
         l_end = common_lib.tof_to_initial_wavelength_igs_lin_time_zero(\
-            tof_end, time_zero_slope=config.time_zero_slope.toValErrTuple(),
-            time_zero_offset=config.time_zero_offset.toValErrTuple())
+            tof_end, time_zero_slope=conf.time_zero_slope.toValErrTuple(),
+            time_zero_offset=conf.time_zero_offset.toValErrTuple())
 
         # Step 12: tof-least-bkg to lambda-least-bkg
         lambda_least_bkg = dr_lib.convert_single_to_list(\
             "tof_initial_wavelength_igs_lin_time_zero",
-            config.tof_least_bkg.toValErrTuple(), dp_som5)
+            conf.tof_least_bkg.toValErrTuple(), dp_som5)
 
         # Step 13: Create lambda-dependent background spectrum
         ldb_som = dr_lib.shift_spectrum(dm_som4, lambda_least_bkg, l_begin,
                                         l_end)
 
         # Step 14: Subtract lambda-dependent background from sample data
-        if config.verbose:
+        if conf.verbose:
             print "Subtracting lambda-dependent background from data"
 
         if t is not None:
