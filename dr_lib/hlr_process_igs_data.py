@@ -408,6 +408,8 @@ def process_igs_data(datalist, conf, **kwargs):
         
         half_inv_chop_freq = 0.5 / conf.chopper_freq.toValErrTuple()[0]
 
+        import array_manip
+
         tof_begin = array_manip.sub_ncerr(tof_center[0], tof_center[1],
                                           half_inv_chop_freq, 0.0)
         tof_end = array_manip.add_ncerr(tof_center[0], tof_center[1],
