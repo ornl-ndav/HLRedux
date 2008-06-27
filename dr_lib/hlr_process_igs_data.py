@@ -409,9 +409,11 @@ def process_igs_data(datalist, conf, **kwargs):
 
         # Step 11: Convert TOF_being and TOF_end to wavelength
         l_begin = common_lib.tof_to_initial_wavelength_igs_lin_time_zero(\
-            tof_begin)
+            tof_begin, time_zero_slope=config.time_zero_slope.toValErrTuple(),
+            time_zero_offset=config.time_zero_offset.toValErrTuple())
         l_end = common_lib.tof_to_initial_wavelength_igs_lin_time_zero(\
-            tof_end)
+            tof_end, time_zero_slope=config.time_zero_slope.toValErrTuple(),
+            time_zero_offset=config.time_zero_offset.toValErrTuple())
 
         # Step 12: tof-least-bkg to lambda-least-bkg
         lambda_least_bkg = dr_lib.convert_single_to_list(\
@@ -422,8 +424,18 @@ def process_igs_data(datalist, conf, **kwargs):
         ldb_som = dr_lib.shift_spectrum(dm_som4, lambda_least_bkg, l_begin,
                                         l_end)
 
-        # Step 14: Subtract lamdba-dependent background from sample data
+        # Step 14: Subtract lambda-dependent background from sample data
+        if config.verbose:
+            print "Subtracting lambda-dependent background from data"
+
+        if t is not None:
+            t.getTime(False)
+
         dp_som6 = common_lib.sub_ncerr(dp_som5, ldb_som)
+
+        if t is not None:
+            t.getTime(msg="After subtracting lambda-dependent background "\
+                      +"from data ")
     else:
         dp_som6 = dp_som5
 
