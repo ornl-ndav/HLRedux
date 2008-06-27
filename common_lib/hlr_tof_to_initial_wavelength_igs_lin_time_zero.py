@@ -131,6 +131,11 @@ def tof_to_initial_wavelength_igs_lin_time_zero(obj, **kwargs):
     except KeyError:
         run_filter = True
 
+    try:
+        iobj = kwargs["iobj"]
+    except KeyError:
+        iobj = None
+
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
     if o_descr == "SOM":
@@ -153,25 +158,31 @@ def tof_to_initial_wavelength_igs_lin_time_zero(obj, **kwargs):
             try:
                 obj.attr_list.instrument.get_primary()
                 inst = obj.attr_list.instrument
+                mobj = obj
             except RuntimeError:
                 raise RuntimeError("A detector was not provided!")
         else:
-            if dist_source_sample is None and dist_sample_detector is None:
-                raise RuntimeError("If a SOM is not passed, the "\
-                                   +"source-sample and sample-detector "\
-                                   +"distances must be provided.")
-            elif dist_source_sample is None:
-                raise RuntimeError("If a SOM is not passed, the "\
-                                   +"source-sample distance must be provided.")
-            elif dist_sample_detector is None:
-                raise RuntimeError("If a SOM is not passed, the "\
-                                   +"sample-detector distance must be "\
-                                   +"provided.")
+            if iobj is None:
+                if dist_source_sample is None and dist_sample_detector is None:
+                    raise RuntimeError("If a SOM is not passed, the "\
+                                       +"source-sample and sample-detector "\
+                                       +"distances must be provided.")
+                elif dist_source_sample is None:
+                    raise RuntimeError("If a SOM is not passed, the "\
+                                       +"source-sample distance must be "\
+                                       +"provided.")
+                elif dist_sample_detector is None:
+                    raise RuntimeError("If a SOM is not passed, the "\
+                                       +"sample-detector distance must be "\
+                                       +"provided.")
+                else:
+                    raise RuntimeError("If you get here, see Steve Miller "\
+                                       +"for your mug.")
             else:
-                raise RuntimeError("If you get here, see Steve Miller for "\
-                                   +"your mug.")
+                inst = iobj.attr_list.instrument
+                mobj = iobj                
     else:
-        pass
+        mobj = obj
         
     if lambda_f is not None:
         l_descr = hlr_utils.get_descr(lambda_f)
@@ -184,8 +195,10 @@ def tof_to_initial_wavelength_igs_lin_time_zero(obj, **kwargs):
                                    +"parameter either via the function call "\
                                    +"or the SOM")
         else:
-            raise RuntimeError("You need to provide a final wavelength")
-            
+            if iobj is None:
+                raise RuntimeError("You need to provide a final wavelength")
+            else:
+                som_l_f = iobj.attr_list["Wavelength_final"]
 
     if time_zero_slope is not None:
         t_0_slope_descr = hlr_utils.get_descr(time_zero_slope)
@@ -200,7 +213,6 @@ def tof_to_initial_wavelength_igs_lin_time_zero(obj, **kwargs):
         else:
             t_0_slope = TIME_ZERO_SLOPE[0]
             t_0_slope_err2 = TIME_ZERO_SLOPE[1]
-
 
     if time_zero_offset is not None:
         t_0_offset_descr = hlr_utils.get_descr(time_zero_offset)
@@ -237,7 +249,7 @@ def tof_to_initial_wavelength_igs_lin_time_zero(obj, **kwargs):
         val = hlr_utils.get_value(obj, i, o_descr, "x", axis)
         err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
 
-        map_so = hlr_utils.get_map_so(obj, None, i)
+        map_so = hlr_utils.get_map_so(mobj, None, i)
 
         if dist_source_sample is None:
             (L_s, L_s_err2) = hlr_utils.get_parameter("primary", map_so, inst)
