@@ -405,15 +405,14 @@ def process_igs_data(datalist, conf, **kwargs):
         # Step 10: Calculate beginning and end of detector TOF spectrum
         if conf.verbose:
             print "Calculating beginning and ending TOF ranges"
-        
+
         half_inv_chop_freq = 0.5 / conf.chopper_freq.toValErrTuple()[0]
 
-        import array_manip
+        tof_begin = common_lib.sub_ncerr(tof_center, (half_inv_chop_freq, 0.0))
+        tof_end = common_lib.add_ncerr(tof_center, (half_inv_chop_freq, 0.0))
 
-        tof_begin = array_manip.sub_ncerr(tof_center[0], tof_center[1],
-                                          half_inv_chop_freq, 0.0)
-        tof_end = array_manip.add_ncerr(tof_center[0], tof_center[1],
-                                        half_inv_chop_freq, 0.0)        
+        print "B:", tof_begin
+        print "C:", tof_end
 
         # Step 11: Convert TOF_begin and TOF_end to wavelength
         if conf.verbose:
