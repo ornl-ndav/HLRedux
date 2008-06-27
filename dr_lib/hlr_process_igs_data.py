@@ -395,11 +395,17 @@ def process_igs_data(datalist, conf, **kwargs):
     if conf.inst == "BSS" and conf.ldb_const is not None and \
            dataset_type == "data":
         # Step 9: Convert chopper center wavelength to TOF center
+        if conf.verbose:
+            print "Converting Chopper center wavelength to TOF"
+            
         tof_center = dr_lib.convert_single_to_list(\
             "initial_wavelength_igs_lin_time_zero_to_tof",
             conf.chopper_lambda_cent.toValErrTuple(), dp_som5)
 
         # Step 10: Calculate beginning and end of detector TOF spectrum
+        if conf.verbose:
+            print "Calculating beginning and ending TOF ranges"
+        
         half_inv_chop_freq = 0.5 / conf.chopper_freq.toValErrTuple()[0]
 
         tof_begin = array_manip.sub_ncerr(tof_center[0], tof_center[1],
@@ -407,7 +413,10 @@ def process_igs_data(datalist, conf, **kwargs):
         tof_end = array_manip.add_ncerr(tof_center[0], tof_center[1],
                                         half_inv_chop_freq, 0.0)        
 
-        # Step 11: Convert TOF_being and TOF_end to wavelength
+        # Step 11: Convert TOF_begin and TOF_end to wavelength
+        if conf.verbose:
+            print "Converting TOF_begin and TOF_end to wavelength"
+        
         l_begin = common_lib.tof_to_initial_wavelength_igs_lin_time_zero(\
             tof_begin, time_zero_slope=conf.time_zero_slope.toValErrTuple(),
             time_zero_offset=conf.time_zero_offset.toValErrTuple())
@@ -416,11 +425,17 @@ def process_igs_data(datalist, conf, **kwargs):
             time_zero_offset=conf.time_zero_offset.toValErrTuple())
 
         # Step 12: tof-least-bkg to lambda-least-bkg
+        if conf.verbose:
+            print "Converting TOF least background to wavelength"
+        
         lambda_least_bkg = dr_lib.convert_single_to_list(\
             "tof_initial_wavelength_igs_lin_time_zero",
             conf.tof_least_bkg.toValErrTuple(), dp_som5)
 
         # Step 13: Create lambda-dependent background spectrum
+        if conf.verbose:
+            print "Creating lambda-dependent background spectra"
+            
         ldb_som = dr_lib.shift_spectrum(dm_som4, lambda_least_bkg, l_begin,
                                         l_end)
 
