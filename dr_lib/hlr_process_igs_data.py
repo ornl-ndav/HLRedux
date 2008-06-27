@@ -407,6 +407,8 @@ def process_igs_data(datalist, conf, **kwargs):
             print "Calculating beginning and ending TOF ranges"
 
         half_inv_chop_freq = 0.5 / conf.chopper_freq.toValErrTuple()[0]
+        # Above is in seconds, need microseconds
+        half_inv_chop_freq *= 1.0e6
 
         tof_begin = common_lib.sub_ncerr(tof_center, (half_inv_chop_freq, 0.0))
         tof_end = common_lib.add_ncerr(tof_center, (half_inv_chop_freq, 0.0))
