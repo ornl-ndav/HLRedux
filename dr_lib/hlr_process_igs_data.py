@@ -437,8 +437,10 @@ def process_igs_data(datalist, conf, **kwargs):
             print "Converting TOF least background to wavelength"
         
         lambda_least_bkg = dr_lib.convert_single_to_list(\
-            "tof_initial_wavelength_igs_lin_time_zero",
+            "tof_to_initial_wavelength_igs_lin_time_zero",
             conf.tof_least_bkg.toValErrTuple(), dp_som5)
+
+        print "F:", lambda_least_bkg
 
         # Step 13: Create lambda-dependent background spectrum
         if conf.verbose:
