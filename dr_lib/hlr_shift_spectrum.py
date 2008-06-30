@@ -76,9 +76,9 @@ def shift_spectrum(obj, shift_point, min_ext, max_ext, scale_const):
         bin_center = utils.calc_bin_centers(x_axis, x_err2)
 
         # Get shift point and extents
-        sp = hlr_utils.get_value(obj, i, s_descr, "y")
-        ie = hlr_utils.get_value(obj, i, ie_descr, "y")
-        ae = hlr_utils.get_value(obj, i, ae_descr, "y")
+        sp = hlr_utils.get_value(shift_point, i, s_descr, "y")
+        ie = hlr_utils.get_value(min_ext, i, ie_descr, "y")
+        ae = hlr_utils.get_value(max_ext, i, ae_descr, "y")
 
         # Setup new spectrum
         ynew = nessi_list.NessiList(len(val))
