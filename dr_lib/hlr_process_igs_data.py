@@ -396,7 +396,7 @@ def process_igs_data(datalist, conf, **kwargs):
            dataset_type == "data":
         # Step 9: Convert chopper center wavelength to TOF center
         if conf.verbose:
-            print "Converting Chopper center wavelength to TOF"
+            print "Converting chopper center wavelength to TOF"
 
         if t is not None:
             t.getTime(False)
@@ -429,9 +429,6 @@ def process_igs_data(datalist, conf, **kwargs):
             time_zero_offset=conf.time_zero_offset.toValErrTuple(),
             iobj=dp_som5, run_filter=False)
 
-        print "D:", l_begin
-        print "E:", l_end
-
         # Step 12: tof-least-bkg to lambda-least-bkg
         if conf.verbose:
             print "Converting TOF least background to wavelength"
@@ -439,8 +436,6 @@ def process_igs_data(datalist, conf, **kwargs):
         lambda_least_bkg = dr_lib.convert_single_to_list(\
             "tof_to_initial_wavelength_igs_lin_time_zero",
             conf.tof_least_bkg.toValErrTuple(), dp_som5)
-
-        print "F:", lambda_least_bkg
 
         if t is not None:
             t.getTime(msg="After converting boundary positions ")
