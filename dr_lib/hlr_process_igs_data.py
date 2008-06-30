@@ -413,9 +413,6 @@ def process_igs_data(datalist, conf, **kwargs):
         tof_begin = common_lib.sub_ncerr(tof_center, (half_inv_chop_freq, 0.0))
         tof_end = common_lib.add_ncerr(tof_center, (half_inv_chop_freq, 0.0))
 
-        print "B:", tof_begin
-        print "C:", tof_end
-
         # Step 11: Convert TOF_begin and TOF_end to wavelength
         if conf.verbose:
             print "Converting TOF_begin and TOF_end to wavelength"
