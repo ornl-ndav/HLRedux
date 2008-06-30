@@ -81,10 +81,19 @@ def shift_spectrum(obj, shift_point, min_ext, max_ext):
         ynew_err2 = nessi_list.NessiList(len(err2))
 
         len_axis = len(bin_center)
+        # Make shofter spectrum
         for j in xrange(len_axis):
             if utils.compare(bin_center[j][0]) < 1:
                 lambda_mon = bin_center[j][0] + (ae - sp)
             else:
                 lambda_mon = bin_center[j][0] - (sp - ie)
+
+            index = utils.bisect_helper(x_axis, lambda_mon)
+
+            ynew[j] = val[index]
+            ynew_err2[j] = err2[index]
+
+        hlr_utils.result_insert(result, res_descr, (ynew, ynew_err2), map_so,
+                                "y")
 
     return result
