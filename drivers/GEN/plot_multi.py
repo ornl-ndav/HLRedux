@@ -50,10 +50,10 @@ def run(config):
         d_som = dr_lib.add_files([datafile], dst_type=dst_type,
                                  Verbose=config.verbose)[0]
 
-        drplot.plot_1D_so(d_som, d_som[0].id, logx=True, logy=True,
-                          llabel=datafile)
+        drplot.plot_1D_so(d_som, d_som[0].id, logx=config.logx,
+                          logy=config.logy, llabel=datafile)
 
-    pylab.legend(numpoints=1)
+    pylab.legend(numpoints=1, loc=config.legpos)
     pylab.show()
 
 if __name__ == "__main__":
@@ -74,7 +74,19 @@ if __name__ == "__main__":
                                     hlr_utils.program_version(), 'error',
                                     " ".join(description))
 
-        # Do not need to use the following options
+    parser.add_option("", "--logy", dest="logy", action="store_true",
+                      help="Set the y-axis to logarithmic scale.")
+    parser.set_defaults(logy=False)
+
+    parser.add_option("", "--logx", dest="logx", action="store_true",
+                      help="Set the x-axis to logarithmic scale.")
+    parser.set_defaults(logx=False)
+
+    parser.add_option("", "--legpos", dest="legpos", help="Set the location "\
+                      +"of the legend on the graph. Default is 0 (best)")
+    parser.set_defaults(legpos=0)
+
+    # Do not need to use the following options
     parser.remove_option("--config")
     parser.remove_option("--data")
     parser.remove_option("--output")
@@ -99,6 +111,15 @@ if __name__ == "__main__":
 
     # Reset verbosity
     configure.verbose = old_verbosity
+
+    # Set the logarithmic y-axis
+    configure.logy = options.logy
+
+    # Set the logarithmic x-axis
+    configure.logx = options.logx
+
+    # Set the legend position
+    configure.legpos = options.legpos
 
     # Run the program
     run(configure)
