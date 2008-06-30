@@ -85,27 +85,32 @@ def shift_spectrum(obj, shift_point, min_ext, max_ext, scale_const):
         ie = hlr_utils.get_value(min_ext, i, ie_descr, "y")
         ae = hlr_utils.get_value(max_ext, i, ae_descr, "y")
 
+        # Bin indicies for boundary points
+        ie_index = utils.bisect_helper(x_axis, ie)
+        ae_index = utils.bisect_helper(x_axis, ae)
+
         # Setup new spectrum
         ynew = nessi_list.NessiList(len(val))
         ynew_err2 = nessi_list.NessiList(len(err2))
 
-        len_axis = len(bin_center[0])
         # Make shifted spectrum
-        for j in xrange(len_axis):
+        # Only consider bins within the boundary points
+        for j in xrange(ie_index, ae_index+1):
             if utils.compare(bin_center[0][j], sp) < 1:
                 lambda_mon = bin_center[0][j] + (ae - sp)
             else:
                 lambda_mon = bin_center[0][j] - (sp - ie)
 
             index = utils.bisect_helper(x_axis, lambda_mon)
-
+            
             ynew[j] = scale_const * val[index]
             ynew_err2[j] = scale_const * scale_const * err2[index]
 
         pylab.subplot(211)
         drplot.plot_1D_arr(x_axis.toNumPy(True), val.toNumPy(), err2.toNumPy(),
-                           xlabel="$\lambda$", title=str(map_so.id))
+                           xlabel="$\lambda$")
         pylab.subplot(212)
+
         drplot.plot_1D_arr(x_axis.toNumPy(True), ynew.toNumPy(),
                            ynew_err2.toNumPy(),
                            xlabel="$\lambda$")
