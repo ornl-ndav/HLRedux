@@ -22,7 +22,7 @@
 
 # $Id$
 
-def shift_spectrum(obj, shift_point, min_ext, max_ext):
+def shift_spectrum(obj, shift_point, min_ext, max_ext, scale_const):
     """
     This function takes a given spectrum and a central value and creates
     a spectrum that is shifted about that point. Values greater than the point
@@ -42,6 +42,10 @@ def shift_spectrum(obj, shift_point, min_ext, max_ext):
     @param max_ext: The maximum extent of the axis to shift.
     @type max_ext: C{list} of C{floats}
     
+    @param scale_const: A scaling constant to apply to the newly shifted
+                        spectrum.
+    @type scale_const: C{float}
+
 
     @return: Monitor spectrum that have been shifted
     @rtype: C{SOM.SOM} or C{SOM.SO}
@@ -90,8 +94,8 @@ def shift_spectrum(obj, shift_point, min_ext, max_ext):
 
             index = utils.bisect_helper(x_axis, lambda_mon)
 
-            ynew[j] = val[index]
-            ynew_err2[j] = err2[index]
+            ynew[j] = scale_const * val[index]
+            ynew_err2[j] = scale_const * scale_const * err2[index]
 
         hlr_utils.result_insert(result, res_descr, (ynew, ynew_err2), map_so,
                                 "y")
