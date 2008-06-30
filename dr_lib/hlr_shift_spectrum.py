@@ -87,7 +87,7 @@ def shift_spectrum(obj, shift_point, min_ext, max_ext, scale_const):
         len_axis = len(bin_center)
         # Make shofter spectrum
         for j in xrange(len_axis):
-            if utils.compare(bin_center[j][0]) < 1:
+            if utils.compare(bin_center[j][0], sp) < 1:
                 lambda_mon = bin_center[j][0] + (ae - sp)
             else:
                 lambda_mon = bin_center[j][0] - (sp - ie)
