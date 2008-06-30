@@ -220,10 +220,6 @@ def initial_wavelength_igs_lin_time_zero_to_tof(obj, **kwargs):
         pass
 
     # iterate through the values
-    import axis_manip
-    if lojac:
-        import utils
-
     len_obj = hlr_utils.get_length(obj)
 
     MNEUT_OVER_H = 1.0 / 0.003956034
@@ -288,7 +284,8 @@ def initial_wavelength_igs_lin_time_zero_to_tof(obj, **kwargs):
 
         tof_err2 = (front_const2 * err2) + (val * val) * \
                    (eterm3 + t_0_slope_err2) + (MNEUT_OVER_H2 * \
-                                                (eterm1 + eterm2))
+                                                (eterm1 + eterm2)) + \
+                                                t_0_offset_err2
 
         hlr_utils.result_insert(result, res_descr, (tof, tof_err2), None,
                                 "all")
