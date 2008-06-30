@@ -445,9 +445,16 @@ def process_igs_data(datalist, conf, **kwargs):
         # Step 13: Create lambda-dependent background spectrum
         if conf.verbose:
             print "Creating lambda-dependent background spectra"
+
+        if t is not None:
+            t.getTime(False)
             
         ldb_som = dr_lib.shift_spectrum(dm_som4, lambda_least_bkg, l_begin,
                                         l_end, conf.ldb_const.getValue())
+
+        if t is not None:
+            t.getTime(msg="After creating lambda-dependent background "\
+                      +"spectra ")
 
         # Step 14: Subtract lambda-dependent background from sample data
         if conf.verbose:
