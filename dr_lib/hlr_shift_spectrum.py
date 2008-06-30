@@ -65,11 +65,6 @@ def shift_spectrum(obj, shift_point, min_ext, max_ext, scale_const):
     import nessi_list
     import utils
 
-    import drplot
-    import pylab
-
-    f1 = pylab.figure(1)
-
     len_obj = hlr_utils.get_length(obj)
     for i in xrange(len_obj):
         val = hlr_utils.get_value(obj, i, o_descr, "y")
@@ -105,17 +100,6 @@ def shift_spectrum(obj, shift_point, min_ext, max_ext, scale_const):
             
             ynew[j] = scale_const * val[index]
             ynew_err2[j] = scale_const * scale_const * err2[index]
-
-        pylab.subplot(211)
-        drplot.plot_1D_arr(x_axis.toNumPy(True), val.toNumPy(), err2.toNumPy(),
-                           xlabel="$\lambda$")
-        pylab.subplot(212)
-
-        drplot.plot_1D_arr(x_axis.toNumPy(True), ynew.toNumPy(),
-                           ynew_err2.toNumPy(),
-                           xlabel="$\lambda$")
-
-        pylab.show()
 
         hlr_utils.result_insert(result, res_descr, (ynew, ynew_err2), map_so,
                                 "y")
