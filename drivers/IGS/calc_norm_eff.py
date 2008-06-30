@@ -225,6 +225,9 @@ if __name__ == "__main__":
     # Call the configuration setter for IgsOptions
     hlr_utils.IgsConfiguration(parser, configure, options, args)
 
+    # Since this option is never used, set it to None
+    configure.ldb_const = None
+
     # Set timer object if timing option is used
     if options.timing:
         import sns_timing
