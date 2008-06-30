@@ -397,6 +397,9 @@ def process_igs_data(datalist, conf, **kwargs):
         # Step 9: Convert chopper center wavelength to TOF center
         if conf.verbose:
             print "Converting Chopper center wavelength to TOF"
+
+        if t is not None:
+            t.getTime(False)
             
         tof_center = dr_lib.convert_single_to_list(\
             "initial_wavelength_igs_lin_time_zero_to_tof",
@@ -438,6 +441,9 @@ def process_igs_data(datalist, conf, **kwargs):
             conf.tof_least_bkg.toValErrTuple(), dp_som5)
 
         print "F:", lambda_least_bkg
+
+        if t is not None:
+            t.getTime(msg="After converting boundary positions ")
 
         # Step 13: Create lambda-dependent background spectrum
         if conf.verbose:
