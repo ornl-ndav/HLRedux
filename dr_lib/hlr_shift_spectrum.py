@@ -69,8 +69,8 @@ def shift_spectrum(obj, shift_point, min_ext, max_ext, scale_const):
     for i in xrange(len_obj):
         val = hlr_utils.get_value(obj, i, o_descr, "y")
         err2 = hlr_utils.get_err2(obj, i, o_descr, "y")
-        x_axis = hlr_utils.get_value(obj, i, o_descr, "x", axis)
-        x_err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
+        x_axis = hlr_utils.get_value(obj, i, o_descr, "x", 0)
+        x_err2 = hlr_utils.get_err2(obj, i, o_descr, "x", 0)
         map_so = hlr_utils.get_map_so(obj, None, i)
 
         bin_center = utils.calc_bin_centers(x_axis, x_err2)
