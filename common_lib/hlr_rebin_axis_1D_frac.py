@@ -84,11 +84,6 @@ def rebin_axis_1D_frac(obj, axis_out):
 
         map_so = hlr_utils.get_map_so(obj, None, i)
 
-        #print "A:", map_so.id
-        #print "B:", value[0].toNumPy()
-        #print "C:", value[2].toNumPy()
-        #print "D:", value1[0].toNumPy()
-        
         hlr_utils.result_insert(result, res_descr, value1, map_so, "all",
                                 0, xvals)
 
