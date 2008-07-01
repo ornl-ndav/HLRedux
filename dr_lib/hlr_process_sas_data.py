@@ -251,7 +251,8 @@ def process_sas_data(datalist, conf, **kwargs):
         t.getTime(False)
 
     if conf.mon_effc:
-        dbm_som3 = dr_lib.feff_correct_mon(dbm_som2)
+        dbm_som3 = dr_lib.feff_correct_mon(dbm_som2,
+                                           eff_const=conf.mon_eff_const)
     else:
         dbm_som3 = dbm_som2
 
