@@ -179,7 +179,7 @@ def process_sas_data(datalist, conf, **kwargs):
     if conf.time_zero_offset_mon is not None:
         dbm_som1.attr_list["Time_zero_offset_mon"] = \
                                      conf.time_zero_offset_mon.toValErrTuple()
-        if conf.trans is None and dtm_som1 is not None:
+        if trans_data is None and dtm_som1 is not None:
             dtm_som1.attr_list["Time_zero_offset_mon"] = \
                                      conf.time_zero_offset_mon.toValErrTuple()
 
@@ -349,10 +349,10 @@ def process_sas_data(datalist, conf, **kwargs):
         del dp_som4_1
 
     # Step 7: Rebin transmission monitor axis onto detector pixel axis
-    if conf.trans is not None:
+    if trans_data is not None:
         print "Reading in transmission monitor data from file"
 
-        dtm_som3 = dr_lib.add_files([conf.trans],
+        dtm_som3 = dr_lib.add_files([trans_data],
                                     dataset_type=dataset_type,
                                     dst_type="text/Spec",
                                     Verbose=conf.verbose,
@@ -365,7 +365,7 @@ def process_sas_data(datalist, conf, **kwargs):
     if t is not None:
         t.getTime(False)
 
-    if conf.trans is not None:
+    if trans_data is not None:
         use_linint = True
     else:
         use_linint = False
