@@ -64,7 +64,8 @@ def run(config, tim=None):
     # Perform Steps 1-9 on sample data
     d_som1 = dr_lib.process_sas_data(config.data, config, timer=tim,
                                      inst_geom_dst=inst_geom_dst,
-                                     bkg_subtract=config.bkg_coeff)
+                                     bkg_subtract=config.bkg_coeff,
+                                     trans_data=config.data_trans)
 
     # Perform Steps 1-9 on buffer/solvent only data
     if config.solv is not None:
@@ -87,7 +88,8 @@ def run(config, tim=None):
     if config.ecan is not None:
         e_som1 = dr_lib.process_sas_data(config.ecan, config, timer=tim,
                                          inst_geom_dst=inst_geom_dst,
-                                         dataset_type="empty_can")
+                                         dataset_type="empty_can",
+                                         trans_data=config.ecan_trans)
     else:
         e_som1 = None
 
@@ -142,6 +144,7 @@ def run(config, tim=None):
         tim.getTime(False)
 
     d_som6 = dr_lib.sum_by_rebin_frac(d_som5, config.Q_bins.toNessiList(),
+                                      configure=config,
                                       norm=True)
 
     if tim is not None:
