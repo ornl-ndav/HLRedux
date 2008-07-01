@@ -47,6 +47,10 @@ def process_sas_data(datalist, conf, **kwargs):
                            The default value is I{data}.
     @type dataset_type: C{string}
 
+    @keyword trans_data: Alternate data for the transmission spectrum. This is
+                         used in the absence of transmission monitors.
+    @type trans_data: C{string}
+
     @keyword transmission: A flag that signals the function to stop after
                            doing the conversion from TOF to wavelength. The
                            default is I{False}.
@@ -91,7 +95,12 @@ def process_sas_data(datalist, conf, **kwargs):
     try:
         bkg_subtract = kwargs["bkg_subtract"]
     except KeyError:
-        bkg_subtract = None        
+        bkg_subtract = None
+
+    try:
+        trans_data = kwargs["trans_data"]
+    except KeyError:
+        trans_data = None        
 
     # Add so_axis to Configure object
     conf.so_axis = "time_of_flight"
@@ -137,7 +146,7 @@ def process_sas_data(datalist, conf, **kwargs):
     del dbm_som0
 
     # Transmission monitor
-    if conf.trans is None:
+    if trans_data is None:
         if conf.verbose:
             print "Reading in transmission monitor data from %s file" \
                   % dataset_type
