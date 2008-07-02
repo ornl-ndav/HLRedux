@@ -81,13 +81,13 @@ def run(config, tim=None):
     else:
         bkg_som = None
 
-    # Perform Steps 1-9 on sample data
+    # Perform Steps 1-15 on sample data
     d_som1 = dr_lib.process_igs_data(config.data, config, timer=tim,
                                      inst_geom_dst=inst_geom_dst,
                                      tib_const=config.tib_data_const,
                                      bkg_som=bkg_som)
 
-    # Perform Steps 1-9 on empty can data
+    # Perform Steps 1-15 on empty can data
     if config.ecan is not None:
         e_som1 = dr_lib.process_igs_data(config.ecan, config, timer=tim,
                                          inst_geom_dst=inst_geom_dst,
@@ -97,7 +97,7 @@ def run(config, tim=None):
     else:
         e_som1 = None
 
-    # Perform Steps 1-9 on normalization data            
+    # Perform Steps 1-15 on normalization data            
     if config.norm is not None:
         n_som1 = dr_lib.process_igs_data(config.norm, config, timer=tim,
                                          inst_geom_dst=inst_geom_dst,
@@ -107,7 +107,7 @@ def run(config, tim=None):
     else:
         n_som1 = None
 
-    # Perform Steps 1-9 on background data
+    # Perform Steps 1-15 on background data
     if config.back is not None:
         b_som1 = dr_lib.process_igs_data(config.back, config, timer=tim,
                                          inst_geom_dst=inst_geom_dst,
@@ -117,7 +117,7 @@ def run(config, tim=None):
     else:
         b_som1 = None
 
-    # Perform Step 1-9 on direct scattering background data
+    # Perform Step 1-15 on direct scattering background data
     if config.dsback is not None:
         ds_som1 = dr_lib.process_igs_data(config.dsback, config, timer=tim,
                                           inst_geom_dst=inst_geom_dst,
@@ -135,7 +135,7 @@ def run(config, tim=None):
             ds_som1.attr_list["Time_zero_offset"] = \
                                       config.time_zero_offset.toValErrTuple()
         
-        # Step 10: Linearly interpolate TOF elastic range in direct scattering
+        # Step 16: Linearly interpolate TOF elastic range in direct scattering
         #          background data
 
         # First convert TOF elastic range to appropriate pixel initial
@@ -212,7 +212,7 @@ def run(config, tim=None):
     if inst_geom_dst is not None:
         inst_geom_dst.release_resource()
 
-    # Steps 11-12: Subtract background spectrum from sample spectrum
+    # Steps 17-18: Subtract background spectrum from sample spectrum
     if config.dsback is None:
         back_som = b_som1
         bkg_type = "background"
@@ -229,7 +229,7 @@ def run(config, tim=None):
     if config.dsback is not None:
         del ds_som2 
 
-    # Step 13: Zero region outside TOF elastic for background for empty can
+    # Step 19: Zero region outside TOF elastic for background for empty can
     if config.dsback is None:
         bcs_som = b_som1
         cs_som = e_som1
@@ -259,7 +259,7 @@ def run(config, tim=None):
             
         del ctof_elastic_range
 
-    # Steps 14-15: Subtract background spectrum from empty can spectrum    
+    # Steps 20-21: Subtract background spectrum from empty can spectrum    
     e_som2 = dr_lib.subtract_bkg_from_data(cs_som, bcs_som,
                                            verbose=config.verbose,
                                            timer=tim,
@@ -267,22 +267,25 @@ def run(config, tim=None):
                                            dataset2="background",
                                            scale=config.scale_bcs)
 
-    # Steps 16-17: Subtract background spectrum from empty can spectrum for
+    # Steps 22-23: Subtract background spectrum from empty can spectrum for
     #              normalization
-    e_som3 = dr_lib.subtract_bkg_from_data(e_som1, b_som1,
-                                           verbose=config.verbose,
-                                           timer=tim,
-                                           dataset1="empty_can",
-                                           dataset2="background",
-                                           scale=config.scale_bcn)
-
-    # Steps 18-19: Subtract background spectrum from normalization spectrum
 
     try:
         config.pre_norm
     except AttributeError:
         config.pre_norm = False
-    
+
+    if not config.pre_norm:
+        e_som3 = dr_lib.subtract_bkg_from_data(e_som1, b_som1,
+                                               verbose=config.verbose,
+                                               timer=tim,
+                                               dataset1="empty_can",
+                                               dataset2="background",
+                                               scale=config.scale_bcn)
+    else:
+        e_som3 = None
+
+    # Steps 24-25: Subtract background spectrum from normalization spectrum
     if not config.pre_norm:
         n_som2 = dr_lib.subtract_bkg_from_data(n_som1, b_som1,
                                                verbose=config.verbose,
@@ -295,7 +298,7 @@ def run(config, tim=None):
 
     del b_som1, e_som1, bcs_som, cs_som
 
-    # Steps 20-21: Subtract empty can spectrum from sample spectrum    
+    # Steps 26-27: Subtract empty can spectrum from sample spectrum    
     d_som3 = dr_lib.subtract_bkg_from_data(d_som2, e_som2,
                                            verbose=config.verbose,
                                            timer=tim,
@@ -305,7 +308,7 @@ def run(config, tim=None):
 
     del d_som2, e_som2
     
-    # Steps 22-23: Subtract empty can spectrum from normalization spectrum
+    # Steps 28-29: Subtract empty can spectrum from normalization spectrum
     if not config.pre_norm:
         n_som3 = dr_lib.subtract_bkg_from_data(n_som2, e_som3,
                                                verbose=config.verbose,
@@ -318,7 +321,7 @@ def run(config, tim=None):
 
     del n_som2, e_som3
 
-    # Step 24-25: Integrate normalization spectra
+    # Step 30-31: Integrate normalization spectra
     if config.verbose and n_som3 is not None and not config.pre_norm:
         print "Integrating normalization spectra"
 
@@ -330,7 +333,7 @@ def run(config, tim=None):
 
     del n_som3
         
-    # Step 26: Normalize data by integrated values
+    # Step 32: Normalize data by integrated values
     if config.verbose and norm_int is not None:
         print "Normalizing data by normalization data"
 
@@ -345,7 +348,7 @@ def run(config, tim=None):
 
     del d_som3, norm_int
 
-    # Steps 27 to end: Creating S(Q,E)
+    # Steps 33 to end: Creating S(Q,E)
     if config.verbose:
         print "Creating 2D spectrum"
 

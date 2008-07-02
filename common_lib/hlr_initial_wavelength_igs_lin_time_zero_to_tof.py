@@ -22,61 +22,57 @@
 
 # $Id$
 
-def tof_to_initial_wavelength_igs_lin_time_zero(obj, **kwargs):
+def initial_wavelength_igs_lin_time_zero_to_tof(obj, **kwargs):
     """
     This function converts a primary axis of a C{SOM} or C{SO} from
-    time-of-flight to initial_wavelength_igs_lin_time_zero. The time-of-flight
-    axis for a C{SOM} must be in units of I{microseconds}. The primary axis of
-    a C{SO} is assumed to be in units of I{microseconds}. A C{tuple} of
-    C{(tof, tof_err2)} (assumed to be in units of I{microseconds}) can be
-    converted to C{(initial_wavelength_igs, initial_wavelength_igs_err2)}.
+    initial_wavelength_igs_lin_time_zero to time-of-flight. The
+    initial_wavelength_igs_lin_time_zero axis for a C{SOM} must be in units of
+    I{Angstroms}. The primary axis of a C{SO} is assumed to be in units of
+    I{Angstroms}. A C{tuple} of C{(initial_wavelength_igs_lin_time_zero,
+    initial_wavelength_igs_lin_time_zero_err2)} (assumed to be in units of
+    I{Angstroms}) can be converted to C{(tof, tof_err2)}.
 
     @param obj: Object to be converted
     @type obj: C{SOM.SOM}, C{SOM.SO} or C{tuple}
-    
+
     @param kwargs: A list of keyword arguments that the function accepts:
-    
+
     @keyword lambda_f:The final wavelength and its associated error^2
     @type lambda_f: C{tuple}
-    
+
     @keyword time_zero_slope: The time zero slope and its associated error^2
     @type time_zero_slope: C{tuple}
 
     @keyword time_zero_offset: The time zero offset and its associated error^2
     @type time_zero_offset: C{tuple}
-    
+
     @keyword dist_source_sample: The source to sample distance information and
                                  its associated error^2
-    @type dist_source_sample: C{tuple} or C{list} of C{tuple}s 
+    @type dist_source_sample: C{tuple} or C{list} of C{tuple}s
 
     @keyword dist_sample_detector: The sample to detector distance information
                                    and its associated error^2
     @type dist_sample_detector: C{tuple} or C{list} of C{tuple}s
-    
-    @keyword run_filter: This determines if the filter on the negative
-                         wavelengths is run. The default setting is True.
-    @type run_filter: C{boolean}
 
     @keyword lojac: A flag that allows one to turn off the calculation of the
                     linear-order Jacobian. The default action is True for
                     histogram data.
     @type lojac: C{boolean}
-    
+
     @keyword units: The expected units for this function. The default for this
-                    function is I{microseconds}
+                    function is I{Angstroms}
     @type units: C{string}
 
 
-    @return: Object with a primary axis in time-of-flight converted to
-             initial_wavelength_igs
+    @return: Object with a primary axis in initial_wavelength_igs converted to
+             time-of-flight
     @rtype: C{SOM.SOM}, C{SOM.SO} or C{tuple}
 
 
     @raise TypeError: The incoming object is not a type the function recognizes
-    
-    @raise RuntimeError: The C{SOM} x-axis units are not I{microseconds}
-    """
 
+    @raise RuntimeError: The C{SOM} x-axis units are not I{Angstroms}
+    """
     # import the helper functions
     import hlr_utils
 
@@ -124,17 +120,7 @@ def tof_to_initial_wavelength_igs_lin_time_zero(obj, **kwargs):
     try:
         units = kwargs["units"]
     except KeyError:
-        units = "microseconds"
-
-    try:
-        run_filter = kwargs["run_filter"]
-    except KeyError:
-        run_filter = True
-
-    try:
-        iobj = kwargs["iobj"]
-    except KeyError:
-        iobj = None
+        units = "Angstroms"
 
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
@@ -145,9 +131,9 @@ def tof_to_initial_wavelength_igs_lin_time_zero(obj, **kwargs):
 
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
     if res_descr == "SOM":
-        result = hlr_utils.force_units(result, "Angstroms", axis)
-        result.setAxisLabel(axis, "wavelength")
-        result.setYUnits("Counts/A")
+        result = hlr_utils.force_units(result, "Microseconds", axis)
+        result.setAxisLabel(axis, "time-of-flight")
+        result.setYUnits("Counts/uS")
         result.setYLabel("Intensity")
     else:
         pass
@@ -158,31 +144,25 @@ def tof_to_initial_wavelength_igs_lin_time_zero(obj, **kwargs):
             try:
                 obj.attr_list.instrument.get_primary()
                 inst = obj.attr_list.instrument
-                mobj = obj
             except RuntimeError:
                 raise RuntimeError("A detector was not provided!")
         else:
-            if iobj is None:
-                if dist_source_sample is None and dist_sample_detector is None:
-                    raise RuntimeError("If a SOM is not passed, the "\
-                                       +"source-sample and sample-detector "\
-                                       +"distances must be provided.")
-                elif dist_source_sample is None:
-                    raise RuntimeError("If a SOM is not passed, the "\
-                                       +"source-sample distance must be "\
-                                       +"provided.")
-                elif dist_sample_detector is None:
-                    raise RuntimeError("If a SOM is not passed, the "\
-                                       +"sample-detector distance must be "\
-                                       +"provided.")
-                else:
-                    raise RuntimeError("If you get here, see Steve Miller "\
-                                       +"for your mug.")
+            if dist_source_sample is None and dist_sample_detector is None:
+                raise RuntimeError("If a SOM is not passed, the "\
+                                   +"source-sample and sample-detector "\
+                                   +"distances must be provided.")
+            elif dist_source_sample is None:
+                raise RuntimeError("If a SOM is not passed, the "\
+                                   +"source-sample distance must be provided.")
+            elif dist_sample_detector is None:
+                raise RuntimeError("If a SOM is not passed, the "\
+                                   +"sample-detector distance must be "\
+                                   +"provided.")
             else:
-                inst = iobj.attr_list.instrument
-                mobj = iobj                
+                raise RuntimeError("If you get here, see Steve Miller for "\
+                                   +"your mug.")
     else:
-        mobj = obj
+        pass
         
     if lambda_f is not None:
         l_descr = hlr_utils.get_descr(lambda_f)
@@ -195,10 +175,8 @@ def tof_to_initial_wavelength_igs_lin_time_zero(obj, **kwargs):
                                    +"parameter either via the function call "\
                                    +"or the SOM")
         else:
-            if iobj is None:
-                raise RuntimeError("You need to provide a final wavelength")
-            else:
-                som_l_f = iobj.attr_list["Wavelength_final"]
+            raise RuntimeError("You need to provide a final wavelength")
+            
 
     if time_zero_slope is not None:
         t_0_slope_descr = hlr_utils.get_descr(time_zero_slope)
@@ -213,6 +191,7 @@ def tof_to_initial_wavelength_igs_lin_time_zero(obj, **kwargs):
         else:
             t_0_slope = TIME_ZERO_SLOPE[0]
             t_0_slope_err2 = TIME_ZERO_SLOPE[1]
+
 
     if time_zero_offset is not None:
         t_0_offset_descr = hlr_utils.get_descr(time_zero_offset)
@@ -241,15 +220,16 @@ def tof_to_initial_wavelength_igs_lin_time_zero(obj, **kwargs):
         pass
 
     # iterate through the values
-    import axis_manip
-    if lojac:
-        import utils
-    
-    for i in xrange(hlr_utils.get_length(obj)):
+    len_obj = hlr_utils.get_length(obj)
+
+    MNEUT_OVER_H = 1.0 / 0.003956034
+    MNEUT_OVER_H2 = MNEUT_OVER_H * MNEUT_OVER_H
+
+    for i in xrange(len_obj):
         val = hlr_utils.get_value(obj, i, o_descr, "x", axis)
         err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
 
-        map_so = hlr_utils.get_map_so(mobj, None, i)
+        map_so = hlr_utils.get_map_so(obj, None, i)
 
         if dist_source_sample is None:
             (L_s, L_s_err2) = hlr_utils.get_parameter("primary", map_so, inst)
@@ -271,7 +251,7 @@ def tof_to_initial_wavelength_igs_lin_time_zero(obj, **kwargs):
             l_f_tuple = hlr_utils.get_special(som_l_f, map_so)
             l_f = l_f_tuple[0]
             l_f_err2 = l_f_tuple[1]
-            
+
         if time_zero_slope is not None:
             t_0_slope = hlr_utils.get_value(time_zero_slope, i,
                                             t_0_slope_descr)
@@ -288,49 +268,29 @@ def tof_to_initial_wavelength_igs_lin_time_zero(obj, **kwargs):
         else:
             pass
 
-        value = axis_manip.tof_to_initial_wavelength_igs_lin_time_zero(
-            val, err2,
-            l_f, l_f_err2,
-            t_0_slope, t_0_slope_err2,
-            t_0_offset, t_0_offset_err2,
-            L_s, L_s_err2,
-            L_d, L_d_err2)
+        # Going to violate rules since the current usage is with a single
+        # number. When an SCL equivalent function arises, this code can be
+        # fixed. 
+        front_const = MNEUT_OVER_H * L_s + t_0_slope
+        term2 = MNEUT_OVER_H * l_f * L_d
 
-        # Remove all wavelengths < 0
-        if run_filter:
-            index = 0
-            for valx in value[0]:
-                if valx >= 0:
-                    break
-                index += 1
+        tof = (front_const * val) + term2 + t_0_offset
+        
+        front_const2 = front_const * front_const
 
-            value[0].__delslice__(0, index)
-            value[1].__delslice__(0, index)
-            map_so.y.__delslice__(0, index)
-            map_so.var_y.__delslice__(0, index)
-            if lojac:
-                val.__delslice__(0, index)
-                err2.__delslice__(0, index)
-        else:
-            pass
+        eterm1 = l_f * l_f * L_d_err2
+        eterm2 = L_d * L_d * l_f_err2
+        eterm3 = MNEUT_OVER_H2 * L_s_err2
 
-        if lojac:
-            try:
-                counts = utils.linear_order_jacobian(val, value[0],
-                                                     map_so.y, map_so.var_y)
-            except Exception, e:
-                # Lets us know offending pixel ID
-                raise Exception(str(map_so.id) + " " + str(e))
-            
-            hlr_utils.result_insert(result, res_descr, counts, map_so,
-                                    "all", axis, [value[0]])
+        tof_err2 = (front_const2 * err2) + (val * val) * \
+                   (eterm3 + t_0_slope_err2) + (MNEUT_OVER_H2 * \
+                                                (eterm1 + eterm2)) + \
+                                                t_0_offset_err2
 
-        else:
-            hlr_utils.result_insert(result, res_descr, value, map_so,
-                                    "x", axis)
+        hlr_utils.result_insert(result, res_descr, (tof, tof_err2), None,
+                                "all")
 
     return result
-
 
 if __name__ == "__main__":
     import hlr_test
@@ -343,7 +303,7 @@ if __name__ == "__main__":
     t_0_o = (0.1, 0.001)
 
     som1 = hlr_test.generate_som()
-    som1.setAllAxisUnits(["microseconds"])
+    som1.setAllAxisUnits(["Angstroms"])
     som1.attr_list["Wavelength_final"] = l_f_i
     som1.attr_list["Time_zero_slope"] = t_0_s
     som1.attr_list["Time_zero_offset"] = t_0_o
@@ -353,11 +313,11 @@ if __name__ == "__main__":
     print "* ", som1[0]
     print "* ", som1[1]
 
-    print "********** tof_to_initial_wavelength_igs_lin_time_zero"
-    print "* som  :", tof_to_initial_wavelength_igs_lin_time_zero(
+    print "********** initial_wavelength_igs_lin_time_zero_to_tof"
+    print "* som  :", initial_wavelength_igs_lin_time_zero_to_tof(
         som1,
         run_filter=False)
-    print "* so   :", tof_to_initial_wavelength_igs_lin_time_zero(
+    print "* so   :", initial_wavelength_igs_lin_time_zero_to_tof(
         som1[0],
         lambda_f=l_f_i,
         time_zero_slope=t_0_s,
@@ -365,7 +325,7 @@ if __name__ == "__main__":
         dist_source_sample=d_ss,
         dist_sample_detector=d_sd,
         run_filter=False)
-    print "* scal :", tof_to_initial_wavelength_igs_lin_time_zero(
+    print "* scal :", initial_wavelength_igs_lin_time_zero_to_tof(
         [1, 1],
         lambda_f=l_f_i,
         time_zero_slope=t_0_s,
@@ -374,5 +334,4 @@ if __name__ == "__main__":
         dist_sample_detector=d_sd,
         run_filter=False)
 
-
-
+    

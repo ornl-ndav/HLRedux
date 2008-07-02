@@ -53,6 +53,7 @@ from hlr_process_ref_data import process_ref_data
 from hlr_process_sas_data import process_sas_data
 from hlr_rebin_efficiency import *
 from hlr_rebin_monitor import *
+from hlr_shift_spectrum import *
 from hlr_subtract_axis_dep_bkg import *
 from hlr_subtract_bkg_from_data import *
 from hlr_subtract_time_indep_bkg import *

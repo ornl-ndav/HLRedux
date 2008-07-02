@@ -26,7 +26,7 @@ Installation Instructions
 
     1. Python       - >= 2.3.4
     2. DOM          - >= 1.1.0
-    3. SCL          - 1.1.1
+    3. SCL          - 1.1.2
     4. ASGUtils     - >= 0.11
     5. Epydoc       - 3.0beta1
 
