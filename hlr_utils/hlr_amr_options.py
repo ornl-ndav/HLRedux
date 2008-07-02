@@ -83,6 +83,23 @@ class AmrOptions(hlr_igs_options.IgsOptions):
                         help="Specify the constant with which to scale the "\
                         +"final data.")
 
+        self.add_option("", "--ldb-const", dest="ldb_const", help="Specify "\
+                        +"the constant with which to scale the "\
+                        +"lambda-dependent background.")
+
+        self.add_option("", "--tof-least-bkg", dest="tof_least_bkg",
+                        help="Specify the time-of-flight channel "\
+                        +"(microseconds) that corresponds to the least level "\
+                        +"of background.")
+
+        self.add_option("", "--chopper-freq", dest="chopper_freq",
+                        help="Specify the chopper frequency (Hz).")
+
+        self.add_option("", "--chopper-lambda-cent",
+                        dest="chopper_lambda_cent",
+                        help="Specify the wavelength center (Angstroms) of "\
+                        +"the chopper.")
+
         self.add_option("", "--dump-dslin", action="store_true",
                         dest="dump_dslin",
                         help="Flag to dump the linearly interpolated direct "\
@@ -165,6 +182,29 @@ def AmrConfiguration(parser, configure, options, args):
             configure.rescale_final = float(options.rescale_final)
         except TypeError:
             configure.rescale_final = options.rescale_final
+
+    # Set the lambda-dependent background constant for data
+    if hlr_utils.cli_provide_override(configure, "ldb_const", "--ldb-const"):
+        configure.ldb_const = hlr_utils.DrParameterFromString(\
+                    options.ldb_const, True)
+
+    # Set the TOF least background channel
+    if hlr_utils.cli_provide_override(configure, "tof_least_bkg",
+                                      "--tof-least-bkg"):
+        configure.tof_least_bkg = hlr_utils.DrParameterFromString(\
+                    options.tof_least_bkg, True)
+
+    # Set the Chopper frequency
+    if hlr_utils.cli_provide_override(configure, "chopper_freq",
+                                      "--chopper-freq"):
+        configure.chopper_freq = hlr_utils.DrParameterFromString(\
+                    options.chopper_freq, True)
+
+    # Set the wavelength center for the Chopper
+    if hlr_utils.cli_provide_override(configure, "chopper_lambda_cent",
+                                      "--chopper-lambda-cent"):
+        configure.chopper_lambda_cent = hlr_utils.DrParameterFromString(\
+                    options.chopper_lambda_cent, True)
 
     # Set the ability to dump the energy transfer information
     if hlr_utils.cli_provide_override(configure, "dump_dslin",

@@ -24,7 +24,6 @@
 from GEN import agg_dr_files
 from GEN import mask_generator
 from GEN import plot_file
-from GEN import plot_multi
 from GEN import tof_slicer
 from GEN import two_file_math
 
@@ -39,10 +38,6 @@ from IGS import igs_diff_reduction
 
 # REF drivers
 from REF import reflect_reduction
-
-# SAS drivers
-from SAS import sas_reduction1
-from SAS import sas_transmission1
 
 #version
 __id__ = "$Id$"

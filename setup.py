@@ -43,7 +43,7 @@ PACKAGE = "HLRedux"
 VERSION = __version__
 
 package_list = ['', 'common_lib', 'dr_lib', 'drivers', 'drivers.GEN',
-                'drivers.IGS', 'drivers.REF', 'drivers.SAS', 'drplot',
+                'drivers.IGS', 'drivers.REF', 'drplot',
                 'hlr_utils', 'hlr_test']
 
 instrument_scripts = {
@@ -60,7 +60,6 @@ instrument_scripts = {
     'agg_dr_files',
     'mask_generator',
     'plot_file',
-    'plot_multi',
     'tof_slicer',
     'two_file_math'
     ],
@@ -79,8 +78,6 @@ instrument_scripts = {
     'reflect_reduction'
     ],
     "SAS" : [
-    'sas_reduction1',
-    'sas_transmission1'
     ],
     "SCD" : [
     ]

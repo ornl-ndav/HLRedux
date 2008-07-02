@@ -33,6 +33,7 @@ def convert_single_to_list(funcname, number, som, **kwargs):
       - d_spacing_to_tof_focused_det
       - energy_to_wavelength
       - frequency_to_energy
+      - initial_wavelength_igs_lin_time_zero_to_tof
       - init_scatt_wavevector_to_scalar_Q
       - tof_to_initial_wavelength_igs_lin_time_zero
       - tof_to_initial_wavelength_igs
@@ -78,6 +79,7 @@ def convert_single_to_list(funcname, number, som, **kwargs):
     function_list.append("d_spacing_to_tof_focused_det")
     function_list.append("energy_to_wavelength")
     function_list.append("frequency_to_energy")
+    function_list.append("initial_wavelength_igs_lin_time_zero_to_tof")
     function_list.append("init_scatt_wavevector_to_scalar_Q")
     function_list.append("tof_to_initial_wavelength_igs_lin_time_zero")
     function_list.append("tof_to_initial_wavelength_igs")

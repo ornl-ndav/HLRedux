@@ -390,7 +390,88 @@ def process_igs_data(datalist, conf, **kwargs):
                              message="monitor wavelength information "\
                              +"(rebinned)")
 
-    # Step 9: Normalize data by monitor
+    # The lambda-dependent background is only done on sample data (aka data)
+    # for the BSS instrument at the SNS
+    if conf.inst == "BSS" and conf.ldb_const is not None and \
+           dataset_type == "data":
+        # Step 9: Convert chopper center wavelength to TOF center
+        if conf.verbose:
+            print "Converting chopper center wavelength to TOF"
+
+        if t is not None:
+            t.getTime(False)
+            
+        tof_center = dr_lib.convert_single_to_list(\
+            "initial_wavelength_igs_lin_time_zero_to_tof",
+            conf.chopper_lambda_cent.toValErrTuple(), dp_som5)
+
+        # Step 10: Calculate beginning and end of detector TOF spectrum
+        if conf.verbose:
+            print "Calculating beginning and ending TOF ranges"
+
+        half_inv_chop_freq = 0.5 / conf.chopper_freq.toValErrTuple()[0]
+        # Above is in seconds, need microseconds
+        half_inv_chop_freq *= 1.0e6
+
+        tof_begin = common_lib.sub_ncerr(tof_center, (half_inv_chop_freq, 0.0))
+        tof_end = common_lib.add_ncerr(tof_center, (half_inv_chop_freq, 0.0))
+
+        # Step 11: Convert TOF_begin and TOF_end to wavelength
+        if conf.verbose:
+            print "Converting TOF_begin and TOF_end to wavelength"
+        
+        l_begin = common_lib.tof_to_initial_wavelength_igs_lin_time_zero(\
+            tof_begin, time_zero_slope=conf.time_zero_slope.toValErrTuple(),
+            time_zero_offset=conf.time_zero_offset.toValErrTuple(),
+            iobj=dp_som5, run_filter=False)
+        l_end = common_lib.tof_to_initial_wavelength_igs_lin_time_zero(\
+            tof_end, time_zero_slope=conf.time_zero_slope.toValErrTuple(),
+            time_zero_offset=conf.time_zero_offset.toValErrTuple(),
+            iobj=dp_som5, run_filter=False)
+
+        # Step 12: tof-least-bkg to lambda-least-bkg
+        if conf.verbose:
+            print "Converting TOF least background to wavelength"
+        
+        lambda_least_bkg = dr_lib.convert_single_to_list(\
+            "tof_to_initial_wavelength_igs_lin_time_zero",
+            conf.tof_least_bkg.toValErrTuple(), dp_som5)
+
+        if t is not None:
+            t.getTime(msg="After converting boundary positions ")
+
+        # Step 13: Create lambda-dependent background spectrum
+        if conf.verbose:
+            print "Creating lambda-dependent background spectra"
+
+        if t is not None:
+            t.getTime(False)
+            
+        ldb_som = dr_lib.shift_spectrum(dm_som4, lambda_least_bkg, l_begin,
+                                        l_end, conf.ldb_const.getValue())
+
+        if t is not None:
+            t.getTime(msg="After creating lambda-dependent background "\
+                      +"spectra ")
+
+        # Step 14: Subtract lambda-dependent background from sample data
+        if conf.verbose:
+            print "Subtracting lambda-dependent background from data"
+
+        if t is not None:
+            t.getTime(False)
+
+        dp_som6 = common_lib.sub_ncerr(dp_som5, ldb_som)
+
+        if t is not None:
+            t.getTime(msg="After subtracting lambda-dependent background "\
+                      +"from data ")
+    else:
+        dp_som6 = dp_som5
+
+    del dp_som5
+    
+    # Step 15: Normalize data by monitor
     if conf.verbose and dm_som4 is not None:
         print "Normalizing data by monitor"
 
@@ -398,33 +479,33 @@ def process_igs_data(datalist, conf, **kwargs):
         t.getTime(False)
 
     if dm_som4 is not None:
-        dp_som6 = common_lib.div_ncerr(dp_som5, dm_som4)
+        dp_som7 = common_lib.div_ncerr(dp_som6, dm_som4)
 
         if t is not None:
             t.getTime(msg="After normalizing data by monitor ")
     else:
-        dp_som6 = dp_som5
+        dp_som7 = dp_som6
 
     if conf.dump_wave_mnorm:
-        dp_som6_1 = dr_lib.sum_all_spectra(dp_som6,\
+        dp_som7_1 = dr_lib.sum_all_spectra(dp_som7,\
                                    rebin_axis=conf.lambda_bins.toNessiList())
 
         write_message = "combined pixel wavelength information"
         if dm_som4 is not None:
             write_message += " (monitor normalized)"
         
-        hlr_utils.write_file(conf.output, "text/Spec", dp_som6_1,
+        hlr_utils.write_file(conf.output, "text/Spec", dp_som7_1,
                              output_ext="pml",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
                              data_ext=conf.ext_replacement,
                              path_replacement=conf.path_replacement,
                              message=write_message)
-        del dp_som6_1
+        del dp_som7_1
 
-    del dm_som4, dp_som5
+    del dm_som4, dp_som6
 
-    return dp_som6
+    return dp_som7
 
 
 

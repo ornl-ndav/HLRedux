@@ -47,10 +47,6 @@ def process_sas_data(datalist, conf, **kwargs):
                            The default value is I{data}.
     @type dataset_type: C{string}
 
-    @keyword trans_data: Alternate data for the transmission spectrum. This is
-                         used in the absence of transmission monitors.
-    @type trans_data: C{string}
-
     @keyword transmission: A flag that signals the function to stop after
                            doing the conversion from TOF to wavelength. The
                            default is I{False}.
@@ -95,12 +91,7 @@ def process_sas_data(datalist, conf, **kwargs):
     try:
         bkg_subtract = kwargs["bkg_subtract"]
     except KeyError:
-        bkg_subtract = None
-
-    try:
-        trans_data = kwargs["trans_data"]
-    except KeyError:
-        trans_data = None        
+        bkg_subtract = None        
 
     # Add so_axis to Configure object
     conf.so_axis = "time_of_flight"
@@ -146,7 +137,7 @@ def process_sas_data(datalist, conf, **kwargs):
     del dbm_som0
 
     # Transmission monitor
-    if trans_data is None:
+    if conf.trans is None:
         if conf.verbose:
             print "Reading in transmission monitor data from %s file" \
                   % dataset_type
@@ -179,7 +170,7 @@ def process_sas_data(datalist, conf, **kwargs):
     if conf.time_zero_offset_mon is not None:
         dbm_som1.attr_list["Time_zero_offset_mon"] = \
                                      conf.time_zero_offset_mon.toValErrTuple()
-        if trans_data is None and dtm_som1 is not None:
+        if conf.trans is None and dtm_som1 is not None:
             dtm_som1.attr_list["Time_zero_offset_mon"] = \
                                      conf.time_zero_offset_mon.toValErrTuple()
 
@@ -251,8 +242,7 @@ def process_sas_data(datalist, conf, **kwargs):
         t.getTime(False)
 
     if conf.mon_effc:
-        dbm_som3 = dr_lib.feff_correct_mon(dbm_som2,
-                                           eff_const=conf.mon_eff_const)
+        dbm_som3 = dr_lib.feff_correct_mon(dbm_som2)
     else:
         dbm_som3 = dbm_som2
 
@@ -350,10 +340,10 @@ def process_sas_data(datalist, conf, **kwargs):
         del dp_som4_1
 
     # Step 7: Rebin transmission monitor axis onto detector pixel axis
-    if trans_data is not None:
+    if conf.trans is not None:
         print "Reading in transmission monitor data from file"
 
-        dtm_som3 = dr_lib.add_files([trans_data],
+        dtm_som3 = dr_lib.add_files([conf.trans],
                                     dataset_type=dataset_type,
                                     dst_type="text/Spec",
                                     Verbose=conf.verbose,
@@ -366,7 +356,7 @@ def process_sas_data(datalist, conf, **kwargs):
     if t is not None:
         t.getTime(False)
 
-    if trans_data is not None:
+    if conf.trans is not None:
         use_linint = True
     else:
         use_linint = False

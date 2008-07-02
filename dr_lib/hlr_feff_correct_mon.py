@@ -36,10 +36,7 @@ def feff_correct_mon(obj, **kwargs):
     @keyword units: The expected units for this function. The default for this
                     function is I{Angstroms}.
     @type units: C{string}
-
-    @keyword eff_const: Use this provided effieciency constant. The default is
-    .
-    @type eff_const: C{float}
+                  
     
     @return: Efficiency corrected monitor spectra
     @rtype: C{SOM.SOM} or C{SOM.SO}
@@ -61,12 +58,6 @@ def feff_correct_mon(obj, **kwargs):
     except KeyError:
         units = "Angstroms"
 
-    try:
-        eff_const = kwargs["eff_const"]
-    except KeyError:
-        # This is for SNS (specifically BASIS) monitors
-        eff_const = 0.00000085 / 1.8 # A^-1
-
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
     if o_descr == "SOM":
@@ -80,6 +71,8 @@ def feff_correct_mon(obj, **kwargs):
     import array_manip
     import nessi_list
     
+    constant = 0.00000085 / 1.8 # A^-1
+    
     for i in xrange(hlr_utils.get_length(obj)):
         val = hlr_utils.get_value(obj, i, o_descr, "x", axis)
         map_so = hlr_utils.get_map_so(obj, None, i)
@@ -88,7 +81,7 @@ def feff_correct_mon(obj, **kwargs):
 
         for j in xrange(len(val)-1):
             bin_center = (val[j+1] + val[j]) / 2.0
-            eff.append(eff_const * bin_center)
+            eff.append(constant * bin_center)
 
         eff_err2 = nessi_list.NessiList(len(eff))
 

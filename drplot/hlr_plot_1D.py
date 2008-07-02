@@ -106,10 +106,7 @@ def plot_1D_arr(x, y, var_y=None, var_x=None, **kwargs):
     @type logy: C{boolean}
 
     @keyword logx: Set the independent axis to logarithmic
-    @type logx: C{boolean}
-
-    @keyword llabel: Set the legend label for the plot
-    @type llabel: C{string}
+    @type logx: C{boolean}    
     """
     # Lookup all the keywords
 
@@ -138,11 +135,6 @@ def plot_1D_arr(x, y, var_y=None, var_x=None, **kwargs):
     except KeyError:
         logx = False
 
-    try:
-        llabel = kwargs["llabel"]
-    except KeyError:
-        llabel = ""
-
     # Square-root incoming uncertainty arrays
     if var_y is not None:
         var_y = numpy.sqrt(var_y)
@@ -158,6 +150,11 @@ def plot_1D_arr(x, y, var_y=None, var_x=None, **kwargs):
         (x, y, var_y, var_x) = drplot.clean_1D_data("nonzero", "x",
                                                     x, y, var_y, var_x)
 
+    pylab.errorbar(x, y, var_y, var_x, fmt='o', mec='b', ls='None')
+    pylab.xlabel(xlabel)
+    pylab.ylabel(ylabel)
+    pylab.title(title)
+
     # Set the axes to logarithimic scale, if necessary
     if logy or logx:
         ax = pylab.gca()
@@ -165,11 +162,3 @@ def plot_1D_arr(x, y, var_y=None, var_x=None, **kwargs):
             ax.set_yscale("log")
         if logx:
             ax.set_xscale("log")
-
-    pylab.errorbar(x, y, var_y, var_x, fmt='o', mec='b', ls='None',
-                   label=llabel)
-    pylab.xlabel(xlabel)
-    pylab.ylabel(ylabel)
-    pylab.title(title)
-
-
