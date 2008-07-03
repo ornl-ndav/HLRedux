@@ -113,8 +113,6 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
     counts_err2 = nessi_list.NessiList(len_data)
     frac_area = nessi_list.NessiList(len_data)
     frac_area_err2 = nessi_list.NessiList(len_data)
-    bin_counts = nessi_list.NessiList(len_data)
-    bin_counts_err2 = nessi_list.NessiList(len_data)
 
     import pylab
     import drplot
@@ -131,26 +129,18 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
         if norm:
             map_so = hlr_utils.get_map_so(obj, None, i)
             dOmega = dr_lib.calc_solid_angle(inst, map_so)
-            #(ncounts, ncounts_err2) = array_manip.div_ncerr(value[0],
-            #                                                value[1],
-            #                                                dOmega,
-            #                                                0.0)
-            #(nbin_counts, nbin_counts_err2) = array_manip.mult_ncerr(value[3],
-            #                                                         frac_err,
-            #                                                         dOmega,
-            #                                                         0.0)
-            #nfrac_area = value[2]
-            #nfrac_area_err2 = frac_err            
-            (nfrac_area, nfrac_area_err2) = array_manip.div_ncerr(value[2],
-                                                                  frac_err,
-                                                                  dOmega,
-                                                                  0.0)
+            (ncounts, ncounts_err2) = array_manip.mult_ncerr(value[0],
+                                                             value[1],
+                                                             dOmega,
+                                                             0.0)
+            #(nfrac_area, nfrac_area_err2) = array_manip.div_ncerr(value[2],
+            #                                                      frac_err,
+            #                                                      dOmega,
+            #                                                      0.0)
             nbin_counts = value[3]
             nbin_counts_err2 = frac_err
-            #nbin_counts = value[3]
-            #nbin_counts_err2 = frac_err
-            #nfrac_area = value[2]
-            #nfrac_area_err2 = frac_err
+            nfrac_area = value[2]
+            nfrac_area_err2 = frac_err
         else:
             ncounts = value[0]
             ncounts_err2 = value[1]
@@ -160,27 +150,16 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
             nfrac_area_err2 = frac_err
         
         (counts, counts_err2) = array_manip.add_ncerr(counts, counts_err2,
-                                                      value[0], value[1])
+                                                      ncounts, ncounts_err2)
         
         (frac_area, frac_area_err2) = array_manip.add_ncerr(frac_area,
                                                             frac_area_err2,
                                                             nfrac_area,
                                                             nfrac_area_err2)
 
-        (bin_counts, bin_counts_err2) = array_manip.add_ncerr(bin_counts,
-                                                              bin_counts_err2,
-                                                              nbin_counts,
-                                                              nbin_counts_err2)
-
-    #value0 = array_manip.div_ncerr(frac_area, frac_area_err2, bin_counts,
-    #                  bin_counts_err2)
-
     # Divide the total counts by the total fractional area
     value1 = array_manip.div_ncerr(counts, counts_err2, frac_area,
                                    frac_area_err2)
-    #value1 = array_manip.div_ncerr(counts, counts_err2, value0[0], value0[1])
-    #value0 = (frac_area, frac_area_err2)
-    #value1 = (counts, counts_err2)
     xvals = []
     xvals.append(axis_out)
     
@@ -190,38 +169,18 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
                             0, xvals)
 
     f1 = pylab.figure()
-    pylab.subplot(231)
+    pylab.subplot(131)
     drplot.plot_1D_arr(axis_out.toNumPy(True), counts.toNumPy(),
                        counts_err2.toNumPy(), xlabel="Q ($\AA^{-1}$)",
                        ylabel="Counts", logy=True, logx=True)
-    pylab.subplot(232)
+    pylab.subplot(132)
     drplot.plot_1D_arr(axis_out.toNumPy(True), frac_area.toNumPy(),
                        frac_area_err2.toNumPy(), xlabel="Q ($\AA^{-1}$)",
                        ylabel="Fractional Area", logy=True, logx=True)
-    pylab.subplot(233)
-    drplot.plot_1D_arr(axis_out.toNumPy(True), bin_counts.toNumPy(),
-                       bin_counts_err2.toNumPy(), xlabel="Q ($\AA^{-1}$)",
-                       ylabel="Solid Angle", logy=True, logx=True)
-    pylab.subplot(234)
+    pylab.subplot(133)
     drplot.plot_1D_arr(axis_out.toNumPy(True), value1[0].toNumPy(),
                        value1[1].toNumPy(), xlabel="Q ($\AA^{-1}$)",
                        ylabel="Normalized Frac Area", logy=True, logx=True)
-
-    import utils
-    axis_out_bw = utils.calc_bin_widths(axis_out)
-
-    divy = nessi_list.NessiList(len_data)
-    divyerr2 = nessi_list.NessiList(len_data)
-
-    for i in xrange(len_data):
-        divy[i] = value1[0][i] * axis_out_bw[0][i]
-        divyerr2[i] = value1[1][i] * ( axis_out_bw[0][i] * axis_out_bw[0][i])
-    
-    pylab.subplot(235)
-    drplot.plot_1D_arr(axis_out.toNumPy(True), divy.toNumPy(),
-                       divyerr2.toNumPy(), xlabel="Q ($\AA^{-1}$)",
-                       ylabel="Rebinned Counts", logy=True, logx=True,
-                       llabel="Test")
 
     if config is not None:
         if o_descr == "SOM":
@@ -256,19 +215,7 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
                                  path_replacement=config.path_replacement,
                                  message="fractional area")
 
-            # Replace counts data with fractional area. The axes remain the
-            # same
-            o_som[0].y = bin_counts
-            o_som[0].var_y = bin_counts_err2
-            
-            # Write out summed fractional area into file
-            hlr_utils.write_file(config.output, "text/Spec", o_som,
-                                 output_ext="bin",
-                                 verbose=config.verbose,
-                                 data_ext=config.ext_replacement,         
-                                 path_replacement=config.path_replacement,
-                                 message="bin counts")
-
+    #pylab.show()
     return result
 
 if __name__ == "__main__":
