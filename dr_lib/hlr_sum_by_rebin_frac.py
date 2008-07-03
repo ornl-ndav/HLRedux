@@ -114,6 +114,7 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
     frac_area = nessi_list.NessiList(len_data)
     frac_area_err2 = nessi_list.NessiList(len_data)
 
+    import math
     import pylab
     import drplot
 
@@ -213,7 +214,7 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
                                  path_replacement=config.path_replacement,
                                  message="fractional area")
 
-    #pylab.show()
+    pylab.show()
     return result
 
 if __name__ == "__main__":
