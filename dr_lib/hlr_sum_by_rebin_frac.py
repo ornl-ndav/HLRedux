@@ -121,22 +121,24 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
         axis_in = hlr_utils.get_value(obj, i, o_descr, "x", 0)
         val = hlr_utils.get_value(obj, i, o_descr)
         err2 = hlr_utils.get_err2(obj, i, o_descr)
-
+        
         value = axis_manip.rebin_axis_1D_frac(axis_in, val, err2, axis_out)
 
         frac_err = nessi_list.NessiList(len(value[2]))
 
         if norm:
             map_so = hlr_utils.get_map_so(obj, None, i)
-            dOmega = dr_lib.calc_solid_angle(inst, map_so)
+
+            xpos = hlr_utils.get_parameter("x-offset", map_so, inst)
+            ypos = hlr_utils.get_parameter("y-offset", map_so, inst)
+            
+            radius = math.sqrt(xpos * xpos + ypos * ypos)
+            #dOmega = dr_lib.calc_solid_angle(inst, map_so)
+
             (ncounts, ncounts_err2) = array_manip.mult_ncerr(value[0],
                                                              value[1],
-                                                             dOmega,
+                                                             radius,
                                                              0.0)
-            #(nfrac_area, nfrac_area_err2) = array_manip.div_ncerr(value[2],
-            #                                                      frac_err,
-            #                                                      dOmega,
-            #                                                      0.0)
             nfrac_area = value[2]
             nfrac_area_err2 = frac_err
         else:
