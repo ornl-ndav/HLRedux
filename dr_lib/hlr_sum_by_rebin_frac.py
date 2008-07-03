@@ -137,15 +137,11 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
             #                                                      frac_err,
             #                                                      dOmega,
             #                                                      0.0)
-            nbin_counts = value[3]
-            nbin_counts_err2 = frac_err
             nfrac_area = value[2]
             nfrac_area_err2 = frac_err
         else:
             ncounts = value[0]
             ncounts_err2 = value[1]
-            nbin_counts = value[3]
-            nbin_counts_err2 = frac_err
             nfrac_area = value[2]
             nfrac_area_err2 = frac_err
         
