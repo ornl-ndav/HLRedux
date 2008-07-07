@@ -25,13 +25,22 @@
 def fix_bin_contents(obj, **kwargs):
     """
     This function takes a SOM or SO and goes through the individual spectra
-    adjusting the bin contents by dividing by the bin widths taken from the
-    individual spectra.
+    adjusting the bin contents by either multiplying or dividing by the
+    bin widths or the bin centers taken from the individual spectra.
 
     @param obj: The data object to be scaled
     @type obj: C{SOM.SOM} or C{SOM.SO}
 
     @param kwargs: A list of keyword arguments that the function accepts:
+
+    @keyword scale: A flag that signals multiplication by the required bin
+                    quantity. The default is I{False} (divide).
+    @type scale: C{bool}
+
+    @keyword width: A flag that signals that the adjusting quantity is the
+                    bin width. The default is I{True}. If I{False}, the bin
+                    center is used.
+    @type width: C{bool}
 
     @keyword units: The expected units for this function. The default for this
                     function is I{microsecond}.
