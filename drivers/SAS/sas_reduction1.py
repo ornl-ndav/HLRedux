@@ -144,23 +144,28 @@ def run(config, tim=None):
         tim.getTime(False)
 
     d_som6 = dr_lib.sum_by_rebin_frac(d_som5, config.Q_bins.toNessiList(),
-                                      configure=config,
-                                      norm=True)
+                                      configure=config)
+    #d_som6 = dr_lib.sum_by_bin_center(d_som5, config.Q_bins.toNessiList())
 
     if tim is not None:
         tim.getTime(msg="After rebinning and summing for spectrum")    
 
     del d_som5
+
+    d_som7 = dr_lib.fix_bin_contents(d_som6, scale=True, width=True,
+                                     units="1/Angstroms")
+
+    del d_som6
     
-    hlr_utils.write_file(config.output, "text/Spec", d_som6,
+    hlr_utils.write_file(config.output, "text/Spec", d_som7,
                          verbose=config.verbose,
                          replace_path=False,
                          replace_ext=False,
                          message="combined S(Q) information")
 
-    d_som6.attr_list["config"] = config
+    d_som7.attr_list["config"] = config
 
-    hlr_utils.write_file(config.output, "text/rmd", d_som6,
+    hlr_utils.write_file(config.output, "text/rmd", d_som7,
                          output_ext="rmd",
                          data_ext=config.ext_replacement,         
                          path_replacement=config.path_replacement,
