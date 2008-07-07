@@ -70,9 +70,12 @@ def apply_sas_correct(obj):
     for i in xrange(len_obj):
         val = hlr_utils.get_value(obj, i, o_descr, "y")
         err2 = hlr_utils.get_err2(obj, i, o_descr, "y")
-        axis = hlr_utils.get_value(obj, i, o_descr, "x", axis_pos)
+        axis = hlr_utils.get_value(obj, i, o_descr, "x", 0)
         
-        (bin_center, bin_center_err2) = utils.calc_bin_centers(axis)
+        #(bin_center, bin_center_err2) = utils.calc_bin_centers(axis)
+
+        #(bin_center2, bin_center2_err2) = array_manip.mult_ncerr(\
+        #    bin_center, bin_center_err2, bin_center, bin_center_err2)
         
         map_so = hlr_utils.get_map_so(obj, None, i)
 
@@ -81,10 +84,19 @@ def apply_sas_correct(obj):
         
         radius = math.sqrt(xpos * xpos + ypos * ypos)
 
-        constant = array_manip.mult_ncerr(bin_center, bin_center_err2,
-                                          radius, 0.0) 
+        #constant = array_manip.mult_ncerr(bin_center, bin_center_err2,
+        #                                  radius, 0.0)
 
-        value = array_manip.mult_ncerr(val, err2, constant[0], constant[1])
+        #constant = array_manip.mult_ncerr(bin_center2, bin_center2_err2,
+        #                                  radius, 0.0)
+        #constant = array_manip.mult_ncerr(radius, 0.0,
+        #                                  bin_center, bin_center_err2)
+
+        #constant = array_manip.div_ncerr(radius, 0.0,
+        #                                 bin_center2, bin_center2_err2)
+
+        #value = array_manip.mult_ncerr(val, err2, constant[0], constant[1])
+        value = array_manip.mult_ncerr(val, err2, radius, 0.0)
         
         hlr_utils.result_insert(result, res_descr, value, map_so, "y")
     
