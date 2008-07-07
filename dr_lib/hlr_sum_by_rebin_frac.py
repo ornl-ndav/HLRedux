@@ -91,7 +91,6 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
 
     import array_manip
     import axis_manip
-    import dr_lib
     import nessi_list
 
     len_data = len(axis_out) - 1
@@ -100,9 +99,6 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
     counts_err2 = nessi_list.NessiList(len_data)
     frac_area = nessi_list.NessiList(len_data)
     frac_area_err2 = nessi_list.NessiList(len_data)
-
-    import pylab
-    import drplot
 
     for i in xrange(hlr_utils.get_length(obj)):
         axis_in = hlr_utils.get_value(obj, i, o_descr, "x", 0)
@@ -129,20 +125,6 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
         
     hlr_utils.result_insert(result, res_descr, value1, map_so, "all",
                             0, xvals)
-
-    f1 = pylab.figure()
-    pylab.subplot(311)
-    drplot.plot_1D_arr(axis_out.toNumPy(True), counts.toNumPy(),
-                       counts_err2.toNumPy(), xlabel="Q ($\AA^{-1}$)",
-                       ylabel="Counts", logy=True, logx=True)
-    pylab.subplot(312)
-    drplot.plot_1D_arr(axis_out.toNumPy(True), frac_area.toNumPy(),
-                       frac_area_err2.toNumPy(), xlabel="Q ($\AA^{-1}$)",
-                       ylabel="Fractional Area", logy=True, logx=True)
-    pylab.subplot(313)
-    drplot.plot_1D_arr(axis_out.toNumPy(True), value1[0].toNumPy(),
-                       value1[1].toNumPy(), xlabel="Q ($\AA^{-1}$)",
-                       ylabel="Normalized Frac Area", logy=True, logx=True)
 
     if config is not None:
         if o_descr == "SOM":
@@ -177,7 +159,6 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
                                  path_replacement=config.path_replacement,
                                  message="fractional area")
 
-    pylab.show()
     return result
 
 if __name__ == "__main__":
