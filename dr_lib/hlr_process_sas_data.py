@@ -210,7 +210,7 @@ def process_sas_data(datalist, conf, **kwargs):
         cut_val=conf.lambda_cut)
 
     if dtm_som1 is not None:
-        # Convert beam monitor
+        # Convert transmission  monitor
         dtm_som2 = common_lib.tof_to_wavelength_lin_time_zero(
             dtm_som1,
             units="microsecond",
