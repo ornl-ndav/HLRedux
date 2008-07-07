@@ -93,9 +93,18 @@ def fix_bin_contents(obj, **kwargs):
         
         map_so = hlr_utils.get_map_so(obj, None, i)
 
-        (bin_width, bin_width_err2) = utils.calc_bin_widths(axis, axis_err2)
+        if width:
+            (bin_const, bin_const_err2) = utils.calc_bin_widths(axis,
+                                                                axis_err2)
+        else:
+            (bin_const, bin_const_err2) = utils.calc_bin_centers(axis,
+                                                                 axis_err2)
 
-        value = array_manip.div_ncerr(val, err2, bin_width, bin_width_err2)
+        if scale:
+            value = array_manip.mult_ncerr(val, err2, bin_const,
+                                           bin_const_err2)
+        else:
+            value = array_manip.div_ncerr(val, err2, bin_const, bin_const_err2)
 
         hlr_utils.result_insert(result, res_descr, value, map_so, "y")
 
