@@ -112,20 +112,25 @@ def process_sas_data(datalist, conf, **kwargs):
         print "Reading %s file" % dataset_type
 
     # The [0] is to get the data SOM and ignore the None background SOM
-    dp_som0 = dr_lib.add_files(datalist, Data_Paths=conf.data_paths.toPath(),
-                               SO_Axis=conf.so_axis, Signal_ROI=conf.roi_file,
-                               dataset_type=dataset_type,
-                               Verbose=conf.verbose, Timer=t)[0]
-
+    dp_som = dr_lib.add_files(datalist, Data_Paths=conf.data_paths.toPath(),
+                              SO_Axis=conf.so_axis, Signal_ROI=conf.roi_file,
+                              dataset_type=dataset_type,
+                              Verbose=conf.verbose, Timer=t)[0]
+    
     if t is not None:
         t.getTime(msg="After reading %s " % dataset_type)
 
-    dp_som1 = dr_lib.fix_bin_contents(dp_som0)
+    dp_som0 = dr_lib.fix_bin_contents(dp_som)
 
-    del dp_som0    
+    del dp_som
 
     if conf.inst_geom is not None:
-        i_geom_dst.setGeometry(conf.data_paths.toPath(), dp_som1)
+        i_geom_dst.setGeometry(conf.data_paths.toPath(), dp_som0)
+
+    # Apply SAS corrections: radius * TOF^2
+    dp_som1 = dr_lib.apply_sas_correct(dp_som0)
+
+    del dp_som0
 
     # Beam monitor
     if conf.verbose:
