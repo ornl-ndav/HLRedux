@@ -61,9 +61,23 @@ def plot_1D_so(som, pix_id, **kwargs):
         var_x = None
 
     # Set plot attributes
-    xlabel = som.getAxisLabel(0) + " [" + som.getAxisUnits(0) + "]"
-    ylabel = som.getYLabel() + " [" + som.getYUnits() + "]"
-    title = str(pix_id)
+    try:
+        xlabel = kwargs["xlabel"]
+        del kwargs["xlabel"]
+    except KeyError:
+        xlabel = som.getAxisLabel(0) + " [" + som.getAxisUnits(0) + "]"
+
+    try:
+        ylabel = kwargs["ylabel"]
+        del kwargs["ylabel"]
+    except KeyError:
+        ylabel = som.getYLabel() + " [" + som.getYUnits() + "]"
+        
+    try:
+        title = kwargs["title"]
+        del kwargs["title"]
+    except KeyError :       
+        title = str(pix_id)
 
     # Make 1D plot
     drplot.plot_1D_arr(x, y, var_y, var_x, xlabel=xlabel, ylabel=ylabel,
