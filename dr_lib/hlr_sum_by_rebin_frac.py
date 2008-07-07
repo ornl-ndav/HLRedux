@@ -42,10 +42,6 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
                         and fractional area to files.
     @type configure: C{Configure}
 
-    @keyword norm: This flag will trigger the function to normalize the final
-                   spectrum by the solid angle distribution of all the pixels.
-    @type norm: C{boolean}
-    
 
     @return: Object that has been rebinned and summed according to the
              provided axis
@@ -89,15 +85,6 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
     except KeyError:
         config = None
 
-    try:
-        norm = kwargs["norm"]
-    except KeyError:
-        norm = False
-
-    if norm:
-        if o_descr == "SOM":
-            inst = obj.attr_list.instrument
-        
     (result, res_descr) = hlr_utils.empty_result(obj)
 
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
@@ -114,7 +101,6 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
     frac_area = nessi_list.NessiList(len_data)
     frac_area_err2 = nessi_list.NessiList(len_data)
 
-    import math
     import pylab
     import drplot
 
@@ -125,36 +111,13 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
         
         value = axis_manip.rebin_axis_1D_frac(axis_in, val, err2, axis_out)
 
-        frac_err = nessi_list.NessiList(len(value[2]))
-
-        if norm:
-            map_so = hlr_utils.get_map_so(obj, None, i)
-
-            xpos = hlr_utils.get_parameter("x-offset", map_so, inst)
-            ypos = hlr_utils.get_parameter("y-offset", map_so, inst)
-            
-            radius = math.sqrt(xpos * xpos + ypos * ypos)
-            #dOmega = dr_lib.calc_solid_angle(inst, map_so)
-
-            (ncounts, ncounts_err2) = array_manip.mult_ncerr(value[0],
-                                                             value[1],
-                                                             radius,
-                                                             0.0)
-            nfrac_area = value[2]
-            nfrac_area_err2 = frac_err
-        else:
-            ncounts = value[0]
-            ncounts_err2 = value[1]
-            nfrac_area = value[2]
-            nfrac_area_err2 = frac_err
-        
         (counts, counts_err2) = array_manip.add_ncerr(counts, counts_err2,
-                                                      ncounts, ncounts_err2)
+                                                      value[0], value[1])
         
         (frac_area, frac_area_err2) = array_manip.add_ncerr(frac_area,
                                                             frac_area_err2,
-                                                            nfrac_area,
-                                                            nfrac_area_err2)
+                                                            value[2],
+                                                            frac_area_err2)
 
     # Divide the total counts by the total fractional area
     value1 = array_manip.div_ncerr(counts, counts_err2, frac_area,
@@ -168,15 +131,15 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
                             0, xvals)
 
     f1 = pylab.figure()
-    pylab.subplot(131)
+    pylab.subplot(311)
     drplot.plot_1D_arr(axis_out.toNumPy(True), counts.toNumPy(),
                        counts_err2.toNumPy(), xlabel="Q ($\AA^{-1}$)",
                        ylabel="Counts", logy=True, logx=True)
-    pylab.subplot(132)
+    pylab.subplot(312)
     drplot.plot_1D_arr(axis_out.toNumPy(True), frac_area.toNumPy(),
                        frac_area_err2.toNumPy(), xlabel="Q ($\AA^{-1}$)",
                        ylabel="Fractional Area", logy=True, logx=True)
-    pylab.subplot(133)
+    pylab.subplot(313)
     drplot.plot_1D_arr(axis_out.toNumPy(True), value1[0].toNumPy(),
                        value1[1].toNumPy(), xlabel="Q ($\AA^{-1}$)",
                        ylabel="Normalized Frac Area", logy=True, logx=True)
