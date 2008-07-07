@@ -58,6 +58,16 @@ def fix_bin_contents(obj, **kwargs):
 
     # Setup keyword arguments
     try:
+        scale = kwargs["scale"]
+    except KeyError:
+        scale = False
+
+    try:
+        width = kwargs["width"]
+    except KeyError:
+        width = True
+    
+    try:
         units = kwargs["units"]
     except KeyError:
         units = "microsecond"
