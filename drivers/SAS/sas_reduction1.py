@@ -150,7 +150,6 @@ def run(config, tim=None):
 
     d_som6 = dr_lib.sum_by_rebin_frac(d_som5, config.Q_bins.toNessiList(),
                                       configure=set_conf)
-    #d_som6 = dr_lib.sum_by_bin_center(d_som5, config.Q_bins.toNessiList())
 
     if tim is not None:
         tim.getTime(msg="After rebinning and summing for spectrum")    
