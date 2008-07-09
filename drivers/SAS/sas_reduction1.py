@@ -156,8 +156,17 @@ def run(config, tim=None):
 
     del d_som5
 
+    if config.verbose:
+        print "Scaling final spectrum by Q centers"
+        
+    if tim is not None:
+        tim.getTime(False)
+
     d_som7 = dr_lib.fix_bin_contents(d_som6, scale=True, width=True,
                                      units="1/Angstroms")
+
+    if tim is not None:
+        tim.getTime(msg="After scaling final spectrum")    
 
     del d_som6
     
