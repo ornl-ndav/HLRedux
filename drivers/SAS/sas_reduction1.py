@@ -143,8 +143,13 @@ def run(config, tim=None):
     if tim is not None:
         tim.getTime(False)
 
+    if config.dump_frac_rebin:
+        set_conf = config
+    else:
+        set_conf = None
+
     d_som6 = dr_lib.sum_by_rebin_frac(d_som5, config.Q_bins.toNessiList(),
-                                      configure=config)
+                                      configure=set_conf)
     #d_som6 = dr_lib.sum_by_bin_center(d_som5, config.Q_bins.toNessiList())
 
     if tim is not None:
