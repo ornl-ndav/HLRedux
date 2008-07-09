@@ -167,6 +167,13 @@ class SansOptions(hlr_utils.InstOptions):
                         +"dataset.")
         self.set_defaults(dump_wave_bmnorm=False)
 
+        self.add_option("", "--dump-frac-rebin", action="store_true",
+                        dest="dump_frac_rebin", help="Flag to dump the "\
+                        +"fractional counts and the fraction area from "\
+                        +"rebinning. Creates a *.cnt file for the fractional "\
+                        +"counts and a *.fra file for the fractional area.")
+        self.set_defaults(dump_frac_rebin=False)
+
         self.add_option("", "--dump-all", action="store_true", dest="dump_all",
                         help="Flag to dump combined information")
         self.set_defaults(dump_all=False)
@@ -287,6 +294,12 @@ def SansConfiguration(parser, configure, options, args):
                                       "--dump-wave-bmnorm"):
         configure.dump_wave_bmnorm = options.dump_wave_bmnorm
 
+    # Set the ability to dump the fractional counts and fractional area
+    # separately after rebinning in Q
+    if hlr_utils.cli_provide_override(configure, "dump_frac_rebin",
+                                      "--dump-frac-rebin"):
+        configure.dump_frac_rebin = options.dump_frac_rebin
+
     if hlr_utils.cli_provide_override(configure, "dump_all", "--dump-all"):
         if options.dump_all:
             configure.dump_wave = True
@@ -294,3 +307,4 @@ def SansConfiguration(parser, configure, options, args):
             configure.dump_bmon_effc = True
             configure.dump_bmon_rebin = True
             configure.dump_wave_bmnorm = True
+            configure.dump_frac_rebin = True
