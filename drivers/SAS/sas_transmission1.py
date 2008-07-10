@@ -127,13 +127,16 @@ if __name__ == "__main__":
     parser.set_defaults(tmon_path="/entry/monitor1,1")
 
     # Remove unnecessary options
+    parser.remove_option("--data-trans")
     parser.remove_option("--tmon-path")
     parser.remove_option("--ecan")
+    parser.remove_option("--ecan-trans")
     parser.remove_option("--solv")
     parser.remove_option("--open")
     parser.remove_option("--dkcur")
     parser.remove_option("--mom-trans-bins")
     parser.remove_option("--dump-wave-bmnorm")
+    parser.remove_option("--dump-frac-rebin")
     
     # Add sas_transmission specific options
     parser.add_option("", "--back",
