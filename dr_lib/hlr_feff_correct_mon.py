@@ -65,7 +65,8 @@ def feff_correct_mon(obj, **kwargs):
         eff_const = kwargs["eff_const"]
     except KeyError:
         # This is for SNS (specifically BASIS) monitors
-        eff_const = 0.00000085 / 1.8 # A^-1
+        eff_const = hlr_utils.DrParameter((0.00000085 / 1.8), 0.0,
+                                          "Angstroms^-1") # A^-1
 
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
@@ -88,7 +89,7 @@ def feff_correct_mon(obj, **kwargs):
 
         for j in xrange(len(val)-1):
             bin_center = (val[j+1] + val[j]) / 2.0
-            eff.append(eff_const * bin_center)
+            eff.append(eff_const.getValue() * bin_center)
 
         eff_err2 = nessi_list.NessiList(len(eff))
 
