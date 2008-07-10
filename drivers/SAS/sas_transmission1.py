@@ -132,7 +132,6 @@ if __name__ == "__main__":
     parser.remove_option("--solv")
     parser.remove_option("--open")
     parser.remove_option("--dkcur")
-    parser.remove_option("--trans")
     parser.remove_option("--mom-trans-bins")
     parser.remove_option("--dump-wave-bmnorm")
     
