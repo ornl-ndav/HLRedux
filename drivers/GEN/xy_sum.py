@@ -24,7 +24,18 @@
 
 # $Id$
 
+"""
+This program reads a TOF U{NeXus<www.nexusformat.org>} file and creates a
+summed value for every pixel in the given detector bank(s).
+"""
+
 def run(config):
+    """
+    This method is where the processing is done.
+
+    @param config: Object containing the driver configuration information.
+    @type config: L{hlr_utils.Configure}
+    """
     if config.data is None:
         raise RuntimeError("Need to pass a data filename to the driver "\
                            +"script.")
@@ -56,6 +67,12 @@ def run(config):
 if __name__ == "__main__":
     import dr_lib
     import hlr_utils
+
+    # Make description for driver
+    result = []
+    result.append("This driver reads a TOF NeXus file and creates a *.xys")
+    result.append("file containing a numeric sum of count values for each")
+    result.append("pixel present in the provided detector bank.")
     
     # set up the options available
     parser = hlr_utils.InstOptions("usage: %prog [options] <datafile>", None, 
@@ -68,7 +85,7 @@ if __name__ == "__main__":
     # set up the configuration
     configure = hlr_utils.Configure()
 
-    # Call the configuration setter for SnsOptions
+    # Call the configuration setter for InstOptions
     hlr_utils.InstConfiguration(parser, configure, options, args)
 
     # run the program
