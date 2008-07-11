@@ -51,7 +51,8 @@ def run(config):
                               Verbose=config.verbose)[0] 
   
     # Use start and end keywords to make slices (see online docs)
-    d_som2 = dr_lib.integrate_spectra(d_som1, start=200, end=200, bin_index=True)
+    d_som2 = dr_lib.integrate_spectra(d_som1, start=config.start,
+                                      end=config.end, bin_index=config.bin)
 
     del d_som1
 
