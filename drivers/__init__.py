@@ -27,6 +27,7 @@ from GEN import plot_file
 from GEN import plot_multi
 from GEN import tof_slicer
 from GEN import two_file_math
+from GEN import xy_sum
 
 # IGS drivers
 from IGS import amorphous_reduction

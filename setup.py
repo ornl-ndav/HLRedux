@@ -62,7 +62,8 @@ instrument_scripts = {
     'plot_file',
     'plot_multi',
     'tof_slicer',
-    'two_file_math'
+    'two_file_math',
+    'xy_sum'
     ],
     "IGS" : [
     'amorphous_reduction',
