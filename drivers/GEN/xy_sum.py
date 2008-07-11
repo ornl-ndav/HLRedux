@@ -79,6 +79,17 @@ if __name__ == "__main__":
                                    None, hlr_utils.program_version(), 'error')
                                   
     parser.set_defaults(data_paths="/entry/bank1,1")
+
+    parser.add_option("-s", "--start", dest="start", type="float",
+                      help="Specify the starting TOF for the sum.")
+
+    parser.add_option("-e", "--end", dest="end", type="float",
+                      help="Specify the ending TOF for the sum.")
+
+    parser.add_option("-b", "--bin", dest="bin", action="store_true",
+                      help="Flag to specify that start and end values are "\
+                      +"bin indicies.")
+    parser.set_defaults(bin=False)
     
     (options, args) = parser.parse_args()
 
@@ -87,6 +98,15 @@ if __name__ == "__main__":
 
     # Call the configuration setter for InstOptions
     hlr_utils.InstConfiguration(parser, configure, options, args)
+
+    # Set the starting TOF value
+    configure.start = options.start
+
+    # Set the ending TOF value
+    configure.end = options.end    
+
+    # Set the bin index flag
+    configure.bin = options.bin
 
     # run the program
     run(configure)
