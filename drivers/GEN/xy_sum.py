@@ -77,7 +77,8 @@ if __name__ == "__main__":
     
     # set up the options available
     parser = hlr_utils.InstOptions("usage: %prog [options] <datafile>", None, 
-                                   None, hlr_utils.program_version(), 'error')
+                                   None, hlr_utils.program_version(), 'error',
+                                   " ".join(result))
                                   
     parser.set_defaults(data_paths="/entry/bank1,1")
 
