@@ -49,12 +49,23 @@ def run(config):
                               Data_Paths=config.data_paths.toPath(), 
                               SO_Axis=so_axis, 
                               Verbose=config.verbose)[0] 
-  
+    print "A:", config.start, config.end
     # Use start and end keywords to make slices (see online docs)
     d_som2 = dr_lib.integrate_spectra(d_som1, start=config.start,
                                       end=config.end, bin_index=config.bin)
 
     del d_som1
+
+    time_tag_list = []
+    if config.start is not None:
+        time_tag_list.append("s"+str(config.start))
+
+    if config.end is not None:
+        time_tag_list.append("e"+str(config.end))        
+
+    time_tag = "_".join(time_tag_list)
+    if time_tag == "":
+        time_tag = None
 
     hlr_utils.write_file(config.output, "text/num-info", d_som2, 
                          output_ext="xys", 
@@ -62,7 +73,7 @@ def run(config):
                          path_replacement=config.path_replacement, 
                          verbose=config.verbose, 
                          message="xy sums", 
-                         tag="Integral", units="counts") 
+                         extra_tag=time_tag, units="counts") 
     
 
 if __name__ == "__main__":
