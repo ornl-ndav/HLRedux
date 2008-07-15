@@ -50,22 +50,49 @@ def run(config):
                               SO_Axis=so_axis, 
                               Verbose=config.verbose)[0] 
     print "A:", config.start, config.end
+
+    if config.start is None:
+        if config.bin:
+            start_val = 0
+        else:
+            start_val = d_som1[0].axis[0].val[0]
+    else:
+        start_val = config.start
+
+    if config.end is None:
+        if config.bin:
+            end_val = -1
+        else:
+            end_val = d_som1[0].axis[0].val[-1]
+    else:
+        end_val = config.end        
+            
     # Use start and end keywords to make slices (see online docs)
-    d_som2 = dr_lib.integrate_spectra(d_som1, start=config.start,
-                                      end=config.end, bin_index=config.bin)
+    d_som2 = dr_lib.integrate_spectra(d_som1, start=start_val, end=end_val,
+                                      bin_index=config.bin)
 
     del d_som1
 
     time_tag_list = []
     if config.start is not None:
-        time_tag_list.append("s"+str(config.start))
+        if config.bin:
+            head_str = "sb"
+        else:
+            head_str = "s"
+        time_tag_list.append(head_str+str(int(config.start)))
 
     if config.end is not None:
-        time_tag_list.append("e"+str(config.end))        
+        if config.bin:
+            head_str = "eb"
+        else:
+            head_str = "e"
+        time_tag_list.append(head_str+str(int(config.end)))
 
     time_tag = "_".join(time_tag_list)
     if time_tag == "":
         time_tag = None
+
+    print "G:", time_tag
 
     hlr_utils.write_file(config.output, "text/num-info", d_som2, 
                          output_ext="xys", 
