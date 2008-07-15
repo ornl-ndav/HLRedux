@@ -49,7 +49,6 @@ def run(config):
                               Data_Paths=config.data_paths.toPath(), 
                               SO_Axis=so_axis, 
                               Verbose=config.verbose)[0] 
-    print "A:", config.start, config.end
 
     if config.start is None:
         if config.bin:
@@ -91,8 +90,6 @@ def run(config):
     time_tag = "_".join(time_tag_list)
     if time_tag == "":
         time_tag = None
-
-    print "G:", time_tag
 
     hlr_utils.write_file(config.output, "text/num-info", d_som2, 
                          output_ext="xys", 
