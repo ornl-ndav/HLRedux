@@ -139,14 +139,26 @@ if __name__ == "__main__":
     # Call the configuration setter for InstOptions
     hlr_utils.InstConfiguration(parser, configure, options, args)
 
-    # Set the starting TOF value
-    configure.start = options.start
-
-    # Set the ending TOF value
-    configure.end = options.end    
-
     # Set the bin index flag
     configure.bin = options.bin
+
+    # Set the starting TOF value
+    if configure.bin:
+        if options.start is not None:
+            configure.start = int(options.start)
+        else:
+            configure.start = options.start
+    else:
+        configure.start = options.start
+        
+    # Set the ending TOF value
+    if configure.bin:
+        if options.end is not None:
+            configure.end = int(options.end)
+        else:
+            configure.end = options.end
+    else:
+        configure.end = options.end
 
     # run the program
     run(configure)
