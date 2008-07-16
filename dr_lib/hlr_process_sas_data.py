@@ -222,13 +222,13 @@ def process_sas_data(datalist, conf, **kwargs):
 
     del dp_som1, dbm_som1, dtm_som1
 
-    if conf.verbose and conf.lambda_cut is not None:
+    if conf.verbose and conf.lambda_low_cut is not None:
         print "Cutting data spectra"
 
     if t is not None:
         t.getTime(False)
 
-    dp_som3 = dr_lib.cut_spectra(dp_som2, conf.lambda_cut, None)
+    dp_som3 = dr_lib.cut_spectra(dp_som2, conf.lambda_low_cut, None)
 
     if t is not None:
         t.getTime(msg="After cutting data spectra ")
