@@ -36,6 +36,7 @@ from hlr_create_axis_from_data import *
 from hlr_create_E_vs_Q_igs import create_E_vs_Q_igs
 from hlr_convert_single_to_list import *
 from hlr_create_X_vs_pixpos import *
+from hlr_cut_spectra import *
 from hlr_data_filter import data_filter
 from hlr_determine_time_indep_bkg import *
 from hlr_determine_ref_background import *
