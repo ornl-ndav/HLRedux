@@ -24,11 +24,11 @@
 
 def cut_spectra(obj, low_cut, high_cut):
     """
-    This function takes spectra and a given set of axis cutoff values and
-    produces spectra that is smaller than the original by removing information
-    outside the cut range.
+    This function takes 1D histogram spectra and a given set of axis cutoff
+    values and produces spectra that is smaller than the original by removing
+    information outside the cut range.
     
-    @param obj: The object containing the spectra to be zeroed
+    @param obj: The object containing the 1D histogram spectra to be zeroed
     @type obj: C{SOM.SOM}
 
     @param low_cut: The low-side axis cutoff. All values less than this will
@@ -42,7 +42,6 @@ def cut_spectra(obj, low_cut, high_cut):
 
     @return: Object containing the zeroed spectra
     @rtype: C{SOM.SOM}
-
     """
     # Kickout if both cuts are None
     if low_cut is None and high_cut is None:
@@ -79,8 +78,11 @@ def cut_spectra(obj, low_cut, high_cut):
         else:
             high_bin = utils.bisect_helper(axis, high_cut)
 
+        # Slice out the requested range
         y_new = map_so.y[low_bin:high_bin]
         var_y_new = map_so.var_y[low_bin:high_bin]
+        # Need to increment the high bin for the axis since it carries one
+        # more bin than the data
         axis_new = axis[low_bin:high_bin+1]
         
         hlr_utils.result_insert(result, res_descr, (y_new, var_y_new),
