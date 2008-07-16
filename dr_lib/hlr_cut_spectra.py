@@ -71,6 +71,9 @@ def cut_spectra(obj, low_cut, high_cut):
         else:
             low_bin = utils.bisect_helper(axis, low_cut)
 
+        # Need to cut directly at the low bin
+        low_bin += 1
+
         if high_cut is None:
             high_bin = len(axis)
         else:
@@ -78,7 +81,7 @@ def cut_spectra(obj, low_cut, high_cut):
 
         y_new = map_so.y[low_bin:high_bin]
         var_y_new = map_so.var_y[low_bin:high_bin]
-        axis_new = axis[low_bin:high_bin]
+        axis_new = axis[low_bin:high_bin+1]
         
         hlr_utils.result_insert(result, res_descr, (y_new, var_y_new),
                                 map_so, "all", 0, [axis_new])
