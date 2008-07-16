@@ -51,4 +51,51 @@ def cut_spectra(obj, low_cut, high_cut):
     # import the helper functions
     import hlr_utils
 
-    return obj
+    # set up for working through data
+    (result, res_descr) = hlr_utils.empty_result(obj)
+    o_descr = hlr_utils.get_descr(obj)
+
+    result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
+
+    # iterate through the values
+    import utils
+
+    # Get object length
+    len_obj = hlr_utils.get_length(obj)
+    for i in xrange(len_obj):
+        map_so = hlr_utils.get_map_so(obj, None, i)
+        axis = hlr_utils.get_value(obj, i, o_descr, "x", 0)
+        
+        if low_cut is None:
+            low_bin = 0
+        else:
+            low_bin = utils.bisect_helper(axis, low_cut)
+
+        if high_cut is None:
+            high_bin = len(axis)
+        else:
+            high_bin = utils.bisect_helper(axis, high_cut)
+
+        y_new = map_so.y[low_bin:high_bin]
+        var_y_new = map_so.var_y[low_bin:high_bin]
+        axis_new = axis[low_bin:high_bin]
+        
+        hlr_utils.result_insert(result, res_descr, (y_new, var_y_new),
+                                map_so, "all", 0, [axis_new])
+
+    return result
+
+if __name__ == "__main__":
+    import hlr_test
+
+    som1 = hlr_test.generate_som("histogram")
+
+    print "********** SOM1"
+    print "* ", som1[0]
+    print "* ", som1[1]
+
+    print "********** cut_spectra"
+    print "* som: ", cut_spectra(som1, None, None)
+    print "* som: ", cut_spectra(som1, 1.5, None)
+    print "* som: ", cut_spectra(som1, None, 3.75)
+    print "* som: ", cut_spectra(som1, 0.6, 2.7)
