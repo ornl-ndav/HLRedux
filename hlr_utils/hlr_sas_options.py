@@ -122,9 +122,9 @@ class SansOptions(hlr_utils.InstOptions):
                         +"values and the wavelength bin width in Angstroms")
         self.set_defaults(lambda_bins="0,10,0.1")
 
-        self.add_option("", "--lambda-cut", dest="lambda_cut",
-                        help="Specify the wavelength at which to cut the "\
-                        +"spectra (Angstroms).")
+        self.add_option("", "--lambda-low-cut", dest="lambda_low_cut",
+                        help="Specify the low-side wavelength at which to "\
+                        +"cut the spectra (Angstroms).")
 
         self.add_option("", "--bkg-coeff", dest="bkg_coeff",
                         help="Specify the polynomial coefficients for a "\
@@ -253,13 +253,13 @@ def SansConfiguration(parser, configure, options, args):
                                       "--lambda-bins"):    
         configure.lambda_bins = hlr_utils.AxisFromString(options.lambda_bins)
 
-    # Set the lambda cut for cutting wavelength spectra
-    if hlr_utils.cli_provide_override(configure, "lambda_cut",
-                                      "--lambda-cut"):
+    # Set the low-side lambda cut for cutting wavelength spectra
+    if hlr_utils.cli_provide_override(configure, "lambda_low_cut",
+                                      "--lambda-low-cut"):
         try:
-            configure.lambda_cut = float(options.lambda_cut)
+            configure.lambda_low_cut = float(options.lambda_low_cut)
         except TypeError:
-            configure.lambda_cut = options.lambda_cut
+            configure.lambda_low_cut = options.lambda_low_cut
 
     # Set the coefficients for the wavelength dependent background correction
     if hlr_utils.cli_provide_override(configure, "bkg_coeff", "--bkg-coeff"):
