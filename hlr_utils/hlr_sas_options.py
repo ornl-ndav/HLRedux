@@ -126,6 +126,10 @@ class SansOptions(hlr_utils.InstOptions):
                         help="Specify the low-side wavelength at which to "\
                         +"cut the spectra (Angstroms).")
 
+        self.add_option("", "--lambda-high-cut", dest="lambda_high_cut",
+                        help="Specify the high-side wavelength at which to "\
+                        +"cut the spectra (Angstroms).")        
+
         self.add_option("", "--bkg-coeff", dest="bkg_coeff",
                         help="Specify the polynomial coefficients for a "\
                         +"wavelength dependent background subtraction. The "\
@@ -260,6 +264,14 @@ def SansConfiguration(parser, configure, options, args):
             configure.lambda_low_cut = float(options.lambda_low_cut)
         except TypeError:
             configure.lambda_low_cut = options.lambda_low_cut
+
+    # Set the high-side lambda cut for cutting wavelength spectra
+    if hlr_utils.cli_provide_override(configure, "lambda_high_cut",
+                                      "--lambda-high-cut"):
+        try:
+            configure.lambda_high_cut = float(options.lambda_high_cut)
+        except TypeError:
+            configure.lambda_high_cut = options.lambda_high_cut            
 
     # Set the coefficients for the wavelength dependent background correction
     if hlr_utils.cli_provide_override(configure, "bkg_coeff", "--bkg-coeff"):
