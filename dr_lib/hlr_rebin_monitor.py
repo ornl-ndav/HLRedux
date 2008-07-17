@@ -96,24 +96,32 @@ def rebin_monitor(obj1, obj2, **kwargs):
         use_pix_id = False
 
     try: 
-        interpolate = kwargs["interpolate"]
+        type = kwargs["type"]
     except KeyError:
-        interpolate = False        
+        type = None
+
+    # Set the name of the rebinning function
+    rebin_function_name = "rebin_axis_1D"
+    if type is not None:
+        rebin_function_name += "_" + str(type)
+
+    # Get function pointer
+    import common_lib
+    rebin_function = common_lib.__getattribute__(rebin_function_name)
 
     result = hlr_utils.copy_som_attr(result, res_descr, obj1, o1_descr)
 
     # iterate through the values
-    import common_lib
-
     val1 = hlr_utils.get_value(obj1, 0, o1_descr, "all")
 
-    for i in xrange(hlr_utils.get_length(obj2)):
+    # Cache length
+    len_obj2 = hlr_utils.get_length(obj2)
+
+    for i in xrange(len_obj2):
         val2 = hlr_utils.get_value(obj2, i, o2_descr, "x")
 
-        if interpolate:
-            value = common_lib.rebin_axis_1D_linint(val1, val2)
-        else:
-            value = common_lib.rebin_axis_1D(val1, val2)
+        value = rebin_function(val1, val2)
+
         if use_pix_id:
             # Set the pixel ID to the spectrum with modified bank ID
             try:
@@ -152,6 +160,8 @@ if __name__ == "__main__":
 
     print "********** rebin_monitor"
     print "* som+som :", rebin_monitor(som1, som2)
-    print "* so +so  :", rebin_monitor(som1[0], som2[0], interpolate=True)
+    print "* som+som :", rebin_monitor(som1, som2, type="linint")
+    print "* som+som :", rebin_monitor(som1, som2, type="frac")
+    print "* so +so  :", rebin_monitor(som1[0], som2[0])
 
     
