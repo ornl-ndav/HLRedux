@@ -46,9 +46,12 @@ def rebin_monitor(obj1, obj2, **kwargs):
                      default is I{m}.
     @type prefix: C{string}
 
-    @keyword interpolate: A flag to use linear interpolation during rebinning.
-                          The default is I{False}.
-    @type interpolate: C{boolean}
+    @keyword rtype: A short string that defines the rebinning function to use.
+                    The default is I{None} which uses
+                    L{common_lib.rebin_axis_1D()}. The other possibilities are
+                    I{linint} which uses L{common_lib.rebin_axis_1D_linint()}
+                    and I{frac} which uses L{common_lib.rebin_axis_1D_frac()}.
+    @type rtype: C{boolean}
 
     
     @return: Object that has been rebinned
@@ -96,14 +99,14 @@ def rebin_monitor(obj1, obj2, **kwargs):
         use_pix_id = False
 
     try: 
-        type = kwargs["type"]
+        rtype = kwargs["rtype"]
     except KeyError:
-        type = None
+        rtype = None
 
     # Set the name of the rebinning function
     rebin_function_name = "rebin_axis_1D"
-    if type is not None:
-        rebin_function_name += "_" + str(type)
+    if rtype is not None:
+        rebin_function_name += "_" + str(rtype)
 
     # Get function pointer
     import common_lib
@@ -160,8 +163,8 @@ if __name__ == "__main__":
 
     print "********** rebin_monitor"
     print "* som+som :", rebin_monitor(som1, som2)
-    print "* som+som :", rebin_monitor(som1, som2, type="linint")
-    print "* som+som :", rebin_monitor(som1, som2, type="frac")
+    print "* som+som :", rebin_monitor(som1, som2, rtype="linint")
+    print "* som+som :", rebin_monitor(som1, som2, rtype="frac")
     print "* so +so  :", rebin_monitor(som1[0], som2[0])
 
     
