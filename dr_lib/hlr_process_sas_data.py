@@ -127,7 +127,7 @@ def process_sas_data(datalist, conf, **kwargs):
     if conf.inst_geom is not None:
         i_geom_dst.setGeometry(conf.data_paths.toPath(), dp_som0)
 
-    # Apply SAS corrections: radius * TOF^2
+    # Apply SAS corrections: radius
     dp_som1 = dr_lib.apply_sas_correct(dp_som0)
 
     del dp_som0
