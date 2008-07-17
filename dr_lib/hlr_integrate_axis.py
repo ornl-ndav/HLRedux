@@ -129,12 +129,14 @@ def integrate_axis(obj, **kwargs):
     except KeyError:
         width_pos = 0       
         
-    integration = 0
-    integration_error2 = 0
+    integration = float(0)
+    integration_error2 = float(0)
 
     import itertools
     if width:
         import utils
+
+    bad_values = ["nan", "inf", "-inf"]
 
     for i in xrange(hlr_utils.get_length(obj)): 
         counter = 0  
@@ -151,9 +153,12 @@ def integrate_axis(obj, **kwargs):
             
         if not width:
             for val, err2 in itertools.izip(value, error):
-                integration += val
-                integration_error2 += err2
-                counter += 1
+                if str(val) in bad_values or str(err2) in bad_values:
+                    continue
+                else:
+                    integration += val
+                    integration_error2 += err2
+                    counter += 1
         else:
             if axis == "y":
                 x_axis = hlr_utils.get_value(obj, i, o_descr, "x", width_pos)
@@ -166,10 +171,13 @@ def integrate_axis(obj, **kwargs):
 
             for val, err2, delta in itertools.izip(value, error,
                                                    bin_widths[0]):
-                integration += (delta * val)
-                integration_error2 += (delta * delta * err2)
-                counter += 1
-            
+                if str(val) in bad_values or str(err2) in bad_values:
+                    continue
+                else:
+                    integration += (delta * val)
+                    integration_error2 += (delta * delta * err2)
+                    counter += 1
+        
     if avg:
         return (integration / float(counter),
                 integration_error2 / float(counter))
@@ -199,4 +207,13 @@ if __name__ == "__main__":
     print "* so         :", integrate_axis(som1[0])
     print "* so  [0,3]  :", integrate_axis(som1[0], start=0, end=3)
     print "* so (width) :", integrate_axis(som1[0], width=True)
+    print
+    
+    # Test the NaNs
 
+    som2[0].y[2] = float('nan')
+    print "********** SOM2"
+    print "* ", som2[0]
+    
+    print "* som        :", integrate_axis(som2)
+    print "* som (width) :", integrate_axis(som2, width=True)
