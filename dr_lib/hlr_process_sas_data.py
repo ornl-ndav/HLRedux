@@ -317,7 +317,7 @@ def process_sas_data(datalist, conf, **kwargs):
     if t is not None:
         t.getTime(False)
 
-    dbm_som4 = dr_lib.rebin_monitor(dbm_som3, dp_som4)
+    dbm_som4 = dr_lib.rebin_monitor(dbm_som3, dp_som4, rtype="frac")
 
     if t is not None:
         t.getTime(msg="After rebinning beam monitor ")
@@ -389,7 +389,7 @@ def process_sas_data(datalist, conf, **kwargs):
     else:
         use_linint = False
 
-    dtm_som4 = dr_lib.rebin_monitor(dtm_som3, dp_som5, interpolate=use_linint)
+    dtm_som4 = dr_lib.rebin_monitor(dtm_som3, dp_som5, rtype="frac")
 
     if t is not None and dtm_som3 is not None:
         t.getTime(msg="After rebinning transmission monitor ")
