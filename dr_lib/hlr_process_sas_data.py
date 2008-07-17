@@ -334,7 +334,6 @@ def process_sas_data(datalist, conf, **kwargs):
                              message="beam monitor wavelength information "\
                              +"(rebinned)")
 
-
     # Step 6: Normalize data by beam monitor
     if conf.verbose:
         print "Normalizing data by beam monitor"
@@ -353,8 +352,8 @@ def process_sas_data(datalist, conf, **kwargs):
         return dp_som5
 
     if conf.dump_wave_bmnorm:
-        dp_som5_1 = dr_lib.sum_all_spectra(dp_som5,\
-                                   rebin_axis=conf.lambda_bins.toNessiList())
+        dp_som5_1 = dr_lib.sum_by_rebin_frac(dp_som5,
+                                             conf.lambda_bins.toNessiList())
 
         write_message = "combined pixel wavelength information"
         write_message += " (beam monitor normalized)"
