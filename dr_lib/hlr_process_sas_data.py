@@ -384,11 +384,6 @@ def process_sas_data(datalist, conf, **kwargs):
     if t is not None:
         t.getTime(False)
 
-    if trans_data is not None:
-        use_linint = True
-    else:
-        use_linint = False
-
     dtm_som4 = dr_lib.rebin_monitor(dtm_som3, dp_som5, rtype="frac")
 
     if t is not None and dtm_som3 is not None:
