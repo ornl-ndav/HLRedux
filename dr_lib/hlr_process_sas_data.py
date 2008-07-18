@@ -393,7 +393,7 @@ def process_sas_data(datalist, conf, **kwargs):
 
     # Step 8: Normalize data by transmission monitor    
     if conf.verbose and dtm_som4 is not None:
-        print "Normalizing data by beam monitor"
+        print "Normalizing data by transmission monitor"
 
     if t is not None:
         t.getTime(False)
@@ -404,7 +404,7 @@ def process_sas_data(datalist, conf, **kwargs):
         dp_som6 = dp_som5
 
     if t is not None and dtm_som4 is not None:
-        t.getTime(msg="After normalizing data by beam monitor ")
+        t.getTime(msg="After normalizing data by transmission monitor ")
 
     del dp_som5
 
