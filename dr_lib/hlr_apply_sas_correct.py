@@ -25,8 +25,8 @@
 def apply_sas_correct(obj):
     """
     This function applies the following corrections to SAS TOF data:
-      - Multiply counts by pixel radius
-      - Multiply counts by TOF^2 (uses bin centers)
+      - Multiply counts by the following formula:
+            (sin(polar) * cos(polar)) / (1 + tan^2(polar))
 
     @param obj: The data to apply the corrections to
     @type obj: C{SOM.SOM} or C{SOM.SO}
