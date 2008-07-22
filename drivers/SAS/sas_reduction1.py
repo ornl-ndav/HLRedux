@@ -61,13 +61,13 @@ def run(config, tim=None):
     else:
         inst_geom_dst = None
 
-    # Perform Steps 1-9 on sample data
+    # Perform Steps 1-11 on sample data
     d_som1 = dr_lib.process_sas_data(config.data, config, timer=tim,
                                      inst_geom_dst=inst_geom_dst,
                                      bkg_subtract=config.bkg_coeff,
                                      trans_data=config.data_trans)
 
-    # Perform Steps 1-9 on buffer/solvent only data
+    # Perform Steps 1-11 on buffer/solvent only data
     if config.solv is not None:
         s_som1 = dr_lib.process_sas_data(config.solv, config, timer=tim,
                                          inst_geom_dst=inst_geom_dst,
@@ -75,7 +75,7 @@ def run(config, tim=None):
     else:
         s_som1 = None
 
-    # Step 10: Subtract buffer/solvent only spectrum from sample spectrum
+    # Step 12: Subtract buffer/solvent only spectrum from sample spectrum
     d_som2 = dr_lib.subtract_bkg_from_data(d_som1, s_som1,
                                            verbose=config.verbose,
                                            timer=tim,
@@ -84,7 +84,7 @@ def run(config, tim=None):
     
     del s_som1, d_som1
 
-    # Perform Steps 1-9 on empty-can data
+    # Perform Steps 1-11 on empty-can data
     if config.ecan is not None:
         e_som1 = dr_lib.process_sas_data(config.ecan, config, timer=tim,
                                          inst_geom_dst=inst_geom_dst,
@@ -93,7 +93,7 @@ def run(config, tim=None):
     else:
         e_som1 = None
 
-    # Step 11: Subtract empty-can spectrum from sample spectrum
+    # Step 13: Subtract empty-can spectrum from sample spectrum
     d_som3 = dr_lib.subtract_bkg_from_data(d_som2, e_som1,
                                            verbose=config.verbose,
                                            timer=tim,
@@ -102,7 +102,7 @@ def run(config, tim=None):
     
     del e_som1, d_som2
 
-    # Perform Steps 1-9 on open beam data
+    # Perform Steps 1-11 on open beam data
     if config.open is not None:
         o_som1 = dr_lib.process_sas_data(config.open, config, timer=tim,
                                          inst_geom_dst=inst_geom_dst,
@@ -110,7 +110,7 @@ def run(config, tim=None):
     else:
         o_som1 = None
         
-    # Step 12: Subtract open beam spectrum from sample spectrum
+    # Step 14: Subtract open beam spectrum from sample spectrum
     d_som4 = dr_lib.subtract_bkg_from_data(d_som3, o_som1,
                                            verbose=config.verbose,
                                            timer=tim,
@@ -119,7 +119,7 @@ def run(config, tim=None):
     
     del o_som1, d_som3
 
-    # Perform Steps 1-9 on dark current data
+    # Perform Steps 1-11 on dark current data
     if config.dkcur is not None:
         dc_som1 = dr_lib.process_sas_data(config.open, config, timer=tim,
                                           inst_geom_dst=inst_geom_dst,
@@ -127,7 +127,7 @@ def run(config, tim=None):
     else:
         dc_som1 = None
         
-    # Step 13: Subtract dark current spectrum from sample spectrum
+    # Step 15: Subtract dark current spectrum from sample spectrum
     d_som5 = dr_lib.subtract_bkg_from_data(d_som4, dc_som1,
                                            verbose=config.verbose,
                                            timer=tim,
@@ -136,7 +136,7 @@ def run(config, tim=None):
     
     del dc_som1, d_som4    
 
-    # Steps 14 and 15: Rebin and sum all spectra
+    # Steps 16 and 17: Rebin and sum all spectra
     if config.verbose:
         print "Rebinning and summing for final spectrum"
 
@@ -156,6 +156,7 @@ def run(config, tim=None):
 
     del d_som5
 
+    # Step 18: Scale final spectrum by Q bin centers
     if config.verbose:
         print "Scaling final spectrum by Q centers"
         
