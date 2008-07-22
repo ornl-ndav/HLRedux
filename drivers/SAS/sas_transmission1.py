@@ -70,20 +70,31 @@ def run(config, tim=None):
                                      transmission=True)
 
     # Perform Steps 1-4,6-8 on background data
-    b_som1 = dr_lib.process_sas_data(config.back, config, timer=tim,
-                                     inst_geom_dst=inst_geom_dst,
-                                     dataset_type="trans_bkg",
-                                     transmission=True)
+    if config.back is not None:
+        b_som1 = dr_lib.process_sas_data(config.back, config, timer=tim,
+                                         inst_geom_dst=inst_geom_dst,
+                                         dataset_type="trans_bkg",
+                                         transmission=True)
+    else:
+        b_som1 = None
 
     # Put the datasets on the same axis
     d_som2 = dr_lib.sum_by_rebin_frac(d_som1, config.lambda_bins.toNessiList())
     del d_som1
 
-    b_som2 = dr_lib.sum_by_rebin_frac(b_som1, config.lambda_bins.toNessiList())
+    if b_som1 is not None:
+        b_som2 = dr_lib.sum_by_rebin_frac(b_som1,
+                                          config.lambda_bins.toNessiList())
+    else:
+        b_som2 = None
+        
     del b_som1    
     
     # Divide the data spectrum by the background spectrum
-    d_som3 = common_lib.div_ncerr(d_som2, b_som2)
+    if b_som2 is not None:
+        d_som3 = common_lib.div_ncerr(d_som2, b_som2)
+    else:
+        d_som3 = d_som2
 
     del d_som2, b_som2
 
@@ -160,10 +171,6 @@ if __name__ == "__main__":
         configure.back = hlr_utils.determine_files(options.back,
                                                    configure.inst,
                                                    configure.facility)
-
-    if configure.back is None:
-        parser.error("Please specify the background file for creating the "\
-                     +"transmission spectrum!")
 
     if configure.lambda_bins is None:
         parser.error("Please specify the final wavelength axis!")
