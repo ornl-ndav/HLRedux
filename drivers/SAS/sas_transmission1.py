@@ -23,7 +23,7 @@
 # $Id$
 
 """
-This program performs steps 1,2,4-6 outlined in B{Section 2.5.1:
+This program performs steps 1-4,6-8 outlined in B{Section 2.5.1:
 Pixel-by-Pixel Reduction in One Dimension}
 U{http://neutrons.ornl.gov/asg/projects/SCL/reqspec/DR_Lib_RS.doc} on two
 datasets and divides those processed datasets to produce a transmisson file.
@@ -63,13 +63,13 @@ def run(config, tim=None):
     else:
         inst_geom_dst = None
 
-    # Perform Steps 1,2,4-6 on sample data
+    # Perform Steps 1-4,6-8 on sample data
     d_som1 = dr_lib.process_sas_data(config.data, config, timer=tim,
                                      inst_geom_dst=inst_geom_dst,
                                      dataset_type="transmission",
                                      transmission=True)
 
-    # Perform Steps 1,2,4-6 on background data
+    # Perform Steps 1-4,6-8 on background data
     b_som1 = dr_lib.process_sas_data(config.back, config, timer=tim,
                                      inst_geom_dst=inst_geom_dst,
                                      dataset_type="trans_bkg",
