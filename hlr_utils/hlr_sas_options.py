@@ -140,6 +140,10 @@ class SansOptions(hlr_utils.InstOptions):
                         +"wavelength dependent background subtraction. The "\
                         +"should be lowest to highest: c0 + c1 * x + "\
                         +"c2 * x**2 + ...")
+
+        self.add_option("", "--rescale-final", dest="rescale_final",
+                        help="Specify the constant with which to scale "\
+                        +"(multiply) the final data.")
         
         self.add_option("", "--dump-wave", action="store_true",
                         dest="dump_wave",
@@ -289,6 +293,14 @@ def SansConfiguration(parser, configure, options, args):
             configure.bkg_coeff = options.bkg_coeff.split(',')
         except AttributeError:
             configure.bkg_coeff = options.bkg_coeff
+
+    # Set the final data rescaling constant
+    if hlr_utils.cli_provide_override(configure, "rescale_final",
+                                      "--rescale-final"):
+        try:
+            configure.rescale_final = float(options.rescale_final)
+        except TypeError:
+            configure.rescale_final = options.rescale_final
         
     # Set the ability to dump the detector pixel wavelength information
     if hlr_utils.cli_provide_override(configure, "dump_wave", "--dump-wave"):
