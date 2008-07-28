@@ -57,8 +57,13 @@ def process_sas_data(datalist, conf, **kwargs):
     @type transmission: C{boolean}
 
     @keyword bkg_subtract: A list of coefficients that help determine the
-    wavelength dependent background subtraction.
+                           wavelength dependent background subtraction.
     @type bkg_subtract: C{list}
+
+    @keyword get_background: A flag that signals the function to convert the
+                             main data to wavelength and exit before
+                             normalizing to the beam monitor.
+    @typ get_background: C{boolean}
 
     @keyword timer: Timing object so the function can perform timing estimates.
     @type timer: C{sns_timer.DiffTime}
@@ -100,7 +105,12 @@ def process_sas_data(datalist, conf, **kwargs):
     try:
         trans_data = kwargs["trans_data"]
     except KeyError:
-        trans_data = None        
+        trans_data = None
+
+    try:
+        get_background = kwargs["get_background"]
+    except KeyError:
+        get_background = False
 
     # Add so_axis to Configure object
     conf.so_axis = "time_of_flight"
@@ -133,22 +143,26 @@ def process_sas_data(datalist, conf, **kwargs):
     del dp_som0
 
     # Beam monitor
-    if conf.verbose:
-        print "Reading in beam monitor data from %s file" % dataset_type
+    if not get_background:
+        if conf.verbose:
+            print "Reading in beam monitor data from %s file" % dataset_type
 
-    # The [0] is to get the data SOM and ignore the None background SOM
-    dbm_som0 = dr_lib.add_files(datalist, Data_Paths=conf.bmon_path.toPath(),
-                                SO_Axis=conf.so_axis,
-                                dataset_type=dataset_type,
-                                Verbose=conf.verbose,
-                                Timer=t)[0]
+        # The [0] is to get the data SOM and ignore the None background SOM
+        dbm_som0 = dr_lib.add_files(datalist,
+                                    Data_Paths=conf.bmon_path.toPath(),
+                                    SO_Axis=conf.so_axis,
+                                    dataset_type=dataset_type,
+                                    Verbose=conf.verbose,
+                                    Timer=t)[0]
+            
+        if t is not None:
+            t.getTime(msg="After reading beam monitor data ")
+
+        dbm_som1 = dr_lib.fix_bin_contents(dbm_som0)
         
-    if t is not None:
-        t.getTime(msg="After reading beam monitor data ")
-
-    dbm_som1 = dr_lib.fix_bin_contents(dbm_som0)
-    
-    del dbm_som0
+        del dbm_som0
+    else:
+        dbm_som1 = None
 
     # Transmission monitor
     if trans_data is None:
@@ -181,11 +195,11 @@ def process_sas_data(datalist, conf, **kwargs):
         dp_som1.attr_list["Time_zero_offset_det"] = \
                                      conf.time_zero_offset_det.toValErrTuple()
     # Note: time_zero_offset_mon MUST be a tuple
-    if conf.time_zero_offset_mon is not None:
+    if conf.time_zero_offset_mon is not None and not get_background:
         dbm_som1.attr_list["Time_zero_offset_mon"] = \
                                      conf.time_zero_offset_mon.toValErrTuple()
-        if trans_data is None and dtm_som1 is not None:
-            dtm_som1.attr_list["Time_zero_offset_mon"] = \
+    if trans_data is None and dtm_som1 is not None:
+        dtm_som1.attr_list["Time_zero_offset_mon"] = \
                                      conf.time_zero_offset_mon.toValErrTuple()
 
     # Step 2: Convert TOF to wavelength for data and monitor
@@ -195,11 +209,14 @@ def process_sas_data(datalist, conf, **kwargs):
     if t is not None:
         t.getTime(False)
 
-    # Convert beam monitor
-    dbm_som2 = common_lib.tof_to_wavelength_lin_time_zero(
-        dbm_som1,
-        units="microsecond",
-        time_zero_offset=conf.time_zero_offset_mon.toValErrTuple())
+    if not get_background:
+        # Convert beam monitor
+        dbm_som2 = common_lib.tof_to_wavelength_lin_time_zero(
+            dbm_som1,
+            units="microsecond",
+            time_zero_offset=conf.time_zero_offset_mon.toValErrTuple())
+    else:
+        dbm_som2 = None
 
     # Convert detector pixels
     dp_som2 = common_lib.tof_to_wavelength_lin_time_zero(
@@ -207,6 +224,9 @@ def process_sas_data(datalist, conf, **kwargs):
         units="microsecond",
         time_zero_offset=conf.time_zero_offset_det.toValErrTuple(),
         inst_param="total")
+
+    if get_background:
+        return dp_som2
 
     if dtm_som1 is not None:
         # Convert transmission  monitor
