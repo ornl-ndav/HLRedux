@@ -151,6 +151,7 @@ if __name__ == "__main__":
     parser.remove_option("--solv-trans")
     parser.remove_option("--open")
     parser.remove_option("--dkcur")
+    parser.remove_option("--rescale-final")
     parser.remove_option("--mom-trans-bins")
     parser.remove_option("--dump-wave-bmnorm")
     parser.remove_option("--dump-frac-rebin")
