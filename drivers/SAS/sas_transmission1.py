@@ -98,6 +98,11 @@ def run(config, tim=None):
 
     del d_som2, b_som2
 
+    # Reset y units to dimensionless for the tranmission due to ratio
+    if config.back is not None:
+        d_som3.setYLabel("Ratio")
+        d_som3.setYUnits("")
+
     # Write out the transmission spectrum
     hlr_utils.write_file(config.output, "text/Spec", d_som3,
                          verbose=config.verbose,
