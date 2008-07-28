@@ -83,10 +83,15 @@ class SansOptions(hlr_utils.InstOptions):
                         +"spectrum. Use this option in the absence of "\
                         +"transmission monitors.")
 
+        self.add_option("", "--solv-trans", dest="solv_trans", help="Specify "\
+                        +"the filename for a solvent only transmission "\
+                        +"spectrum. Use this option in the absence of "\
+                        +"transmission monitors.")
+        
         self.add_option("", "--ecan-trans", dest="ecan_trans", help="Specify "\
                         +"the filename for a empty can transmission "\
                         +"spectrum. Use this option in the absence of "\
-                        +"transmission monitors.")   
+                        +"transmission monitors.")
 
         self.add_option("", "--mon-effc", action="store_true",
                         dest="mon_effc",
@@ -217,10 +222,15 @@ def SansConfiguration(parser, configure, options, args):
         configure.data_trans = hlr_utils.determine_files(options.data_trans,
                                                          one_file=True)
 
+    # Set the solvent only Transmission spectrum file
+    if hlr_utils.cli_provide_override(configure, "solv_trans", "--solv-trans"):
+        configure.solv_trans = hlr_utils.determine_files(options.solv_trans,
+                                                         one_file=True)
+
     # Set the empty can Transmission spectrum file
     if hlr_utils.cli_provide_override(configure, "ecan_trans", "--ecan-trans"):
         configure.ecan_trans = hlr_utils.determine_files(options.ecan_trans,
-                                                         one_file=True)        
+                                                         one_file=True)   
     # Set mon_effc flag
     if hlr_utils.cli_provide_override(configure, "mon_effc", "--mon-effc"):
         configure.mon_effc = options.mon_effc
