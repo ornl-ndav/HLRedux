@@ -63,11 +63,19 @@ def run(config, tim=None):
     else:
         inst_geom_dst = None
 
+    if config.back is None:
+        only_background = True
+        data_type = "data"
+    else:
+        only_background = False
+        data_type = "transmission"
+        
     # Perform Steps 1-4,6-8 on sample data
     d_som1 = dr_lib.process_sas_data(config.data, config, timer=tim,
                                      inst_geom_dst=inst_geom_dst,
-                                     dataset_type="transmission",
-                                     transmission=True)
+                                     dataset_type=data_type,
+                                     transmission=True,
+                                     get_background=only_background)
 
     # Perform Steps 1-4,6-8 on background data
     if config.back is not None:
@@ -102,13 +110,16 @@ def run(config, tim=None):
     if config.back is not None:
         d_som3.setYLabel("Ratio")
         d_som3.setYUnits("")
+        write_message = "transmission spectrum"
+    else:
+        write_message = "spectrum for background estimation"
 
     # Write out the transmission spectrum
     hlr_utils.write_file(config.output, "text/Spec", d_som3,
                          verbose=config.verbose,
                          replace_path=False,
                          replace_ext=False,
-                         message="transmission spectrum")
+                         message=write_message)
 
     d_som3.attr_list["config"] = config
 
