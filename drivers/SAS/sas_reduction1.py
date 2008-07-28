@@ -71,7 +71,7 @@ def run(config, tim=None):
     if config.solv is not None:
         s_som1 = dr_lib.process_sas_data(config.solv, config, timer=tim,
                                          inst_geom_dst=inst_geom_dst,
-                                         dataset_type="solvent"
+                                         dataset_type="solvent",
                                          trans_data=config.solv_trans)
     else:
         s_som1 = None
