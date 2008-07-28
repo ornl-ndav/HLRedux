@@ -148,6 +148,7 @@ if __name__ == "__main__":
     parser.remove_option("--ecan")
     parser.remove_option("--ecan-trans")
     parser.remove_option("--solv")
+    parser.remove_option("--solv-trans")
     parser.remove_option("--open")
     parser.remove_option("--dkcur")
     parser.remove_option("--mom-trans-bins")
