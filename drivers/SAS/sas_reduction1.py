@@ -171,16 +171,25 @@ def run(config, tim=None):
         tim.getTime(msg="After scaling final spectrum")    
 
     del d_som6
+
+    # If rescaling factor present, rescale the data
+    if config.rescale_final is not None:
+        import common_lib
+        d_som8 = common_lib.mult_ncerr(d_som7, (config.rescale_final, 0.0))
+    else:
+        d_som8 = d_som7
+
+    del d_som7
     
-    hlr_utils.write_file(config.output, "text/Spec", d_som7,
+    hlr_utils.write_file(config.output, "text/Spec", d_som8,
                          verbose=config.verbose,
                          replace_path=False,
                          replace_ext=False,
                          message="combined S(Q) information")
 
-    d_som7.attr_list["config"] = config
+    d_som8.attr_list["config"] = config
 
-    hlr_utils.write_file(config.output, "text/rmd", d_som7,
+    hlr_utils.write_file(config.output, "text/rmd", d_som8,
                          output_ext="rmd",
                          data_ext=config.ext_replacement,         
                          path_replacement=config.path_replacement,
