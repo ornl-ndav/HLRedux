@@ -215,7 +215,7 @@ def process_igs_data(datalist, conf, **kwargs):
             
         int_factor = dr_lib.calc_intensity_factor(dp_som2)
 
-    # Step 3: Time-independent background determination
+    # Step 4: Time-independent background determination
     if conf.verbose and conf.tib_tofs is not None:
         print "Determining time-independent background from data"
 
@@ -246,7 +246,7 @@ def process_igs_data(datalist, conf, **kwargs):
                              comments=[file_comment])
         del dp_som2.attr_list[attr_name]
 
-    # Step 4: Subtract time-independent background
+    # Step 5: Subtract time-independent background
     if conf.verbose and B is not None:
         print "Subtracting time-independent background from data"
 
@@ -263,7 +263,7 @@ def process_igs_data(datalist, conf, **kwargs):
 
     del dp_som2, B
 
-    # Step 5: Subtract time-independent background constant
+    # Step 6: Subtract time-independent background constant
     if conf.verbose and tib_const is not None:
         print "Subtracting time-independent background constant from data"
             
@@ -304,7 +304,7 @@ def process_igs_data(datalist, conf, **kwargs):
             dm_som1.attr_list["Time_zero_offset"] = \
                                       conf.time_zero_offset.toValErrTuple()    
 
-    # Step 6: Convert TOF to wavelength for data and monitor
+    # Step 7: Convert TOF to wavelength for data and monitor
     if conf.verbose:
         print "Converting TOF to wavelength"
 
@@ -347,7 +347,7 @@ def process_igs_data(datalist, conf, **kwargs):
         
     del dp_som4, dm_som1
 
-    # Step 7: Efficiency correct monitor
+    # Step 8: Efficiency correct monitor
     if conf.verbose and dm_som2 is not None and not conf.no_mon_effc:
         print "Efficiency correct monitor data"
 
@@ -374,7 +374,7 @@ def process_igs_data(datalist, conf, **kwargs):
 
     del dm_som2
 
-    # Step 8: Rebin monitor axis onto detector pixel axis
+    # Step 9: Rebin monitor axis onto detector pixel axis
     if conf.verbose and dm_som3 is not None:
         print "Rebin monitor axis to detector pixel axis"
 
@@ -402,7 +402,7 @@ def process_igs_data(datalist, conf, **kwargs):
     # for the BSS instrument at the SNS
     if conf.inst == "BSS" and conf.ldb_const is not None and \
            dataset_type == "data":
-        # Step 9: Convert chopper center wavelength to TOF center
+        # Step 10: Convert chopper center wavelength to TOF center
         if conf.verbose:
             print "Converting chopper center wavelength to TOF"
 
@@ -413,7 +413,7 @@ def process_igs_data(datalist, conf, **kwargs):
             "initial_wavelength_igs_lin_time_zero_to_tof",
             conf.chopper_lambda_cent.toValErrTuple(), dp_som5)
 
-        # Step 10: Calculate beginning and end of detector TOF spectrum
+        # Step 11: Calculate beginning and end of detector TOF spectrum
         if conf.verbose:
             print "Calculating beginning and ending TOF ranges"
 
@@ -424,7 +424,7 @@ def process_igs_data(datalist, conf, **kwargs):
         tof_begin = common_lib.sub_ncerr(tof_center, (half_inv_chop_freq, 0.0))
         tof_end = common_lib.add_ncerr(tof_center, (half_inv_chop_freq, 0.0))
 
-        # Step 11: Convert TOF_begin and TOF_end to wavelength
+        # Step 12: Convert TOF_begin and TOF_end to wavelength
         if conf.verbose:
             print "Converting TOF_begin and TOF_end to wavelength"
         
@@ -437,7 +437,7 @@ def process_igs_data(datalist, conf, **kwargs):
             time_zero_offset=conf.time_zero_offset.toValErrTuple(),
             iobj=dp_som5, run_filter=False)
 
-        # Step 12: tof-least-bkg to lambda-least-bkg
+        # Step 13: tof-least-bkg to lambda-least-bkg
         if conf.verbose:
             print "Converting TOF least background to wavelength"
         
@@ -448,7 +448,7 @@ def process_igs_data(datalist, conf, **kwargs):
         if t is not None:
             t.getTime(msg="After converting boundary positions ")
 
-        # Step 13: Create lambda-dependent background spectrum
+        # Step 14: Create lambda-dependent background spectrum
         if conf.verbose:
             print "Creating lambda-dependent background spectra"
 
@@ -471,7 +471,7 @@ def process_igs_data(datalist, conf, **kwargs):
 
         del ldb_som
 
-        # Step 14: Subtract lambda-dependent background from sample data
+        # Step 16: Subtract lambda-dependent background from sample data
         if conf.verbose:
             print "Subtracting lambda-dependent background from data"
 
@@ -488,7 +488,7 @@ def process_igs_data(datalist, conf, **kwargs):
 
     del dp_som5
     
-    # Step 15: Normalize data by monitor
+    # Step 17: Normalize data by monitor
     if conf.verbose and dm_som4 is not None:
         print "Normalizing data by monitor"
 
