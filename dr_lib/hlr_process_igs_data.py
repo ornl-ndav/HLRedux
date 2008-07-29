@@ -480,7 +480,7 @@ def process_igs_data(datalist, conf, **kwargs):
         int_factor.setAxisUnits(0, "Angstroms")
         int_factor.setYUnits("Counts/A")
 
-        ldb1_som = common_lib.mult_ncerr(ldb_som, int_factor)
+        ldb_som1 = common_lib.mult_ncerr(ldb_som, int_factor)
 
         if t is not None:
             t.getTime(msg="After multiplying lambda-dependent background "\
