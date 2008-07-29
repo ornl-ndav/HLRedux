@@ -207,6 +207,14 @@ def process_igs_data(datalist, conf, **kwargs):
     # Step 2: Dead Time Correction
     # No dead time correction is being applied to the data yet
 
+    # Step 3: Calculate intensity factor (BASIS only)
+    if conf.inst == "BSS" and conf.ldb_const is not None and \
+           dataset_type == "data":
+        if conf.verbose:
+            print "Calculating intensity factor"
+            
+        int_factor = dr_lib.calc_intensity_factor(dp_som2)
+
     # Step 3: Time-independent background determination
     if conf.verbose and conf.tib_tofs is not None:
         print "Determining time-independent background from data"
@@ -453,6 +461,15 @@ def process_igs_data(datalist, conf, **kwargs):
         if t is not None:
             t.getTime(msg="After creating lambda-dependent background "\
                       +"spectra ")
+
+        # Step 15: Multiply the lambda-dependent background by the appropriate
+        #          intensity factor
+        if conf.verbose:
+            print "Multiplying lambda-dependent background by intensity factor"
+
+        ldb1_som = common_lib.mult_ncerr(ldb_som, int_factor)
+
+        del ldb_som
 
         # Step 14: Subtract lambda-dependent background from sample data
         if conf.verbose:
