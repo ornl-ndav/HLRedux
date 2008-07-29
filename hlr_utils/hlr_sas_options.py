@@ -78,30 +78,15 @@ class SansOptions(hlr_utils.InstOptions):
                         help="Specify the comma separated list of the "\
                         +"transmission monitor path and signal.")        
 
-        self.add_option("", "--data-trans", dest="data_trans", help="Specify "\
-                        +"the filename for a sample data transmission "\
-                        +"spectrum. Use this option in the absence of "\
-                        +"transmission monitors.")
-
-        self.add_option("", "--solv-trans", dest="solv_trans", help="Specify "\
-                        +"the filename for a solvent only transmission "\
-                        +"spectrum. Use this option in the absence of "\
-                        +"transmission monitors.")
-        
-        self.add_option("", "--ecan-trans", dest="ecan_trans", help="Specify "\
-                        +"the filename for a empty can transmission "\
-                        +"spectrum. Use this option in the absence of "\
-                        +"transmission monitors.")
+        self.add_option("", "--trans", dest="trans", help="Specify the "\
+                        +"filename for a transmission spectrum. Use this "\
+                        +"option in the absence of transmission monitors.")
 
         self.add_option("", "--mon-effc", action="store_true",
                         dest="mon_effc",
                         help="Flag for turning on monitor efficiency "\
                         +"correction")
         self.set_defaults(mon_eff=False)
-
-        self.add_option("", "--mon-eff-const", dest="mon_eff_const",
-                        help="Specify the monitor efficiency constant "\
-                        +"(Angstroms^-1)")
 
         self.add_option("", "--roi-file", dest="roi_file",
                         help="Specify a file that contains a list of pixel "\
@@ -127,23 +112,15 @@ class SansOptions(hlr_utils.InstOptions):
                         +"values and the wavelength bin width in Angstroms")
         self.set_defaults(lambda_bins="0,10,0.1")
 
-        self.add_option("", "--lambda-low-cut", dest="lambda_low_cut",
-                        help="Specify the low-side wavelength at which to "\
-                        +"cut the spectra (Angstroms).")
-
-        self.add_option("", "--lambda-high-cut", dest="lambda_high_cut",
-                        help="Specify the high-side wavelength at which to "\
-                        +"cut the spectra (Angstroms).")        
+        self.add_option("", "--lambda-cut", dest="lambda_cut",
+                        help="Specify the wavelength at which to cut the "\
+                        +"spectra (Angstroms).")
 
         self.add_option("", "--bkg-coeff", dest="bkg_coeff",
                         help="Specify the polynomial coefficients for a "\
                         +"wavelength dependent background subtraction. The "\
                         +"should be lowest to highest: c0 + c1 * x + "\
                         +"c2 * x**2 + ...")
-
-        self.add_option("", "--rescale-final", dest="rescale_final",
-                        help="Specify the constant with which to scale "\
-                        +"(multiply) the final data.")
         
         self.add_option("", "--dump-wave", action="store_true",
                         dest="dump_wave",
@@ -180,13 +157,6 @@ class SansOptions(hlr_utils.InstOptions):
                         +"dataset.")
         self.set_defaults(dump_wave_bmnorm=False)
 
-        self.add_option("", "--dump-frac-rebin", action="store_true",
-                        dest="dump_frac_rebin", help="Flag to dump the "\
-                        +"fractional counts and the fraction area from "\
-                        +"rebinning. Creates a *.cnt file for the fractional "\
-                        +"counts and a *.fra file for the fractional area.")
-        self.set_defaults(dump_frac_rebin=False)
-
         self.add_option("", "--dump-all", action="store_true", dest="dump_all",
                         help="Flag to dump combined information")
         self.set_defaults(dump_all=False)
@@ -221,29 +191,13 @@ def SansConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "tmon_path", "--tmon-path"):
         configure.tmon_path = hlr_utils.NxPath(options.tmon_path)        
 
-    # Set the sample data Transmission spectrum file
-    if hlr_utils.cli_provide_override(configure, "data_trans", "--data-trans"):
-        configure.data_trans = hlr_utils.determine_files(options.data_trans,
-                                                         one_file=True)
-
-    # Set the solvent only Transmission spectrum file
-    if hlr_utils.cli_provide_override(configure, "solv_trans", "--solv-trans"):
-        configure.solv_trans = hlr_utils.determine_files(options.solv_trans,
-                                                         one_file=True)
-
-    # Set the empty can Transmission spectrum file
-    if hlr_utils.cli_provide_override(configure, "ecan_trans", "--ecan-trans"):
-        configure.ecan_trans = hlr_utils.determine_files(options.ecan_trans,
-                                                         one_file=True)   
+    # Set the Transmission spectrum file
+    if hlr_utils.cli_provide_override(configure, "trans", "--trans"):
+        configure.trans = hlr_utils.determine_files(options.trans,
+                                                    one_file=True)
     # Set mon_effc flag
     if hlr_utils.cli_provide_override(configure, "mon_effc", "--mon-effc"):
         configure.mon_effc = options.mon_effc
-
-    # Set the monitor efficiency constant
-    if hlr_utils.cli_provide_override(configure, "mon_eff_const",
-                                      "--mon-eff-const"):
-        configure.mon_eff_const = hlr_utils.DrParameterFromString(\
-            options.mon_eff_const, True)
 
     # Set the ROI file
     if hlr_utils.cli_provide_override(configure, "roi_file", "--roi-file"):
@@ -271,21 +225,13 @@ def SansConfiguration(parser, configure, options, args):
                                       "--lambda-bins"):    
         configure.lambda_bins = hlr_utils.AxisFromString(options.lambda_bins)
 
-    # Set the low-side lambda cut for cutting wavelength spectra
-    if hlr_utils.cli_provide_override(configure, "lambda_low_cut",
-                                      "--lambda-low-cut"):
+    # Set the lambda cut for cutting wavelength spectra
+    if hlr_utils.cli_provide_override(configure, "lambda_cut",
+                                      "--lambda-cut"):
         try:
-            configure.lambda_low_cut = float(options.lambda_low_cut)
+            configure.lambda_cut = float(options.lambda_cut)
         except TypeError:
-            configure.lambda_low_cut = options.lambda_low_cut
-
-    # Set the high-side lambda cut for cutting wavelength spectra
-    if hlr_utils.cli_provide_override(configure, "lambda_high_cut",
-                                      "--lambda-high-cut"):
-        try:
-            configure.lambda_high_cut = float(options.lambda_high_cut)
-        except TypeError:
-            configure.lambda_high_cut = options.lambda_high_cut            
+            configure.lambda_cut = options.lambda_cut
 
     # Set the coefficients for the wavelength dependent background correction
     if hlr_utils.cli_provide_override(configure, "bkg_coeff", "--bkg-coeff"):
@@ -293,14 +239,6 @@ def SansConfiguration(parser, configure, options, args):
             configure.bkg_coeff = options.bkg_coeff.split(',')
         except AttributeError:
             configure.bkg_coeff = options.bkg_coeff
-
-    # Set the final data rescaling constant
-    if hlr_utils.cli_provide_override(configure, "rescale_final",
-                                      "--rescale-final"):
-        try:
-            configure.rescale_final = float(options.rescale_final)
-        except TypeError:
-            configure.rescale_final = options.rescale_final
         
     # Set the ability to dump the detector pixel wavelength information
     if hlr_utils.cli_provide_override(configure, "dump_wave", "--dump-wave"):
@@ -328,12 +266,6 @@ def SansConfiguration(parser, configure, options, args):
                                       "--dump-wave-bmnorm"):
         configure.dump_wave_bmnorm = options.dump_wave_bmnorm
 
-    # Set the ability to dump the fractional counts and fractional area
-    # separately after rebinning in Q
-    if hlr_utils.cli_provide_override(configure, "dump_frac_rebin",
-                                      "--dump-frac-rebin"):
-        configure.dump_frac_rebin = options.dump_frac_rebin
-
     if hlr_utils.cli_provide_override(configure, "dump_all", "--dump-all"):
         if options.dump_all:
             configure.dump_wave = True
@@ -341,4 +273,3 @@ def SansConfiguration(parser, configure, options, args):
             configure.dump_bmon_effc = True
             configure.dump_bmon_rebin = True
             configure.dump_wave_bmnorm = True
-            configure.dump_frac_rebin = True

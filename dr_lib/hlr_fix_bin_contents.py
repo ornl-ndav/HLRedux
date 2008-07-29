@@ -25,22 +25,13 @@
 def fix_bin_contents(obj, **kwargs):
     """
     This function takes a SOM or SO and goes through the individual spectra
-    adjusting the bin contents by either multiplying or dividing by the
-    bin widths or the bin centers taken from the individual spectra.
+    adjusting the bin contents by dividing by the bin widths taken from the
+    individual spectra.
 
     @param obj: The data object to be scaled
     @type obj: C{SOM.SOM} or C{SOM.SO}
 
     @param kwargs: A list of keyword arguments that the function accepts:
-
-    @keyword scale: A flag that signals multiplication by the required bin
-                    quantity. The default is I{False} (divide).
-    @type scale: C{bool}
-
-    @keyword width: A flag that signals that the adjusting quantity is the
-                    bin width. The default is I{True}. If I{False}, the bin
-                    center is used.
-    @type width: C{bool}
 
     @keyword units: The expected units for this function. The default for this
                     function is I{microsecond}.
@@ -57,16 +48,6 @@ def fix_bin_contents(obj, **kwargs):
     o_descr = hlr_utils.get_descr(obj)
 
     # Setup keyword arguments
-    try:
-        scale = kwargs["scale"]
-    except KeyError:
-        scale = False
-
-    try:
-        width = kwargs["width"]
-    except KeyError:
-        width = True
-    
     try:
         units = kwargs["units"]
     except KeyError:
@@ -93,18 +74,9 @@ def fix_bin_contents(obj, **kwargs):
         
         map_so = hlr_utils.get_map_so(obj, None, i)
 
-        if width:
-            (bin_const, bin_const_err2) = utils.calc_bin_widths(axis,
-                                                                axis_err2)
-        else:
-            (bin_const, bin_const_err2) = utils.calc_bin_centers(axis,
-                                                                 axis_err2)
+        (bin_width, bin_width_err2) = utils.calc_bin_widths(axis, axis_err2)
 
-        if scale:
-            value = array_manip.mult_ncerr(val, err2, bin_const,
-                                           bin_const_err2)
-        else:
-            value = array_manip.div_ncerr(val, err2, bin_const, bin_const_err2)
+        value = array_manip.div_ncerr(val, err2, bin_width, bin_width_err2)
 
         hlr_utils.result_insert(result, res_descr, value, map_so, "y")
 

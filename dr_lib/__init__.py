@@ -26,17 +26,15 @@ data reduction functionality.
 """
 
 from hlr_add_files import *
-from hlr_apply_sas_correct import *
 from hlr_bss_E_vs_Q_helpers import calc_BSS_coeffs, calc_BSS_EQ_verticies, calc_BSS_solid_angle
 from hlr_calc_deltat_over_t import *
 from hlr_calc_delta_theta_over_theta import *
-from hlr_calc_solid_angle import *
+from hlr_calc_intensity_factor import *
 from hlr_calculate_ref_background import *
 from hlr_create_axis_from_data import *
 from hlr_create_E_vs_Q_igs import create_E_vs_Q_igs
 from hlr_convert_single_to_list import *
 from hlr_create_X_vs_pixpos import *
-from hlr_cut_spectra import *
 from hlr_data_filter import data_filter
 from hlr_determine_time_indep_bkg import *
 from hlr_determine_ref_background import *
@@ -60,7 +58,6 @@ from hlr_subtract_axis_dep_bkg import *
 from hlr_subtract_bkg_from_data import *
 from hlr_subtract_time_indep_bkg import *
 from hlr_sum_all_spectra import *
-from hlr_sum_by_rebin_frac import *
 from hlr_zero_bins import *
 from hlr_zero_spectra import *
 

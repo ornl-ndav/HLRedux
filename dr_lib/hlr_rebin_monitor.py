@@ -46,12 +46,9 @@ def rebin_monitor(obj1, obj2, **kwargs):
                      default is I{m}.
     @type prefix: C{string}
 
-    @keyword rtype: A short string that defines the rebinning function to use.
-                    The default is I{None} which uses
-                    L{common_lib.rebin_axis_1D()}. The other possibilities are
-                    I{linint} which uses L{common_lib.rebin_axis_1D_linint()}
-                    and I{frac} which uses L{common_lib.rebin_axis_1D_frac()}.
-    @type rtype: C{boolean}
+    @keyword interpolate: A flag to use linear interpolation during rebinning.
+                          The default is I{False}.
+    @type interpolate: C{boolean}
 
     
     @return: Object that has been rebinned
@@ -99,32 +96,24 @@ def rebin_monitor(obj1, obj2, **kwargs):
         use_pix_id = False
 
     try: 
-        rtype = kwargs["rtype"]
+        interpolate = kwargs["interpolate"]
     except KeyError:
-        rtype = None
-
-    # Set the name of the rebinning function
-    rebin_function_name = "rebin_axis_1D"
-    if rtype is not None:
-        rebin_function_name += "_" + str(rtype)
-
-    # Get function pointer
-    import common_lib
-    rebin_function = common_lib.__getattribute__(rebin_function_name)
+        interpolate = False        
 
     result = hlr_utils.copy_som_attr(result, res_descr, obj1, o1_descr)
 
     # iterate through the values
+    import common_lib
+
     val1 = hlr_utils.get_value(obj1, 0, o1_descr, "all")
 
-    # Cache length
-    len_obj2 = hlr_utils.get_length(obj2)
-
-    for i in xrange(len_obj2):
+    for i in xrange(hlr_utils.get_length(obj2)):
         val2 = hlr_utils.get_value(obj2, i, o2_descr, "x")
 
-        value = rebin_function(val1, val2)
-
+        if interpolate:
+            value = common_lib.rebin_axis_1D_linint(val1, val2)
+        else:
+            value = common_lib.rebin_axis_1D(val1, val2)
         if use_pix_id:
             # Set the pixel ID to the spectrum with modified bank ID
             try:
@@ -163,8 +152,6 @@ if __name__ == "__main__":
 
     print "********** rebin_monitor"
     print "* som+som :", rebin_monitor(som1, som2)
-    print "* som+som :", rebin_monitor(som1, som2, rtype="linint")
-    print "* som+som :", rebin_monitor(som1, som2, rtype="frac")
-    print "* so +so  :", rebin_monitor(som1[0], som2[0])
+    print "* so +so  :", rebin_monitor(som1[0], som2[0], interpolate=True)
 
     
