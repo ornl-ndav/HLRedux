@@ -72,6 +72,7 @@ def run(config, tim=None):
         s_som1 = dr_lib.process_sas_data(config.solv, config, timer=tim,
                                          inst_geom_dst=inst_geom_dst,
                                          dataset_type="solvent",
+                                         bkg_subtract=config.bkg_coeff,
                                          trans_data=config.solv_trans)
     else:
         s_som1 = None
@@ -90,6 +91,7 @@ def run(config, tim=None):
         e_som1 = dr_lib.process_sas_data(config.ecan, config, timer=tim,
                                          inst_geom_dst=inst_geom_dst,
                                          dataset_type="empty_can",
+                                         bkg_subtract=config.bkg_coeff,
                                          trans_data=config.ecan_trans)
     else:
         e_som1 = None
@@ -107,7 +109,8 @@ def run(config, tim=None):
     if config.open is not None:
         o_som1 = dr_lib.process_sas_data(config.open, config, timer=tim,
                                          inst_geom_dst=inst_geom_dst,
-                                         dataset_type="open_beam")
+                                         dataset_type="open_beam",
+                                         bkg_subtract=config.bkg_coeff)
     else:
         o_som1 = None
         
@@ -124,7 +127,8 @@ def run(config, tim=None):
     if config.dkcur is not None:
         dc_som1 = dr_lib.process_sas_data(config.open, config, timer=tim,
                                           inst_geom_dst=inst_geom_dst,
-                                          dataset_type="dark_current")
+                                          dataset_type="dark_current",
+                                          bkg_subtract=config.bkg_coeff)
     else:
         dc_som1 = None
         
