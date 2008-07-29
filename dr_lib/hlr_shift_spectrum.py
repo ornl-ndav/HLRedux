@@ -22,7 +22,7 @@
 
 # $Id$
 
-def shift_spectrum(obj, shift_point, min_ext, max_ext, scale_const):
+def shift_spectrum(obj, shift_point, min_ext, max_ext, scale_const=None):
     """
     This function takes a given spectrum and a central value and creates
     a spectrum that is shifted about that point. Values greater than the point
@@ -42,8 +42,8 @@ def shift_spectrum(obj, shift_point, min_ext, max_ext, scale_const):
     @param max_ext: The maximum extent of the axis to shift.
     @type max_ext: C{list} of C{floats}
     
-    @param scale_const: A scaling constant to apply to the newly shifted
-                        spectrum.
+    @param scale_const: A scaling constant to apply (multiply) to the newly
+                        shifted spectrum. The default is I{None}.
     @type scale_const: C{float}
 
 
@@ -62,7 +62,7 @@ def shift_spectrum(obj, shift_point, min_ext, max_ext, scale_const):
 
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
 
-    import nessi_list
+    import array_manip
     import utils
 
     len_obj = hlr_utils.get_length(obj)
@@ -80,28 +80,17 @@ def shift_spectrum(obj, shift_point, min_ext, max_ext, scale_const):
         ie = hlr_utils.get_value(min_ext, i, ie_descr, "y")
         ae = hlr_utils.get_value(max_ext, i, ae_descr, "y")
 
-        # Bin indicies for boundary points
-        ie_index = utils.bisect_helper(x_axis, ie)
-        ae_index = utils.bisect_helper(x_axis, ae)
-
-        # Setup new spectrum
-        ynew = nessi_list.NessiList(len(val))
-        ynew_err2 = nessi_list.NessiList(len(err2))
-
         # Make shifted spectrum
-        # Only consider bins within the boundary points
-        for j in xrange(ie_index, ae_index+1):
-            if utils.compare(bin_center[0][j], sp) < 1:
-                lambda_mon = bin_center[0][j] + (ae - sp)
-            else:
-                lambda_mon = bin_center[0][j] - (sp - ie)
+        value0 = utils.shift_spectrum(val, err2, x_axis, bin_center[0],
+                                      sp, ie, ae)
 
-            index = utils.bisect_helper(x_axis, lambda_mon)
-            
-            ynew[j] = scale_const * val[index]
-            ynew_err2[j] = scale_const * scale_const * err2[index]
+        # Scale spectrum if necessary
+        if scale_const is not None:
+            value1 = array_manip.mult_ncerr(value0[0], value0[1],
+                                            scale_const, 0.0)
+        else:
+            value1 = value0
 
-        hlr_utils.result_insert(result, res_descr, (ynew, ynew_err2), map_so,
-                                "y")
+        hlr_utils.result_insert(result, res_descr, value1, map_so, "y")
 
     return result
