@@ -478,7 +478,7 @@ def process_igs_data(datalist, conf, **kwargs):
         if t is not None:
             t.getTime(False)
 
-        dp_som6 = common_lib.sub_ncerr(dp_som5, ldb_som)
+        dp_som6 = common_lib.sub_ncerr(dp_som5, ldb_som1)
 
         if t is not None:
             t.getTime(msg="After subtracting lambda-dependent background "\
