@@ -39,6 +39,9 @@ def run(config, tim=None):
                            timing evaluations.
     @type tim: C{sns_time.DiffTime}
     """
+    import common_lib
+    import dr_lib
+    
     if tim is not None:
         tim.getTime(False)
         old_time = tim.getOldTime()
@@ -58,92 +61,96 @@ def run(config, tim=None):
         inst_geom_dst = None
 
     # Add so_axis to Configure object
-    conf.so_axis = "time_of_flight"
+    config.so_axis = "time_of_flight"
+
+    dataset_type = "background"
 
     # Step 0: Open appropriate data files
 
     # Data
-    if conf.verbose:
+    if config.verbose:
         print "Reading %s file" % dataset_type
 
     # The [0] is to get the data SOM and ignore the None background SOM
-    dp_som = dr_lib.add_files(datalist, Data_Paths=conf.data_paths.toPath(),
-                              SO_Axis=conf.so_axis, Signal_ROI=conf.roi_file,
-                              dataset_type="background",
-                              Verbose=conf.verbose, Timer=t)[0]
+    dp_som = dr_lib.add_files(config.data,
+                              Data_Paths=config.data_paths.toPath(),
+                              SO_Axis=config.so_axis,
+                              Signal_ROI=config.roi_file,
+                              dataset_type=dataset_type,
+                              Verbose=config.verbose, Timer=tim)[0]
     
-    if t is not None:
-        t.getTime(msg="After reading %s " % dataset_type)
+    if tim is not None:
+        tim.getTime(msg="After reading %s " % dataset_type)
 
     dp_som0 = dr_lib.fix_bin_contents(dp_som)
 
     del dp_som
 
-    if conf.inst_geom is not None:
-        i_geom_dst.setGeometry(conf.data_paths.toPath(), dp_som0)
+    if config.inst_geom is not None:
+        i_geom_dst.setGeometry(config.data_paths.toPath(), dp_som0)
 
-    if conf.verbose:
+    if config.verbose:
         print "Reading in beam monitor data from %s file" % dataset_type
 
     # The [0] is to get the data SOM and ignore the None background SOM
-    dbm_som0 = dr_lib.add_files(datalist,
-                                Data_Paths=conf.bmon_path.toPath(),
-                                SO_Axis=conf.so_axis,
-                                dataset_type="background",
-                                Verbose=conf.verbose,
-                                Timer=t)[0]
+    dbm_som0 = dr_lib.add_files(config.data,
+                                Data_Paths=config.bmon_path.toPath(),
+                                SO_Axis=config.so_axis,
+                                dataset_type=dataset_type,
+                                Verbose=config.verbose,
+                                Timer=tim)[0]
     
-    if t is not None:
-        t.getTime(msg="After reading beam monitor data ")
+    if tim is not None:
+        tim.getTime(msg="After reading beam monitor data ")
 
     # Note: time_zero_offset_det MUST be a tuple
-    if conf.time_zero_offset_det is not None:
+    if config.time_zero_offset_det is not None:
         dp_som0.attr_list["Time_zero_offset_det"] = \
-                                     conf.time_zero_offset_det.toValErrTuple()
+                                   config.time_zero_offset_det.toValErrTuple()
     # Note: time_zero_offset_mon MUST be a tuple
-    if conf.time_zero_offset_mon is not None and not get_background:
+    if config.time_zero_offset_mon is not None:
         dbm_som0.attr_list["Time_zero_offset_mon"] = \
-                                     conf.time_zero_offset_mon.toValErrTuple()
+                                   config.time_zero_offset_mon.toValErrTuple()
 
     # Step 2: Convert TOF to wavelength for data and monitor
-    if conf.verbose:
+    if config.verbose:
         print "Converting TOF to wavelength"
 
-    if t is not None:
-        t.getTime(False)
+    if tim is not None:
+        tim.getTime(False)
 
     # Convert beam monitor
     dbm_som1 = common_lib.tof_to_wavelength_lin_time_zero(
         dbm_som0,
         units="microsecond",
-        time_zero_offset=conf.time_zero_offset_mon.toValErrTuple())
+        time_zero_offset=config.time_zero_offset_mon.toValErrTuple())
 
     # Convert detector pixels
     dp_som1 = common_lib.tof_to_wavelength_lin_time_zero(
         dp_som0,
         units="microsecond",
-        time_zero_offset=conf.time_zero_offset_det.toValErrTuple(),
+        time_zero_offset=config.time_zero_offset_det.toValErrTuple(),
         inst_param="total")
 
-    if t is not None:
-        t.getTime(msg="After converting TOF to wavelength ")
+    if tim is not None:
+        tim.getTime(msg="After converting TOF to wavelength ")
 
     del dp_som0, dbm_som0
 
-    if conf.verbose:
+    if config.verbose:
         print "Cutting spectra"
 
-    if t is not None:
-        t.getTime(False)
+    if tim is not None:
+        tim.getTime(False)
 
-    dp_som2 = dr_lib.cut_spectra(dp_som1, conf.lambda_low_cut,
-                                 conf.lambda_high_cut)
+    dp_som2 = dr_lib.cut_spectra(dp_som1, config.lambda_low_cut,
+                                 config.lambda_high_cut)
 
-    dbm_som2 = dr_lib.cut_spectra(dbm_som1, conf.lambda_low_cut,
-                                  conf.lambda_high_cut)
+    dbm_som2 = dr_lib.cut_spectra(dbm_som1, config.lambda_low_cut,
+                                  config.lambda_high_cut)
 
-    if t is not None:
-        t.getTime(msg="After cutting spectra ")
+    if tim is not None:
+        tim.getTime(msg="After cutting spectra ")
 
     del dp_som1, dbm_som1
 
@@ -173,6 +180,7 @@ if __name__ == "__main__":
     # Set defaults for imported options
     parser.set_defaults(data_paths="/entry/bank1,1")
     parser.set_defaults(bmon_path="/entry/monitor1,1")
+    parser.set_defaults(tmon_path="/entry/monitor2,1")
 
     # Remove unnecessary options
     parser.remove_option("--data-trans")
