@@ -22,6 +22,11 @@
 
 # $Id$
 
+"""
+This program was requested by the I{LENS} facility to create a background
+spectrum for fitting.
+"""
+
 def run(config, tim=None):
     """
     This method is where the data reduction process gets done.
@@ -87,6 +92,10 @@ if __name__ == "__main__":
     parser.remove_option("--rescale-final")
     parser.remove_option("--bkg-coeff")
     parser.remove_option("--mom-trans-bins")
+    parser.remove_option("--dump-wave")
+    parser.remove_option("--dump-bmon-wave")
+    parser.remove_option("--dump-bmon-effc")
+    parser.remove_option("--dump-bmon-rebin")
     parser.remove_option("--dump-wave-bmnorm")
     parser.remove_option("--dump-frac-rebin")
 
