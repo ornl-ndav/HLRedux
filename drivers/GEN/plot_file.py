@@ -108,7 +108,7 @@ def __plot_a3c(som, conf):
             __plot_one_a3c(x, y, numpy.sqrt(var_y),
                            som.getAllAxisLabels(), som.getAllAxisUnits(),
                            som.getYLabel(), som.getYUnits(),
-                           pid, logy=conf.logy, logx=conf.logx)
+                           pid, logy=conf.logy)
 
 def __plot_one_a3c(x, y, var_y, *args, **kwargs):
     """
@@ -118,11 +118,6 @@ def __plot_one_a3c(x, y, var_y, *args, **kwargs):
         logy = kwargs["logy"]
     except KeyError:
         logy = False
-
-    try:
-        logx = kwargs["logx"]
-    except KeyError:
-        logx = False        
 
     y = numpy.nan_to_num(y)
     var_y = numpy.nan_to_num(var_y)
@@ -143,9 +138,6 @@ def __plot_one_a3c(x, y, var_y, *args, **kwargs):
     if logy:
         ax = pylab.gca()
         ax.set_yscale("log")
-    if logx:
-        ax = pylab.gca()
-        ax.set_xscale("log")
 
 def __plot_dave(som):
     """
@@ -214,9 +206,6 @@ if __name__ == "__main__":
 
     parser.add_option("", "--logy", dest="logy", action="store_true")
     parser.set_defaults(logy=False)
-
-    parser.add_option("", "--logx", dest="logx", action="store_true")
-    parser.set_defaults(logx=False)    
     
     # Do not need to use the following options
     parser.remove_option("--config")
@@ -250,9 +239,6 @@ if __name__ == "__main__":
 
     # Set the logarithmic y-axis
     configure.logy = options.logy
-
-    # Set the logarithmic x-axis
-    configure.logx = options.logx    
 
     # Run the program
     run(configure)
