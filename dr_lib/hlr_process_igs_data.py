@@ -220,6 +220,14 @@ def process_igs_data(datalist, conf, **kwargs):
 
         if t is not None:
             t.getTime(msg="After calculting intensity factor ")
+
+        if conf.dump_int_factors:
+            hlr_utils.write_file(conf.output, "text/num-info", int_factor,
+                                 output_ext="isf",
+                                 data_ext=conf.ext_replacement,
+                                 path_replacement=conf.path_replacement,
+                                 verbose=conf.verbose,
+                                 message="intensity scale values")
             
     # Step 4: Time-independent background determination
     if conf.verbose and conf.tib_tofs is not None:
