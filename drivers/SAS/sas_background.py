@@ -157,41 +157,99 @@ def run(config, tim=None):
     rebin_axis = config.lambda_bins.toNessiList()
 
     # Put the data on the same axis
+    if config.verbose:
+        print "Rebinning data onto specified wavelength axis"
+
+    if tim is not None:
+        tim.getTime(False)
+        
     dp_som3 = dr_lib.sum_by_rebin_frac(dp_som2, rebin_axis)
 
+    if tim is not None:
+        tim.getTime(msg="After rebinning data onto specified wavelength axis ")
+        
     del dp_som2
 
     data_run_time = dp_som3.attr_list["background-duration"]
 
     # Divide the data by the duration
+    if config.verbose:
+        print "Scaling data by the counting duration"
+        
+    if tim is not None:
+        tim.getTime(False)
+        
     dp_som4 = common_lib.div_ncerr(dp_som3, (data_run_time.getValue(), 0.0))
 
+    if tim is not None:
+        tim.getTime(msg="After scaling data by the counting duration ")
+        
     del dp_som3
 
     # Get monitor integral
+    if config.verbose:
+        print "Integrating monitor"
+
+    if tim is not None:
+        tim.getTime(False)
+        
     mon_rate0 = dr_lib.integrate_spectra(dbm_som2, width=True, total=True)
     print "A:", mon_rate0
+
+    if tim is not None:
+        tim.getTime(msg="After integrating monitor ")
+        
     # Calculate the accelerator on time
+    if config.verbose:
+        print "Calculating accelerator on time"
+        
     acc_on_time = hlr_utils.DrParameter(data_run_time.getValue() -
                                         config.acc_down_time.getValue(), 0.0,
                                         "seconds")
     print "B:", acc_on_time
     # Calculate the monitor rate
+    if config.verbose:
+        print "Calculating the monitor rate"
+
+    if tim is not None:
+        tim.getTime(False)
+        
     mon_rate1 = common_lib.div_ncerr(mon_rate0, acc_on_time.toValErrTuple())
 
+    if tim is not None:
+        tim.getTime(msg="After calculating the monitor rate ")
+        
     del mon_rate0
     print "C:", mon_rate1
 
     num_wave_bins = len(rebin_axis) - 1
     print "D:", num_wave_bins
 
-    # Calculare the scaled monitor rate
+    # Calculate the scaled monitor rate
+    if config.verbose:
+        print "Calculating the scaled monitor rate"
+
+    if tim is not None:
+        tim.getTime(False)
+        
     final_scale = common_lib.div_ncerr(mon_rate1, (num_wave_bins, 0.0))
     print "E:", final_scale
 
+    if tim is not None:
+        tim.getTime(msg="After calculating the scaled monitor rate ")
+        
     # Create the final background spectrum
+    if config.verbose:
+        print "Creating the background spectrum"
+
+    if tim is not None:
+        tim.getTime(False)
+        
     dp_som5 = common_lib.div_ncerr(dp_som4, final_scale)
 
+    if tim is not None:
+        tim.getTime(msg="After creating background spectrum ")
+        
     del dp_som4
 
     # Write out the background spectrum
