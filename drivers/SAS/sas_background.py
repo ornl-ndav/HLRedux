@@ -154,10 +154,36 @@ def run(config, tim=None):
 
     del dp_som1, dbm_som1
 
-    # Put the data on the same axis
-    dp_som3 = dr_lib.sum_by_rebin_frac(dp_som2,
-                                       config.lambda_bins.toNessiList())
+    rebin_axis = config.lambda_bins.toNessiList()
 
+    # Put the data on the same axis
+    dp_som3 = dr_lib.sum_by_rebin_frac(dp_som2, rebin_axis)
+
+    del dp_som2
+
+    data_run_time = dp_som3.attr_list["background-duration"]
+
+    # Divide the data by the duration
+    dp_som4 = common_lib.div_ncerr(dp_som3, (data_run_time.getValue(), 0.0))
+
+    del dp_som3
+
+    # Get monitor integral
+    mon_rate0 = dr_lib.integrate_spectra(dbm_som2, width=True, total=True)
+    print "A:", mon_rate0
+    # Calculate the accelerator on time
+    acc_on_time = hlr_utils.DrParameter(data_run_time.getValue() -
+                                        config.acc_down_time.getValue(), 0.0,
+                                        "seconds")
+    print "B:", acc_on_time
+    # Calculate the monitor rate
+    mon_rate1 = common_lib.div_ncerr(mon_rate0, acc_on_time.toValErrTuple())
+
+    del mon_rate0
+    print "C:", mon_rate1
+
+    num_wave_bins = len(rebin_axis) - 1
+    print "D:", num_wave_bins
     
     if tim is not None:
         tim.setOldTime(old_time)
@@ -202,6 +228,11 @@ if __name__ == "__main__":
     parser.remove_option("--dump-frac-rebin")
 
     # Add sas_background specific options
+    parser.add_option("", "--acc-down-time", dest="acc_down_time",
+                      help="Please provide the duration (seconds) that the "\
+                      +"accelerator is down.")
+    parser.set_defaults(acc_down_time="0.0,0.0,seconds")
+    
     parser.add_option("", "--timing", action="store_true", dest="timing",
                       help="Flag to turn on timing of code")
     parser.set_defaults(timing=False)
@@ -213,6 +244,12 @@ if __name__ == "__main__":
 
     # Call the configuration setter for SansOptions
     hlr_utils.SansConfiguration(parser, configure, options, args)
+
+    # Set the accelerator down time
+    if hlr_utils.cli_provide_override(configure, "acc_down_time",
+                                      "--acc-down-time"):
+        configure.acc_down_time = hlr_utils.DrParameterFromString(\
+            options.acc_down_time, True)
 
     if configure.lambda_bins is None:
         parser.error("Please specify the final wavelength axis!")
