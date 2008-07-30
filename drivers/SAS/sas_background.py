@@ -184,6 +184,33 @@ def run(config, tim=None):
 
     num_wave_bins = len(rebin_axis) - 1
     print "D:", num_wave_bins
+
+    # Calculare the scaled monitor rate
+    final_scale = common_lib.div_ncerr(mon_rate1, (num_wave_bins, 0.0))
+    print "E:", final_scale
+
+    # Create the final background spectrum
+    dp_som5 = common_lib.div_ncerr(dp_som4, final_scale)
+
+    del dp_som4
+
+    # Write out the background spectrum
+    hlr_utils.write_file(config.output, "text/Spec", dp_som5,
+                         verbose=config.verbose,
+                         output_ext="bkg",
+                         data_ext="txt",
+                         replace_path=False,
+                         replace_ext=True,
+                         message="background spectrum")
+
+    dp_som5.attr_list["config"] = config
+
+    hlr_utils.write_file(config.output, "text/rmd", dp_som5,
+                         output_ext="rmd",
+                         data_ext=config.ext_replacement,         
+                         path_replacement=config.path_replacement,
+                         verbose=config.verbose,
+                         message="metadata")
     
     if tim is not None:
         tim.setOldTime(old_time)
