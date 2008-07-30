@@ -80,6 +80,7 @@ instrument_scripts = {
     'reflect_reduction'
     ],
     "SAS" : [
+    'sas_background',
     'sas_reduction1',
     'sas_transmission1'
     ],

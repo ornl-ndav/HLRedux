@@ -42,6 +42,7 @@ from IGS import igs_diff_reduction
 from REF import reflect_reduction
 
 # SAS drivers
+from SAS import sas_background
 from SAS import sas_reduction1
 from SAS import sas_transmission1
 
