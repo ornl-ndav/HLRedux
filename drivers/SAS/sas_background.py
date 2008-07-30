@@ -194,7 +194,6 @@ def run(config, tim=None):
         tim.getTime(False)
         
     mon_rate0 = dr_lib.integrate_spectra(dbm_som2, width=True, total=True)
-    print "A:", mon_rate0
 
     if tim is not None:
         tim.getTime(msg="After integrating monitor ")
@@ -206,7 +205,7 @@ def run(config, tim=None):
     acc_on_time = hlr_utils.DrParameter(data_run_time.getValue() -
                                         config.acc_down_time.getValue(), 0.0,
                                         "seconds")
-    print "B:", acc_on_time
+
     # Calculate the monitor rate
     if config.verbose:
         print "Calculating the monitor rate"
@@ -220,10 +219,9 @@ def run(config, tim=None):
         tim.getTime(msg="After calculating the monitor rate ")
         
     del mon_rate0
-    print "C:", mon_rate1
 
+    # Get the number of data bins
     num_wave_bins = len(rebin_axis) - 1
-    print "D:", num_wave_bins
 
     # Calculate the scaled monitor rate
     if config.verbose:
@@ -233,7 +231,6 @@ def run(config, tim=None):
         tim.getTime(False)
         
     final_scale = common_lib.div_ncerr(mon_rate1, (num_wave_bins, 0.0))
-    print "E:", final_scale
 
     if tim is not None:
         tim.getTime(msg="After calculating the scaled monitor rate ")
@@ -281,7 +278,9 @@ if __name__ == "__main__":
     result = []
     result.append("This driver creates a background spectrum for")
     result.append("Small-Angle Scattering detectors that will be fit and")
-    result.append("subtracted during data reduction.")
+    result.append("subtracted during data reduction. The result of running")
+    result.append("this driver is a 3-column ASCII file with an extension")
+    result.append("of *.bkg")
 
     # Set up the options available
     parser = hlr_utils.SansOptions("usage: %prog [options] <datafile>", None,
@@ -311,6 +310,7 @@ if __name__ == "__main__":
     parser.remove_option("--dump-bmon-rebin")
     parser.remove_option("--dump-wave-bmnorm")
     parser.remove_option("--dump-frac-rebin")
+    parser.remove_option("--dump-all")
 
     # Add sas_background specific options
     parser.add_option("", "--acc-down-time", dest="acc_down_time",
