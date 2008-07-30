@@ -100,6 +100,12 @@ class AmrOptions(hlr_igs_options.IgsOptions):
                         help="Specify the wavelength center (Angstroms) of "\
                         +"the chopper.")
 
+        self.add_option("", "--dump-int-factors", action="store_true",
+                        dest="dump_int_factors", help="Flag to dump the "\
+                        +"intensity scale factors toa a file. Creates a *.isf"\
+                        +" file.")
+        self.set_defaults(dump_int_factors=False)
+
         self.add_option("", "--dump-dslin", action="store_true",
                         dest="dump_dslin",
                         help="Flag to dump the linearly interpolated direct "\
@@ -206,6 +212,11 @@ def AmrConfiguration(parser, configure, options, args):
         configure.chopper_lambda_cent = hlr_utils.DrParameterFromString(\
                     options.chopper_lambda_cent, True)
 
+    # Set the ability to dump the intesnity scale factors
+    if hlr_utils.cli_provide_override(configure, "dump_int_factors",
+                                      "--dump-int-factors"):
+        configure.dump_int_factors = options.dump_int_factors
+
     # Set the ability to dump the energy transfer information
     if hlr_utils.cli_provide_override(configure, "dump_dslin",
                                       "--dump-dslin"):
@@ -223,6 +234,7 @@ def AmrConfiguration(parser, configure, options, args):
 
     if hlr_utils.cli_provide_override(configure, "dump_all", "--dump-all"):
         if options.dump_all:
+            configure.dump_int_factors = True
             configure.dump_dslin = True
             configure.dump_energy = True
             configure.dump_initial_energy = True
