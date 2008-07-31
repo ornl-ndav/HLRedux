@@ -275,8 +275,17 @@ def process_sas_data(datalist, conf, **kwargs):
                              message="beam monitor wavelength information")
 
     # Step 3: Subtract wavelength dependent background if necessary
+    if conf.verbose and bkg_subtract is not None:
+        print "Subtracting wavelength dependent background"
+        
     if bkg_subtract is not None:
+        if t is not None:
+            t.getTime(False)
+            
         dp_som4 = dr_lib.subtract_axis_dep_bkg(dp_som3, bkg_subtract)
+
+        if t is not None:
+            t.getTime(msg="After subtracting wavelength dependent background ")
     else:
         dp_som4 = dp_som3
 
