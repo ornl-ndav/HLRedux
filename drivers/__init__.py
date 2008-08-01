@@ -43,8 +43,8 @@ from REF import reflect_reduction
 
 # SAS drivers
 from SAS import sas_background
-from SAS import sas_reduction1
-from SAS import sas_transmission1
+from SAS import sas_reduction
+from SAS import sas_transmission
 
 #version
 __id__ = "$Id$"

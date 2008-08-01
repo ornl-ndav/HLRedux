@@ -81,8 +81,8 @@ instrument_scripts = {
     ],
     "SAS" : [
     'sas_background',
-    'sas_reduction1',
-    'sas_transmission1'
+    'sas_reduction',
+    'sas_transmission'
     ],
     "SCD" : [
     ]
