@@ -62,7 +62,6 @@ def apply_sas_correct(obj):
 
     # iterate through the values
     import array_manip
-    import utils
 
     import math
 
@@ -70,7 +69,6 @@ def apply_sas_correct(obj):
     for i in xrange(len_obj):
         val = hlr_utils.get_value(obj, i, o_descr, "y")
         err2 = hlr_utils.get_err2(obj, i, o_descr, "y")
-        axis = hlr_utils.get_value(obj, i, o_descr, "x", 0)
         
         map_so = hlr_utils.get_map_so(obj, None, i)
 
