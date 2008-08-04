@@ -41,6 +41,7 @@ def run(config, tim=None):
     """
     import common_lib
     import dr_lib
+    import DST
     
     if tim is not None:
         tim.getTime(False)
@@ -86,8 +87,8 @@ def run(config, tim=None):
 
     del dp_som
 
-    if config.inst_geom is not None:
-        i_geom_dst.setGeometry(config.data_paths.toPath(), dp_som0)
+    if inst_geom_dst is not None:
+        inst_geom_dst.setGeometry(config.data_paths.toPath(), dp_som0)
 
     if config.verbose:
         print "Reading in beam monitor data from %s file" % dataset_type
