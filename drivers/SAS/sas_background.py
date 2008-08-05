@@ -41,6 +41,7 @@ def run(config, tim=None):
     """
     import common_lib
     import dr_lib
+    import DST
     
     if tim is not None:
         tim.getTime(False)
@@ -86,8 +87,8 @@ def run(config, tim=None):
 
     del dp_som
 
-    if config.inst_geom is not None:
-        i_geom_dst.setGeometry(config.data_paths.toPath(), dp_som0)
+    if inst_geom_dst is not None:
+        inst_geom_dst.setGeometry(config.data_paths.toPath(), dp_som0)
 
     if config.verbose:
         print "Reading in beam monitor data from %s file" % dataset_type
@@ -253,7 +254,7 @@ def run(config, tim=None):
     hlr_utils.write_file(config.output, "text/Spec", dp_som5,
                          verbose=config.verbose,
                          output_ext="bkg",
-                         data_ext="txt",
+                         data_ext=config.ext_replacement,
                          replace_path=False,
                          replace_ext=True,
                          message="background spectrum")

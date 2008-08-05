@@ -22,6 +22,8 @@
 
 # $Id$
 
+import nessi_list
+
 def rebin_axis_1D_frac(obj, axis_out):
     """
     This function rebins the primary axis for a C{SOM} or a C{SO} based on the
@@ -66,7 +68,6 @@ def rebin_axis_1D_frac(obj, axis_out):
     # iterate through the values
     import array_manip
     import axis_manip
-    import nessi_list
     
     for i in xrange(hlr_utils.get_length(obj)):
         axis_in = hlr_utils.get_value(obj, i, o_descr, "x", 0)
@@ -92,7 +93,6 @@ def rebin_axis_1D_frac(obj, axis_out):
 
 if __name__ == "__main__":
     import hlr_test
-    import nessi_list
 
     som1 = hlr_test.generate_som()
 

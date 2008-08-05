@@ -50,8 +50,8 @@ def calc_solid_angle(inst, pix, **kwargs):
         pathtype = "secondary"
 
     # Get pixel pathlength and square it (this is in meters)
-    (pl, pl_err2) = hlr_utils.get_parameter(pathtype, pix, inst)
-    pl2 = pl * pl
+    pl = hlr_utils.get_parameter(pathtype, pix, inst)
+    pl2 = pl[0] * pl[0]
 
     # Make object for neighboring pixel
     import SOM
@@ -91,9 +91,9 @@ def calc_solid_angle(inst, pix, **kwargs):
     pix_area = xdiff * ydiff
 
     # Get the polar angle
-    (polar, polar_err2) = hlr_utils.get_parameter("polar", pix, inst)
+    polar = hlr_utils.get_parameter("polar", pix, inst)
     
-    solid_angle = (pix_area * math.cos(polar)) / pl2
+    solid_angle = (pix_area * math.cos(polar[0])) / pl2
 
     return solid_angle
     
