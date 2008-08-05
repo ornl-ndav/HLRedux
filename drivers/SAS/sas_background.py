@@ -254,7 +254,7 @@ def run(config, tim=None):
     hlr_utils.write_file(config.output, "text/Spec", dp_som5,
                          verbose=config.verbose,
                          output_ext="bkg",
-                         data_ext="txt",
+                         data_ext=config.ext_replacement,
                          replace_path=False,
                          replace_ext=True,
                          message="background spectrum")
