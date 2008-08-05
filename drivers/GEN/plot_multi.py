@@ -60,7 +60,6 @@ if __name__ == "__main__":
     import drplot
     import hlr_utils
 
-    import numpy
     import pylab
 
     # Make description for driver

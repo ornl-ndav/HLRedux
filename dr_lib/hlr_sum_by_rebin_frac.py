@@ -22,6 +22,8 @@
 
 # $Id$
 
+import nessi_list
+    
 def sum_by_rebin_frac(obj, axis_out, **kwargs):
     """
     This function uses the C{axis_manip.rebin_axis_1D_frac} function from the
@@ -91,7 +93,6 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
 
     import array_manip
     import axis_manip
-    import nessi_list
 
     len_data = len(axis_out) - 1
 
@@ -163,7 +164,6 @@ def sum_by_rebin_frac(obj, axis_out, **kwargs):
 
 if __name__ == "__main__":
     import hlr_test
-    import nessi_list
 
     som1 = hlr_test.generate_som()
 
