@@ -21,8 +21,8 @@
 #
 
 """
-This module holds data reduction and data characterization drivers for the IGS
-class of instruments.
+This module holds data reduction and data characterization drivers for the
+SAS class of instruments.
 """
 
 #version
