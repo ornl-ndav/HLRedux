@@ -132,7 +132,7 @@ def run(config, tim):
     if tim is not None:
         tim.getTime(False)
 
-    d_som3 = common_lib.tof_to_wavelength(d_som2)
+    d_som3 = common_lib.tof_to_wavelength(d_som2, units="microsecond")
 
     if tim is not None:
         tim.getTime(msg="After converting TOF to wavelength ")
@@ -194,8 +194,9 @@ def run(config, tim):
                                                     pathlength=pathlength)
         print "B:", delta_lambda
 
-        delta_lambdap = common_lib.div_ncerr(delta_lambda,
-                                             (math.sin(theta_rads[0]), 0.0))
+        import array_manip
+        delta_lambdap = array_manip.div_ncerr(delta_lambda[0], delta_lambda[1],
+                                              math.sin(theta_rads[0]), 0.0)
         
         print "C:", delta_lambdap
         
@@ -219,15 +220,15 @@ def run(config, tim):
     del d_som4
 
     # Step 8: Write out all spectra to a file
-    hlr_utils.write_file(config.output, "text/Spec", d_som6,
+    hlr_utils.write_file(config.output, "text/Spec", d_som5,
                          replace_ext=False,
                          replace_path=False,
                          verbose=config.verbose,
                          message="Reflectivity information")
 
-    d_som6.attr_list["config"] = config
+    d_som5.attr_list["config"] = config
 
-    hlr_utils.write_file(config.output, "text/rmd", d_som6,
+    hlr_utils.write_file(config.output, "text/rmd", d_som5,
                          output_ext="rmd", verbose=config.verbose,
                          data_ext=config.ext_replacement,
                          path_replacement=config.path_replacement,
