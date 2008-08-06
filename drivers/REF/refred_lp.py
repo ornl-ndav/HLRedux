@@ -94,7 +94,7 @@ if __name__ == "__main__":
     # Set up the configuration
     configure = hlr_utils.Configure()
 
-    # Call the configuration setter for RefRedOptions
+    # Call the configuration setter for RefOptions
     hlr_utils.RefConfiguration(parser, configure, options, args)
 
     # Setup the timing object
