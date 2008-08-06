@@ -40,7 +40,73 @@ def run(config, tim):
                 evaluations.
     @type tim: C{sns_time.DiffTime}
     """
-    pass
+    import DST
+
+    if tim is not None:
+        tim.getTime(False)
+        old_time = tim.getOldTime()
+
+    if config.data is None:
+        raise RuntimeError("Need to pass a data filename to the driver "\
+                           +"script.")
+
+    # Read in sample data geometry if one is provided
+    if config.data_inst_geom is not None:
+        if config.verbose:
+            print "Reading in sample data instrument geometry file"
+
+        data_inst_geom_dst = DST.getInstance("application/x-NxsGeom",
+                                             config.data_inst_geom)
+    else:
+        data_inst_geom_dst = None
+    
+    # Perform Steps 1-2 on sample data
+    d_som1 = dr_lib.process_reflp_data(config.data, config,
+                                       None,
+                                       timer=tim)
+
+    # Perform Steps 1-3 on normalization data
+    if config.norm is not None:
+        n_som1 = dr_lib.process_reflp_data(config.norm, config,
+                                           config.norm_roi_file,
+                                           timer=tim)
+    else:
+        n_som1 = None
+
+    # Step 4: Divide data by normalization
+    if config.verbose and config.norm is not None:
+        print "Scale data by normalization"
+
+    if tim is not None:
+        tim.getTime(False)
+
+    if config.norm is not None:
+        d_som2 = common_lib.div_ncerr(d_som1, n_som1, length_one_som=True)
+    else:
+        d_som2 = d_som1
+
+    if tim is not None and config.norm is not None:
+        tim.getTime(msg="After normalizing signal spectra")
+
+    del d_som1, n_som1
+
+    if config.dump_rtof_comb:
+        d_som2_1 = dr_lib.sum_all_spectra(d_som2)
+        d_som2_2 = dr_lib.data_filter(d_som2_1)
+        del d_som2_1
+        
+        hlr_utils.write_file(config.output, "text/Spec", d_som2_2,
+                             output_ext="crtof",
+                             verbose=config.verbose,
+                             data_ext=config.ext_replacement,
+                             path_replacement=config.path_replacement,
+                             message="combined R(TOF) information")
+
+        del d_som2_2
+
+    # Step 5: Convert TOF to Wavelength
+
+    
 
 if __name__ == "__main__":
     import hlr_utils
