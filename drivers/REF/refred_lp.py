@@ -109,6 +109,17 @@ def run(config, tim):
 
         del d_som2_2
 
+    if config.dump_rtof:
+        d_som2_1 = dr_lib.filter_ref_data(d_som2)
+
+        hlr_utils.write_file(config.output, "text/Spec", d_som2_1,
+                             output_ext="rtof",
+                             verbose=config.verbose,
+                             data_ext=config.ext_replacement,
+                             path_replacement=config.path_replacement,
+                             message="R(TOF) information")
+        del d_som2_1
+
     # Override geometry if necessary
     if data_inst_geom_dst is not None:
         data_inst_geom_dst.setGeometry(config.data_paths.toPath(), d_som2)
@@ -265,7 +276,6 @@ if __name__ == "__main__":
     parser.remove_option("--dump-specular")
     parser.remove_option("--dump-bkg")
     parser.remove_option("--dump-sub")
-    parser.remove_option("--dump-rtof-comb")
     parser.remove_option("--dump-rq")
     parser.remove_option("--dump-rqr")
 
