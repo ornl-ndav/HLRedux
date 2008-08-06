@@ -47,6 +47,14 @@ if __name__ == "__main__":
 
     # Make description for driver
     result = []
+    result.append("This driver runs the data reduction for REF_M and REF_L")
+    result.append("instruments in helping\nto produce 2D maps of pixel ID")
+    result.append("versus perpendicular wavelength (lambda_T). The standard")
+    result.append("output is a *.txt file (3-column ASCII) for R(lambda_T).")
+    result.append("Other intermediate files can be produced")
+    result.append("by using the appropriate dump-X flag described in this")
+    result.append("help. The file extensions are described in the option")
+    result.append("documentation.")
 
     # Set up the options available
     parser = hlr_utils.RefOptions("usage: %prog [options] <datafile>", None,
