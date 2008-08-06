@@ -71,6 +71,7 @@ if __name__ == "__main__":
     parser.remove_option("--nbkg-roi-file")
     parser.remove_option("--data-peak-excl")
     parser.remove_option("--norm-peak-excl")
+    parser.remove_option("--norm-inst-geom")
     parser.remove_option("--no-bkg")
     parser.remove_option("--no-norm-bkg")
     parser.remove_option("--mom-trans-bins")
