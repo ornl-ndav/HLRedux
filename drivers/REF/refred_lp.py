@@ -109,6 +109,11 @@ def run(config, tim):
 
         del d_som2_2
 
+    # Override geometry if necessary
+    if data_inst_geom_dst is not None:
+        data_inst_geom_dst.setGeometry(config.data_paths.toPath(), d_som2)
+        data_inst_geom_dst.release_resource()
+        
     # Step 5: Convert TOF to Wavelength
     if config.verbose:
         print "Converting TOF to wavelength"
