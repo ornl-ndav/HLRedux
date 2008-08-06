@@ -67,7 +67,7 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
         dataset_type = "norm"
     else:
         # Sample data
-        datset_type = "data"
+        dataset_type = "data"
 
     so_axis = "time_of_flight"
 
@@ -96,9 +96,15 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
     else:
         y_sort = False
 
+    if t is not None:
+        t.getTime(False)
+
     d_som2 = dr_lib.sum_all_spectra(d_som1, y_sort=y_sort, stripe=True,
                                     pixel_fix=127)
 
+    if t is not None:
+        t.getTime(msg="After summing low resolution direction ")
+        
     del d_som1
 
     # Step 2: Multiply the spectra by the proton charge
@@ -106,15 +112,20 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
         print "Multiply spectra by proton charge"
 
     pc_tag = dataset_type + "-proton_charge"
-    proton_charge = d_som1.attr_list[pc_tag]
+    proton_charge = d_som2.attr_list[pc_tag]
 
-    d_som2 = common_lib.mult_ncerr(d_som1, (proton_charge.getValue(),
-                                            proton_charge.getError()))
+    if t is not None:
+        t.getTime(False)
+
+    d_som3 = common_lib.mult_ncerr(d_som2, (proton_charge.getValue(), 0.0))
+
+    if t is not None:
+        t.getTime(msg="After scaling by proton charge ")
 
     del d_som2
 
     if roi_file is None:
-        return d_som2
+        return d_som3
     else:
-        #Step 3: Make one spectrum for normalization dataset
-        return dr_lib.sum_all_spectra(d_som2)
+        # Step 3: Make one spectrum for normalization dataset
+        return dr_lib.sum_all_spectra(d_som3)
