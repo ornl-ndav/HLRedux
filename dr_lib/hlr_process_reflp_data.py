@@ -22,9 +22,9 @@
 
 # $Id$
 
-def process_reflp_data(datalist, conf, roi_file):
+def process_reflp_data(datalist, conf, roi_file, **kwargs):
     """
-    This function combines Steps 1 through 5 in section 2.4.6.1 of the data
+    This function combines Steps 1 through 4 in section 2.4.6.1 of the data
     reduction process for Reduction from TOF to lambda_T as specified by
     the document at
     U{http://neutrons.ornl.gov/asg/projects/SCL/reqspec/DR_Lib_RS.doc}. The
@@ -42,8 +42,79 @@ def process_reflp_data(datalist, conf, roi_file):
                      of interest. This only applies to normalization data. 
     @type roi_file: C{string}
 
+    @param kwargs: A list of keyword arguments that the function accepts:
+
+    @keyword timer:  Timing object so the function can perform timing
+                     estimates.
+    @type timer: C{sns_timer.DiffTime}
+
 
     @return: Object that has undergone all requested processing steps
     @rtype: C{SOM.SOM}
     """
-    pass
+    import common_lib
+    import dr_lib
+    import hlr_utils
+
+    # Check keywords
+    try:
+        t = kwargs["timer"]
+    except KeyError:
+        t = None
+
+    if roi_file is not None:
+        # Normalization
+        dataset_type = "norm"
+    else:
+        # Sample data
+        datset_type = "data"
+
+    so_axis = "time_of_flight"
+
+    # Step 0: Open data files and select ROI (if necessary)
+    if conf.verbose:
+        print "Reading %s file" % dataset_type
+
+    d_som1 = dr_lib.add_files(datalist,
+                              Data_Paths=conf.data_paths.toPath(),
+                              SO_Axis=so_axis,
+                              dataset_type=dataset_type,
+                              Signal_ROI=roi_file,
+                              Verbose=conf.verbose,
+                              Timer=t)[0]
+
+    if t is not None:
+        t.getTime(msg="After reading %s " % dataset_type)
+
+    # Step 1: Sum all spectra along the low resolution direction
+    # Set sorting for REF_L
+    if conf.verbose:
+        print "Summing over low resolution direction"
+        
+    if conf.inst == "REF_L":
+        y_sort = True
+    else:
+        y_sort = False
+
+    d_som2 = dr_lib.sum_all_spectra(d_som1, y_sort=y_sort, stripe=True,
+                                    pixel_fix=127)
+
+    del d_som1
+
+    # Step 2 & 4: Multiply the spectra by the proton charge
+    if conf.verbose:
+        print "Multiply spectra by proton charge"
+
+    pc_tag = dataset_type + "-proton_charge"
+    proton_charge = d_som1.attr_list[pc_tag]
+
+    d_som2 = common_lib.mult_ncerr(d_som1, (proton_charge.getValue(),
+                                            proton_charge.getError()))
+
+    del d_som2
+
+    if roi_file is None:
+        return d_som2
+    else:
+        # Make one spectrum for normalization
+        return dr_lib.sum_all_spectra(d_som2)
