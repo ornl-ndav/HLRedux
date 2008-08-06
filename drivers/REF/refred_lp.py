@@ -105,8 +105,41 @@ def run(config, tim):
         del d_som2_2
 
     # Step 5: Convert TOF to Wavelength
+    if config.verbose:
+        print "Converting TOF to wavelength"
 
-    
+    if tim is not None:
+        tim.getTime(False)
+
+    d_som3 = common_lib.tof_to_wavelength(d_som2)
+
+    if tim is not None:
+        tim.getTime(msg="After converting TOF to wavelength ")
+
+    del d_som2
+
+    # Step 6: Scale wavlength axis by sin(theta)
+
+    # Step 7: Rebin to lambda_T axis
+
+    # Step 8: Write out all spectra to a file
+    hlr_utils.write_file(config.output, "text/Spec", d_som6,
+                         replace_ext=False,
+                         replace_path=False,
+                         verbose=config.verbose,
+                         message="Reflectivity information")
+
+    d_som6.attr_list["config"] = config
+
+    hlr_utils.write_file(config.output, "text/rmd", d_som6,
+                         output_ext="rmd", verbose=config.verbose,
+                         data_ext=config.ext_replacement,
+                         path_replacement=config.path_replacement,
+                         message="metadata")
+
+    if tim is not None:
+        tim.setOldTime(old_time)
+        tim.getTime(msg="Total Running Time")    
 
 if __name__ == "__main__":
     import hlr_utils
