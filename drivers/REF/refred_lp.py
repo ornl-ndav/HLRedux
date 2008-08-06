@@ -64,6 +64,26 @@ if __name__ == "__main__":
     # Defaults for REF
     parser.set_defaults(data_paths="/entry/bank1,1")
 
+    # Remove unneeded options
+    parser.remove_option("--angle-offset")
+    parser.remove_option("--data-roi-file")
+    parser.remove_option("--dbkg-roi-file")
+    parser.remove_option("--nbkg-roi-file")
+    parser.remove_option("--data-peak-excl")
+    parser.remove_option("--norm-peak-excl")
+    parser.remove_option("--no-bkg")
+    parser.remove_option("--no-norm-bkg")
+    parser.remove_option("--mom-trans-bins")
+    parser.remove_option("--tof-cuts")
+    parser.remove_option("--no-filter")
+    parser.remove_option("--store-dtot")
+    parser.remove_option("--dump-specular")
+    parser.remove_option("--dump-bkg")
+    parser.remove_option("--dump-sub")
+    parser.remove_option("--dump-rtof-comb")
+    parser.remove_option("--dump-rq")
+    parser.remove_option("--dump-rqr")
+
     # Setup REF specific options
     parser.add_option("", "--timing", action="store_true", dest="timing",
                       help="Flag to turn on timing of code")
