@@ -143,6 +143,8 @@ def run(config, tim):
     else: 
         theta_rads = (float('nan'), float('nan'))
 
+    print "A:", theta_rads
+
     if tim is not None:
         tim.getTime(False)
         
@@ -154,6 +156,51 @@ def run(config, tim):
     del d_som3
 
     # Step 7: Rebin to lambda_T axis
+    if config.verbose:
+        print "Rebinning spectra"
+
+    if config.lambdap_bins is None:
+        # Create a binning scheme
+        delta_TOF = d_som4[0].axis[0].val[1] - d_som4[0].axis[0].val[0]
+
+        try:
+            pathlength = d_som4.attr_list["det_pathlength"]
+        except KeyError:
+            if config.inst == "REF_L":
+                pathlength = (14.85, 0.0)
+            elif config.inst == "REF_M":
+                pathlength = (21.0353, 0.0)
+            else:
+                raise RuntimeError("Do not know how to handle pathlength for "\
+                                   +"%s" % config.inst)
+
+        delta_lambda = common_lib.tof_to_wavelength((delta_TOF, 0.0),
+                                                    pathlength=pathlength)
+        print "B:", delta_lambda
+
+        delta_lambdap = common_lib.div_ncerr(delta_lambda,
+                                             (math.sin(theta_rads[0]), 0.0))
+        
+        print "C:", delta_lambdap
+        
+        config.lambdap_bins = dr_lib.create_axis_from_data(d_som4,
+                                                       width=delta_lambdap[0])
+
+        print "D:", config.lambdap_bins
+    else:
+        # Do nothing, got the binning scheme
+        pass
+
+    if tim is not None:
+        tim.getTime(False)
+
+    d_som5 = common_lib.rebin_axis_1D_frac(d_som4,
+                                           config.lambdap_bins.toNessiList())
+
+    if tim is not None:
+        tim.getTime(msg="After rebinning spectra ")
+
+    del d_som4
 
     # Step 8: Write out all spectra to a file
     hlr_utils.write_file(config.output, "text/Spec", d_som6,
@@ -218,6 +265,11 @@ if __name__ == "__main__":
     parser.remove_option("--dump-rqr")
 
     # Setup REF specific options
+    parser.add_option("", "--lambdap-bins", dest="lambdap_bins",
+                      help="Specify the minimum and maximum lambda "\
+                      +"perpendicular values and the lambda perpedicular "\
+                      +"bin width in Angstroms.")
+    
     parser.add_option("", "--timing", action="store_true", dest="timing",
                       help="Flag to turn on timing of code")
     parser.set_defaults(timing=False)
@@ -230,6 +282,11 @@ if __name__ == "__main__":
     # Call the configuration setter for RefOptions
     hlr_utils.RefConfiguration(parser, configure, options, args)
 
+    # Set the lambda perpendicular
+    if hlr_utils.cli_provide_override(configure, "lambdap_bins",
+                                      "--lambdap-bins"):
+        configure.lambdap_bins = hlr_utils.AxisFromString(options.lambdap_bins)
+        
     # Setup the timing object
     if options.timing:
         import sns_timing
