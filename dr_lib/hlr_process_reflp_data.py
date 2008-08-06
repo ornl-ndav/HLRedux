@@ -24,7 +24,7 @@
 
 def process_reflp_data(datalist, conf, roi_file, **kwargs):
     """
-    This function combines Steps 1 through 4 in section 2.4.6.1 of the data
+    This function combines Steps 1 through 3 in section 2.4.6.1 of the data
     reduction process for Reduction from TOF to lambda_T as specified by
     the document at
     U{http://neutrons.ornl.gov/asg/projects/SCL/reqspec/DR_Lib_RS.doc}. The
@@ -101,7 +101,7 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
 
     del d_som1
 
-    # Step 2 & 4: Multiply the spectra by the proton charge
+    # Step 2: Multiply the spectra by the proton charge
     if conf.verbose:
         print "Multiply spectra by proton charge"
 
@@ -116,5 +116,5 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
     if roi_file is None:
         return d_som2
     else:
-        # Make one spectrum for normalization
+        #Step 3: Make one spectrum for normalization dataset
         return dr_lib.sum_all_spectra(d_som2)
