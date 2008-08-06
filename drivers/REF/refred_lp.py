@@ -40,7 +40,12 @@ def run(config, tim):
                 evaluations.
     @type tim: C{sns_time.DiffTime}
     """
+    import common_lib
+    import dr_lib
     import DST
+    import SOM
+
+    import math
 
     if tim is not None:
         tim.getTime(False)
@@ -118,7 +123,35 @@ def run(config, tim):
 
     del d_som2
 
-    # Step 6: Scale wavlength axis by sin(theta)
+    # Step 6: Scale wavelength axis by sin(theta) to make lambda_T
+    if config.verbose:
+        print "Scaling wavelength axis by sin(theta)"
+    
+    # Make a fake SO
+    so = SOM.SO()
+    # Get the detector angle
+    try: 
+        theta = hlr_utils.get_special(d_som3.attr_list["Theta"], so) 
+    except KeyError: 
+        theta = no_info 
+        
+    if theta[0] is not None: 
+        if theta[2] == "degrees" or theta[2] == "degree": 
+            theta_rads = (theta[0] * (math.pi / 180.0), 0.0)
+        else: 
+            theta_rads = (theta[0], 0.0)
+    else: 
+        theta_rads = (float('nan'), float('nan'))
+
+    if tim is not None:
+        tim.getTime(False)
+        
+    d_som4 = common_lib.div_ncerr(d_som3, theta_rads, axis="x")
+
+    if tim is not None:
+        tim.getTime(msg="After scaling wavelength axis ")
+
+    del d_som3
 
     # Step 7: Rebin to lambda_T axis
 
