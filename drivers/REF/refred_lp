@@ -1,0 +1,4 @@
+#!/bin/sh
+
+loc=`python -c "import drivers.REF; print drivers.REF.__path__[0]"`
+python $loc/refred_lp.py $@

@@ -77,7 +77,8 @@ instrument_scripts = {
     "PD" : [
     ],
     "REF" : [
-    'reflect_reduction'
+    'reflect_reduction',
+    'refred_lp'
     ],
     "SAS" : [
     'sas_background',
