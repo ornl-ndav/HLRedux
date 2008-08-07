@@ -40,6 +40,7 @@ def run(config, tim):
                 evaluations.
     @type tim: C{sns_time.DiffTime}
     """
+    import array_manip
     import common_lib
     import dr_lib
     import DST
@@ -159,8 +160,6 @@ def run(config, tim):
     else: 
         theta_rads = (float('nan'), float('nan'))
 
-    print "A:", theta_rads
-
     if tim is not None:
         tim.getTime(False)
         
@@ -192,18 +191,14 @@ def run(config, tim):
 
         delta_lambda = common_lib.tof_to_wavelength((delta_TOF, 0.0),
                                                     pathlength=pathlength)
-        print "B:", delta_lambda
-
-        import array_manip
+ 
+ 
         delta_lambdap = array_manip.div_ncerr(delta_lambda[0], delta_lambda[1],
                                               math.sin(theta_rads[0]), 0.0)
-        
-        print "C:", delta_lambdap
         
         config.lambdap_bins = dr_lib.create_axis_from_data(d_som4,
                                                        width=delta_lambdap[0])
 
-        print "D:", config.lambdap_bins
     else:
         # Do nothing, got the binning scheme
         pass
