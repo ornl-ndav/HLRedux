@@ -229,7 +229,7 @@ def create_X_vs_pixpos(som, *args, **kwargs):
     except KeyError:
         comb_som.setYUnits("Counts / Arb")
 
-    # Check for x_labels keyword argument
+    # Check for x_label keyword argument
     try:
         comb_som.setAllAxisLabels(["Pixel Number", kwargs["x_label"]])
     except KeyError:
