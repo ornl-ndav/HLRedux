@@ -71,6 +71,26 @@ def run(config, tim):
                                        None,
                                        timer=tim)
 
+    # Get TOF bin width
+    delta_TOF = d_som1[0].axis[0].val[1] - d_som1[0].axis[0].val[0]
+
+    # Get the detector angle
+
+    # Make a fake SO
+    so = SOM.SO()
+    try: 
+        theta = hlr_utils.get_special(d_som1.attr_list["TwoTheta"], so)
+    except KeyError: 
+        theta = (float('nan'), float('nan'))
+        
+    if theta[0] is not None: 
+        if theta[2] == "degrees" or theta[2] == "degree": 
+            theta_rads = (theta[0] * (math.pi / 180.0), 0.0)
+        else: 
+            theta_rads = (theta[0], 0.0)
+    else: 
+        theta_rads = (float('nan'), float('nan'))
+
     # Perform Steps 1-3 on normalization data
     if config.norm is not None:
         n_som1 = dr_lib.process_reflp_data(config.norm, config,
@@ -125,7 +145,7 @@ def run(config, tim):
     if data_inst_geom_dst is not None:
         data_inst_geom_dst.setGeometry(config.data_paths.toPath(), d_som2)
         data_inst_geom_dst.release_resource()
-        
+
     # Step 5: Convert TOF to Wavelength
     if config.verbose:
         print "Converting TOF to wavelength"
@@ -144,22 +164,6 @@ def run(config, tim):
     if config.verbose:
         print "Scaling wavelength axis by sin(theta)"
     
-    # Make a fake SO
-    so = SOM.SO()
-    # Get the detector angle
-    try: 
-        theta = hlr_utils.get_special(d_som3.attr_list["Theta"], so) 
-    except KeyError: 
-        theta = no_info 
-        
-    if theta[0] is not None: 
-        if theta[2] == "degrees" or theta[2] == "degree": 
-            theta_rads = (theta[0] * (math.pi / 180.0), 0.0)
-        else: 
-            theta_rads = (theta[0], 0.0)
-    else: 
-        theta_rads = (float('nan'), float('nan'))
-
     if tim is not None:
         tim.getTime(False)
         
@@ -178,8 +182,6 @@ def run(config, tim):
 
     if config.lambdap_bins is None:
         # Create a binning scheme
-        delta_TOF = d_som4[0].axis[0].val[1] - d_som4[0].axis[0].val[0]
-
         try:
             pathlength = d_som4.attr_list["det_pathlength"]
         except KeyError:
@@ -194,10 +196,9 @@ def run(config, tim):
         delta_lambda = common_lib.tof_to_wavelength((delta_TOF, 0.0),
                                                     pathlength=pathlength)
  
- 
         delta_lambdap = array_manip.div_ncerr(delta_lambda[0], delta_lambda[1],
                                               math.sin(theta_rads[0]), 0.0)
-        
+
         config.lambdap_bins = dr_lib.create_axis_from_data(d_som4,
                                                        width=delta_lambdap[0])
 
