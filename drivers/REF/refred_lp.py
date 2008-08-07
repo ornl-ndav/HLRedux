@@ -221,6 +221,17 @@ def run(config, tim):
                          verbose=config.verbose,
                          message="Reflectivity information")
 
+    if config.dump_twod:
+        d_som6 = dr_lib.create_X_vs_pixpos(d_som5,
+                                           config.lambdap_bins.toNessiList(),
+                                           rebin=False)
+
+        hlr_utils.write_file(config.output, "text/Dave2d", d_som6,
+                             output_ext="plp", verbose=config.verbose,
+                             data_ext=config.ext_replacement,
+                             path_replacement=config.path_replacement,
+                             message="2D Reflectivity information")
+
     d_som5.attr_list["config"] = config
 
     hlr_utils.write_file(config.output, "text/rmd", d_som5,
@@ -280,7 +291,13 @@ if __name__ == "__main__":
                       help="Specify the minimum and maximum lambda "\
                       +"perpendicular values and the lambda perpedicular "\
                       +"bin width in Angstroms.")
-    
+
+    parser.add_option("", "--dump-twod", action="store_true",
+                      dest="dump_twod",
+                      help="Flag to dump the R(pid,lambda_T) information. "\
+                      +"Creates a *.plp file.")
+    parser.set_defaults(dump_twod=False)
+
     parser.add_option("", "--timing", action="store_true", dest="timing",
                       help="Flag to turn on timing of code")
     parser.set_defaults(timing=False)
@@ -293,11 +310,19 @@ if __name__ == "__main__":
     # Call the configuration setter for RefOptions
     hlr_utils.RefConfiguration(parser, configure, options, args)
 
-    # Set the lambda perpendicular
+    # Set the lambda perpendicular (lambda_T)
     if hlr_utils.cli_provide_override(configure, "lambdap_bins",
                                       "--lambdap-bins"):
         configure.lambdap_bins = hlr_utils.AxisFromString(options.lambdap_bins)
+
+    # Set the ability to dump the R(pid, lambda_T) information
+    if hlr_utils.cli_provide_override(configure, "dump_twod", "--dump-twod"):
+        configure.dump_twod = options.dump_twod
         
+    if hlr_utils.cli_provide_override(configure, "dump_all", "--dump-all"):
+        if options.dump_all:
+            configure.dump_twod = True
+
     # Setup the timing object
     if options.timing:
         import sns_timing
