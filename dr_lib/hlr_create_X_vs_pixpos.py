@@ -70,9 +70,9 @@ def create_X_vs_pixpos(som, *args, **kwargs):
     @keyword y_units: The y axis units
     @type y_units: C{string}
     
-    @keyword x_labels: This is a list of names that sets the individual x axis
+    @keyword x_label: This is a list of names that sets the individual x axis
     labels
-    @type x_labels: C{list} of C{string}s
+    @type x_label: C{list} of C{string}s
     
     @keyword x_units: This is a list of names that sets the individual x axis
     units
