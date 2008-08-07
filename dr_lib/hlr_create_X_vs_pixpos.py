@@ -46,39 +46,33 @@ def create_X_vs_pixpos(som, *args, **kwargs):
     
     @param kwargs: A list of keyword arguments that the function accepts:
     
-    @keyword withXVar: Flag for whether the function should be expecting the
+    @keyword withXVar: A flag for whether the function should be expecting the
                        associated axes to have errors. The default value will
                        be I{False}.
     @type withXVar: C{boolean}
 
-    @keyword data_type: Name of the data type which can be either I{histogram},
-                        I{density} or I{coordinate}. The default value will be
-                        I{histogram}
+    @keyword data_type: The name of the data type which can be either
+                        I{histogram}, I{density} or I{coordinate}. The default
+                        value will be I{histogram}.
     @type data_type: C{string}
     
-    @keyword Q_filter: Flag to turn on or off Q filtering. The default behavior
-                       is I{True}.
-    @type Q_filter: C{boolean}
-    
     @keyword so_id: The identifier represents a number, string, tuple or other
-                    object that describes the resulting C{SO}
+                    object that describes the resulting C{SO}.
     @type so_id: C{int}, C{string}, C{tuple}, C{pixel ID}
     
-    @keyword y_label: The y axis label
+    @keyword y_label: The dependent axis label
     @type y_label: C{string}
     
-    @keyword y_units: The y axis units
+    @keyword y_units: The dependent axis units
     @type y_units: C{string}
     
-    @keyword x_label: This is a list of names that sets the individual x axis
-    labels
-    @type x_label: C{list} of C{string}s
+    @keyword x_label: The second primary axis label
+    @type x_label: C{string}
     
-    @keyword x_units: This is a list of names that sets the individual x axis
-    units
-    @type x_units: C{list} of C{string}s
+    @keyword x_units: The second primary axis units
+    @type x_units: C{string}
 
-    @keyword rebin: Flag for turning rebin on or off. Default is I{True}.
+    @keyword rebin: A flag for turning rebin on or off. The default is I{True}.
     @type rebin: C{boolean}
 
 
