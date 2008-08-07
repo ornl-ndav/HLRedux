@@ -227,7 +227,11 @@ def run(config, tim):
     if config.dump_twod:
         d_som6 = dr_lib.create_X_vs_pixpos(d_som5,
                                            config.lambdap_bins.toNessiList(),
-                                           rebin=False)
+                                           rebin=False,
+                                           y_label="R",
+                                           y_units="",
+                                           x_label="$\lambda_T$",
+                                           x_units="$\AA$")
 
         hlr_utils.write_file(config.output, "text/Dave2d", d_som6,
                              output_ext="plp", verbose=config.verbose,
