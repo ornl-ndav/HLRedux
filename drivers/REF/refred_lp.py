@@ -170,6 +170,8 @@ def run(config, tim):
 
     del d_som3
 
+    d_som4.setAxisLabel(0, "lambda_T")
+
     # Step 7: Rebin to lambda_T axis
     if config.verbose:
         print "Rebinning spectra"
