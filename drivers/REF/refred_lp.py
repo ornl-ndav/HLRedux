@@ -291,6 +291,11 @@ if __name__ == "__main__":
                       +"perpendicular values and the lambda perpedicular "\
                       +"bin width in Angstroms.")
 
+    parser.add_option("", "--mon-norm", action="store_true", dest="mon_norm",
+                      help="Flag for using monitor normalization instead of "\
+                      +"proton charge.")
+    parser.set_defaults(mon_norm=False)
+
     parser.add_option("", "--dump-twod", action="store_true",
                       dest="dump_twod",
                       help="Flag to dump the R(pid,lambda_T) information. "\
@@ -313,6 +318,10 @@ if __name__ == "__main__":
     if hlr_utils.cli_provide_override(configure, "lambdap_bins",
                                       "--lambdap-bins"):
         configure.lambdap_bins = hlr_utils.AxisFromString(options.lambdap_bins)
+
+    # Set mon_norm flag
+    if hlr_utils.cli_provide_override(configure, "mon_norm", "--mon-norm"):
+        configure.mon_norm = options.mon_norm
 
     # Set the ability to dump the R(pid, lambda_T) information
     if hlr_utils.cli_provide_override(configure, "dump_twod", "--dump-twod"):
