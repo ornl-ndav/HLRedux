@@ -182,16 +182,8 @@ def run(config, tim):
 
     if config.lambdap_bins is None:
         # Create a binning scheme
-        try:
-            pathlength = d_som4.attr_list["det_pathlength"]
-        except KeyError:
-            if config.inst == "REF_L":
-                pathlength = (14.85, 0.0)
-            elif config.inst == "REF_M":
-                pathlength = (21.0353, 0.0)
-            else:
-                raise RuntimeError("Do not know how to handle pathlength for "\
-                                   +"%s" % config.inst)
+        pathlength = d_som4.attr_list.instrument.get_total_path(
+            det_secondary=True)
 
         delta_lambda = common_lib.tof_to_wavelength((delta_TOF, 0.0),
                                                     pathlength=pathlength)
