@@ -91,6 +91,8 @@ def run(config, tim):
     else: 
         theta_rads = (float('nan'), float('nan'))
 
+    d_som1.attr_list["data-theta"] = (theta_rads[0], theta_rads[1], "radians")
+
     # Perform Steps 1-3 on normalization data
     if config.norm is not None:
         n_som1 = dr_lib.process_reflp_data(config.norm, config,
