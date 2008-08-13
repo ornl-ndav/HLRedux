@@ -52,7 +52,7 @@ def run(config):
     if dst_type == "text/Spec":
         __plot_a3c(d_som, config)
     elif dst_type == "text/Dave2d":
-        __plot_dave(d_som)
+        __plot_dave(d_som, config)
     elif dst_type == "text/num-info":
         __plot_numinfo(d_som)
     else:
@@ -147,7 +147,7 @@ def __plot_one_a3c(x, y, var_y, *args, **kwargs):
         ax = pylab.gca()
         ax.set_xscale("log")
 
-def __plot_dave(som):
+def __plot_dave(som, conf):
     """
     This subroutine is responsible for plotting a Dave 2D file.
     """
@@ -160,8 +160,15 @@ def __plot_dave(som):
     z = numpy.reshape(numpy.nan_to_num(info[0][2]), (Nx, Ny))
 
     import matplotlib.cm as cm
+    import matplotlib
 
-    pylab.contourf(info[0][1], info[0][0], z, cmap=cm.hot)
+    if conf.logz:
+        mylocator = matplotlib.ticker.LogLocator()
+    else:
+        mylocator = None
+
+    pylab.contourf(info[0][1], info[0][0], z, cmap=cm.hot,
+                   locator=mylocator)
 
     energy_units = som.getAxisUnits(1)
     if energy_units == "ueV":
@@ -216,7 +223,10 @@ if __name__ == "__main__":
     parser.set_defaults(logy=False)
 
     parser.add_option("", "--logx", dest="logx", action="store_true")
-    parser.set_defaults(logx=False)    
+    parser.set_defaults(logx=False)
+
+    parser.add_option("", "--logz", dest="logz", action="store_true")
+    parser.set_defaults(logz=False)        
     
     # Do not need to use the following options
     parser.remove_option("--config")
@@ -252,7 +262,10 @@ if __name__ == "__main__":
     configure.logy = options.logy
 
     # Set the logarithmic x-axis
-    configure.logx = options.logx    
+    configure.logx = options.logx
+
+    # Set the logarithmic z-axis
+    configure.logz = options.logz    
 
     # Run the program
     run(configure)
