@@ -48,24 +48,81 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
     @keyword rebin_axis: An axis to rebin the given spectra to.
     @type rebin_axis: C{nessi_list.NessiList}
 
+    @keyword data_type: The name of the data type which can be either
+                        I{histogram}, I{density} or I{coordinate}. The default
+                        value will be I{histogram}.
+    @type data_type: C{string}
+
 
     @return: A two dimensional spectrum with the parameter as the x-axis and
              the given spectra axes as the y-axis.
     @rtype: C{SOM.SOM}
     """
-    import common_lib
     import hlr_utils
     import nessi_list
     import SOM
 
+    # Check for rebinning axis
+    try:
+        rebin_axis = kwargs["rebin_axis"]
+    except KeyError:
+        rebin_axis = None
+
+    # Check dataType keyword argument. An offset will be set to 1 for the
+    # histogram type and 0 for either density or coordinate
+    try:
+        data_type = kwargs["data_type"]
+        if data_type.lower() == "histogram":
+            offset = 1
+        elif data_type.lower() == "density" or \
+                 data_type.lower() == "coordinate":
+            offset = 0
+        else:
+            raise RuntimeError("Do not understand data type given: %s" % \
+                               data_type)
+    # Default is offset for histogram
+    except KeyError:
+        offset = 1
+
     # Setup some variables 
     dim = 2
-    N_y = []
     N_tot = 1
-    N_args = len(args)
 
     # Create 2D spectrum object
     so_dim = SOM.SO(dim)
+
+    # Set the axis locations
+    param_axis = 0    
+    arb_axis = 1
+
+    # Rebin original data to rebin_axis if necessary
+    if rebin_axis is not None:
+        som1 = common_lib.rebin_axis_1D_frac(som, rebin_axis)
+        len_arb_data = len(rebin_axis) - offset
+        so_dim.axis[arb_axis].val = rebin_axis
+    else:
+        som1 = som
+        len_arb_data = len(som[0].axis[0].val) - offset
+        so_dim.axis[arb_axis].val = som[0].axis[0].val
+
+    del som
+
+    len_param_axis = len(param_axis) - offset
+    so_dim.axis[param_axis].val = param_axis
+
+    N_tot = len_param_axis * len_arb_data
+
+    # Create y and var_y lists from total 2D size
+    so_dim.y = nessi_list.NessiList(N_tot)
+    so_dim.var_y = nessi_list.NessiList(N_tot)
+
+    # Loop through data and create 2D spectrum
+    len_som = hlr_utils.get_length(som_1)
+    for i in xrange(len_som):
+        val = hlr_utils.get_value(som_1, i, "SOM", "y")
+        err2 = hlr_utils.get_err2(som_1, i, "SOM", "y")
+
+
 
     # Create final 2D spectrum object container
     comb_som = SOM.SOM()
