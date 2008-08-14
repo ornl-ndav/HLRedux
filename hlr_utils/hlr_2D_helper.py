@@ -48,3 +48,28 @@ def param_array(som, param):
 
     return plist
         
+def negparam_array(som, param):
+    """
+    This function takes a parameter and interrogates the object for that
+    information and flips its sign.
+
+    @param som: The object containing the requested information.
+    @type som: C{SOM.SOM}
+
+    @param param: The name of the parameter to seek.
+    @type param: C{string}
+
+
+    @return: An array of the negated values from parameters from the incoming
+             object.
+    @rtype: C{list}
+    """
+    len_som = hlr_utils.get_length(som)
+    plist = hlr_utils.param_array(som, param)
+
+    for i in xrange(len_som):
+        plist[i] *= -1.0
+
+    return plist
+    
+    
