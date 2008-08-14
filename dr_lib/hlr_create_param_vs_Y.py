@@ -117,15 +117,18 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
     so_dim.var_y = nessi_list.NessiList(N_tot)
 
     # Loop through data and create 2D spectrum
-    len_som = hlr_utils.get_length(som_1)
+    len_som = hlr_utils.get_length(som1)
     for i in xrange(len_som):
-        val = hlr_utils.get_value(som_1, i, "SOM", "y")
-        err2 = hlr_utils.get_err2(som_1, i, "SOM", "y")
+        val = hlr_utils.get_value(som1, i, "SOM", "y")
+        err2 = hlr_utils.get_err2(som1, i, "SOM", "y")
 
 
 
     # Create final 2D spectrum object container
     comb_som = SOM.SOM()
+    comb_som.copyAttributes(som1)
+
+    del som1
     
     comb_som.append(so_dim)
 
