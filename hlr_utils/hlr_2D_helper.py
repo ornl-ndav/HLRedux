@@ -72,4 +72,31 @@ def negparam_array(som, param):
 
     return plist
     
-    
+def __trig_param_array(som, param, trig_func):
+    """
+    This private function applies a trigonometric function to a given
+    parameter obtained from the supplied object.
+
+    @param som: The object containing the requested information.
+    @type som: C{SOM.SOM}
+
+    @param param: The name of the parameter to seek.
+    @type param: C{string}
+
+
+    @return: An array of trigonometry applied values from parameters from the
+             incoming object.
+    @rtype: C{list}   
+    """
+    import math
+    len_som = hlr_utils.get_length(som)
+    plist = []
+    inst = som.attr_list.instrument
+
+    tfunc = math.__getattribute__(trig_func)
+
+    for i in xrange(len_som):
+        plist.append(tfunc(hlr_utils.get_parameter(param, som[i], inst)[0]))
+
+    return plist
+
