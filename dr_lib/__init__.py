@@ -34,6 +34,7 @@ from hlr_calc_solid_angle import *
 from hlr_calculate_ref_background import *
 from hlr_create_axis_from_data import *
 from hlr_create_E_vs_Q_igs import create_E_vs_Q_igs
+from hlr_create_param_vs_Y import *
 from hlr_convert_single_to_list import *
 from hlr_create_X_vs_pixpos import *
 from hlr_cut_spectra import *
