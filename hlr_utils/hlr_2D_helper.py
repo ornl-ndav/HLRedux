@@ -64,13 +64,7 @@ def negparam_array(som, param):
              object.
     @rtype: C{list}
     """
-    len_som = hlr_utils.get_length(som)
-    plist = hlr_utils.param_array(som, param)
-
-    for i in xrange(len_som):
-        plist[i] *= -1.0
-
-    return plist
+    return __negate_array(hlr_utils.param_array(som, param))
 
 def __negate_array(array):
     """
