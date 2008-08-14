@@ -102,3 +102,58 @@ def __trig_param_array(som, param, trig_func):
         plist.append(tfunc(hlr_utils.get_parameter(param, som[i], inst)[0]))
 
     return plist
+
+def sin_param_array(som, param):
+    """
+    This function applies the I{sine} trig function to the requested
+    parameter. 
+    
+    @param som: The object containing the requested information.
+    @type som: C{SOM.SOM}
+
+    @param param: The name of the parameter to seek.
+    @type param: C{string}
+
+    
+    @return: An array of sine applied values from parameters from the incoming
+             object.
+    @rtype: C{list}   
+    """
+    return __trig_param_array(som, param, "sin")
+
+def cos_param_array(som, param):
+    """
+    This function applies the I{cosine} trig function to the requested
+    parameter. 
+    
+    @param som: The object containing the requested information.
+    @type som: C{SOM.SOM}
+
+    @param param: The name of the parameter to seek.
+    @type param: C{string}
+
+    
+    @return: An array of cosine applied values from parameters from the
+             incoming object.
+    @rtype: C{list}   
+    """
+    return __trig_param_array(som, param, "cos")
+
+def tan_param_array(som, param):
+    """
+    This function applies the I{tangent} trig function to the requested
+    parameter. 
+    
+    @param som: The object containing the requested information.
+    @type som: C{SOM.SOM}
+
+    @param param: The name of the parameter to seek.
+    @type param: C{string}
+
+    
+    @return: An array of tangent applied values from parameters from the
+             incoming object.
+    @rtype: C{list}   
+    """
+    return __trig_param_array(som, param, "tan")
+
