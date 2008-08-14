@@ -79,10 +79,10 @@ def run(config, tim):
     # Make a fake SO
     so = SOM.SO()
     try: 
-        theta = hlr_utils.get_special(d_som1.attr_list["TwoTheta"], so)
+        theta = hlr_utils.get_special(d_som1.attr_list["Theta"], so)
     except KeyError: 
         theta = (float('nan'), float('nan'))
-        
+
     if theta[0] is not None: 
         if theta[2] == "degrees" or theta[2] == "degree": 
             theta_rads = (theta[0] * (math.pi / 180.0), 0.0)
