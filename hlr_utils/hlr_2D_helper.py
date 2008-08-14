@@ -71,6 +71,23 @@ def negparam_array(som, param):
         plist[i] *= -1.0
 
     return plist
+
+def __negate_array(array):
+    """
+    This private function negates (multplies by -1) each element of an array.
+
+    @param array: The list of values to negate
+    @type array: C{list}
+
+
+    @return: The list of negated elements.
+    @rtype: C{list}
+    """
+    len_arr = len(array)
+    for i in xrange(len_arr):
+        array[i] *= -1.0
+
+    return array
     
 def __trig_param_array(som, param, trig_func):
     """
