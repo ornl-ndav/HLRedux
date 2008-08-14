@@ -83,6 +83,9 @@ def __trig_param_array(som, param, trig_func):
     @param param: The name of the parameter to seek.
     @type param: C{string}
 
+    @param trig_func: The name of the trigonometric function to apply.
+    @type trig_func: C{string}
+    
 
     @return: An array of trigonometry applied values from parameters from the
              incoming object.
@@ -99,4 +102,3 @@ def __trig_param_array(som, param, trig_func):
         plist.append(tfunc(hlr_utils.get_parameter(param, som[i], inst)[0]))
 
     return plist
-
