@@ -74,6 +74,7 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
              the given spectra axes as the y-axis.
     @rtype: C{SOM.SOM}
     """
+    import array_manip
     import hlr_utils
     import nessi_list
     import SOM
@@ -109,31 +110,31 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
     so_dim = SOM.SO(dim)
 
     # Set the axis locations
-    param_axis = 0    
-    arb_axis = 1
+    param_axis_loc = 0    
+    arb_axis_loc = 1
 
     # Rebin original data to rebin_axis if necessary
     if rebin_axis is not None:
         som1 = common_lib.rebin_axis_1D_frac(som, rebin_axis)
-        len_arb_data = len(rebin_axis) - offset
-        so_dim.axis[arb_axis].val = rebin_axis
+        len_arb_axis = len(rebin_axis) - offset
+        so_dim.axis[arb_axis_loc].val = rebin_axis
     else:
         som1 = som
-        len_arb_data = len(som[0].axis[0].val) - offset
-        so_dim.axis[arb_axis].val = som[0].axis[0].val
+        len_arb_axis = len(som[0].axis[0].val) - offset
+        so_dim.axis[arb_axis_loc].val = som[0].axis[0].val
 
     del som
 
     # Get parameter axis information
     len_param_axis = len(param_axis) - offset
-    so_dim.axis[param_axis].val = param_axis
+    so_dim.axis[param_axis_loc].val = param_axis
 
     # Get the parameter lookup array
     pfunc = hlr_utils.__getattribute__(param_func)
-    lookup_array = pfunc(som, param)
+    lookup_array = pfunc(som1, param)
 
     # Create y and var_y lists from total 2D size
-    N_tot = len_param_axis * len_arb_data
+    N_tot = len_param_axis * len_arb_axis
     so_dim.y = nessi_list.NessiList(N_tot)
     so_dim.var_y = nessi_list.NessiList(N_tot)
 
