@@ -53,6 +53,22 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
                         value will be I{histogram}.
     @type data_type: C{string}
 
+    @keyword so_id: The identifier represents a number, string, tuple or other
+                    object that describes the resulting C{SO}.
+    @type so_id: C{int}, C{string}, C{tuple}, C{pixel ID}
+    
+    @keyword y_label: The dependent axis label
+    @type y_label: C{string}
+    
+    @keyword y_units: The dependent axis units
+    @type y_units: C{string}
+    
+    @keyword x_labels: The two independent axis labels
+    @type x_labels: C{list} of C{string}s
+    
+    @keyword x_units: The two independent axis units
+    @type x_units: C{list} of C{string}s
+
 
     @return: A two dimensional spectrum with the parameter as the x-axis and
              the given spectra axes as the y-axis.
@@ -141,7 +157,37 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
     comb_som.copyAttributes(som1)
 
     del som1
-    
+
+    # Check for so_id keyword argument
+    try:
+        so_dim.id = kwargs["so_id"]
+    except KeyError:
+        so_dim.id = 0
+
+    # Check for y_label keyword argument
+    try:
+        comb_som.setYLabel(kwargs["y_label"])
+    except KeyError:        
+        comb_som.setYLabel("Counts")
+
+    # Check for y_units keyword argument
+    try:
+        comb_som.setYUnits(kwargs["y_units"])
+    except KeyError:
+        comb_som.setYUnits("Counts / Arb")
+
+    # Check for x_label keyword argument
+    try:
+        comb_som.setAllAxisLabels(kwargs["x_labels"])
+    except KeyError:
+        comb_som.setAllAxisLabels(["Parameter", "Arbitrary"])
+
+    # Check for x_units keyword argument
+    try:
+        comb_som.setAllAxisUnits(kwargs["x_units"])
+    except KeyError:
+        comb_som.setAllAxisUnits(["Arb", "Arb"])
+
     comb_som.append(so_dim)
 
     del so_dim
