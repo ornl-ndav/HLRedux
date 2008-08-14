@@ -168,3 +168,54 @@ def tan_param_array(som, param):
     """
     return __trig_param_array(som, param, "tan")
 
+def negsin_param_array(som, param):
+    """
+    This function applies -I{sine} trig function to the requested parameter. 
+    
+    @param som: The object containing the requested information.
+    @type som: C{SOM.SOM}
+
+    @param param: The name of the parameter to seek.
+    @type param: C{string}
+
+    
+    @return: An array of negated sine applied values from parameters from
+             the incoming object.
+    @rtype: C{list}   
+    """
+    return __negate_array(hlr_utils.sin_param_array(som, param))
+
+def negcos_param_array(som, param):
+    """
+    This function applies -I{cosine} trig function to the requested parameter. 
+    
+    @param som: The object containing the requested information.
+    @type som: C{SOM.SOM}
+
+    @param param: The name of the parameter to seek.
+    @type param: C{string}
+
+    
+    @return: An array of negated cosine applied values from parameters from
+             the incoming object.
+    @rtype: C{list}   
+    """
+    return __negate_array(hlr_utils.cos_param_array(som, param))
+
+def negtan_param_array(som, param):
+    """
+    This function applies -I{tangent} trig function to the requested
+    parameter. 
+    
+    @param som: The object containing the requested information.
+    @type som: C{SOM.SOM}
+
+    @param param: The name of the parameter to seek.
+    @type param: C{string}
+
+    
+    @return: An array of negated tangent applied values from parameters from
+             the incoming object.
+    @rtype: C{list}   
+    """
+    return __negate_array(hlr_utils.tan_param_array(som, param))
