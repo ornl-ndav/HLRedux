@@ -20,29 +20,31 @@
 # its use would not infringe privately owned rights.
 #
 
-"""
-The functions and objects in this module provide support functionality for
-handling various data reduction requests.
-"""
+# $Id$
 
-from hlr_1D_units import *
-from hlr_2D_helper import *
-from hlr_amr_options import AmrOptions, AmrConfiguration
-from hlr_axis_object import *
-from hlr_bisect_helper import bisect_helper
-from hlr_config import Configure, ConfigFromXml
-from hlr_drparameter import *
-from hlr_fix_index import *
-from hlr_igs_options import IgsOptions, IgsConfiguration
-from hlr_math_compatible import *
-from hlr_nxpath import *
-from hlr_options import *
-from hlr_ref_options import RefOptions, RefConfiguration
-from hlr_sas_options import SansOptions, SansConfiguration
-from hlr_data_helper import *
-from hlr_driver_helper import *
+import hlr_utils
 
-from HLR_version import version as __version__
+def param_array(som, param):
+    """
+    This function takes a parameter and interrogates the object for that
+    information.
 
-#version
-__id__ = "$Id$"
+    @param som: The object containing the requested information.
+    @type som: C{SOM.SOM}
+
+    @param param: The name of the parameter to seek.
+    @type param: C{string}
+
+
+    @return: An array of the parameters from the incoming object.
+    @rtype: C{list}
+    """
+    len_som = hlr_utils.get_length(som)
+    plist = []
+    inst = som.attr_list.instrument
+
+    for i in xrange(len_som):
+        plist.append(hlr_utils.get_parameter(param, som[i], inst)[0])
+
+    return plist
+        
