@@ -61,6 +61,7 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
     import hlr_utils
     import nessi_list
     import SOM
+    import utils
 
     # Check for rebinning axis
     try:
@@ -107,12 +108,16 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
 
     del som
 
+    # Get parameter axis information
     len_param_axis = len(param_axis) - offset
     so_dim.axis[param_axis].val = param_axis
 
-    N_tot = len_param_axis * len_arb_data
+    # Get the parameter lookup array
+    pfunc = hlr_utils.__getattribute__(param_func)
+    lookup_array = pfunc(som, param)
 
     # Create y and var_y lists from total 2D size
+    N_tot = len_param_axis * len_arb_data
     so_dim.y = nessi_list.NessiList(N_tot)
     so_dim.var_y = nessi_list.NessiList(N_tot)
 
@@ -122,7 +127,14 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
         val = hlr_utils.get_value(som1, i, "SOM", "y")
         err2 = hlr_utils.get_err2(som1, i, "SOM", "y")
 
+        bin_index = utils.bisect_helper(param_axis, lookup_array[i])
+        start = bin_index * len_arb_axis
 
+        (so_dim.y, so_dim.var_y) = array_manip.add_ncerr(so_dim.y,
+                                                         so_dim.var_y,
+                                                         val,
+                                                         err2,
+                                                         a_start=start)        
 
     # Create final 2D spectrum object container
     comb_som = SOM.SOM()
