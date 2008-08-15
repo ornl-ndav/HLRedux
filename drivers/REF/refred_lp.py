@@ -75,14 +75,16 @@ def run(config, tim):
     delta_TOF = d_som1[0].axis[0].val[1] - d_som1[0].axis[0].val[0]
 
     # Get the detector angle
-
-    # Make a fake SO
-    so = SOM.SO()
-    try: 
-        theta = hlr_utils.get_special(d_som1.attr_list["Theta"], so)
-    except KeyError: 
-        theta = (float('nan'), float('nan'))
-
+    if config.omega is None:
+        # Make a fake SO
+        so = SOM.SO()
+        try: 
+            theta = hlr_utils.get_special(d_som1.attr_list["Theta"], so)
+        except KeyError: 
+            theta = (float('nan'), float('nan'))
+    else:
+        theta = config.omega.toFullTuple()
+        
     if theta[0] is not None: 
         if theta[2] == "degrees" or theta[2] == "degree": 
             theta_rads = (theta[0] * (math.pi / 180.0), 0.0)
@@ -298,6 +300,10 @@ if __name__ == "__main__":
                       +"proton charge.")
     parser.set_defaults(mon_norm=False)
 
+    parser.add_option("", "--omega", dest="omega", help="Override the value "\
+                      +"of the angle for lambda perpendicular. The units on "\
+                      +"the angle must be in radians.")
+
     parser.add_option("", "--dump-twod", action="store_true",
                       dest="dump_twod",
                       help="Flag to dump the R(pid,lambda_T) information. "\
@@ -324,6 +330,10 @@ if __name__ == "__main__":
     # Set mon_norm flag
     if hlr_utils.cli_provide_override(configure, "mon_norm", "--mon-norm"):
         configure.mon_norm = options.mon_norm
+
+    # Set the override angle for calculating lambda_T
+    if hlr_utils.cli_provide_override(configure, "omega", "--omega"):
+        configure.omega = hlr_utils.DrParameterFromString(options.omega, True)
 
     # Set the ability to dump the R(pid, lambda_T) information
     if hlr_utils.cli_provide_override(configure, "dump_twod", "--dump-twod"):
