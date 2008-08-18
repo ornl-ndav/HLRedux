@@ -75,6 +75,7 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
     @rtype: C{SOM.SOM}
     """
     import array_manip
+    import common_lib
     import hlr_utils
     import nessi_list
     import SOM
