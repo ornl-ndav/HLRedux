@@ -126,11 +126,11 @@ def energy_transfer(obj, itype, axis_const, **kwargs):
 
     for i in xrange(hlr_utils.get_length(obj)):
         if itype == "IGS":
-            E_i = hlr_utils.get_value(obj, i, o_descr, "x", axis)
-            E_i_err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
+            l_i = hlr_utils.get_value(obj, i, o_descr, "x", axis)
+            l_i_err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
         else:
-            E_f = hlr_utils.get_value(obj, i, o_descr, "x", axis)
-            E_f_err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
+            l_f = hlr_utils.get_value(obj, i, o_descr, "x", axis)
+            l_f_err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
             
         y_val = hlr_utils.get_value(obj, i, o_descr, "y", axis)
         y_err2 = hlr_utils.get_err2(obj, i, o_descr, "y", axis)
@@ -138,21 +138,21 @@ def energy_transfer(obj, itype, axis_const, **kwargs):
         map_so = hlr_utils.get_map_so(obj, None, i)
 
         if itype == "IGS":
-            l_f = hlr_utils.get_special(lambda_f, map_so)
+            (E_i, E_i_err2) = axis_manip.wavelength_to_energy(l_i, l_i_err2)
+            l_f = hlr_utils.get_special(axis_c, map_so)[:2]
             (E_f, E_f_err2) = axis_manip.wavelength_to_energy(l_f[0], l_f[1])
         else:
             (E_i, E_i_err2) = axis_c.toValErrTuple()
+            (E_f, E_f_err2) = axis_manip.wavelength_to_energy(l_f, l_f_err2)
 
         if scale:
             # Scale counts by lambda_f / lambda_i
             if itype == "IGS":
-                l_i = axis_manip.energy_to_wavelength(E_i, E_i_err2)
-                (l_d, l_d_err2) = utils.calc_bin_centers(l_i[0], l_i[1])
+                (l_d, l_d_err2) = utils.calc_bin_centers(l_i, l_i_err2)
                 (l_n, l_n_err2) = l_f
             # Scale counts by lambda_i / lambda_f                
             else:
-                l_f = axis_manip.energy_to_wavelength(E_f, E_f_err2)
-                (l_d, l_d_err2) = utils.calc_bin_centers(l_f[0], l_f[1])
+                (l_d, l_d_err2) = utils.calc_bin_centers(l_f, l_f_err2)
                 (l_n, l_n_err2) = axis_manip.energy_to_wavelength(E_i,
                                                                   E_i_err2)
                 
@@ -172,8 +172,13 @@ def energy_transfer(obj, itype, axis_const, **kwargs):
             value2 = value
             value3 = scale_y
 
-        hlr_utils.result_insert(result, res_descr, value3, map_so, "all",
-                                0, [value2[0]])
+        # Reverse the values due to the conversion
+        value_y = axis_manip.reverse_array_cp(scale_y[0])
+        value_var_y = axis_manip.reverse_array_cp(scale_y[1])
+        value_x = axis_manip.reverse_array_cp(value2[0])
+
+        hlr_utils.result_insert(result, res_descr, (value_y, value_var_y),
+                                map_so, "all", 0, [value_x])
 
     return result
 
@@ -182,7 +187,7 @@ if __name__ == "__main__":
     import SOM
 
     som1 = hlr_test.generate_som()
-    som1.setAllAxisUnits(["meV"])
+    som1.setAllAxisUnits(["Angstroms"])
 
     la_f = SOM.Information([7.0], [0.1], "Angstroms", "ZSelector")
     som1.attr_list["Wavelength_final"] = la_f
@@ -191,10 +196,9 @@ if __name__ == "__main__":
     print "* ", som1[0]
     print "* ", som1[1]
 
-    print "********** igs_energy_transfer"
-    print "* som        :", igs_energy_transfer(som1)
-    print "* som (scale):", igs_energy_transfer(som1, scale=True)
-    print "* so         :", igs_energy_transfer(som1[0], lambda_f=la_f)
+    print "********** energy_transfer"
+    print "* som        :", energy_transfer(som1, "IGS", "Wavelength_final",
+                                            change_units=True, scale=True)
 
 
    
