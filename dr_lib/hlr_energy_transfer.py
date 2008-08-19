@@ -22,7 +22,7 @@
 
 # $Id$
 
-def energy_transfer(obj, itype, lambda_const, **kwargs):
+def energy_transfer(obj, itype, axis_const, **kwargs):
     """
     This function takes a SOM with a wavelength axis (initial for IGS and
     final for DGS) and calculates the energy transfer.  
@@ -34,9 +34,10 @@ def energy_transfer(obj, itype, lambda_const, **kwargs):
                   I{DGS}.
     @type itype: C{string}
 
-    @param lambda_const: The attribute name for the wavelength constant
-                         (final for IGS and initial for DGS).
-    @type lambda_const: C{string}
+    @param axis_const: The attribute name for the axis constant which is the 
+                         final wavelength for I{IGS} and the initial energy for
+                         I{DGS}.
+    @type axis_const: C{string}
 
     @param kwargs: A list of keyword arguments that the function accepts:
 
@@ -103,7 +104,7 @@ def energy_transfer(obj, itype, lambda_const, **kwargs):
 
     # Get the subtraction constant
     try:
-        lambda_c = obj.attr_list[lambda_const]
+        axis_c = obj.attr_list[axis_const]
     except KeyError:
         raise RuntimeError("Must provide a final wavelength (IGS) or initial "\
                            +"energy (DGS) via the incoming SOM")
@@ -140,7 +141,7 @@ def energy_transfer(obj, itype, lambda_const, **kwargs):
             l_f = hlr_utils.get_special(lambda_f, map_so)
             (E_f, E_f_err2) = axis_manip.wavelength_to_energy(l_f[0], l_f[1])
         else:
-            (E_i, E_i_err2) = lambda_c
+            (E_i, E_i_err2) = axis_c.toValErrTuple()
 
         if scale:
             # Scale counts by lambda_f / lambda_i
