@@ -124,32 +124,43 @@ def energy_transfer(obj, itype, lambda_const, **kwargs):
     import utils
 
     for i in xrange(hlr_utils.get_length(obj)):
-        val = hlr_utils.get_value(obj, i, o_descr, "x", axis)
-        err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
-
+        if itype == "IGS":
+            E_i = hlr_utils.get_value(obj, i, o_descr, "x", axis)
+            E_i_err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
+        else:
+            E_f = hlr_utils.get_value(obj, i, o_descr, "x", axis)
+            E_f_err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
+            
         y_val = hlr_utils.get_value(obj, i, o_descr, "y", axis)
         y_err2 = hlr_utils.get_err2(obj, i, o_descr, "y", axis)
         
         map_so = hlr_utils.get_map_so(obj, None, i)
-        
-        l_f = hlr_utils.get_special(lambda_f, map_so)
 
-        (E_f, E_f_err2) = axis_manip.wavelength_to_energy(l_f[0], l_f[1])
+        if itype == "IGS":
+            l_f = hlr_utils.get_special(lambda_f, map_so)
+            (E_f, E_f_err2) = axis_manip.wavelength_to_energy(l_f[0], l_f[1])
+        else:
+            (E_i, E_i_err2) = lambda_c
 
-        # Scale counts by lambda_f / lambda_i
         if scale:
-            l_i = axis_manip.energy_to_wavelength(val, err2)
-
-            l_i_bc = utils.calc_bin_centers(l_i[0], l_i[1])
-
-            ratio = array_manip.div_ncerr(l_f[0], l_f[1],
-                                          l_i_bc[0], l_i_bc[1])
-
+            # Scale counts by lambda_f / lambda_i
+            if itype == "IGS":
+                l_i = axis_manip.energy_to_wavelength(E_i, E_i_err2)
+                (l_d, l_d_err2) = utils.calc_bin_centers(l_i[0], l_i[1])
+                (l_n, l_n_err2) = l_f
+            # Scale counts by lambda_i / lambda_f                
+            else:
+                l_f = axis_manip.energy_to_wavelength(E_f, E_f_err2)
+                (l_d, l_d_err2) = utils.calc_bin_centers(l_f[0], l_f[1])
+                (l_n, l_n_err2) = axis_manip.energy_to_wavelength(E_i,
+                                                                  E_i_err2)
+                
+            ratio = array_manip.div_ncerr(l_n, l_n_err2, l_d, l_d_err2)
             scale_y = array_manip.mult_ncerr(y_val, y_err2, ratio[0], ratio[1])
         else:
             scale_y = (y_val, y_err2)
 
-        value = array_manip.sub_ncerr(val, err2, E_f[0], E_f[1])
+        value = array_manip.sub_ncerr(E_i, E_i_err2, E_f, E_f_err2)
 
         if change_units:
             # Convert from meV to ueV
