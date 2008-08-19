@@ -98,38 +98,25 @@ def energy_transfer(obj, itype, lambda_const, **kwargs):
     except KeyError:
         scale = False
         
-    # Primary axis for transformation. If a SO is passed, the function, will
-    # assume the axis for transformation is at the 0 position
-    if o_descr == "SOM":
-        axis = hlr_utils.one_d_units(obj, units)
-    else:
-        axis = 0
+    # Primary axis for transformation. 
+    axis = hlr_utils.one_d_units(obj, units)
 
-    if lambda_f is None:
-        if o_descr == "SOM":
-            try:
-                lambda_f = obj.attr_list["Wavelength_final"]
-            except KeyError:
-                raise RuntimeError("Must provide a final wavelength via the "\
-                                   +"incoming SOM or the lambda_f keyword")
-        else:
-            raise RuntimeError("Must provide a final wavelength via the "\
-                                   +"lambda_f keyword")
-    else:
-        pass
+    # Get the subtraction constant
+    try:
+        lambda_c = obj.attr_list[lambda_const]
+    except KeyError:
+        raise RuntimeError("Must provide a final wavelength (IGS) or initial "\
+                           +"energy (DGS) via the incoming SOM")
     
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
-    if res_descr == "SOM":
-        if change_units:
-            unit_str = "ueV"
-        else:
-            unit_str = "meV"
-        result = hlr_utils.force_units(result, unit_str, axis)
-        result.setAxisLabel(axis, "energy_transfer")
-        result.setYUnits("Counts/" + unit_str)
-        result.setYLabel("Intensity")
+    if change_units:
+        unit_str = "ueV"
     else:
-        pass
+        unit_str = "meV"
+    result = hlr_utils.force_units(result, unit_str, axis)
+    result.setAxisLabel(axis, "energy_transfer")
+    result.setYUnits("Counts/" + unit_str)
+    result.setYLabel("Intensity")
 
     # iterate through the values
     import array_manip
