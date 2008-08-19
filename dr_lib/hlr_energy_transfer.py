@@ -24,11 +24,11 @@
 
 def energy_transfer(obj, itype, lambda_const, **kwargs):
     """
-    This function takes a SOM or a SO with a wavelength axis (initial for IGS
-    and final for DGS) and calculates the energy transfer.  
+    This function takes a SOM with a wavelength axis (initial for IGS and
+    final for DGS) and calculates the energy transfer.  
 
     @param obj: The object containing the wavelength axis
-    @type obj: C{SOM.SOM} or C{SOM.SO}
+    @type obj: C{SOM.SOM}
 
     @param itype: The instrument class type. The choices are either I{IGS} or
                   I{DGS}.
@@ -55,12 +55,12 @@ def energy_transfer(obj, itype, lambda_const, **kwargs):
 
     @return: Object with the energy transfer calculated in units of I{meV} or
              I{ueV}. The default is I{meV}.
-    @rtype: C{SOM.SOM} or C{SOM.SO}
+    @rtype: C{SOM.SOM}
 
 
     @raise RuntimeError: The instrument class type is not recognized
     @raise RuntimeError: The x-axis units are not Angstroms
-    @raise RuntimeError: A SOM or SO is not given to the function
+    @raise RuntimeError: A SOM is not given to the function
     """
     # Check the instrument class type to make sure its allowed
     allowed_types = ["DGS", "IGS"]
@@ -76,8 +76,8 @@ def energy_transfer(obj, itype, lambda_const, **kwargs):
     (result, res_descr) = hlr_utils.empty_result(obj)
     o_descr = hlr_utils.get_descr(obj)
 
-    if o_descr == "number" or o_descr == "list":
-        raise RuntimeError("Must provide a SOM of a SO to the function.")
+    if o_descr != "SOM":
+        raise RuntimeError("Must provide a SOM to the function.")
     # Go on
     else:
         pass
