@@ -149,20 +149,6 @@ def energy_transfer(obj, itype, lambda_const, **kwargs):
 
         (E_f, E_f_err2) = axis_manip.wavelength_to_energy(l_f[0], l_f[1])
 
-        if offset is not None:
-            info = hlr_utils.get_special(offset, map_so)
-            try:
-                E_f_new = array_manip.add_ncerr(E_f, E_f_err2,
-                                                info[0], info[1])
-            except TypeError:
-                # Have to do this since add_ncerr does not support
-                # scalar-scalar operations
-                value1 = E_f + info[0]
-                value2 = E_f_err2 + info[1]
-                E_f_new = (value1, value2)
-        else:
-            E_f_new = (E_f, E_f_err2)
-
         # Scale counts by lambda_f / lambda_i
         if scale:
             l_i = axis_manip.energy_to_wavelength(val, err2)
@@ -176,7 +162,7 @@ def energy_transfer(obj, itype, lambda_const, **kwargs):
         else:
             scale_y = (y_val, y_err2)
 
-        value = array_manip.sub_ncerr(val, err2, E_f_new[0], E_f_new[1])
+        value = array_manip.sub_ncerr(val, err2, E_f[0], E_f[1])
             
         # Convert from meV to ueV
         value2 = array_manip.mult_ncerr(value[0], value[1], 1000.0, 0.0)
