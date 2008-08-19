@@ -79,10 +79,6 @@ class AmrOptions(hlr_igs_options.IgsOptions):
                         +"transfer values and the momentum transfer bin "\
                         +"width in Angstroms^-1")
 
-        self.add_option("", "--ncos-polar-bins", dest="ncospol_bins",
-                        help="Specify the minimum and maximum negative "\
-                        +"cosine polar values and the bin width in radians")
-
         self.add_option("", "--rescale-final", dest="rescale_final",
                         help="Specify the constant with which to scale the "\
                         +"final data.")
@@ -171,20 +167,13 @@ def AmrConfiguration(parser, configure, options, args):
         parser.error("You must provide energy transfer binning via the "\
                      +"energy-bins option")        
 
-    # Make sure only momentum transfer or negative cosine polar binning is set
-    if (options.Q_bins is not None and options.ncospol_bins is not None) or \
-           (options.Q_bins is None and options.ncospol_bins is None):
-        parser.error("Please specify either --mom-trans-bins or "\
-                     +"--ncos-pol-bins")
-
     # Set the momentum transfer bins
     if hlr_utils.cli_provide_override(configure, "Q_bins", "--mom-trans-bins"):
         configure.Q_bins = hlr_utils.AxisFromString(options.Q_bins)
 
-    # Set the negative cosine polar angle bins
-    if hlr_utils.cli_provide_override(configure, "ncospol_bins",
-                                      "--ncos-pol-bins"):
-        configure.ncospol_bins = hlr_utils.AxisFromString(options.ncospol_bins)
+    if configure.Q_bins is None:
+        parser.error("You must provide Q binning via the mom-trans-bins "\
+                     +"option")
 
     # Set the final data rescaling constant
     if hlr_utils.cli_provide_override(configure, "rescale_final",

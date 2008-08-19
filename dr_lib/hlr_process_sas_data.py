@@ -63,7 +63,7 @@ def process_sas_data(datalist, conf, **kwargs):
     @keyword get_background: A flag that signals the function to convert the
                              main data to wavelength and exit before
                              normalizing to the beam monitor.
-    @typ get_background: C{boolean}
+    @type get_background: C{boolean}
 
     @keyword timer: Timing object so the function can perform timing estimates.
     @type timer: C{sns_timer.DiffTime}

@@ -42,21 +42,18 @@ def run(config):
 
     dst_type = hlr_utils.file_peeker(config.data[0])
 
+    if dst_type != "text/Spec":
+        raise RuntimeError("Cannot plot multiple files of this type %s" \
+                           % dst_type)
+
     for datafile in config.data:
         d_som = dr_lib.add_files([datafile], dst_type=dst_type,
                                  Verbose=config.verbose)[0]
 
-        if dst_type == "text/Spec":
-            drplot.plot_1D_so(d_som, d_som[0].id, logx=config.logx,
-                              logy=config.logy, llabel=datafile)
+        drplot.plot_1D_so(d_som, d_som[0].id, logx=config.logx,
+                          logy=config.logy, llabel=datafile)
 
-            pylab.legend(numpoints=1, loc=config.legpos)
-        elif dst_type == "text/Dave2d":
-            drplot.plot_2D_so(d_som, logz=config.logz, nocb=True)
-        else:
-            raise RuntimeError("Cannot plot multiple files of this type %s" \
-                               % dst_type)
-        
+    pylab.legend(numpoints=1, loc=config.legpos)
     pylab.show()
 
 if __name__ == "__main__":
@@ -83,10 +80,6 @@ if __name__ == "__main__":
     parser.add_option("", "--logx", dest="logx", action="store_true",
                       help="Set the x-axis to logarithmic scale.")
     parser.set_defaults(logx=False)
-
-    parser.add_option("", "--logz", dest="logz", action="store_true",
-                      help="Set the z-axis to logarithmic scale.")
-    parser.set_defaults(logz=False)    
 
     parser.add_option("", "--legpos", dest="legpos", help="Set the location "\
                       +"of the legend on the graph. Default is 0 (best)")
@@ -123,9 +116,6 @@ if __name__ == "__main__":
 
     # Set the logarithmic x-axis
     configure.logx = options.logx
-
-    # Set the logarithmic z-axis
-    configure.logz = options.logz    
 
     # Set the legend position
     configure.legpos = options.legpos

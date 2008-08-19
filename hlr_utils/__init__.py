@@ -26,7 +26,6 @@ handling various data reduction requests.
 """
 
 from hlr_1D_units import *
-from hlr_2D_helper import *
 from hlr_amr_options import AmrOptions, AmrConfiguration
 from hlr_axis_object import *
 from hlr_bisect_helper import bisect_helper

@@ -141,97 +141,59 @@ def run(config, tim=None):
     
     del dc_som1, d_som4    
 
-    if config.theta_bins is None:
-        # Steps 16 and 17: Rebin and sum all spectra
-        if config.verbose:
-            print "Rebinning and summing for final spectrum"
-            
-        if tim is not None:
-            tim.getTime(False)
+    # Steps 16 and 17: Rebin and sum all spectra
+    if config.verbose:
+        print "Rebinning and summing for final spectrum"
 
-        if config.dump_frac_rebin:
-            set_conf = config
-        else:
-            set_conf = None
+    if tim is not None:
+        tim.getTime(False)
 
-        d_som6 = dr_lib.sum_by_rebin_frac(d_som5, config.Q_bins.toNessiList(),
-                                          configure=set_conf)
-
-        if tim is not None:
-            tim.getTime(msg="After rebinning and summing for spectrum")    
-
-        del d_som5
-
-        # Step 18: Scale final spectrum by Q bin centers
-        if config.verbose:
-            print "Scaling final spectrum by Q centers"
-        
-        if tim is not None:
-            tim.getTime(False)
-
-        d_som7 = dr_lib.fix_bin_contents(d_som6, scale=True, width=True,
-                                         units="1/Angstroms")
-
-        if tim is not None:
-            tim.getTime(msg="After scaling final spectrum")    
-
-        del d_som6
-
-        # If rescaling factor present, rescale the data
-        if config.rescale_final is not None:
-            import common_lib
-            d_som8 = common_lib.mult_ncerr(d_som7, (config.rescale_final, 0.0))
-        else:
-            d_som8 = d_som7
-
-        del d_som7
-    
-        hlr_utils.write_file(config.output, "text/Spec", d_som8,
-                             verbose=config.verbose,
-                             replace_path=False,
-                             replace_ext=False,
-                             message="combined S(Q) information")
-
-        d_som9 = d_som8
-
+    if config.dump_frac_rebin:
+        set_conf = config
     else:
-        import common_lib
-        d_som6 = common_lib.rebin_axis_1D_frac(d_som5,
-                                               config.Q_bins.toNessiList())
+        set_conf = None
 
-        del d_som5
+    d_som6 = dr_lib.sum_by_rebin_frac(d_som5, config.Q_bins.toNessiList(),
+                                      configure=set_conf)
 
-        d_som7 = dr_lib.fix_bin_contents(d_som6, scale=True, width=True,
-                                         units="1/Angstroms")
+    if tim is not None:
+        tim.getTime(msg="After rebinning and summing for spectrum")    
 
-        del d_som6
+    del d_som5
 
-        if config.rescale_final is not None:
-            import common_lib
-            d_som8 = common_lib.mult_ncerr(d_som7, (config.rescale_final, 0.0))
-        else:
-            d_som8 = d_som7
-
-        del d_som7
-
-        d_som9 = dr_lib.create_param_vs_Y(d_som8, "polar", "param_array",
-                                          config.theta_bins.toNessiList(),
-                                          y_label="S",
-                                          y_units="Counts / A^-1 rads",
-                                          x_labels=["theta", "Q"],
-                                          x_units=["rads", "1/Angstroms"])
-
-        del d_som8
-
-        hlr_utils.write_file(config.output, "text/Dave2d", d_som9,
-                             output_ext="qp", verbose=config.verbose,
-                             data_ext="txt",
-                             path_replacement=config.path_replacement,
-                             message="S(theta, Q) information")
+    # Step 18: Scale final spectrum by Q bin centers
+    if config.verbose:
+        print "Scaling final spectrum by Q centers"
         
-    d_som9.attr_list["config"] = config
+    if tim is not None:
+        tim.getTime(False)
 
-    hlr_utils.write_file(config.output, "text/rmd", d_som9,
+    d_som7 = dr_lib.fix_bin_contents(d_som6, scale=True, width=True,
+                                     units="1/Angstroms")
+
+    if tim is not None:
+        tim.getTime(msg="After scaling final spectrum")    
+
+    del d_som6
+
+    # If rescaling factor present, rescale the data
+    if config.rescale_final is not None:
+        import common_lib
+        d_som8 = common_lib.mult_ncerr(d_som7, (config.rescale_final, 0.0))
+    else:
+        d_som8 = d_som7
+
+    del d_som7
+    
+    hlr_utils.write_file(config.output, "text/Spec", d_som8,
+                         verbose=config.verbose,
+                         replace_path=False,
+                         replace_ext=False,
+                         message="combined S(Q) information")
+
+    d_som8.attr_list["config"] = config
+
+    hlr_utils.write_file(config.output, "text/rmd", d_som8,
                          output_ext="rmd",
                          data_ext=config.ext_replacement,         
                          path_replacement=config.path_replacement,

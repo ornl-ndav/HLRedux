@@ -112,11 +112,6 @@ class SansOptions(hlr_utils.InstOptions):
                         +"transfer values, the momentum transfer bin "\
                         +"width in Angstroms^-1 and the type (lin or log)")
 
-        self.add_option("", "--theta-bins", dest="theta_bins",
-                        help="Specify the minimum and maximum polar "\
-                        +"angle values, the polar angle bin "\
-                        +"width in radians and the type (lin or log)")
-        
         self.add_option("", "--time-zero-offset-det",
                         dest="time_zero_offset_det",
                         help="Specify the time zero offset, err^2 in "\
@@ -258,10 +253,6 @@ def SansConfiguration(parser, configure, options, args):
     # Set the momentum transfer bins
     if hlr_utils.cli_provide_override(configure, "Q_bins", "--mom-trans-bins"):
         configure.Q_bins = hlr_utils.AxisFromString(options.Q_bins)
-
-    # Set the theta bins
-    if hlr_utils.cli_provide_override(configure, "theta_bins", "--theta-bins"):
-        configure.theta_bins = hlr_utils.AxisFromString(options.theta_bins)   
 
     # Set the time-zero offset for the detector
     if hlr_utils.cli_provide_override(configure, "time_zero_offset_det",

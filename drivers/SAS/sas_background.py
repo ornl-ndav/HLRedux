@@ -23,8 +23,10 @@
 # $Id$
 
 """
-This program was requested by the I{LENS} facility to create a background
-spectrum for fitting.
+This program covers the functionality outlined in B{Section 2.5.2:
+Background Spectrum Creation}
+U{http://neutrons.ornl.gov/asg/projects/SCL/reqspec/DR_Lib_RS.doc} as
+developed for the I{LENS} facility.
 """
 
 def run(config, tim=None):

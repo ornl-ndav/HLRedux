@@ -349,63 +349,29 @@ def run(config, tim=None):
     del d_som3, norm_int
 
     # Steps 33 to end: Creating S(Q,E)
-    if config.Q_bins is not None:
-        if config.verbose:
-            print "Creating 2D spectrum"
+    if config.verbose:
+        print "Creating 2D spectrum"
 
-        if tim is not None:
-            tim.getTime(False)
-
-        d_som5 = dr_lib.create_E_vs_Q_igs(d_som4,
-                                          config.E_bins.toNessiList(),
-                                          config.Q_bins.toNessiList(),
-                                          so_id="Full Detector",
-                                          y_label="counts",
-                                          y_units="counts / (ueV * A^-1)",
-                                          x_labels=["Q transfer",
-                                                    "energy transfer"],
-                                          x_units=["1/Angstroms","ueV"],
-                                          split=config.split,
-                                          configure=config)
-        if tim is not None:
-            tim.getTime(msg="After creation of final spectrum ")
-
-        del d_som4
+    if tim is not None:
+        tim.getTime(False)
         
-    # Steps 33 to 36: Create S(-cos(polar), E)
-    elif config.ncospol_bins is not None:
-        if config.verbose:
-            print "Convert wavelength to energy transfer"
-
-        if tim is not None:
-            tim.getTime(False)
-
-        d_som4a = dr_lib.energy_transfer(d_som4, "IGS", "Wavelength_final",
-                                         scale=True, change_units=True)
-
-        if tim is not None:
-            tim.getTime(msg="After wavelength to energy transfer conversion ")
-
-        del d_som4
-
-        if config.verbose:
-            print "Creating 2D spectrum"
-
-        if tim is not None:
-            tim.getTime(False)
-
-        d_som5 = dr_lib.create_param_vs_Y(d_som4a, "polar",
-                                        "negcos_param_array",
-                                        config.ncospol_bins.toNessiList(),
-                                        rebin_axis=config.E_bins.toNessiList(),
-                                        y_label="counts",
-                                        y_units="counts / (ueV * rads)",
-                                        x_labels=["Angle", "Energy Transfer"], 
-                                        x_units=["rads", "ueV"])
-
-        if tim is not None:
-            tim.getTime(msg="After creation of final spectrum ")        
+    d_som5 = dr_lib.create_E_vs_Q_igs(d_som4,
+                                      config.E_bins.toNessiList(),
+                                      config.Q_bins.toNessiList(),
+                                      so_id="Full Detector",
+                                      y_label="counts",
+                                      y_units="counts / (ueV * A^-1)",
+                                      x_labels=["Q transfer",
+                                                "energy transfer"],
+                                      x_units=["1/Angstroms","ueV"],
+                                      split=config.split,
+                                      configure=config)
     
+    if tim is not None:
+        tim.getTime(msg="After creation of final spectrum ")
+
+    del d_som4
+
     # If rescaling factor present, rescale the data
     if config.rescale_final is not None and not config.split:
         d_som6 = common_lib.mult_ncerr(d_som5, (config.rescale_final, 0.0))

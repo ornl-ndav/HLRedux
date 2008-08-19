@@ -34,7 +34,6 @@ from hlr_calc_solid_angle import *
 from hlr_calculate_ref_background import *
 from hlr_create_axis_from_data import *
 from hlr_create_E_vs_Q_igs import create_E_vs_Q_igs
-from hlr_create_param_vs_Y import *
 from hlr_convert_single_to_list import *
 from hlr_create_X_vs_pixpos import *
 from hlr_cut_spectra import *
@@ -43,7 +42,6 @@ from hlr_determine_time_indep_bkg import *
 from hlr_determine_ref_background import *
 from hlr_dimensionless_mon import *
 from hlr_E_vs_Q_helpers import *
-from hlr_energy_transfer import *
 from hlr_feff_correct_mon import *
 from hlr_filter_ref_data import *
 from hlr_find_nz_extent import *
@@ -54,7 +52,6 @@ from hlr_integrate_spectra import *
 from hlr_lin_interpolate_spectra import *
 from hlr_process_igs_data import process_igs_data
 from hlr_process_ref_data import process_ref_data
-from hlr_process_reflp_data import process_reflp_data
 from hlr_process_sas_data import process_sas_data
 from hlr_rebin_efficiency import *
 from hlr_rebin_monitor import *

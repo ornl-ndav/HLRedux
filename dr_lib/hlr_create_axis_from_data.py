@@ -40,9 +40,6 @@ def create_axis_from_data(obj, **kwargs):
                        argument is given, the default value is 0
     @type axis_pos: C{int}
 
-    @keyword width: A override parameter for specifying the axis bin width.
-    @type width: C{float}
-
 
     @return: The axis based on the found values from the data
     @rtype: L{hlr_utils.Axis}
@@ -52,18 +49,11 @@ def create_axis_from_data(obj, **kwargs):
     """
     import hlr_utils
 
-    # Check for keyword arguments
+    # Check for axis_pos keyword argument
     try:
         axis_pos = kwargs["axis_pos"]
     except KeyError:
         axis_pos = 0
-
-    try:
-        axis_width = kwargs["width"]
-        width_given = True
-    except KeyError:
-        axis_width = 999999999999999999999999999999999999.0
-        width_given = False
 
     o_descr = hlr_utils.get_descr(obj)
 
@@ -73,9 +63,10 @@ def create_axis_from_data(obj, **kwargs):
     else:
         pass
 
-    # Set extreme values for axis minimum and maximum
+    # Set extreme values for axis minimum, maximum and width
     axis_min = 999999999999999999999999999999999999
     axis_max = -99999999999999999999999999999999999
+    axis_width = 999999999999999999999999999999999999
     
     # iterate through the values
     for i in xrange(hlr_utils.get_length(obj)):
@@ -104,9 +95,8 @@ def create_axis_from_data(obj, **kwargs):
 
         axis_max = max(axis_max, axis[max_index])
 
-        if not width_given:
-            test_width = axis[min_index+1] - axis[min_index]
-            axis_width = min(axis_width, test_width)
+        test_width = axis[min_index+1] - axis[min_index]
+        axis_width = min(axis_width, test_width)
 
     return hlr_utils.Axis(axis_min, axis_max, axis_width)
 

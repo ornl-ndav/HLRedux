@@ -86,12 +86,6 @@ def plot_2D_arr(x, y, z, **kwargs):
                        default is I{cm.hot}.
     @type colormap: C{matplotlib.cm}
 
-    @keyword logz: A flag that sets the z-axis on a logarithmic scale.
-    @type logz: C{bool}
-
-    @keyword nocb: A flag that turns of the colorbar for the plot.
-    @type nocb: C{bool}
-    
     @keyword xlabel: The label for the independent axis.
     @type xlabel: C{string}
 
@@ -124,30 +118,13 @@ def plot_2D_arr(x, y, z, **kwargs):
         import matplotlib
         colormap = matplotlib.cm.hot
 
-    try:
-        logz = kwargs["logz"]
-    except KeyError:
-        logz = False
-
-    try:
-        nocb = kwargs["nocb"]
-    except KeyError:
-        nocb = False        
-
-    if logz:
-        import matplotlib
-        mylocator = matplotlib.ticker.LogLocator()
-    else:
-        mylocator = None
-
-    pylab.contourf(x, y, z, cmap=colormap, locator=mylocator)
+    pylab.contourf(x, y, z, cmap=colormap)
     pylab.xlabel(xlabel)
     pylab.ylabel(ylabel)
     pylab.title(title)
 
     # Add the color scale
-    if not nocb:
-        pylab.colorbar()
+    pylab.colorbar()
 
 def plot_1D_slice(som, axis, xslice, yslice, **kwargs):
     """
