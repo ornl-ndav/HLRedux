@@ -226,7 +226,8 @@ if __name__ == "__main__":
                       help="Set the x-axis to logarithmic scale.")
     parser.set_defaults(logx=False)
 
-    parser.add_option("", "--logz", dest="logz", action="store_true")
+    parser.add_option("", "--logz", dest="logz", action="store_true",
+                      help="Set the z-axis to logarithmic scale.")
     parser.set_defaults(logz=False)        
     
     # Do not need to use the following options
