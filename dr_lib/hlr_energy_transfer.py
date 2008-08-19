@@ -31,7 +31,7 @@ def energy_transfer(obj, itype, lambda_const, **kwargs):
     @type obj: C{SOM.SOM} or C{SOM.SO}
 
     @param itype: The instrument class type. The choices are either I{IGS} or
-    I{DGS}.
+                  I{DGS}.
     @type itype: C{string}
 
     @param lambda_const: The attribute name for the wavelength constant
@@ -97,7 +97,6 @@ def energy_transfer(obj, itype, lambda_const, **kwargs):
         scale = kwargs["scale"]
     except KeyError:
         scale = False
-
         
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
@@ -119,12 +118,15 @@ def energy_transfer(obj, itype, lambda_const, **kwargs):
     else:
         pass
     
-
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
     if res_descr == "SOM":
-        result = hlr_utils.force_units(result, "ueV", axis)
+        if change_units:
+            unit_str = "ueV"
+        else:
+            unit_str = "meV"
+        result = hlr_utils.force_units(result, unit_str, axis)
         result.setAxisLabel(axis, "energy_transfer")
-        result.setYUnits("Counts/ueV")
+        result.setYUnits("Counts/" + unit_str)
         result.setYLabel("Intensity")
     else:
         pass
