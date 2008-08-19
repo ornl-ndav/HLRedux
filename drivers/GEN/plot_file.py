@@ -211,11 +211,12 @@ if __name__ == "__main__":
                       help="Specify a file that contains a list of pixel "\
                       +"ids to be read from the data")
 
-
-    parser.add_option("", "--logy", dest="logy", action="store_true")
+    parser.add_option("", "--logy", dest="logy", action="store_true",
+                      help="Set the y-axis to logarithmic scale.")
     parser.set_defaults(logy=False)
 
-    parser.add_option("", "--logx", dest="logx", action="store_true")
+    parser.add_option("", "--logx", dest="logx", action="store_true"
+                      help="Set the x-axis to logarithmic scale.")
     parser.set_defaults(logx=False)    
     
     # Do not need to use the following options
