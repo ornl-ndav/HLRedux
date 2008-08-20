@@ -79,7 +79,7 @@ def __check_range(value, low_end, high_end):
     """
     return value >= low_end and value <= high_end
 
-def __calculate_ratio(conf, ctib, t=None):
+def __calculate_ratio(conf, cwdb, t=None):
     """
     This function runs amorphous_reduction_sqe and calculates the ratio for the
     given time-independent background constant.
@@ -88,15 +88,17 @@ def __calculate_ratio(conf, ctib, t=None):
                  information.
     @type conf: L{hlr_utils.Configure}
 
-    @param ctib: Value of the time-independent background to run reduction with
-    @type ctib: C{float}
+    @param cwdb: Value of the wavelength-dependent background to run reduction
+                 with.
+    @type cwdb: C{float}
 
     @param t: (OPTIONAL) Object that will allow the method to perform
                          timing evaluations.
     @type t: C{sns_time.DiffTime}
 
+
     @return: The values of the integration in the positive and negative
-    sections respectively.
+             sections respectively.
     @rtype: C{tuple}
     """
     import copy
@@ -105,7 +107,7 @@ def __calculate_ratio(conf, ctib, t=None):
 
     amr_config = copy.deepcopy(conf)
     amr_config.verbose = conf.amr_verbose
-    amr_config.tib_data_const = hlr_utils.DrParameter(ctib, 0.0)
+    amr_config.ldb_const = hlr_utils.DrParameter(cwdb, 0.0)
     
     if t is not None:
         t.getTime(False)
@@ -157,14 +159,14 @@ def run(config, tim=None):
     @type tim: C{sns_time.DiffTime}
     """
     # Steps 1-3
-    ratio_min_parts = __calculate_ratio(config, config.ctib_min)
+    ratio_min_parts = __calculate_ratio(config, config.cwdb_min)
     ratio_min = __make_ratio(ratio_min_parts)
 
     if tim is not None:
         tim.getTime(msg="After minimum ratio calculation ")
 
     # Step 4
-    ratio_max_parts = __calculate_ratio(config, config.ctib_max)
+    ratio_max_parts = __calculate_ratio(config, config.cwdb_max)
     ratio_max = __make_ratio(ratio_max_parts)
 
     if tim is not None:
@@ -173,75 +175,75 @@ def run(config, tim=None):
     # Step 5
     if __check_parts(ratio_min_parts) and __check_parts(ratio_max_parts):
         if (config.ratio[0] < ratio_min or config.ratio[0] > ratio_max):
-            raise RuntimeError("Ratios from minimum and maximum ctibs do not "\
-                               +"bracket ratio. Increase the maximum ctib "
+            raise RuntimeError("Ratios from minimum and maximum cwdbs do not "\
+                               +"bracket ratio. Increase the maximum cwdb "
                                +"parameter. Min: %f, Max: %f, Given Ratio: %f"\
                                % (ratio_min, ratio_max, config.ratio[0]))
     elif __check_parts(ratio_min_parts) and not __check_parts(ratio_max_parts):
         if ratio_min > config.ratio[0]:
-            raise RuntimeError("Ratio from minimum ctib is greater than "\
-                               +"requested ratio. Decrease the minimum ctib "\
+            raise RuntimeError("Ratio from minimum cwdb is greater than "\
+                               +"requested ratio. Decrease the minimum cwdb "\
                                +"parameter. Min: %f, Given Ratio: %f" \
                                %(ratio_min, config.ratio[0]))
     elif not __check_parts(ratio_min_parts) and \
              not __check_parts(ratio_max_parts):
         raise RuntimeError("The components of both ratios are negative. "\
-                           +"Decrease the value of the minimum ctib "\
+                           +"Decrease the value of the minimum cwdb "\
                            +"parameter.")
     else:
         pass
 
     # Step 6
-    tib_try = 0.0
+    wdb_try = 0.0
     ratio_try = 0.0
     
-    tib_range = [config.ctib_min, config.ctib_max]
+    wdb_range = [config.cwdb_min, config.cwdb_max]
 
     run_ok = False
 
     counter = 0
     while counter < config.niter:
-        tib_try = __bisect_range(tib_range)
+        wdb_try = __bisect_range(wdb_range)
         if config.verbose:
-            print "TIB Try: ", tib_try
+            print "WDB Try: ", wdb_try
 
-        ratio_try_parts = __calculate_ratio(config, tib_try)
+        ratio_try_parts = __calculate_ratio(config, wdb_try)
         ratio_try = __make_ratio(ratio_try_parts)
 
         # First, check to see if ratio is within tolerance
         if __check_range(ratio_try, config.ratio[0]-config.ratio[1],
                          config.ratio[0]+config.ratio[1]):
             if config.verbose:
-                print "Final TIB: %f" % tib_try
+                print "Final WDB: %f" % wdb_try
             run_ok = True
             break
 
         # If not, check if the ratio parts
         if not __check_parts(ratio_try_parts):
             # It's not +/+, move range down
-            tib_range[1] = tib_try
+            wdb_range[1] = wdb_try
         else:
             # It's +/+, so look at ratio
             if ratio_try > config.ratio[0]:
                 # Move range down
-                tib_range[1] = tib_try
+                wdb_range[1] = wdb_try
             else:
                 # Move range up
-                tib_range[0] = tib_try
+                wdb_range[0] = wdb_try
 
         counter += 1
 
     if not run_ok:
         # If you hit here, you've exhausted the number of iterations
-        print "Maximum number of iterations exceeded! No suitable TIB found!"
-        print "Best Value: %f, Ratio: %f" % (tib_try, ratio_try)
+        print "Maximum number of iterations exceeded! No suitable WDB found!"
+        print "Best Value: %f, Ratio: %f" % (wdb_try, ratio_try)
     
 if __name__ == "__main__":
     import hlr_utils
 
     # Make description for driver
     result = []
-    result.append("This driver searches for a time-independent background")
+    result.append("This driver searches for a wavelength-dependent background")
     result.append("that corresponds to a user requested ratio of energy")
     result.append("transfer ranges. The --energy-bins option should be used")
     result.append("to set the positive energy transfer region of integration.")
@@ -260,7 +262,7 @@ if __name__ == "__main__":
     parser.set_defaults(norm_start="6.24")
     parser.set_defaults(norm_end="6.30")
 
-    # Add find_tib related options
+    # Add find_ldb related options
     parser.add_option("", "--ratio", dest="ratio",
                       help="Specify the value and tolerance (error) of the "\
                       +"target energy transfer integration ratio as comma "\
@@ -271,13 +273,13 @@ if __name__ == "__main__":
                       +"default is 20.")
     parser.set_defaults(niter=20)
 
-    parser.add_option("", "--ctib-min", dest="ctib_min", type="float",
+    parser.add_option("", "--cwdb-min", dest="cwdb_min", type="float",
                       help="Specify the minimum value of the "\
-                      +"time-independent background")
+                      +"wavelength-dependent background")
     
-    parser.add_option("", "--ctib-max", dest="ctib_max", type="float",
+    parser.add_option("", "--cwdb-max", dest="cwdb_max", type="float",
                       help="Specify the maximum value of the "\
-                      +"time-independent background")
+                      +"wavelength-dependent background")
 
     parser.add_option("", "--amr-verbose", action="store_true",
                       dest="amr_verbose", help="Flag to turn on the "\
@@ -287,9 +289,6 @@ if __name__ == "__main__":
     parser.add_option("", "--timing", action="store_true", dest="timing",
                       help="Flag to turn on timing of code")
     parser.set_defaults(timing=False)
-
-    # Removing output flag
-    parser.remove_option("-o")
 
     # Removing all file writing flags
     parser.remove_option("--dump-all")
@@ -301,6 +300,11 @@ if __name__ == "__main__":
     parser.remove_option("--dump-wave-mnorm")
     parser.remove_option("--dump-energy")
     parser.remove_option("--dump-ei")
+    parser.remove_option("--dump-dslin")
+
+    # Remove some other unneeded options
+    parser.remove_option("--split")
+    parser.remove_option("--lambda-bins")
 
     (options, args) = parser.parse_args()
 
@@ -335,11 +339,11 @@ if __name__ == "__main__":
     # Set the number of iterations
     configure.niter = options.niter
 
-    # Set the minimum time-independent background constant
-    configure.ctib_min = options.ctib_min
+    # Set the minimum wavelength-dependent background constant
+    configure.cwdb_min = options.cwdb_min
 
-    # Set the maximum time-independent background constant
-    configure.ctib_max = options.ctib_max
+    # Set the maximum wavelength-dependent background constant
+    configure.cwdb_max = options.cwdb_max
 
     # Set the verbosity for the amorphous_reduction_sqe code
     configure.amr_verbose = options.amr_verbose
