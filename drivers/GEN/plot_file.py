@@ -53,7 +53,7 @@ def run(config):
     if dst_type == "text/Spec":
         __plot_a3c(d_som, config)
     elif dst_type == "text/Dave2d":
-        __plot_dave(d_som, config)
+        drplot.plot_2D_so(d_som, logz=config.logz)
     elif dst_type == "text/num-info":
         drplot.plot_numinfo(d_som)
     else:
@@ -147,42 +147,6 @@ def __plot_one_a3c(x, y, var_y, *args, **kwargs):
     if logx:
         ax = pylab.gca()
         ax.set_xscale("log")
-
-def __plot_dave(som, conf):
-    """
-    This subroutine is responsible for plotting a Dave 2D file.
-    """
-    info = som.toXY()
-
-    Nx = len(info[0][0])
-    Ny = len(info[0][1])
-    
-    # Y values are filtered since plotting has trouble with NaNs
-    z = numpy.reshape(numpy.nan_to_num(info[0][2]), (Nx, Ny))
-
-    import matplotlib.cm as cm
-    import matplotlib
-
-    if conf.logz:
-        mylocator = matplotlib.ticker.LogLocator()
-    else:
-        mylocator = None
-
-    pylab.contourf(info[0][1], info[0][0], z, cmap=cm.hot,
-                   locator=mylocator)
-
-    energy_units = som.getAxisUnits(1)
-    if energy_units == "ueV":
-        energy_units = "$\mu$eV"
-
-    q_units = som.getAxisUnits(0)
-    if q_units == "1/Angstroms":
-        q_units = "1/$\AA$"
-    
-    pylab.xlabel(som.getAxisLabel(1) + " [" + energy_units + "]")
-    pylab.ylabel(som.getAxisLabel(0) + " [" + q_units + "]")
-
-    pylab.colorbar()
 
 if __name__ == "__main__":
     import hlr_utils
