@@ -59,11 +59,24 @@ def plot_2D_so(som, **kwargs):
     # This means the labels are created in reverse order and the original x
     # and y arrays are plotted in reverse. 
 
-    # Set plot attributes
-    xlabel = som.getAxisLabel(1) + " [" + som.getAxisUnits(1) + "]"
-    ylabel = som.getAxisLabel(0) + " [" + som.getAxisUnits(0) + "]"
+    # Set plot attributes, take overrides if provided
+    try:
+        xlabel = kwargs["xlabel"]
+        del kwargs["xlabel"]
+    except KeyError:
+        xlabel = som.getAxisLabel(1) + " [" + som.getAxisUnits(1) + "]"
 
-    drplot.plot_2D_arr(y, x, z, xlabel=xlabel, ylabel=ylabel, **kwargs)
+    try:
+        ylabel = kwargs["ylabel"]
+        del kwargs["ylabel"]
+    except KeyError:
+        ylabel = som.getAxisLabel(0) + " [" + som.getAxisUnits(0) + "]"
+
+    # Add labels back into keyword dictionary
+    kwargs["xlabel"] = xlabel
+    kwargs["ylabel"] = ylabel
+
+    drplot.plot_2D_arr(y, x, z, **kwargs)
 
 def plot_2D_arr(x, y, z, **kwargs):
     """
