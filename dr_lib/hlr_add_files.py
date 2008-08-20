@@ -80,7 +80,8 @@ def add_files(filelist, **kwargs):
 
     import common_lib
     import DST
-
+    import hlr_utils
+    
     # Parse keywords
     try:
         so_axis = kwargs["SO_Axis"]
@@ -109,7 +110,11 @@ def add_files(filelist, **kwargs):
     try:
         dst_type = kwargs["dst_type"]
     except KeyError:
-        dst_type = "application/x-NeXus"
+        try:
+            dst_type = hlr_utils.file_peeker(filelist[0])
+        except RuntimeError:
+            # Assume it is a NeXus file, since it is not a DR produced file
+            dst_type = "application/x-NeXus"
 
     try:
         verbose = kwargs["Verbose"]
