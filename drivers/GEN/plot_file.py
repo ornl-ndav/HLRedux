@@ -35,6 +35,7 @@ def run(config):
     @type config: L{hlr_utils.Configure}
     """
     import dr_lib
+    import drplot
 
     if config.data is None:
         raise RuntimeError("Need to pass a data filename(s) to the driver "\
@@ -54,7 +55,7 @@ def run(config):
     elif dst_type == "text/Dave2d":
         __plot_dave(d_som, config)
     elif dst_type == "text/num-info":
-        __plot_numinfo(d_som)
+        drplot.plot_numinfo(d_som)
     else:
         raise RuntimeError("Do not know how to plot file type %s" % dst_type)
 
@@ -182,22 +183,6 @@ def __plot_dave(som, conf):
     pylab.ylabel(som.getAxisLabel(0) + " [" + q_units + "]")
 
     pylab.colorbar()
-
-def __plot_numinfo(som):
-    """
-    This subroutine is responsible for plotting a NumInfo file.
-    """
-    info = som.toXY(withYvar=True)
-
-    # Data is stored as floats and pixel IDs, so everything needs conversion
-    x = numpy.arange(len(info))
-    y = numpy.array([s[1] for s in info])
-    ey = numpy.sqrt([s[2] for s in info])
-    pid = numpy.array([str(s[0]) for s in info])
-
-    pylab.errorbar(x, y, ey, fmt='o', mec='b', ls='None')
-    pylab.xticks(x, pid, rotation='vertical')
-    pylab.ylabel(som.getYLabel() + " [" + som.getYUnits() + "]")
 
 if __name__ == "__main__":
     import hlr_utils
