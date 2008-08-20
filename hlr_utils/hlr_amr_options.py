@@ -171,12 +171,6 @@ def AmrConfiguration(parser, configure, options, args):
         parser.error("You must provide energy transfer binning via the "\
                      +"energy-bins option")        
 
-    # Make sure only momentum transfer or negative cosine polar binning is set
-    if (options.Q_bins is not None and options.ncospol_bins is not None) or \
-           (options.Q_bins is None and options.ncospol_bins is None):
-        parser.error("Please specify either --mom-trans-bins or "\
-                     +"--ncos-pol-bins")
-
     # Set the momentum transfer bins
     if hlr_utils.cli_provide_override(configure, "Q_bins", "--mom-trans-bins"):
         configure.Q_bins = hlr_utils.AxisFromString(options.Q_bins)
@@ -185,6 +179,13 @@ def AmrConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "ncospol_bins",
                                       "--ncos-pol-bins"):
         configure.ncospol_bins = hlr_utils.AxisFromString(options.ncospol_bins)
+
+    # Make sure only momentum transfer or negative cosine polar binning is set
+    if (configure.Q_bins is not None and \
+        configure.ncospol_bins is not None) or \
+        (configure.Q_bins is None and configure.ncospol_bins is None):
+        parser.error("Please specify either --mom-trans-bins or "\
+                     +"--ncos-pol-bins")
 
     # Set the final data rescaling constant
     if hlr_utils.cli_provide_override(configure, "rescale_final",
