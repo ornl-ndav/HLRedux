@@ -35,7 +35,6 @@ def run(config):
     @type config: L{hlr_utils.Configure}
     """
     import dr_lib
-    import drplot
 
     if config.data is None:
         raise RuntimeError("Need to pass a data filename(s) to the driver "\
@@ -67,8 +66,6 @@ def __plot_a3c(som, conf):
     """
     len_som = len(som)
 
-    info = som.toXY(withYvar=True)
-
     if len_som > 1:
         # Get the number of figures needed
         num_figs = len_som / 10 + 1
@@ -88,72 +85,24 @@ def __plot_a3c(som, conf):
 
         for j in xrange(extent):
             if len_som > 1:
-                pylab.subplot(2,5,j+1)
+                pylab.subplot(2, 5, j+1)
             index = (i*10) + j
 
-            if conf.logy:
-                indicies = info[index][1].nonzero()
-                y = info[index][1][indicies]
-                var_y = info[index][2][indicies]
-                x = info[index][0][indicies]
-            else:
-                y = info[index][1]
-                var_y = info[index][2]
-                x = info[index][0]
+            pid = som[index].id
 
-            if len_som > 1:
-                pid = som[index].id
-            else:
-                pid = None
-                
-            __plot_one_a3c(x, y, numpy.sqrt(var_y),
-                           som.getAllAxisLabels(), som.getAllAxisUnits(),
-                           som.getYLabel(), som.getYUnits(),
-                           pid, logy=conf.logy, logx=conf.logx)
-
-def __plot_one_a3c(x, y, var_y, *args, **kwargs):
-    """
-    This subroutine is responsible for making a single 3-column ASCII dataset
-    """
-    try:
-        logy = kwargs["logy"]
-    except KeyError:
-        logy = False
-
-    try:
-        logx = kwargs["logx"]
-    except KeyError:
-        logx = False        
-
-    y = numpy.nan_to_num(y)
-    var_y = numpy.nan_to_num(var_y)
-    
-    try:
-        pylab.errorbar(x, y, var_y, fmt='o', mec='b', ls='None')
-    except ValueError:
-        # All data got filtered
-        pass
-    
-    pylab.xlabel(args[0][0] + " [" + args[1][0] + "]")
-    pylab.ylabel(args[2] + " [" + args[3] + "]")
-    if args[4] is not None:
-        pylab.title(args[4])
-    else:
-        pass
-
-    if logy:
-        ax = pylab.gca()
-        ax.set_yscale("log")
-    if logx:
-        ax = pylab.gca()
-        ax.set_xscale("log")
-
+            try:
+                drplot.plot_1D_so(som, pid, title=pid, logy=conf.logy,
+                                  logx=conf.logx)
+            except ValueError:
+                # All data got filtered
+                pass
+            
 if __name__ == "__main__":
+    import drplot
     import hlr_utils
 
-    import numpy
     import pylab
-    
+   
     # Make description for driver
     description = []
     description.append("")
