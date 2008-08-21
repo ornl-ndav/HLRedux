@@ -195,7 +195,7 @@ def run(config, tim=None):
     else:
         pass
 
-    # Step 6
+    # Steps 6-7
     wdb_try = 0.0
     ratio_try = 0.0
     
@@ -239,6 +239,7 @@ def run(config, tim=None):
 
     print "Best Value: %f, Ratio: %f" % (wdb_try, ratio_try)
 
+    # Step 8
     # Set the create_output flag to True to get the output file from this run
     config.create_output = True
     config.ldb_const = hlr_utils.DrParameter(wdb_try, 0.0)
