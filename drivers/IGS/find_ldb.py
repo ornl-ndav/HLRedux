@@ -159,7 +159,7 @@ def run(config, tim=None):
     @type tim: C{sns_time.DiffTime}
     """
     import amorphous_reduction_sqe
-    
+
     # Steps 1-3
     ratio_min_parts = __calculate_ratio(config, config.cwdb_min)
     ratio_min = __make_ratio(ratio_min_parts)
@@ -176,17 +176,17 @@ def run(config, tim=None):
 
     # Step 5
     if __check_parts(ratio_min_parts) and __check_parts(ratio_max_parts):
-        if (config.ratio[0] < ratio_min or config.ratio[0] > ratio_max):
+        if (config.ratio < ratio_min or config.ratio > ratio_max):
             raise RuntimeError("Ratios from minimum and maximum cwdbs do not "\
                                +"bracket ratio. Increase the maximum cwdb "
                                +"parameter. Min: %f, Max: %f, Given Ratio: %f"\
-                               % (ratio_min, ratio_max, config.ratio[0]))
+                               % (ratio_min, ratio_max, config.ratio))
     elif __check_parts(ratio_min_parts) and not __check_parts(ratio_max_parts):
-        if ratio_min > config.ratio[0]:
+        if ratio_min > config.ratio:
             raise RuntimeError("Ratio from minimum cwdb is greater than "\
                                +"requested ratio. Decrease the minimum cwdb "\
                                +"parameter. Min: %f, Given Ratio: %f" \
-                               %(ratio_min, config.ratio[0]))
+                               %(ratio_min, config.ratio))
     elif not __check_parts(ratio_min_parts) and \
              not __check_parts(ratio_max_parts):
         raise RuntimeError("The components of both ratios are negative. "\
@@ -213,8 +213,8 @@ def run(config, tim=None):
         ratio_try = __make_ratio(ratio_try_parts)
 
         # First, check to see if ratio is within tolerance
-        if __check_range(ratio_try, config.ratio[0]-config.ratio[1],
-                         config.ratio[0]+config.ratio[1]):
+        if __check_range(ratio_try, config.ratio-config.tol,
+                         config.ratio+config.tol):
             run_ok = True
             break
 
@@ -224,7 +224,7 @@ def run(config, tim=None):
             wdb_range[1] = wdb_try
         else:
             # It's +/+, so look at ratio
-            if ratio_try > config.ratio[0]:
+            if ratio_try > config.ratio:
                 # Move range down
                 wdb_range[1] = wdb_try
             else:
@@ -250,11 +250,11 @@ if __name__ == "__main__":
     # Make description for driver
     result = []
     result.append("This driver searches for a wavelength-dependent background")
-    result.append("that corresponds to a user requested ratio of energy")
-    result.append("transfer ranges. The --energy-bins option should be used")
-    result.append("to set the positive energy transfer region of integration.")
-    result.append("The negative region will be constructed from this")
-    result.append("information.")
+    result.append("that corresponds to a desired ratio based on temperature")
+    result.append("an the energy transfer range. The --energy-bins option")
+    rssult.append("should be used to set the positive energy transfer region")
+    result.append("of integration. The negative region will be constructed")
+    result.append("from this information.")
 
     # Set up the options available
     parser = hlr_utils.AmrOptions("usage: %prog [options] <datafile>", None,
@@ -269,10 +269,13 @@ if __name__ == "__main__":
     parser.set_defaults(norm_end="6.30")
 
     # Add find_ldb related options
-    parser.add_option("", "--ratio", dest="ratio",
-                      help="Specify the value and tolerance (error) of the "\
-                      +"target energy transfer integration ratio as comma "\
-                      +"separated values")
+    parser.add_option("", "--detbal-temp", dest="detbal_temp", help="Specify "\
+                      +"the experiment temperature that will help calculate "\
+                      +"the desired ratio.")
+    
+    parser.add_option("", "--tol", dest="tol",
+                      help="Specify the tolerance of the target energy "\
+                      +"transfer integration ratio")
     
     parser.add_option("", "--niter", dest="niter", type="int",
                       help="Specify the number of iterations to try. The "\
@@ -282,6 +285,7 @@ if __name__ == "__main__":
     parser.add_option("", "--cwdb-min", dest="cwdb_min", type="float",
                       help="Specify the minimum value of the "\
                       +"wavelength-dependent background")
+    parser.set_defaults(cwdb_min=0.0)
     
     parser.add_option("", "--cwdb-max", dest="cwdb_max", type="float",
                       help="Specify the maximum value of the "\
@@ -336,11 +340,17 @@ if __name__ == "__main__":
                                       float(qfacts[1]),
                                       float(qfacts[1])-float(qfacts[0]))
 
-    # Set the integration ratio and its tolerance
-    if options.ratio:
-        configure.ratio = hlr_utils.split_values(options.ratio)
+    # Set the tolerance for the desired ratio
+    if options.tol:
+        configure.tol = float(options.tol)
     else:
-        parser.error("An integration ratio must be supplied") 
+        parser.error("A tolerance must be supplied") 
+
+    # Set the experiment (detailed balance) temperature
+    if options.detbal_temp:
+        configure.detbal_temp = float(options.detbal_temp)
+    else:
+        parser.error("An experiment temperature must be supplied")         
 
     # Set the number of iterations
     configure.niter = options.niter
@@ -363,5 +373,11 @@ if __name__ == "__main__":
         timer = sns_timing.DiffTime()
     else:
         timer = None
+
+    # Step 0: Calculate desired ratio
+    import math
+    configure.ratio = math.exp(0.5 * (float(efacts[0]) + float(efacts[1])) /
+                               (configure.detbal_temp * 86.17343))
+    
 
     run(configure, timer)
