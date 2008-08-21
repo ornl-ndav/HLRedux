@@ -52,7 +52,20 @@ def run(config):
     if dst_type == "text/Spec":
         __plot_a3c(d_som, config)
     elif dst_type == "text/Dave2d":
-        drplot.plot_2D_so(d_som, logz=config.logz)
+        if config.projx:
+            drplot.plot_1D_slice(d_som, "y", config.range, (None, None),
+                                 logx=config.logx, logy=config.logy)
+        elif config.projy:
+            drplot.plot_1D_slice(d_som, "x", (None, None), config.range,
+                                 logx=config.logx, logy=config.logy)
+        elif config.slicex:
+            drplot.plot_1D_slices(d_som, "y", config.range,
+                                 logx=config.logx, logy=config.logy)
+        elif config.slicey:
+            drplot.plot_1D_slices(d_som, "x", config.range,
+                                  logx=config.logx, logy=config.logy)
+        else:
+            drplot.plot_2D_so(d_som, logz=config.logz)
     elif dst_type == "text/num-info":
         drplot.plot_numinfo(d_som)
     else:
@@ -96,7 +109,7 @@ def __plot_a3c(som, conf):
             except ValueError:
                 # All data got filtered
                 pass
-            
+
 if __name__ == "__main__":
     import drplot
     import hlr_utils
@@ -127,6 +140,26 @@ if __name__ == "__main__":
     parser.add_option("", "--logz", dest="logz", action="store_true",
                       help="Set the z-axis to logarithmic scale.")
     parser.set_defaults(logz=False)        
+
+    parser.add_option("", "--projx", dest="projx", action="store_true",
+                      help="Project a 2D distribution along x.")
+    parser.set_defaults(projx=False)
+
+    parser.add_option("", "--projy", dest="projy", action="store_true",
+                      help="Project a 2D distribution along y.")
+    parser.set_defaults(projy=False)    
+
+    parser.add_option("", "--range", dest="range", type="float", nargs=2,
+                      help="Set the range to filter on the opposite "\
+                      +"axis when projecting or slicing a 2D distribution.")
+
+    parser.add_option("", "--slicex", dest="slicex", action="store_true",
+                      help="Project a 2D distribution along x.")
+    parser.set_defaults(slicex=False)
+
+    parser.add_option("", "--slicey", dest="slicey", action="store_true",
+                      help="Project a 2D distribution along y.")
+    parser.set_defaults(slicey=False)
     
     # Do not need to use the following options
     parser.remove_option("--config")
@@ -166,6 +199,25 @@ if __name__ == "__main__":
 
     # Set the logarithmic z-axis
     configure.logz = options.logz    
+
+    # Set the flag to project to the x-axis
+    configure.projx = options.projx
+
+    # Set the flag to project to the y-axis
+    configure.projy = options.projy
+
+    # Set the range for filtering the opposite axis for the chosen projection
+    # or slicing scheme
+    if options.range is None:
+        configure.range = (None, None)
+    else:
+        configure.range = options.range    
+
+    # Set the flag to make slices along the y-axis
+    configure.slicex = options.slicex
+
+    # Set the flag to make slices along the x-axis
+    configure.slicey = options.slicey
 
     # Run the program
     run(configure)
