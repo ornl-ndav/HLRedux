@@ -413,32 +413,48 @@ def run(config, tim=None):
         d_som6 = d_som5
 
     if not __name__ == "amorphous_reduction_sqe":
-
         del d_som5
-
-        # Writing 2D DAVE file
-        if not config.split:
-            hlr_utils.write_file(config.output, "text/Dave2d", d_som6,
-                                 verbose=config.verbose,
-                                 message="data",
-                                 replace_path=False,
-                                 replace_ext=False)
-        
-        d_som6.attr_list["config"] = config
-
-        hlr_utils.write_file(config.output, "text/rmd", d_som6,
-                             output_ext="rmd",
-                             data_ext=config.ext_replacement,         
-                             path_replacement=config.path_replacement,
-                             verbose=config.verbose,
-                             message="metadata")
-    
-        if tim is not None:
-            tim.setOldTime(old_time)
-            tim.getTime(msg="Total Running Time")
-
+        __write_output(d_som6, config, tim)
     else:
-        return d_som6
+        if config.create_output:
+            del d_som5
+            __write_output(d_som6, config, tim)
+        else:
+            return d_som6
+
+def __write_output(som, conf, t):
+    """
+    This is private  helper function for writing the output to a file
+
+    @param som: The object to be written to file.
+    @type som: C{SOM.SOM}
+
+    @param conf: The current driver configuration object.
+    @type conf: L{hlr_utils.Configure}
+
+    @param t: The current timing object.
+    @type t: C{sns_timing.DiffTime}
+    """
+    # Writing 2D DAVE file
+    if not conf.split:
+        hlr_utils.write_file(conf.output, "text/Dave2d", som,
+                             verbose=conf.verbose,
+                             message="data",
+                             replace_path=False,
+                             replace_ext=False)
+        
+    som.attr_list["config"] = conf
+    
+    hlr_utils.write_file(conf.output, "text/rmd", som,
+                         output_ext="rmd",
+                         data_ext=conf.ext_replacement,         
+                         path_replacement=conf.path_replacement,
+                         verbose=conf.verbose,
+                         message="metadata")
+    
+    if t is not None:
+        t.setOldTime(old_time)
+        t.getTime(msg="Total Running Time")
     
 if __name__ == "__main__":
     import hlr_utils
