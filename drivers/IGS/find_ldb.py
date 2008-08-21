@@ -102,7 +102,7 @@ def __calculate_ratio(conf, cwdb, t=None):
     @rtype: C{tuple}
     """
     import copy
-    import amorphous_reduction_sqe
+
     import dr_lib
 
     amr_config = copy.deepcopy(conf)
@@ -158,6 +158,8 @@ def run(config, tim=None):
                            timing evaluations.
     @type tim: C{sns_time.DiffTime}
     """
+    import amorphous_reduction_sqe
+    
     # Steps 1-3
     ratio_min_parts = __calculate_ratio(config, config.cwdb_min)
     ratio_min = __make_ratio(ratio_min_parts)
@@ -213,8 +215,6 @@ def run(config, tim=None):
         # First, check to see if ratio is within tolerance
         if __check_range(ratio_try, config.ratio[0]-config.ratio[1],
                          config.ratio[0]+config.ratio[1]):
-            if config.verbose:
-                print "Final WDB: %f" % wdb_try
             run_ok = True
             break
 
@@ -236,7 +236,13 @@ def run(config, tim=None):
     if not run_ok:
         # If you hit here, you've exhausted the number of iterations
         print "Maximum number of iterations exceeded! No suitable WDB found!"
-        print "Best Value: %f, Ratio: %f" % (wdb_try, ratio_try)
+
+    print "Best Value: %f, Ratio: %f" % (wdb_try, ratio_try)
+
+    # Add a flag to the options to signal we need the output file from this run
+    config.create_output = True
+    config.ldb_const = hlr_utils.DrParameter(wdb_try, 0.0)
+    amorphous_reduction_sqe.run(config)
     
 if __name__ == "__main__":
     import hlr_utils
