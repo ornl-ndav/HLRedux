@@ -354,6 +354,9 @@ if __name__ == "__main__":
     # Set the verbosity for the amorphous_reduction_sqe code
     configure.amr_verbose = options.amr_verbose
 
+    # Set a flag for creating output, but the default is currently False
+    configure.create_output = False
+
     # Set timer object if timing option is used
     if options.timing:
         import sns_timing
