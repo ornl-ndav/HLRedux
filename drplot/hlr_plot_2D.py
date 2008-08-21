@@ -246,6 +246,70 @@ def plot_1D_slice(som, axis, xslice, yslice, **kwargs):
 
     drplot.plot_1D_arr(xp, yp, var_yp, xlabel=xlabel, **kwargs)
 
+def plot_1D_slices(som, axis, range, **kwargs):
+    """
+    This function plots multiple 1D slices from a 2D spectrum. The function
+    requires the axis to project onto and a range of slices to view. NOTE: This
+    function only creates the plot. Viewing the actual plot requires invoking
+    I{pylab.show()}.
+
+    @param som: The object containing the data to plot.
+    @type som: C{SOM.SOM}
+
+    @param axis: The particular axis to clean. This is either I{x} or I{y}.
+    @type axis: C{string}
+
+    @param range: A set of axis values that determines the slices to view in
+                  the format of (min, max).
+    @type range: C{tuple} of two numbers
+
+    @param kwargs: A list of keyword arguments that the function accepts. The
+                   function also takes keywords for L{drplot.plot_1d_slice}.
+    """
+    if axis == "y":
+        saxis = som[0].axis[0].val
+        ilabel = som.getAxisLabel(0)
+        iunits = som.getAxisUnits(0)
+        yslice = (None, None)
+        sidx = __find_index(saxis.toNumPy(), range[0])
+        eidx = __find_index(saxis.toNumPy(), range[1])
+    elif axis == "x":
+        saxis = som[0].axis[1].val
+        ilabel = som.getAxisLabel(1)
+        iunits = som.getAxisUnits(1)
+        xslice = (None, None)
+        sidx = __find_index(saxis.toNumPy(), range[0])
+        eidx = __find_index(saxis.toNumPy(), range[1])
+    else:
+        raise RuntimeError("Only understand x or y for axis and not: %s" \
+                           % axis)
+
+    if sidx is None and eidx is None:
+        slice_range = (0, len(saxis))
+    elif sidx is None and eidx is not None:
+        slice_range = (0, eidx)
+    elif sidx is not None and eidx is None:
+        slice_range = (sidx, len(saxis))
+    else:
+        slice_range = (sidx, eidx)
+
+    for i in xrange(slice_range[0], slice_range[1]):
+        if axis == "y":
+            xslice = (i, i+1)
+        elif axis == "x":
+            yslice = (i, i+1)
+
+        nlabel = ilabel + " = %f %s" % (saxis[i], iunits)
+
+        try:
+            drplot.plot_1D_slice(som, axis, xslice, yslice, index=True,
+                                 llabel=nlabel, **kwargs)
+        except ValueError:
+            # All data got filtered
+            pass
+
+    pylab.legend(numpoints=1)
+
 def __find_index(arr, val):
     """
     This helper function searches an array for a particular value returning
