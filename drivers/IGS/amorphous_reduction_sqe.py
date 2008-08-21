@@ -414,15 +414,15 @@ def run(config, tim=None):
 
     if not __name__ == "amorphous_reduction_sqe":
         del d_som5
-        __write_output(d_som6, config, tim)
+        __write_output(d_som6, config, tim, old_time)
     else:
         if config.create_output:
             del d_som5
-            __write_output(d_som6, config, tim)
+            __write_output(d_som6, config, tim, old_time)
         else:
             return d_som6
 
-def __write_output(som, conf, t):
+def __write_output(som, conf, t, ot):
     """
     This is private  helper function for writing the output to a file
 
@@ -434,6 +434,9 @@ def __write_output(som, conf, t):
 
     @param t: The current timing object.
     @type t: C{sns_timing.DiffTime}
+
+    @param ot: The origianl timing object.
+    @type ot: C{sns_timing.DiffTime}
     """
     # Writing 2D DAVE file
     if not conf.split:
@@ -453,7 +456,7 @@ def __write_output(som, conf, t):
                          message="metadata")
     
     if t is not None:
-        t.setOldTime(old_time)
+        t.setOldTime(ot)
         t.getTime(msg="Total Running Time")
     
 if __name__ == "__main__":
