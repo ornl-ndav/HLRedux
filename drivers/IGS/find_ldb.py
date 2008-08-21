@@ -239,7 +239,7 @@ def run(config, tim=None):
 
     print "Best Value: %f, Ratio: %f" % (wdb_try, ratio_try)
 
-    # Add a flag to the options to signal we need the output file from this run
+    # Set the create_output flag to True to get the output file from this run
     config.create_output = True
     config.ldb_const = hlr_utils.DrParameter(wdb_try, 0.0)
     amorphous_reduction_sqe.run(config)
