@@ -267,22 +267,20 @@ def plot_1D_slices(som, axis, range, **kwargs):
                    function also takes keywords for L{drplot.plot_1d_slice}.
     """
     if axis == "y":
-        saxis = som[0].axis[0].val
-        ilabel = som.getAxisLabel(0)
-        iunits = som.getAxisUnits(0)
+        iaxis = 0
         yslice = (None, None)
-        sidx = __find_index(saxis.toNumPy(), range[0])
-        eidx = __find_index(saxis.toNumPy(), range[1])
     elif axis == "x":
-        saxis = som[0].axis[1].val
-        ilabel = som.getAxisLabel(1)
-        iunits = som.getAxisUnits(1)
+        iaxis = 1
         xslice = (None, None)
-        sidx = __find_index(saxis.toNumPy(), range[0])
-        eidx = __find_index(saxis.toNumPy(), range[1])
     else:
         raise RuntimeError("Only understand x or y for axis and not: %s" \
                            % axis)
+
+    saxis = som[0].axis[iaxis].val
+    ilabel = som.getAxisLabel(iaxis)
+    iunits = som.getAxisUnits(iaxis)
+    sidx = __find_index(saxis.toNumPy(), range[0])
+    eidx = __find_index(saxis.toNumPy(), range[1])
 
     if sidx is None and eidx is None:
         slice_range = (0, len(saxis))
