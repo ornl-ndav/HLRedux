@@ -316,6 +316,8 @@ if __name__ == "__main__":
     # Remove some other unneeded options
     parser.remove_option("--split")
     parser.remove_option("--lambda-bins")
+    # This one is handled by the loop
+    parser.remove_option("--ldb-const")
 
     (options, args) = parser.parse_args()
 
