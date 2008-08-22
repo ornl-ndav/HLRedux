@@ -158,6 +158,13 @@ def run(config, tim=None):
                            timing evaluations.
     @type tim: C{sns_time.DiffTime}
     """
+    if tim is not None:
+        tim.getTime(False)
+        old_time = tim.getOldTime()
+
+    if config.verbose:
+        print "Ratio:", config.ratio
+    
     # Steps 1-3
     ratio_min_parts = __calculate_ratio(config, config.cwdb_min)
     ratio_min = __make_ratio(ratio_min_parts)
@@ -210,6 +217,9 @@ def run(config, tim=None):
         ratio_try_parts = __calculate_ratio(config, wdb_try)
         ratio_try = __make_ratio(ratio_try_parts)
 
+        if tim is not None:
+            tim.getTime(msg="After maximum ratio calculation ")
+
         # First, check to see if ratio is within tolerance
         if __check_range(ratio_try, config.ratio-config.tol,
                          config.ratio+config.tol):
@@ -242,6 +252,10 @@ def run(config, tim=None):
     config.create_output = True
     config.ldb_const = hlr_utils.DrParameter(wdb_try, 0.0)
     amorphous_reduction_sqe.run(config)
+
+    if tim is not None:
+        tim.setOldTime(old_time)
+        tim.getTime(msg="Total Running Time")
     
 if __name__ == "__main__":
     import amorphous_reduction_sqe
