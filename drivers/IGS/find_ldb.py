@@ -158,8 +158,6 @@ def run(config, tim=None):
                            timing evaluations.
     @type tim: C{sns_time.DiffTime}
     """
-    import amorphous_reduction_sqe
-
     # Steps 1-3
     ratio_min_parts = __calculate_ratio(config, config.cwdb_min)
     ratio_min = __make_ratio(ratio_min_parts)
@@ -246,6 +244,7 @@ def run(config, tim=None):
     amorphous_reduction_sqe.run(config)
     
 if __name__ == "__main__":
+    import amorphous_reduction_sqe
     import hlr_utils
 
     # Make description for driver
