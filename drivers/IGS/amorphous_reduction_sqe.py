@@ -27,6 +27,7 @@ This program covers the functionality outlined in B{Section 2.2.1 Powder or
 amorphous material reduction} in
 U{http://neutrons.ornl.gov/asg/projects/SCL/reqspec/DR_Lib_RS.doc}
 """
+import hlr_utils
 
 def run(config, tim=None):
     """
@@ -412,6 +413,9 @@ def run(config, tim=None):
     else:
         d_som6 = d_som5
 
+    if tim is None:
+        old_time = None
+
     if not __name__ == "amorphous_reduction_sqe":
         del d_som5
         __write_output(d_som6, config, tim, old_time)
@@ -460,7 +464,6 @@ def __write_output(som, conf, t, ot):
         t.getTime(msg="Total Running Time")
     
 if __name__ == "__main__":
-    import hlr_utils
 
     # Make description for driver
     result = []
