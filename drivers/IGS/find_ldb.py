@@ -245,7 +245,7 @@ def run(config, tim=None):
         # If you hit here, you've exhausted the number of iterations
         print "Maximum number of iterations exceeded! No suitable WDB found!"
 
-    print "Best Value: %f, Ratio: %f" % (wdb_try, ratio_try)
+    print "Best Value: %e, Ratio: %f" % (wdb_try, ratio_try)
 
     # Step 8
     # Set the create_output flag to True to get the output file from this run
@@ -331,6 +331,8 @@ if __name__ == "__main__":
     parser.remove_option("--lambda-bins")
     # This one is handled by the loop
     parser.remove_option("--ldb-const")
+    # Block the rescaling as this causes havoc with the looping
+    parser.remove_option("--rescale-final")
 
     (options, args) = parser.parse_args()
 
