@@ -253,7 +253,7 @@ if __name__ == "__main__":
     result.append("This driver searches for a wavelength-dependent background")
     result.append("that corresponds to a desired ratio based on temperature")
     result.append("an the energy transfer range. The --energy-bins option")
-    rssult.append("should be used to set the positive energy transfer region")
+    result.append("should be used to set the positive energy transfer region")
     result.append("of integration. The negative region will be constructed")
     result.append("from this information.")
 
