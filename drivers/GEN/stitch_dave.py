@@ -45,6 +45,39 @@ def run(config):
         raise TypeError("Only Dave2D ASCII files can be handled. Do not "\
                         +"know how to handle %s." % dst_type)
 
+    spectra = []
+
+    # Read in all data files
+    for datafile in config.data:
+        spectra.append(dr_lib.add_files(datafile, dst_type=dst_type,
+                                        Verbose=config.verbose,
+                                        Timer=tim)[0])
+
+    # Sort spectra on slowest axis (Q for BSS files)
+    spectra.sort(lambda x, y: cmp(x[0].axis[0].val[0], y[0].axis[0].val[0]))
+
+    # Create placeholder for combined spectrum
+    Ny = len(spectra)
+    Nx = len(spectra[0][0].axis[1].val)
+
+    import nessi_list
+    import SOM
+
+    result = SOM.SOM()
+    result = hlr_utils.copy_som_attr(result, "SOM", spectra[0], "SOM")
+    
+    so = SOM.SO(2)
+    so.y = nessi_list.NessiList(Nx * Ny)
+    so.var_y = nessi_list.NessiList(Nx * Ny)
+    so.axis[1].val = spectra[0][0].axis[1].val
+
+    # Make the slowest axis
+    slow_axis = [x[0].axis[0].val[0] for x in spectra]
+    so.axis[0].val = nessi_list.NessiList()
+    so.axis[0].val.extend(slow_axis)
+
+    
+
     
 if __name__ == "__main__":
     import dr_lib
