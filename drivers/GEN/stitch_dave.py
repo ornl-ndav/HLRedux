@@ -89,8 +89,17 @@ def run(config):
                                                 a_start=start)
 
     result.append(so)
-    
-    hlr_utils.write_file(config.output, dst_type, result,
+
+    # Rescale data if necessary
+    if config.rescale is not None:
+        import common_lib
+        result2 = common_lib.mult_ncerr(result, (config.rescale, 0.0))
+    else:
+        result2 = result
+
+    del result
+
+    hlr_utils.write_file(config.output, dst_type, result2,
                          verbose=config.verbose,
                          replace_ext=False,
                          path_replacement=config.path_replacement,
@@ -114,7 +123,8 @@ if __name__ == "__main__":
 
     # Specify the rescaling constant
     parser.add_option("-r", "--rescale", dest="rescale", help="Specify a "\
-                      +"constant with which to rescale the final data.")
+                      +"constant with which to rescale (multiply) the final "\
+                      +"data.")
 
     # Remove unneeded options
     parser.remove_option("--inst")
