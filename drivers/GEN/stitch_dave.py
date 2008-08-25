@@ -126,6 +126,9 @@ if __name__ == "__main__":
                       +"constant with which to rescale (multiply) the final "\
                       +"data.")
 
+    # Change help slightly for data option
+    parser.get_option("--data").help = "Specify the DAVE 2D ASCII files."
+
     # Remove unneeded options
     parser.remove_option("--inst")
     parser.remove_option("--facility")
