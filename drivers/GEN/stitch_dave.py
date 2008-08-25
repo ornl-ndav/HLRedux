@@ -41,7 +41,7 @@ def run(config):
                            +"script.")
 
     dst_type = hlr_utils.file_peeker(config.data[0])
-    if dst_type != "text/Dave2D":
+    if dst_type != "text/Dave2d":
         raise TypeError("Only Dave2D ASCII files can be handled. Do not "\
                         +"know how to handle %s." % dst_type)
 
@@ -89,7 +89,6 @@ def run(config):
         (so.y, so.var_y) = commo_lib.add_ncerr(so.y, so.var_y, value, err2,
                                                a_start=start)
         
-
     hlr_utils.write_file(config.output, dst_type, result,
                          verbose=config.verbose,
                          replace_ext=False,
