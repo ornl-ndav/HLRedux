@@ -49,9 +49,8 @@ def run(config):
 
     # Read in all data files
     for datafile in config.data:
-        spectra.append(dr_lib.add_files(datafile, dst_type=dst_type,
-                                        Verbose=config.verbose,
-                                        Timer=tim)[0])
+        spectra.append(dr_lib.add_files([datafile], dst_type=dst_type,
+                                        Verbose=config.verbose)[0])
 
     # Sort spectra on slowest axis (Q for BSS files)
     spectra.sort(lambda x, y: cmp(x[0].axis[0].val[0], y[0].axis[0].val[0]))
@@ -78,17 +77,19 @@ def run(config):
     so.axis[0].val.extend(slow_axis)
 
     # Create combined spectrum
-    import common_lib
+    import array_manip
     
     for i in xrange(Ny):
-        value = hlr_util.get_value(spectra[i], 0, "SOM", "y")
-        err2 = hlr_util.get_err2(spectra[i], 0, "SOM", "y")
+        value = hlr_utils.get_value(spectra[i], 0, "SOM", "y")
+        err2 = hlr_utils.get_err2(spectra[i], 0, "SOM", "y")
         
-        start = i * Ny
+        start = i * Nx
 
-        (so.y, so.var_y) = commo_lib.add_ncerr(so.y, so.var_y, value, err2,
-                                               a_start=start)
-        
+        (so.y, so.var_y) = array_manip.add_ncerr(so.y, so.var_y, value, err2,
+                                                a_start=start)
+
+    result.append(so)
+    
     hlr_utils.write_file(config.output, dst_type, result,
                          verbose=config.verbose,
                          replace_ext=False,
