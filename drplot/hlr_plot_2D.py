@@ -264,7 +264,7 @@ def plot_1D_slices(som, axis, range, **kwargs):
     @type range: C{tuple} of two numbers
 
     @param kwargs: A list of keyword arguments that the function accepts. The
-                   function also takes keywords for L{drplot.plot_1d_slice}.
+                   function also takes keywords for L{drplot.plot_1D_slice}.
     """
     if axis == "y":
         iaxis = 0
