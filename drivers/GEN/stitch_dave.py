@@ -67,6 +67,7 @@ def run(config):
     result = hlr_utils.copy_som_attr(result, "SOM", spectra[0], "SOM")
     
     so = SOM.SO(2)
+    so.id = 0
     so.y = nessi_list.NessiList(Nx * Ny)
     so.var_y = nessi_list.NessiList(Nx * Ny)
     so.axis[1].val = spectra[0][0].axis[1].val
@@ -76,9 +77,26 @@ def run(config):
     so.axis[0].val = nessi_list.NessiList()
     so.axis[0].val.extend(slow_axis)
 
+    # Create combined spectrum
+    import common_lib
     
+    for i in xrange(Ny):
+        value = hlr_util.get_value(spectra[i], 0, "SOM", "y")
+        err2 = hlr_util.get_err2(spectra[i], 0, "SOM", "y")
+        
+        start = i * Ny
 
-    
+        (so.y, so.var_y) = commo_lib.add_ncerr(so.y, so.var_y, value, err2,
+                                               a_start=start)
+        
+
+    hlr_utils.write_file(config.output, dst_type, result,
+                         verbose=config.verbose,
+                         replace_ext=False,
+                         path_replacement=config.path_replacement,
+                         axis_ok=True,
+                         message="combined file")
+
 if __name__ == "__main__":
     import dr_lib
     import hlr_utils
