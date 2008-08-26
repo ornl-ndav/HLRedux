@@ -171,7 +171,7 @@ def run(config, tim):
         delta_lambdap = array_manip.div_ncerr(delta_lambda[0], delta_lambda[1],
                                               math.sin(theta_rads[0]), 0.0)
 
-        config.lambdap_bins = dr_lib.create_axis_from_data(d_som4,
+        config.lambdap_bins = dr_lib.create_axis_from_data(d_som3,
                                                        width=delta_lambdap[0])
 
     else:
