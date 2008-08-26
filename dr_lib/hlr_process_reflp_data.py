@@ -144,8 +144,8 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
     if conf.verbose:
         print "Converting TOF to wavelength"
 
-    if tim is not None:
-        tim.getTime(False)
+    if t is not None:
+        t.getTime(False)
 
     d_som3 = common_lib.tof_to_wavelength(d_som2, units="microsecond")
     if dm_som1 is not None:
@@ -155,8 +155,8 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
 
     del dm_som1
 
-    if tim is not None:
-        tim.getTime(msg="After converting TOF to wavelength ")
+    if t is not None:
+        t.getTime(msg="After converting TOF to wavelength ")
 
     del d_som2
 
@@ -173,12 +173,12 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
             print "Multiply spectra by proton charge"
 
         pc_tag = dataset_type + "-proton_charge"
-        proton_charge = d_som2.attr_list[pc_tag]
+        proton_charge = d_som3.attr_list[pc_tag]
 
         if t is not None:
             t.getTime(False)
 
-        d_som3 = common_lib.mult_ncerr(d_som2, (proton_charge.getValue(), 0.0))
+        d_som4 = common_lib.mult_ncerr(d_som3, (proton_charge.getValue(), 0.0))
 
         if t is not None:
             t.getTime(msg="After scaling by proton charge ")
@@ -189,25 +189,25 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
         if t is not None:
             t.getTime(False)
 
-        d_som3 = common_lib.div_ncerr(d_som2, dm_som3)
+        d_som4 = common_lib.div_ncerr(d_som2, dm_som3)
 
         if t is not None:
             t.getTime(msg="After monitor normalization ")
 
-    del d_som2, dm_som3
+    del d_som3, dm_som3
 
     if roi_file is None:
-        return d_som3
+        return d_som4
     else:
         # Step 3: Make one spectrum for normalization dataset
         # Need to create a final rebinning axis
-        pathlength = d_som3.attr_list.instrument.get_total_path(
+        pathlength = d_som4.attr_list.instrument.get_total_path(
             det_secondary=True)
         
-        delta_lambda = common_lib.tof_to_wavelength((config.delta_TOF, 0.0),
+        delta_lambda = common_lib.tof_to_wavelength((conf.delta_TOF, 0.0),
                                                     pathlength=pathlength)
 
-        lambda_bins = dr_lib.create_axis_from_data(d_som3,
+        lambda_bins = dr_lib.create_axis_from_data(d_som4,
                                                    width=delta_lambda[0])
 
-        return dr_lib.sum_by_rebin_frac(d_som3, lambda_bins.toNessiList())
+        return dr_lib.sum_by_rebin_frac(d_som4, lambda_bins.toNessiList())
