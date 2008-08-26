@@ -137,45 +137,6 @@ def run(config, tim):
 
     del d_som1, n_som1
 
-    if config.dump_rtof_comb:
-        d_som2_1 = dr_lib.sum_all_spectra(d_som2)
-        d_som2_2 = dr_lib.data_filter(d_som2_1)
-        del d_som2_1
-        
-        hlr_utils.write_file(config.output, "text/Spec", d_som2_2,
-                             output_ext="crtof",
-                             verbose=config.verbose,
-                             data_ext=config.ext_replacement,
-                             path_replacement=config.path_replacement,
-                             message="combined R(TOF) information")
-
-        del d_som2_2
-
-    if config.dump_rtof:
-        d_som2_1 = dr_lib.filter_ref_data(d_som2)
-
-        hlr_utils.write_file(config.output, "text/Spec", d_som2_1,
-                             output_ext="rtof",
-                             verbose=config.verbose,
-                             data_ext=config.ext_replacement,
-                             path_replacement=config.path_replacement,
-                             message="R(TOF) information")
-        del d_som2_1
-
-    # Step 5: Convert TOF to Wavelength
-    if config.verbose:
-        print "Converting TOF to wavelength"
-
-    if tim is not None:
-        tim.getTime(False)
-
-    d_som3 = common_lib.tof_to_wavelength(d_som2, units="microsecond")
-
-    if tim is not None:
-        tim.getTime(msg="After converting TOF to wavelength ")
-
-    del d_som2
-
     # Step 6: Scale wavelength axis by sin(theta) to make lambda_T
     if config.verbose:
         print "Scaling wavelength axis by sin(theta)"
