@@ -62,6 +62,11 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
 
     # Check keywords
     try:
+        i_geom_dst = kwargs["inst_geom_dst"]
+    except KeyError:
+        i_geom_dst = None
+    
+    try:
         t = kwargs["timer"]
     except KeyError:
         t = None
@@ -90,8 +95,13 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
     if t is not None:
         t.getTime(msg="After reading %s " % dataset_type)
 
-    # Get TOF bin width
-    conf.delta_TOF = d_som1[0].axis[0].val[1] - d_som1[0].axis[0].val[0]
+    # Override geometry if necessary
+    if i_geom_dst is not None:
+        i_geom_dst.setGeometry(conf.data_paths.toPath(), d_som1)
+
+    if dataset_type == "data":
+        # Get TOF bin width
+        conf.delta_TOF = d_som1[0].axis[0].val[1] - d_som1[0].axis[0].val[0]
 
     # Step 1: Sum all spectra along the low resolution direction
     # Set sorting for REF_L
@@ -113,6 +123,20 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
         t.getTime(msg="After summing low resolution direction ")
         
     del d_som1
+
+    # Step N: Convert TOF to wavelength
+    if config.verbose:
+        print "Converting TOF to wavelength"
+
+    if tim is not None:
+        tim.getTime(False)
+
+    d_som3 = common_lib.tof_to_wavelength(d_som2, units="microsecond")
+
+    if tim is not None:
+        tim.getTime(msg="After converting TOF to wavelength ")
+
+    del d_som2
 
     # Step 2: Multiply the spectra by the proton charge
     if conf.verbose:
