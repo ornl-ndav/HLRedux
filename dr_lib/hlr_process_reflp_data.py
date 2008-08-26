@@ -44,6 +44,10 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
 
     @param kwargs: A list of keyword arguments that the function accepts:
 
+    @keyword inst_geom_dst: File object that contains instrument geometry
+                            information.
+    @type inst_geom_dst: C{DST.GeomDST}
+
     @keyword timer:  Timing object so the function can perform timing
                      estimates.
     @type timer: C{sns_timer.DiffTime}
@@ -85,6 +89,9 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
 
     if t is not None:
         t.getTime(msg="After reading %s " % dataset_type)
+
+    # Get TOF bin width
+    conf.delta_TOF = d_som1[0].axis[0].val[1] - d_som1[0].axis[0].val[0]
 
     # Step 1: Sum all spectra along the low resolution direction
     # Set sorting for REF_L
