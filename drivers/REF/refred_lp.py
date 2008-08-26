@@ -65,6 +65,16 @@ def run(config, tim):
                                              config.data_inst_geom)
     else:
         data_inst_geom_dst = None
+
+    # Read in normalization data geometry if one is provided
+    if config.norm_inst_geom is not None:
+        if config.verbose:
+            print "Reading in normalization instrument geometry file"
+            
+        norm_inst_geom_dst = DST.getInstance("application/x-NxsGeom",
+                                             config.norm_inst_geom)
+    else:
+        norm_inst_geom_dst = None        
     
     # Perform Steps 1-2 on sample data
     d_som1 = dr_lib.process_reflp_data(config.data, config,
@@ -97,9 +107,18 @@ def run(config, tim):
     if config.norm is not None:
         n_som1 = dr_lib.process_reflp_data(config.norm, config,
                                            config.norm_roi_file,
+                                           inst_geom_dst=norm_inst_geom_dst,
                                            timer=tim)
     else:
         n_som1 = None
+
+    # Closing sample data instrument geometry file
+    if data_inst_geom_dst is not None:
+        data_inst_geom_dst.release_resource()
+
+    # Closing normalization data instrument geometry file
+    if norm_inst_geom_dst is not None:
+        norm_inst_geom_dst.release_resource()        
 
     # Step 4: Divide data by normalization
     if config.verbose and config.norm is not None:
@@ -142,11 +161,6 @@ def run(config, tim):
                              path_replacement=config.path_replacement,
                              message="R(TOF) information")
         del d_som2_1
-
-    # Override geometry if necessary
-    if data_inst_geom_dst is not None:
-        data_inst_geom_dst.setGeometry(config.data_paths.toPath(), d_som2)
-        data_inst_geom_dst.release_resource()
 
     # Step 5: Convert TOF to Wavelength
     if config.verbose:
@@ -274,7 +288,6 @@ if __name__ == "__main__":
     parser.remove_option("--nbkg-roi-file")
     parser.remove_option("--data-peak-excl")
     parser.remove_option("--norm-peak-excl")
-    parser.remove_option("--norm-inst-geom")
     parser.remove_option("--no-bkg")
     parser.remove_option("--no-norm-bkg")
     parser.remove_option("--mom-trans-bins")
