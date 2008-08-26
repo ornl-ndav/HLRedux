@@ -284,6 +284,8 @@ if __name__ == "__main__":
     parser.remove_option("--dump-specular")
     parser.remove_option("--dump-bkg")
     parser.remove_option("--dump-sub")
+    parser.remove_option("--dump-rtof")
+    parser.remove_option("--dump-rtof-comb")
     parser.remove_option("--dump-rq")
     parser.remove_option("--dump-rqr")
 
