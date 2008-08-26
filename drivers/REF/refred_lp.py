@@ -69,10 +69,8 @@ def run(config, tim):
     # Perform Steps 1-2 on sample data
     d_som1 = dr_lib.process_reflp_data(config.data, config,
                                        None,
+                                       inst_geom_dst=data_inst_geom_dst,
                                        timer=tim)
-
-    # Get TOF bin width
-    delta_TOF = d_som1[0].axis[0].val[1] - d_som1[0].axis[0].val[0]
 
     # Get the detector angle
     if config.omega is None:
@@ -189,7 +187,7 @@ def run(config, tim):
         pathlength = d_som4.attr_list.instrument.get_total_path(
             det_secondary=True)
 
-        delta_lambda = common_lib.tof_to_wavelength((delta_TOF, 0.0),
+        delta_lambda = common_lib.tof_to_wavelength((config.delta_TOF, 0.0),
                                                     pathlength=pathlength)
  
         delta_lambdap = array_manip.div_ncerr(delta_lambda[0], delta_lambda[1],
@@ -300,6 +298,11 @@ if __name__ == "__main__":
                       +"proton charge.")
     parser.set_defaults(mon_norm=False)
 
+    parser.add_option("", "--mon-path", dest="mon_path",
+                      help="Specify the comma separated list of monitor "\
+                      +"path and signal.")
+    parser.set_defaults(mon_path="/entry/monitor1,1")    
+
     parser.add_option("", "--omega", dest="omega", help="Override the value "\
                       +"of the angle for lambda perpendicular. The units on "\
                       +"the angle must be in radians.")
@@ -330,6 +333,10 @@ if __name__ == "__main__":
     # Set mon_norm flag
     if hlr_utils.cli_provide_override(configure, "mon_norm", "--mon-norm"):
         configure.mon_norm = options.mon_norm
+
+    # Set the monitor path
+    if hlr_utils.cli_provide_override(configure, "mon_path", "--mon-path"):
+        configure.mon_path = hlr_utils.NxPath(options.mon_path)
 
     # Set the override angle for calculating lambda_T
     if hlr_utils.cli_provide_override(configure, "omega", "--omega"):
