@@ -77,8 +77,7 @@ def run(config, tim):
         norm_inst_geom_dst = None        
     
     # Perform Steps 1-2 on sample data
-    d_som1 = dr_lib.process_reflp_data(config.data, config,
-                                       None,
+    d_som1 = dr_lib.process_reflp_data(config.data, config, None,
                                        inst_geom_dst=data_inst_geom_dst,
                                        timer=tim)
 
@@ -128,7 +127,11 @@ def run(config, tim):
         tim.getTime(False)
 
     if config.norm is not None:
-        d_som2 = common_lib.div_ncerr(d_som1, n_som1, length_one_som=True)
+        # Need to rebin the normalization spectra to the data pixel spectra
+        n_som2 = dr_lib.rebin_monitor(n_som1, d_som1, rtype="frac")
+        # Now divide the spectra
+        d_som2 = common_lib.div_ncerr(d_som1, n_som2)
+        del n_som2
     else:
         d_som2 = d_som1
 
@@ -144,14 +147,14 @@ def run(config, tim):
     if tim is not None:
         tim.getTime(False)
         
-    d_som4 = common_lib.div_ncerr(d_som3, theta_rads, axis="x")
+    d_som3 = common_lib.div_ncerr(d_som2, theta_rads, axis="x")
 
     if tim is not None:
         tim.getTime(msg="After scaling wavelength axis ")
 
-    del d_som3
+    del d_som2
 
-    d_som4.setAxisLabel(0, "lambda_T")
+    d_som3.setAxisLabel(0, "lambda_T")
 
     # Step 7: Rebin to lambda_T axis
     if config.verbose:
@@ -159,7 +162,7 @@ def run(config, tim):
 
     if config.lambdap_bins is None:
         # Create a binning scheme
-        pathlength = d_som4.attr_list.instrument.get_total_path(
+        pathlength = d_som3.attr_list.instrument.get_total_path(
             det_secondary=True)
 
         delta_lambda = common_lib.tof_to_wavelength((config.delta_TOF, 0.0),
@@ -178,23 +181,23 @@ def run(config, tim):
     if tim is not None:
         tim.getTime(False)
 
-    d_som5 = common_lib.rebin_axis_1D_frac(d_som4,
+    d_som4 = common_lib.rebin_axis_1D_frac(d_som3,
                                            config.lambdap_bins.toNessiList())
 
     if tim is not None:
         tim.getTime(msg="After rebinning spectra ")
 
-    del d_som4
+    del d_som3
 
     # Step 8: Write out all spectra to a file
-    hlr_utils.write_file(config.output, "text/Spec", d_som5,
+    hlr_utils.write_file(config.output, "text/Spec", d_som4,
                          replace_ext=False,
                          replace_path=False,
                          verbose=config.verbose,
                          message="Reflectivity information")
 
     if config.dump_twod:
-        d_som6 = dr_lib.create_X_vs_pixpos(d_som5,
+        d_som5 = dr_lib.create_X_vs_pixpos(d_som4,
                                            config.lambdap_bins.toNessiList(),
                                            rebin=False,
                                            y_label="R",
@@ -202,15 +205,15 @@ def run(config, tim):
                                            x_label="$\lambda_T$",
                                            x_units="$\AA$")
 
-        hlr_utils.write_file(config.output, "text/Dave2d", d_som6,
+        hlr_utils.write_file(config.output, "text/Dave2d", d_som5,
                              output_ext="plp", verbose=config.verbose,
                              data_ext=config.ext_replacement,
                              path_replacement=config.path_replacement,
                              message="2D Reflectivity information")
 
-    d_som5.attr_list["config"] = config
+    d_som4.attr_list["config"] = config
 
-    hlr_utils.write_file(config.output, "text/rmd", d_som5,
+    hlr_utils.write_file(config.output, "text/rmd", d_som4,
                          output_ext="rmd", verbose=config.verbose,
                          data_ext=config.ext_replacement,
                          path_replacement=config.path_replacement,
