@@ -259,6 +259,7 @@ def run(config, tim=None):
     # Step 8
     # Set the create_output flag to True to get the output file from this run
     config.create_output = True
+    config.verbose = config.amr_verbose
     config.ldb_const = hlr_utils.DrParameter(wdb_try, 0.0)
     amorphous_reduction_sqe.run(config)
 
