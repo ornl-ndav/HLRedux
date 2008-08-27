@@ -127,9 +127,12 @@ def __calculate_ratio(conf, cwdb, t=None):
                                        end=conf.et_neg_range[1], axis_pos=1) 
 
     if conf.verbose:
-        print "Ratio: %e / %e, %f" % (pos_int[0].y, neg_int[0].y,
-                                      __make_ratio((pos_int[0].y,
-                                                    neg_int[0].y)))
+        try:
+            print "Ratio: %e / %e, %f" % (pos_int[0].y, neg_int[0].y,
+                                          __make_ratio((pos_int[0].y,
+                                                        neg_int[0].y)))
+        except ZeroDivisionError:
+            print "Ratio: %e / %e, inf" % (pos_int[0].y, neg_int[0].y)
 
     return (pos_int[0].y, neg_int[0].y)
 
@@ -144,7 +147,10 @@ def __make_ratio(ratio):
     @return: The ratio
     @rtype: C{float}
     """
-    return ratio[0] / ratio[1]
+    try: 
+        return ratio[0] / ratio[1]
+    except ZeroDivisionError:
+        return float("inf")
 
 def run(config, tim=None):
     """
@@ -210,6 +216,8 @@ def run(config, tim=None):
 
     counter = 0
     while counter < config.niter:
+        if config.verbose:
+            print "Range:", wdb_range
         wdb_try = __bisect_range(wdb_range)
         if config.verbose:
             print "WDB Try: ", wdb_try
@@ -218,7 +226,7 @@ def run(config, tim=None):
         ratio_try = __make_ratio(ratio_try_parts)
 
         if tim is not None:
-            tim.getTime(msg="After maximum ratio calculation ")
+            tim.getTime(msg="After ratio calculation ")
 
         # First, check to see if ratio is within tolerance
         if __check_range(ratio_try, config.ratio-config.tol,
@@ -245,7 +253,8 @@ def run(config, tim=None):
         # If you hit here, you've exhausted the number of iterations
         print "Maximum number of iterations exceeded! No suitable WDB found!"
 
-    print "Best Value: %e, Ratio: %f" % (wdb_try, ratio_try)
+    print "Best Value: %e, Ratio: %f, NIter: %d" % (wdb_try, ratio_try,
+                                                    counter)
 
     # Step 8
     # Set the create_output flag to True to get the output file from this run
