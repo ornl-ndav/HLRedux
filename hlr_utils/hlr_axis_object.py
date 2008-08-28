@@ -213,7 +213,7 @@ class Axis(object):
 
         return axis
 
-    def getBinningType():
+    def getBinningType(self):
         """
         This method returns the C{Axis} object's binning type
 
@@ -222,7 +222,7 @@ class Axis(object):
         """        
         return self.__bintype
 
-    def getDelta():
+    def getDelta(self):
         """
         This method returns the C{Axis} object's delta parameter
 
@@ -231,7 +231,7 @@ class Axis(object):
         """
         return self.__delta
 
-    def getMaximum():
+    def getMaximum(self):
         """
         This method returns the C{Axis} object's maximum axis value
 
@@ -240,7 +240,7 @@ class Axis(object):
         """
         return self.__max
 
-    def getMinimum():
+    def getMinimum(self):
         """
         This method returns the C{Axis} object's minimum axis value
 
@@ -249,7 +249,7 @@ class Axis(object):
         """
         return self.__min
 
-    def getTitle():
+    def getTitle(self):
         """
         This method returns the C{Axis} object's axis title
 
@@ -258,7 +258,7 @@ class Axis(object):
         """        
         return self.__title
 
-    def getUnits():
+    def getUnits(self):
         """
         This method returns the C{Axis} object's units
 
@@ -267,7 +267,7 @@ class Axis(object):
         """        
         return self.__units
 
-    def setBinningType(bintype):
+    def setBinningType(self, bintype):
         """
         This method sets the C{Axis} object's binning type 
 
@@ -276,7 +276,7 @@ class Axis(object):
         """
         self.__bintype = bintype    
 
-    def setDelta(delta):
+    def setDelta(self, delta):
         """
         This method sets the C{Axis} object's delta parameter
 
@@ -285,7 +285,7 @@ class Axis(object):
         """        
         self.__delta = float(delta)
 
-    def setMaximum(max):
+    def setMaximum(self, max):
         """
         This method sets the C{Axis} object's maximum axis value
 
@@ -294,7 +294,7 @@ class Axis(object):
         """        
         self.__max = float(max)
 
-    def setMinimum(min):
+    def setMinimum(self, min):
         """
         This method sets the C{Axis} object's minimum axis value
 
@@ -303,7 +303,7 @@ class Axis(object):
         """        
         self.__min = float(min)
 
-    def setTitle(title):
+    def setTitle(self, title):
         """
         This method sets the C{Axis} object's title string
 
@@ -312,7 +312,7 @@ class Axis(object):
         """
         self.__title = str(title)
 
-    def setUnits(units):
+    def setUnits(self, units):
         """
         This method sets the C{Axis} object's units 
 
