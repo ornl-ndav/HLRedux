@@ -382,47 +382,60 @@ if __name__ == "__main__":
     hlr_utils.AmrConfiguration(parser, configure, options, args)
 
     # Set the positive and negative energy transfer axis integration ranges
-    efacts = options.et_int_range.split(',')
-    configure.et_pos_range = (float(efacts[0]), float(efacts[1]))
-    configure.et_neg_range = (-1.0*float(efacts[1]), -1.0*float(efacts[0]))
+    if hlr_utils.cli_provide_override(configure, "et_int_range",
+                                      "--et-int-range"):
+        configure.et_int_range = hlr_utils.AxisFromString(options.et_int_range)
+
+    configure.et_pos_range = (configure.et_int_range.getMinimum(),
+                              configure.et_int_range.getMaximum())
+    configure.et_neg_range = (-1.0*configure.et_int_range.getMaximum(),
+                              -1.0*configure.et_int_range.getMinimum())
 
     # Capture final energy binning
     configure.final_E_bins = configure.E_bins
 
     # Reset energy transfer axis to [-E_t_max, E_t_max]
-    configure.E_bins = hlr_utils.Axis(-1.0*float(efacts[1]),
-                                      float(efacts[1]),
-                                      float(efacts[2]))
+    configure.E_bins = hlr_utils.Axis(-1.0*configure.et_int_range.getMaximum(),
+                                      configure.et_int_range.getMaximum(),
+                                      configure.et_int_range.getDelta())
 
     # Reset Q axis to one big bin
-    qfacts = options.Q_bins.split(',')
-    configure.Q_bins = hlr_utils.Axis(float(qfacts[0]),
-                                      float(qfacts[1]),
-                                      float(qfacts[1])-float(qfacts[0]))
+    configure.Q_bins = hlr_utils.Axis(configure.Q_bins.getMinimum(),
+                                      configure.Q_bins.getMaximum(),
+                                      configure.Q_bins.getMaximum()-
+                                      configure.Q_bins.getMinimum())
 
     # Set the tolerance for the desired ratio
-    if options.tol:
+    if hlr_utils.cli_provide_override(configure, "tol", "--tol"):
         configure.tol = float(options.tol)
-    else:
+
+    if configure.tol is None:
         parser.error("A tolerance must be supplied") 
 
     # Set the experiment (detailed balance) temperature
-    if options.detbal_temp:
+    if hlr_utils.cli_provide_override(configure, "detbal_temp",
+                                      "--detbal-temp"):
         configure.detbal_temp = float(options.detbal_temp)
-    else:
+
+    if configure.detbal_temp is None:
         parser.error("An experiment temperature must be supplied")         
 
     # Set the number of iterations
-    configure.niter = options.niter
+    if hlr_utils.cli_provide_override(configure, "niter", "--niter"):
+        configure.niter = options.niter
 
     # Set the minimum wavelength-dependent background constant
-    configure.cwdb_min = options.cwdb_min
+    if hlr_utils.cli_provide_override(configure, "cwdb_min", "--cwdb-min"):
+        configure.cwdb_min = options.cwdb_min
 
     # Set the maximum wavelength-dependent background constant
-    configure.cwdb_max = options.cwdb_max
+    if hlr_utils.cli_provide_override(configure, "cwdb_max", "--cwdb-max"):
+        configure.cwdb_max = options.cwdb_max
 
     # Set the verbosity for the amorphous_reduction_sqe code
-    configure.amr_verbose = options.amr_verbose
+    if hlr_utils.cli_provide_override(configure, "amr_verbose",
+                                      "--amr-verbose"):
+        configure.amr_verbose = options.amr_verbose
 
     # Set a flag for creating output, but the default is currently False
     configure.create_output = False
@@ -439,7 +452,8 @@ if __name__ == "__main__":
 
     # Step 0: Calculate desired ratio
     import math
-    configure.ratio = math.exp(0.5 * (float(efacts[0]) + float(efacts[1])) /
+    configure.ratio = math.exp(0.5 * (configure.et_int_range.getMinimum() +
+                                      configure.et_int_range.getMaximum()) /
                                (configure.detbal_temp * 86.17343))
     
 
