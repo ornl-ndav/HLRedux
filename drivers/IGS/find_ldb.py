@@ -263,7 +263,10 @@ def run(config, tim=None):
     config.E_bins = config.final_E_bins
     config.ldb_const = hlr_utils.DrParameter(wdb_try, 0.0)
 
+    # Remove unneeded options so they don't get into RMD file
     del config.final_E_bins
+    del config.et_neg_range
+    del config.et_pos_range
     
     amorphous_reduction_sqe.run(config)
 
@@ -414,6 +417,9 @@ if __name__ == "__main__":
         timer = sns_timing.DiffTime()
     else:
         timer = None
+
+    # Take out options that have defaults but aren't necessary
+    del configure.lambda_bins
 
     # Step 0: Calculate desired ratio
     import math
