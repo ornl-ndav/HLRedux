@@ -185,24 +185,31 @@ def run(config, tim=None):
     if tim is not None:
         tim.getTime(msg="After maximum ratio calculation ")
 
+    old_niter = -1
+
     # Step 5
     if __check_parts(ratio_min_parts) and __check_parts(ratio_max_parts):
         if (config.ratio < ratio_min or config.ratio > ratio_max):
-            raise RuntimeError("Ratios from minimum and maximum cwdbs do not "\
-                               +"bracket ratio. Increase the maximum cwdb "
-                               +"parameter. Min: %f, Max: %f, Given Ratio: %f"\
-                               % (ratio_min, ratio_max, config.ratio))
+            print "Ratios from minimum and maximum cwdbs do not "\
+                  +"bracket ratio. Increase the maximum cwdb "\
+                  +"parameter. Min: %f, Max: %f, Given Ratio: %f"\
+                  % (ratio_min, ratio_max, config.ratio)
+            old_niter = config.niter
+            config.niter = 0
     elif __check_parts(ratio_min_parts) and not __check_parts(ratio_max_parts):
         if ratio_min > config.ratio:
-            raise RuntimeError("Ratio from minimum cwdb is greater than "\
-                               +"requested ratio. Decrease the minimum cwdb "\
-                               +"parameter. Min: %f, Given Ratio: %f" \
-                               %(ratio_min, config.ratio))
+            print "Ratio from minimum cwdb is greater than "\
+                      +"requested ratio. Decrease the minimum cwdb "\
+                      +"parameter. Min: %f, Given Ratio: %f" \
+                      %(ratio_min, config.ratio)
+            old_niter = config.niter
+            config.niter = 0
     elif not __check_parts(ratio_min_parts) and \
              not __check_parts(ratio_max_parts):
-        raise RuntimeError("The components of both ratios are negative. "\
-                           +"Decrease the value of the minimum cwdb "\
-                           +"parameter.")
+        print "The components of both ratios are negative. "\
+              +"Decrease the value of the minimum cwdb parameter."
+        old_niter = config.niter
+        config.niter = 0
     else:
         pass
 
@@ -249,12 +256,16 @@ def run(config, tim=None):
 
         counter += 1
 
-    if not run_ok:
-        # If you hit here, you've exhausted the number of iterations
-        print "Maximum number of iterations exceeded! No suitable WDB found!"
+    if not run_ok and counter != 0:
+        # If you hit here, you've exhausted the number of iterations, so
+        # subtract nothing
+        print "Maximum number of iterations (%d) reached! No suitable WDB "\
+              +"found!" % counter
+        wdb_try = 0.0
 
-    print "Best Value: %e, Ratio: %f, NIter: %d" % (wdb_try, ratio_try,
-                                                    counter)
+    if run_ok:
+        print "Best Value: %e, Ratio: %f, NIter: %d" % (wdb_try, ratio_try,
+                                                        counter)
 
     # Step 8
     # Set the create_output flag to True to get the output file from this run
@@ -267,6 +278,10 @@ def run(config, tim=None):
     del config.final_E_bins
     del config.et_neg_range
     del config.et_pos_range
+
+    # Reset the iteration option to make sure info goes into RMD file
+    if old_niter != -1:
+        config.niter = old_niter
     
     amorphous_reduction_sqe.run(config)
 
