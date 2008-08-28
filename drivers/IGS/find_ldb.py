@@ -278,6 +278,7 @@ def run(config, tim=None):
     del config.final_E_bins
     del config.et_neg_range
     del config.et_pos_range
+    del config.ratio
 
     # Reset the iteration option to make sure info goes into RMD file
     if old_niter != -1:
