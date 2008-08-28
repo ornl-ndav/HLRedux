@@ -442,11 +442,19 @@ def __write_output(som, conf, t, ot):
     @param ot: The origianl timing object.
     @type ot: C{sns_timing.DiffTime}
     """
+    # Get file comments if present
+    try:
+        file_comments = conf.comments
+        del conf.comments
+    except AttributeError:
+        file_comments = None
+    
     # Writing 2D DAVE file
     if not conf.split:
         hlr_utils.write_file(conf.output, "text/Dave2d", som,
                              verbose=conf.verbose,
                              message="data",
+                             comments=file_comments,
                              replace_path=False,
                              replace_ext=False)
         
