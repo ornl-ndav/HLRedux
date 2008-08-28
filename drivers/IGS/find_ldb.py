@@ -260,7 +260,11 @@ def run(config, tim=None):
     # Set the create_output flag to True to get the output file from this run
     config.create_output = True
     config.verbose = config.amr_verbose
+    config.E_bins = config.final_E_bins
     config.ldb_const = hlr_utils.DrParameter(wdb_try, 0.0)
+
+    del config.final_E_bins
+    
     amorphous_reduction_sqe.run(config)
 
     if tim is not None:
@@ -275,7 +279,7 @@ if __name__ == "__main__":
     result = []
     result.append("This driver searches for a wavelength-dependent background")
     result.append("that corresponds to a desired ratio based on temperature")
-    result.append("an the energy transfer range. The --energy-bins option")
+    result.append("an the energy transfer range. The --et-int-range option")
     result.append("should be used to set the positive energy transfer region")
     result.append("of integration. The negative region will be constructed")
     result.append("from this information.")
@@ -293,6 +297,12 @@ if __name__ == "__main__":
     parser.set_defaults(norm_end="6.30")
 
     # Add find_ldb related options
+    parser.add_option("", "--et-int-range", dest="et_int_range", help="Set "\
+                      +"the minimum and maximum values of the energy tranfer "\
+                      +"integration range. Also, set the bin width for "\
+                      +"energy transfer that will be used during the "\
+                      +"calculation.")
+    
     parser.add_option("", "--detbal-temp", dest="detbal_temp", help="Specify "\
                       +"the experiment temperature that will help calculate "\
                       +"the desired ratio.")
@@ -353,9 +363,12 @@ if __name__ == "__main__":
     hlr_utils.AmrConfiguration(parser, configure, options, args)
 
     # Set the positive and negative energy transfer axis integration ranges
-    efacts = options.E_bins.split(',')
+    efacts = options.et_int_range.split(',')
     configure.et_pos_range = (float(efacts[0]), float(efacts[1]))
     configure.et_neg_range = (-1.0*float(efacts[1]), -1.0*float(efacts[0]))
+
+    # Capture final energy binning
+    configure.final_E_bins = configure.E_bins
 
     # Reset energy transfer axis to [-E_t_max, E_t_max]
     configure.E_bins = hlr_utils.Axis(-1.0*float(efacts[1]),
