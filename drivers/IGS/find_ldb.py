@@ -196,6 +196,7 @@ def run(config, tim=None):
                   % (ratio_min, ratio_max, config.ratio)
             old_niter = config.niter
             config.niter = 0
+            config.comments = ["find_ldb: Range failure!"]
     elif __check_parts(ratio_min_parts) and not __check_parts(ratio_max_parts):
         if ratio_min > config.ratio:
             print "Ratio from minimum cwdb is greater than "\
@@ -204,12 +205,14 @@ def run(config, tim=None):
                       %(ratio_min, config.ratio)
             old_niter = config.niter
             config.niter = 0
+            config.comments = ["find_ldb: Range failure!"]
     elif not __check_parts(ratio_min_parts) and \
              not __check_parts(ratio_max_parts):
         print "The components of both ratios are negative. "\
               +"Decrease the value of the minimum cwdb parameter."
         old_niter = config.niter
         config.niter = 0
+        config.comments = ["find_ldb: Range failure!"]
     else:
         pass
 
@@ -261,11 +264,13 @@ def run(config, tim=None):
         # subtract nothing
         print "Maximum number of iterations (%d) reached! No suitable WDB "\
               +"found!" % counter
+        config.comments = ["find_ldb: Iterations exhausted!"]
         wdb_try = 0.0
 
     if run_ok:
         print "Best Value: %e, Ratio: %f, NIter: %d" % (wdb_try, ratio_try,
                                                         counter)
+        config.comments = ["find_ldb: Success!"]
 
     # Step 8
     # Set the create_output flag to True to get the output file from this run
