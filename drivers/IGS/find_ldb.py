@@ -262,8 +262,7 @@ def run(config, tim=None):
     if not run_ok and counter != 0:
         # If you hit here, you've exhausted the number of iterations, so
         # subtract nothing
-        print "Maximum number of iterations (%d) reached! No suitable WDB "\
-              +"found!" % counter
+        print "Maximum number of iterations reached! No suitable WDB found!"
         config.comments = ["find_ldb: Iterations exhausted!"]
         wdb_try = 0.0
 
