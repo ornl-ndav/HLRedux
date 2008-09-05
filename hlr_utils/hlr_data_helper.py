@@ -586,6 +586,8 @@ def get_parameter(param, so, inst):
         return inst.get_x_pix_offset(so.id)
     elif param == "y-offset":
         return inst.get_y_pix_offset(so.id)
+    elif param == "radius":
+        return inst.get_radius(so.id)
     elif param in inst.get_diff_geom_keys():
         return inst.get_diff_geom(param, so.id)
     else:
