@@ -58,7 +58,6 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
     """
     import common_lib
     import dr_lib
-    import hlr_utils
 
     # Check keywords
     try:
