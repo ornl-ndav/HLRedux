@@ -53,6 +53,10 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
                         value will be I{histogram}.
     @type data_type: C{string}
 
+    @keyword pixnorm: A flag to track the number of pixels that contribute to
+                      a bin and then normalize the bin by that number.
+    @type pixnorm: C{boolean}
+
     @keyword so_id: The identifier represents a number, string, tuple or other
                     object that describes the resulting C{SO}.
     @type so_id: C{int}, C{string}, C{tuple}, C{pixel ID}
@@ -86,6 +90,12 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
         rebin_axis = kwargs["rebin_axis"]
     except KeyError:
         rebin_axis = None
+
+    # Check for pixnorm flag
+    try:
+        pixnorm = kwargs["pixnorm"]
+    except KeyError:
+        pixnorm = False
 
     # Check dataType keyword argument. An offset will be set to 1 for the
     # histogram type and 0 for either density or coordinate
@@ -130,6 +140,9 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
     len_param_axis = len(param_axis) - offset
     so_dim.axis[param_axis_loc].val = param_axis
 
+    if pixnorm:
+        pixarr = nessi_list.NessiList(len_param_axis)
+
     # Get the parameter lookup array
     pfunc = hlr_utils.__getattribute__(param_func)
     lookup_array = pfunc(som1, param)
@@ -148,11 +161,15 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
         bin_index = utils.bisect_helper(param_axis, lookup_array[i])
         start = bin_index * len_arb_axis
 
+        if pixnorm:
+            pixarr[bin_index]++
+
         (so_dim.y, so_dim.var_y) = array_manip.add_ncerr(so_dim.y,
                                                          so_dim.var_y,
                                                          val,
                                                          err2,
                                                          a_start=start)        
+
 
     # Create final 2D spectrum object container
     comb_som = SOM.SOM()
