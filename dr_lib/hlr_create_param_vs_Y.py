@@ -162,7 +162,7 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
         start = bin_index * len_arb_axis
 
         if pixnorm:
-            pixarr[bin_index]++
+            pixarr[bin_index] += 1
 
         (so_dim.y, so_dim.var_y) = array_manip.add_ncerr(so_dim.y,
                                                          so_dim.var_y,
@@ -170,7 +170,32 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
                                                          err2,
                                                          a_start=start)        
 
+    # If pixel normalization tracking enabled, divided slices by pixel counts
+    if pixnorm:
+        tmp_y = nessi_list.NessiList(Ntot)
+        tmp_var_y = nessi_list.NessiList(Ntot)
 
+        for i in range(len_param_axis):
+            start = i * len_arb_axis
+            end = (i + 1) * len_arb_axis
+
+            slice_y = so_dim.y[start:end]
+            slice_var_y = so_dim.var_y[start:end]
+
+            (dslice_y, dslice_var_y) = array_manip.div_ncerr(slice_y,
+                                                             slice_var_y,
+                                                             pixarr[i],
+                                                             0.0)
+
+            (tmp_y, tmp_var_y) = array_manip.add_ncerr(tmp_y,
+                                                       tmp_var_y,
+                                                       dslice_y,
+                                                       dslice_var_y,
+                                                       a_start=start)
+
+        so_dim.y = tmp_y
+        so_dim.var_y = tmp_var_y
+    
     # Create final 2D spectrum object container
     comb_som = SOM.SOM()
     comb_som.copyAttributes(som1)
