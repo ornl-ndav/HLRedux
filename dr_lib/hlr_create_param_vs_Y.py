@@ -172,8 +172,8 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
 
     # If pixel normalization tracking enabled, divided slices by pixel counts
     if pixnorm:
-        tmp_y = nessi_list.NessiList(Ntot)
-        tmp_var_y = nessi_list.NessiList(Ntot)
+        tmp_y = nessi_list.NessiList(N_tot)
+        tmp_var_y = nessi_list.NessiList(N_tot)
 
         for i in range(len_param_axis):
             start = i * len_arb_axis
