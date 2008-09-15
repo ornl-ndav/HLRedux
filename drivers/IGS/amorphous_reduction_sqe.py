@@ -382,7 +382,8 @@ def run(config, tim=None):
             tim.getTime(False)
 
         d_som4a = dr_lib.energy_transfer(d_som4, "IGS", "Wavelength_final",
-                                         scale=True, change_units=True)
+                                         sa_norm=True, scale=True,
+                                         change_units=True)
 
         if tim is not None:
             tim.getTime(msg="After wavelength to energy transfer conversion ")
@@ -399,6 +400,7 @@ def run(config, tim=None):
                                         "negcos_param_array",
                                         config.ncospol_bins.toNessiList(),
                                         rebin_axis=config.E_bins.toNessiList(),
+                                        pixnorm=True,
                                         y_label="counts",
                                         y_units="counts / (ueV * rads)",
                                         x_labels=["Angle", "Energy Transfer"], 
