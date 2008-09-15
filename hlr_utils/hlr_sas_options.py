@@ -116,7 +116,12 @@ class SansOptions(hlr_utils.InstOptions):
                         help="Specify the minimum and maximum polar "\
                         +"angle values, the polar angle bin "\
                         +"width in radians and the type (lin or log)")
-        
+
+        self.add_option("", "--r-bins", dest="r_bins",
+                        help="Specify the minimum and maximum radius "\
+                        +"values, the radius bin width in cm and the type "\
+                        +"(lin or log)")
+
         self.add_option("", "--time-zero-offset-det",
                         dest="time_zero_offset_det",
                         help="Specify the time zero offset, err^2 in "\
@@ -287,6 +292,10 @@ def SansConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "theta_bins", "--theta-bins"):
         configure.theta_bins = hlr_utils.AxisFromString(options.theta_bins)   
 
+    # Set the radius bins
+    if hlr_utils.cli_provide_override(configure, "r_bins", "--r-bins"):
+        configure.r_bins = hlr_utils.AxisFromString(options.r_bins)   
+
     # Set the time-zero offset for the detector
     if hlr_utils.cli_provide_override(configure, "time_zero_offset_det",
                                       "--time-zero-offset-det"):    
@@ -398,3 +407,4 @@ def SansConfiguration(parser, configure, options, args):
             configure.dump_tof_theta = True
             configure.dump_wave_r = True
             configure.dump_wave_theta = True
+
