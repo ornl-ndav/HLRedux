@@ -192,6 +192,30 @@ class SansOptions(hlr_utils.InstOptions):
                         +"counts and a *.fra file for the fractional area.")
         self.set_defaults(dump_frac_rebin=False)
 
+        self.add_option("", "--dump-tof-r", action="store_true",
+                        dest="dump_tof_r", help="Flag to dump a 2D "\
+                        +"distribution of TOF vs radius. Creates a *.tvr "\
+                        +"file.")
+        self.set_defaults(dump_tof_r=False)
+
+        self.add_option("", "--dump-tof-theta", action="store_true",
+                        dest="dump_tof_theta", help="Flag to dump a 2D "\
+                        +"distribution of TOF vs polar angle. Creates a "\
+                        +"*.tvt file.")
+        self.set_defaults(dump_tof_theta=False)
+
+        self.add_option("", "--dump-wave-r", action="store_true",
+                        dest="dump_wave_r", help="Flag to dump a 2D "\
+                        +"distribution of wavelength vs radius. Creates a "\
+                        +"*.lvr file.")
+        self.set_defaults(dump_wave_r=False)
+
+        self.add_option("", "--dump-wave-theta", action="store_true",
+                        dest="dump_wave_theta", help="Flag to dump a 2D "\
+                        +"distribution of wavelength vs polar angle. Creates "\
+                        +"a *.lvt file.")
+        self.set_defaults(dump_wave_theta=False)        
+        
         self.add_option("", "--dump-all", action="store_true", dest="dump_all",
                         help="Flag to dump combined information")
         self.set_defaults(dump_all=False)
@@ -343,6 +367,25 @@ def SansConfiguration(parser, configure, options, args):
                                       "--dump-frac-rebin"):
         configure.dump_frac_rebin = options.dump_frac_rebin
 
+    # Set the ability to dump a TOF vs radius distribution
+    if hlr_utils.cli_provide_override(configure, "dump_tof_r", "--dump-tof-r"):
+        configure.dump_tof_r = options.dump_tof_r
+
+    # Set the ability to dump a TOF vs polar angle distribution
+    if hlr_utils.cli_provide_override(configure, "dump_tof_theta",
+                                      "--dump-tof-theta"):
+        configure.dump_tof_theta = options.dump_tof_theta
+
+    # Set the ability to dump a wavelength vs radius distribution
+    if hlr_utils.cli_provide_override(configure, "dump_wave_r",
+                                      "--dump-wave-r"):
+        configure.dump_wave_r = options.dump_wave_r        
+
+    # Set the ability to dump a wavelength vs polar angle distribution
+    if hlr_utils.cli_provide_override(configure, "dump_wave_theta",
+                                      "--dump-wave-theta"):
+        configure.dump_wave_theta = options.dump_wave_theta
+
     if hlr_utils.cli_provide_override(configure, "dump_all", "--dump-all"):
         if options.dump_all:
             configure.dump_wave = True
@@ -351,3 +394,7 @@ def SansConfiguration(parser, configure, options, args):
             configure.dump_bmon_rebin = True
             configure.dump_wave_bmnorm = True
             configure.dump_frac_rebin = True
+            configure.dump_tof_r = True
+            configure.dump_tof_theta = True
+            configure.dump_wave_r = True
+            configure.dump_wave_theta = True
