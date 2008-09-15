@@ -146,9 +146,9 @@ def process_sas_data(datalist, conf, **kwargs):
         dp_som1_1 = dr_lib.create_param_vs_Y(dp_som1, "radius", "param_array",
                                              conf.r_bins.toNessiList(),
                                              y_label="counts",
-                                             y_units="counts / (usec * cm)",
+                                             y_units="counts / (usec * m)",
                                              x_labels=["Radius", "TOF"], 
-                                             x_units=["cm", "usec"])
+                                             x_units=["m", "usec"])
 
         hlr_utils.write_file(conf.output, "text/Dave2d", dp_som1_1,
                              output_ext="tvr",
@@ -315,9 +315,9 @@ def process_sas_data(datalist, conf, **kwargs):
                                    conf.r_bins.toNessiList(),
                                    rebin_axis=conf.lambda_bins.toNessiList(),
                                    y_label="counts",
-                                   y_units="counts / (Angstrom * cm)",
+                                   y_units="counts / (Angstrom * m)",
                                    x_labels=["Radius", "Wavelength"], 
-                                   x_units=["cm", "Angstrom"])
+                                   x_units=["m", "Angstrom"])
 
         hlr_utils.write_file(conf.output, "text/Dave2d", dp_som3_1,
                              output_ext="lvr",
