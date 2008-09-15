@@ -52,7 +52,9 @@ def energy_transfer(obj, itype, axis_const, **kwargs):
     @keyword scale: A flag to scale the y-axis by lambda_f/lambda_i for I{IGS}
                     and lambda_i/lambda_f for I{DGS}. The default is I{False}.
     @type scale: C{boolean}
-    
+
+    @keyword sa_norm: A flag to turn on solid angle normlaization.
+    @type sa_norm: C{boolean}
 
     @return: Object with the energy transfer calculated in units of I{meV} or
              I{ueV}. The default is I{meV}.
@@ -98,7 +100,15 @@ def energy_transfer(obj, itype, axis_const, **kwargs):
         scale = kwargs["scale"]
     except KeyError:
         scale = False
-        
+
+    try:
+        sa_norm = kwargs["sa_norm"]
+    except KeyError:
+        sa_norm = False
+
+    if sa_norm:
+        inst = obj.attr_list.instrument
+    
     # Primary axis for transformation. 
     axis = hlr_utils.one_d_units(obj, units)
 
@@ -172,6 +182,15 @@ def energy_transfer(obj, itype, axis_const, **kwargs):
             value2 = value
             value3 = scale_y
 
+        if sa_norm:
+            if inst.get_name() == "BSS":
+                dOmega = dr_lib.calc_BSS_solid_angle(map_so, inst)
+                scale_y = array_manip.div_ncerr(scale_y[0], scale_y[1],
+                                                dOmega, 0.0)
+            else:
+                raise RuntimeError("Do not know how to get solid angle from "\
+                                   +"%s" % inst.get_name())
+            
         # Reverse the values due to the conversion
         value_y = axis_manip.reverse_array_cp(scale_y[0])
         value_var_y = axis_manip.reverse_array_cp(scale_y[1])
