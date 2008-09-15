@@ -408,3 +408,15 @@ def SansConfiguration(parser, configure, options, args):
             configure.dump_wave_r = True
             configure.dump_wave_theta = True
 
+    # Do some cross-checks
+    if configure.dump_tof_r or configure.dump_wave_r:
+        if configure.r_bins is None:
+            parser.error("Must specify --r-bins option when using 2D "\
+                         +"distribution options --dump-tof-r or "\
+                         +"--dump-wave-r.")
+
+    if configure.dump_tof_theta or configure.dump_wave_theta:
+        if configure.theta_bins is None:
+            parser.error("Must specify --theta-bins option when using 2D "\
+                         +"distribution options --dump-tof-theta or "\
+                         +"--dump-wave-theta.")            
