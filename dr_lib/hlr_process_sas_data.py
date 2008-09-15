@@ -150,7 +150,7 @@ def process_sas_data(datalist, conf, **kwargs):
                                              x_labels=["Radius", "TOF"], 
                                              x_units=["cm", "usec"])
 
-        hlr_utils.write_file(conf.output, "text/Spec", dp_som1_1,
+        hlr_utils.write_file(conf.output, "text/Dave2d", dp_som1_1,
                              output_ext="tvr",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
@@ -168,7 +168,7 @@ def process_sas_data(datalist, conf, **kwargs):
                                              x_labels=["Polar Angle", "TOF"], 
                                              x_units=["rads", "usec"])
 
-        hlr_utils.write_file(conf.output, "text/Spec", dp_som1_1,
+        hlr_utils.write_file(conf.output, "text/Dave2d", dp_som1_1,
                              output_ext="tvt",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
