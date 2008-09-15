@@ -144,7 +144,7 @@ def process_sas_data(datalist, conf, **kwargs):
 
     if conf.dump_tof_r:
         dp_som1_1 = dr_lib.create_param_vs_Y(dp_som1, "radius", "param_array",
-                                             config.r_bins.toNessiList(),
+                                             conf.r_bins.toNessiList(),
                                              y_label="counts",
                                              y_units="counts / (usec * cm)",
                                              x_labels=["Radius", "TOF"], 
@@ -162,7 +162,7 @@ def process_sas_data(datalist, conf, **kwargs):
 
     if conf.dump_tof_theta:
         dp_som1_1 = dr_lib.create_param_vs_Y(dp_som1, "polar", "param_array",
-                                             config.theta_bins.toNessiList(),
+                                             conf.theta_bins.toNessiList(),
                                              y_label="counts",
                                              y_units="counts / (usec * rads)",
                                              x_labels=["Polar Angle", "TOF"], 
@@ -312,8 +312,8 @@ def process_sas_data(datalist, conf, **kwargs):
 
     if conf.dump_wave_r:
         dp_som3_1 = dr_lib.create_param_vs_Y(dp_som3, "radius", "param_array",
-                                   config.r_bins.toNessiList(),
-                                   rebin_axis=config.lambda_bins.toNessiList(),
+                                   conf.r_bins.toNessiList(),
+                                   rebin_axis=conf.lambda_bins.toNessiList(),
                                    y_label="counts",
                                    y_units="counts / (Angstrom * cm)",
                                    x_labels=["Radius", "Wavelength"], 
@@ -325,14 +325,14 @@ def process_sas_data(datalist, conf, **kwargs):
                              verbose=conf.verbose,
                              data_ext=conf.ext_replacement,
                              path_replacement=conf.path_replacement,
-                             message="Wavelength vs radius information")
+                             message="wavelength vs radius information")
 
         del dp_som3_1
 
     if conf.dump_wave_theta:
         dp_som3_1 = dr_lib.create_param_vs_Y(dp_som3, "polar", "param_array",
-                                   config.theta_bins.toNessiList(),
-                                   rebin_axis=config.lambda_bins.toNessiList(),
+                                   conf.theta_bins.toNessiList(),
+                                   rebin_axis=conf.lambda_bins.toNessiList(),
                                    y_label="counts",
                                    y_units="counts / (Angstrom * rads)",
                                    x_labels=["Polar Angle", "Wavelength"], 
@@ -344,7 +344,7 @@ def process_sas_data(datalist, conf, **kwargs):
                              verbose=conf.verbose,
                              data_ext=conf.ext_replacement,
                              path_replacement=conf.path_replacement,
-                             message="Wavelength vs polar angle information") 
+                             message="wavelength vs polar angle information") 
 
         del dp_som3_1
 
