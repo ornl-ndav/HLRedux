@@ -310,6 +310,44 @@ def process_sas_data(datalist, conf, **kwargs):
                              path_replacement=conf.path_replacement,
                              message="beam monitor wavelength information")
 
+    if conf.dump_wave_r:
+        dp_som3_1 = dr_lib.create_param_vs_Y(dp_som3, "radius", "param_array",
+                                   config.r_bins.toNessiList(),
+                                   rebin_axis=config.lambda_bins.toNessiList(),
+                                   y_label="counts",
+                                   y_units="counts / (Angstrom * cm)",
+                                   x_labels=["Radius", "Wavelength"], 
+                                   x_units=["cm", "Angstrom"])
+
+        hlr_utils.write_file(conf.output, "text/Dave2d", dp_som3_1,
+                             output_ext="lvr",
+                             extra_tag=dataset_type,
+                             verbose=conf.verbose,
+                             data_ext=conf.ext_replacement,
+                             path_replacement=conf.path_replacement,
+                             message="Wavelength vs radius information")
+
+        del dp_som3_1
+
+    if conf.dump_wave_theta:
+        dp_som3_1 = dr_lib.create_param_vs_Y(dp_som3, "polar", "param_array",
+                                   config.theta_bins.toNessiList(),
+                                   rebin_axis=config.lambda_bins.toNessiList(),
+                                   y_label="counts",
+                                   y_units="counts / (Angstrom * rads)",
+                                   x_labels=["Polar Angle", "Wavelength"], 
+                                   x_units=["rads", "Angstrom"])
+
+        hlr_utils.write_file(conf.output, "text/Dave2d", dp_som3_1,
+                             output_ext="lvt",
+                             extra_tag=dataset_type,
+                             verbose=conf.verbose,
+                             data_ext=conf.ext_replacement,
+                             path_replacement=conf.path_replacement,
+                             message="Wavelength vs polar angle information") 
+
+        del dp_som3_1
+
     # Step 3: Subtract wavelength dependent background if necessary
     if conf.verbose and bkg_subtract is not None:
         print "Subtracting wavelength dependent background"
