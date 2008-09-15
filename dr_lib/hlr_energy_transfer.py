@@ -176,11 +176,10 @@ def energy_transfer(obj, itype, axis_const, **kwargs):
         if change_units:
             # Convert from meV to ueV
             value2 = array_manip.mult_ncerr(value[0], value[1], 1000.0, 0.0)
-            value3 = array_manip.mult_ncerr(scale_y[0], scale_y[1],
-                                            1.0/1000.0, 0.0)
+            scale_y = array_manip.mult_ncerr(scale_y[0], scale_y[1],
+                                             1.0/1000.0, 0.0)
         else:
             value2 = value
-            value3 = scale_y
 
         if sa_norm:
             if inst.get_name() == "BSS":
