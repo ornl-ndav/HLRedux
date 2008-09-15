@@ -132,6 +132,7 @@ def energy_transfer(obj, itype, axis_const, **kwargs):
     # iterate through the values
     import array_manip
     import axis_manip
+    import dr_lib
     import utils
 
     for i in xrange(hlr_utils.get_length(obj)):
