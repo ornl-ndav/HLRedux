@@ -57,6 +57,12 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
                       a bin and then normalize the bin by that number.
     @type pixnorm: C{boolean}
 
+    @keyword prnorm: A parameter to track and determine a range (max - min)
+                     for each bin the requested parameter axis. The range will
+                     then be divided into the final summed spectrum for the
+                     given bin.
+    @type prnorm: C{string}
+
     @keyword so_id: The identifier represents a number, string, tuple or other
                     object that describes the resulting C{SO}.
     @type so_id: C{int}, C{string}, C{tuple}, C{pixel ID}
@@ -96,6 +102,13 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
         pixnorm = kwargs["pixnorm"]
     except KeyError:
         pixnorm = False
+
+    # Check for prnorm flag
+    try:
+        prpar = kwargs["prnorm"]
+        prnorm = True
+    except KeyError:
+        prnorm = False
 
     # Check dataType keyword argument. An offset will be set to 1 for the
     # histogram type and 0 for either density or coordinate
@@ -143,6 +156,14 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
     if pixnorm:
         pixarr = nessi_list.NessiList(len_param_axis)
 
+    if prnorm:
+        prarr = []
+        for i in xrange(len_param_axis):
+            prarr.append(nessi_list.NessiList())
+        # Get the parameters for all the spectra
+        ppfunc = hlr_utils.__getattribute__("param_array")
+        prarr_lookup = ppfunc(som1, prpar)
+
     # Get the parameter lookup array
     pfunc = hlr_utils.__getattribute__(param_func)
     lookup_array = pfunc(som1, param)
@@ -164,11 +185,24 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
         if pixnorm:
             pixarr[bin_index] += 1
 
+        if prnorm:
+            prarr[bin_index].append(prarr_lookup[i])
+
         (so_dim.y, so_dim.var_y) = array_manip.add_ncerr(so_dim.y,
                                                          so_dim.var_y,
                                                          val,
                                                          err2,
                                                          a_start=start)        
+
+    # If parameter range normalization enabled, find the range for the
+    # parameter
+    if prnorm:
+        import math
+        prrange = nessi_list.NessiList(len_param_axis)
+        for i in xrange(len(prrange)):
+            max_val = max(prarr[i])
+            min_val = min(prarr[i])
+            prrange[i] = math.fabs(max_val - min_val)
 
     # If pixel normalization tracking enabled, divided slices by pixel counts
     if pixnorm:
@@ -182,9 +216,15 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
             slice_y = so_dim.y[start:end]
             slice_var_y = so_dim.var_y[start:end]
 
+            # Scale division constant if parameter range normalization enabled
+            if prnorm:
+                divconst = pixarr[i] * prrange[i]
+            else:
+                divconst = pixarr[i]
+
             (dslice_y, dslice_var_y) = array_manip.div_ncerr(slice_y,
                                                              slice_var_y,
-                                                             pixarr[i],
+                                                             divconst,
                                                              0.0)
 
             (tmp_y, tmp_var_y) = array_manip.add_ncerr(tmp_y,
