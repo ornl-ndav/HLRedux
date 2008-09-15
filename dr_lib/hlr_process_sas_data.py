@@ -142,6 +142,42 @@ def process_sas_data(datalist, conf, **kwargs):
 
     del dp_som0
 
+    if conf.dump_tof_r:
+        dp_som1_1 = dr_lib.create_param_vs_Y(dp_som1, "radius", "param_array",
+                                             config.r_bins.toNessiList(),
+                                             y_label="counts",
+                                             y_units="counts / (usec * cm)",
+                                             x_labels=["Radius", "TOF"], 
+                                             x_units=["cm", "usec"])
+
+        hlr_utils.write_file(conf.output, "text/Spec", dp_som1_1,
+                             output_ext="tvr",
+                             extra_tag=dataset_type,
+                             verbose=conf.verbose,
+                             data_ext=conf.ext_replacement,
+                             path_replacement=conf.path_replacement,
+                             message="TOF vs radius information")
+
+        del dp_som1_1
+
+    if conf.dump_tof_theta:
+        dp_som1_1 = dr_lib.create_param_vs_Y(dp_som1, "polar", "param_array",
+                                             config.theta_bins.toNessiList(),
+                                             y_label="counts",
+                                             y_units="counts / (usec * rads)",
+                                             x_labels=["Polar Angle", "TOF"], 
+                                             x_units=["rads", "usec"])
+
+        hlr_utils.write_file(conf.output, "text/Spec", dp_som1_1,
+                             output_ext="tvt",
+                             extra_tag=dataset_type,
+                             verbose=conf.verbose,
+                             data_ext=conf.ext_replacement,
+                             path_replacement=conf.path_replacement,
+                             message="TOF vs polar angle information")        
+
+        del dp_som1_1
+        
     # Beam monitor
     if not get_background:
         if conf.verbose:
