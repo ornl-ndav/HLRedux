@@ -232,6 +232,10 @@ class SansOptions(hlr_utils.InstOptions):
                         +"distribution of Q vs polar angle. Creates "\
                         +"a *.qvt file.")
         self.set_defaults(dump_Q_theta=False)        
+
+        self.add_option("", "--dump-2d", action="store_true", dest="dump_2d",
+                        help="Flag to dump 2D distributions")
+        self.set_defaults(dump_2d=False)
         
         self.add_option("", "--dump-all", action="store_true", dest="dump_all",
                         help="Flag to dump combined information")
@@ -417,6 +421,15 @@ def SansConfiguration(parser, configure, options, args):
                                       "--dump-Q-theta"):
         configure.dump_Q_theta = options.dump_Q_theta        
 
+    if hlr_utils.cli_provide_override(configure, "dump_2d", "--dump-2d"):
+        if options.dump_2d:
+            configure.dump_tof_r = True
+            configure.dump_tof_theta = True
+            configure.dump_wave_r = True
+            configure.dump_wave_theta = True
+            configure.dump_Q_r = True
+            configure.dump_Q_theta = True
+
     if hlr_utils.cli_provide_override(configure, "dump_all", "--dump-all"):
         if options.dump_all:
             configure.dump_wave = True
@@ -430,7 +443,7 @@ def SansConfiguration(parser, configure, options, args):
             configure.dump_wave_r = True
             configure.dump_wave_theta = True
             configure.dump_Q_r = True
-            configure.dump_Q_theta = True            
+            configure.dump_Q_theta = True
 
     # Do some cross-checks
     if configure.dump_tof_r or configure.dump_wave_r or configure.dump_Q_r:
