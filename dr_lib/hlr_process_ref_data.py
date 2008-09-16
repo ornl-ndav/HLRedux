@@ -107,14 +107,14 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
     if conf.verbose:
         print "Reading %s file" % dataset_type
 
-    (d_som1, b_som1) = dr_lib.add_files(datalist,
-                                        Data_Paths=conf.data_paths.toPath(),
-                                        SO_Axis=so_axis,
-                                        dataset_type=dataset_type,
-                                        Signal_ROI=signal_roi_file,
-                                        Bkg_ROI=bkg_roi_file,
-                                        Verbose=conf.verbose,
-                                        Timer=t)
+    (d_som1, b_som1) = dr_lib.add_files_bg(datalist,
+                                           Data_Paths=conf.data_paths.toPath(),
+                                           SO_Axis=so_axis,
+                                           dataset_type=dataset_type,
+                                           Signal_ROI=signal_roi_file,
+                                           Bkg_ROI=bkg_roi_file,
+                                           Verbose=conf.verbose,
+                                           Timer=t)
 
     if t is not None:
         t.getTime(msg="After reading %s " % dataset_type)
