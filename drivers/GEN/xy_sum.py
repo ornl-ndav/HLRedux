@@ -48,7 +48,7 @@ def run(config):
     d_som1 = dr_lib.add_files(config.data, 
                               Data_Paths=config.data_paths.toPath(), 
                               SO_Axis=so_axis, 
-                              Verbose=config.verbose)[0] 
+                              Verbose=config.verbose)
 
     if config.start is None:
         if config.bin:

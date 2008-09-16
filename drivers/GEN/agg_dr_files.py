@@ -56,7 +56,7 @@ def run(config, tim):
 
     d_som1 = dr_lib.add_files(config.data, dst_type=dst_type,
                               Verbose=config.verbose,
-                              Timer=tim)[0]
+                              Timer=tim)
 
     hlr_utils.write_file(config.output, dst_type, d_som1,
                          verbose=config.verbose,

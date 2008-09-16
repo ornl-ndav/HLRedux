@@ -47,7 +47,7 @@ def run(config):
 
     d_som = dr_lib.add_files(config.data, dst_type=dst_type,
                              Signal_ROI=config.roi_file,
-                             Verbose=config.verbose)[0]
+                             Verbose=config.verbose)
 
     if dst_type == "text/Spec":
         __plot_a3c(d_som, config)

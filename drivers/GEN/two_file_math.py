@@ -58,7 +58,7 @@ def run(config, tim):
 
     d_som1 = dr_lib.add_files(config.data1, dst_type=dst_type1,
                               Verbose=config.verbose,
-                              Timer=tim)[0]
+                              Timer=tim)
 
     dst_type2 = hlr_utils.file_peeker(config.data2[0])
 
@@ -67,7 +67,7 @@ def run(config, tim):
 
     d_som2 = dr_lib.add_files(config.data2, dst_type=dst_type2,
                               Verbose=config.verbose,
-                              Timer=tim)[0]
+                              Timer=tim)
 
     # Get requested simple math operation
     func = common_lib.__getattribute__(config.operation)

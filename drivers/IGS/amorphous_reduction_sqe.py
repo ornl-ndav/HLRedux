@@ -75,7 +75,7 @@ def run(config, tim=None):
                                     SO_Axis=so_axis,
                                     Signal_ROI=config.roi_file,
                                     dataset_type="background",
-                                    Verbose=config.verbose, Timer=tim)[0]
+                                    Verbose=config.verbose, Timer=tim)
 
         bkg_som = dr_lib.fix_bin_contents(bkg_som0)
         del bkg_som0

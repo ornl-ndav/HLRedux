@@ -80,7 +80,7 @@ def run(config, tim=None):
                               SO_Axis=config.so_axis,
                               Signal_ROI=config.roi_file,
                               dataset_type=dataset_type,
-                              Verbose=config.verbose, Timer=tim)[0]
+                              Verbose=config.verbose, Timer=tim)
     
     if tim is not None:
         tim.getTime(msg="After reading %s " % dataset_type)
@@ -101,7 +101,7 @@ def run(config, tim=None):
                                 SO_Axis=config.so_axis,
                                 dataset_type=dataset_type,
                                 Verbose=config.verbose,
-                                Timer=tim)[0]
+                                Timer=tim)
     
     if tim is not None:
         tim.getTime(msg="After reading beam monitor data ")

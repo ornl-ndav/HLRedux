@@ -50,7 +50,7 @@ def run(config):
     # Read in all data files
     for datafile in config.data:
         spectra.append(dr_lib.add_files([datafile], dst_type=dst_type,
-                                        Verbose=config.verbose)[0])
+                                        Verbose=config.verbose))
 
     # Sort spectra on slowest axis (Q for BSS files)
     spectra.sort(lambda x, y: cmp(x[0].axis[0].val[0], y[0].axis[0].val[0]))

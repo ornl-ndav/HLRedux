@@ -44,7 +44,7 @@ def run(config):
 
     for datafile in config.data:
         d_som = dr_lib.add_files([datafile], dst_type=dst_type,
-                                 Verbose=config.verbose)[0]
+                                 Verbose=config.verbose)
 
         if dst_type == "text/Spec":
             drplot.plot_1D_so(d_som, d_som[0].id, logx=config.logx,
