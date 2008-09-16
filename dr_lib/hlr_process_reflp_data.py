@@ -90,7 +90,7 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
                               dataset_type=dataset_type,
                               Signal_ROI=roi_file,
                               Verbose=conf.verbose,
-                              Timer=t)[0]
+                              Timer=t)
 
     if t is not None:
         t.getTime(msg="After reading %s " % dataset_type)
@@ -112,7 +112,7 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
                                    SO_Axis=so_axis,
                                    dataset_type=dataset_type,
                                    Verbose=conf.verbose,
-                                   Timer=t)[0]
+                                   Timer=t)
         
         if t is not None:
             t.getTime(msg="After reading monitor data ")

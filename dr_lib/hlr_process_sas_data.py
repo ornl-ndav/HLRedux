@@ -125,7 +125,7 @@ def process_sas_data(datalist, conf, **kwargs):
     dp_som = dr_lib.add_files(datalist, Data_Paths=conf.data_paths.toPath(),
                               SO_Axis=conf.so_axis, Signal_ROI=conf.roi_file,
                               dataset_type=dataset_type,
-                              Verbose=conf.verbose, Timer=t)[0]
+                              Verbose=conf.verbose, Timer=t)
     
     if t is not None:
         t.getTime(msg="After reading %s " % dataset_type)
@@ -189,7 +189,7 @@ def process_sas_data(datalist, conf, **kwargs):
                                     SO_Axis=conf.so_axis,
                                     dataset_type=dataset_type,
                                     Verbose=conf.verbose,
-                                    Timer=t)[0]
+                                    Timer=t)
             
         if t is not None:
             t.getTime(msg="After reading beam monitor data ")
@@ -211,7 +211,7 @@ def process_sas_data(datalist, conf, **kwargs):
                                         SO_Axis=conf.so_axis,
                                         dataset_type=dataset_type,
                                         Verbose=conf.verbose,
-                                        Timer=t)[0]
+                                        Timer=t)
             if t is not None:
                 t.getTime(msg="After reading transmission monitor data ")
 
@@ -478,7 +478,7 @@ def process_sas_data(datalist, conf, **kwargs):
                                     dataset_type=dataset_type,
                                     dst_type="text/Spec",
                                     Verbose=conf.verbose,
-                                    Timer=t)[0]
+                                    Timer=t)
 
     
     if conf.verbose and dtm_som3 is not None:
