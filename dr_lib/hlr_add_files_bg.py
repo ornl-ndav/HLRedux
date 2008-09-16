@@ -266,9 +266,9 @@ if __name__ == "__main__":
     signal_roi_file = "../hlr_test/files/REF_L_1845_signal_Pid.txt"
     bkg_roi_file = "../hlr_test/files/REF_L_1845_background_Pid.txt"
 
-    (d_som, b_som) = add_files(my_files, Data_Paths=my_paths,
-                               Signal_ROI=signal_roi_file,
-                               Bkg_ROI=bkg_roi_file, Verbose=True)
+    (d_som, b_som) = add_files_bg(my_files, Data_Paths=my_paths,
+                                  Signal_ROI=signal_roi_file,
+                                  Bkg_ROI=bkg_roi_file, Verbose=True)
 
     print "Length Data:", len(d_som)
     if b_som is not None:
