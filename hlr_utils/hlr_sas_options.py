@@ -219,7 +219,19 @@ class SansOptions(hlr_utils.InstOptions):
                         dest="dump_wave_theta", help="Flag to dump a 2D "\
                         +"distribution of wavelength vs polar angle. Creates "\
                         +"a *.lvt file.")
-        self.set_defaults(dump_wave_theta=False)        
+        self.set_defaults(dump_wave_theta=False)
+
+        self.add_option("", "--dump-Q-r", action="store_true",
+                        dest="dump_Q_r", help="Flag to dump a 2D "\
+                        +"distribution of Q vs radius. Creates a "\
+                        +"*.qvr file.")
+        self.set_defaults(dump_Q_r=False)
+
+        self.add_option("", "--dump-Q-theta", action="store_true",
+                        dest="dump_Q_theta", help="Flag to dump a 2D "\
+                        +"distribution of Q vs polar angle. Creates "\
+                        +"a *.qvt file.")
+        self.set_defaults(dump_Q_theta=False)        
         
         self.add_option("", "--dump-all", action="store_true", dest="dump_all",
                         help="Flag to dump combined information")
@@ -395,6 +407,16 @@ def SansConfiguration(parser, configure, options, args):
                                       "--dump-wave-theta"):
         configure.dump_wave_theta = options.dump_wave_theta
 
+    # Set the ability to dump a momentum transfer vs radius distribution
+    if hlr_utils.cli_provide_override(configure, "dump_Q_r",
+                                      "--dump-Q-r"):
+        configure.dump_Q_r = options.dump_Q_r        
+
+    # Set the ability to dump a momentum transfer vs polar angle distribution
+    if hlr_utils.cli_provide_override(configure, "dump_Q_theta",
+                                      "--dump-Q-theta"):
+        configure.dump_Q_theta = options.dump_Q_theta        
+
     if hlr_utils.cli_provide_override(configure, "dump_all", "--dump-all"):
         if options.dump_all:
             configure.dump_wave = True
@@ -407,16 +429,19 @@ def SansConfiguration(parser, configure, options, args):
             configure.dump_tof_theta = True
             configure.dump_wave_r = True
             configure.dump_wave_theta = True
+            configure.dump_Q_r = True
+            configure.dump_Q_theta = True            
 
     # Do some cross-checks
-    if configure.dump_tof_r or configure.dump_wave_r:
+    if configure.dump_tof_r or configure.dump_wave_r or configure.dump_Q_r:
         if configure.r_bins is None:
             parser.error("Must specify --r-bins option when using 2D "\
-                         +"distribution options --dump-tof-r or "\
-                         +"--dump-wave-r.")
+                         +"distribution options --dump-tof-r, "\
+                         +"--dump-wave-r or --dump-Q-r.")
 
-    if configure.dump_tof_theta or configure.dump_wave_theta:
+    if configure.dump_tof_theta or configure.dump_wave_theta or \
+           configure.dump_Q_theta:
         if configure.theta_bins is None:
             parser.error("Must specify --theta-bins option when using 2D "\
-                         +"distribution options --dump-tof-theta or "\
-                         +"--dump-wave-theta.")            
+                         +"distribution options --dump-tof-theta, "\
+                         +"--dump-wave-theta or --dump-Q-theta.")            
