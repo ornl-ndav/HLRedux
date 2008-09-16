@@ -48,11 +48,6 @@ def add_files(filelist, **kwargs):
                          stored as a signal C{SOM}
     @type Signal_ROI: C{string}
     
-    @keyword Bkg_ROI: This is the name of a file that contains a list of pixel
-                      IDs that will be read from the data file and stored as a
-                      background C{SOM}
-    @type Bkg_ROI: C{string}
-    
     @keyword dataset_type: The practical name of the dataset being processed.
                            The default value is I{data}.
     @type dataset_type: C{string}
@@ -97,10 +92,6 @@ def add_files(filelist, **kwargs):
         signal_roi = kwargs["Signal_ROI"]
     except KeyError:
         signal_roi = None 
-    try:
-        bkg_roi = kwargs["Bkg_ROI"]
-    except KeyError:
-        bkg_roi = None        
 
     try:
         dataset_type = kwargs["dataset_type"]
@@ -170,22 +161,6 @@ def add_files(filelist, **kwargs):
                     except IndexError:
                         pass
 
-            if bkg_roi is not None:
-                if dst_type == "application/x-NeXus":
-                    b_som1 = data_dst.getSOM(data_paths, so_axis,
-                                             roi_file=bkg_roi)
-                    b_som1.rekeyNxPars(dataset_type)
-                else:
-                    if dst_type != "text/Dave2d":
-                        b_som1 = data_dst.getSOM(data_paths, roi_file=bkg_roi)
-                    else:
-                        b_som1 = data_dst.getSOM(data_paths)
-                if verbose:
-                    print "# Background SO:", len(b_som1)
-
-            else:
-                b_som1 = None
-
             if timer is not None:
                 timer.getTime(msg="After reading data")
 
@@ -202,35 +177,16 @@ def add_files(filelist, **kwargs):
                     d_som_t = data_dst.getSOM(data_paths)
                 add_nxpars_sig = False
                 
-            if bkg_roi is not None:
-                if dst_type == "application/x-NeXus":
-                    b_som_t = data_dst.getSOM(data_paths, so_axis,
-                                              roi_file=bkg_roi)
-                    b_som_t.rekeyNxPars(dataset_type)
-                    add_nxpars_bkg = True
-                else:
-                    if dst_type != "text/Dave2d":
-                        b_som_t = data_dst.getSOM(data_paths, roi_file=bkg_roi)
-                    else:
-                        b_som_t = data_dst.getSOM(data_paths)
-                    add_nxpars_bkg = False
-            else:
-                b_som_t = None
             if timer is not None:
                 timer.getTime(msg="After reading data")
 
             d_som1 = common_lib.add_ncerr(d_som_t, d_som1,
                                           add_nxpars=add_nxpars_sig)
-            if bkg_roi is not None:
-                b_som1 = common_lib.add_ncerr(b_som_t, b_som1,
-                                              add_nxpars=add_nxpars_bkg)
 
             if timer is not None:
                 timer.getTime(msg="After adding spectra")
 
             del d_som_t
-            if bkg_roi is not None:
-                del b_som_t
 
             if timer is not None:
                 timer.getTime(msg="After SOM deletion")
@@ -247,13 +203,11 @@ def add_files(filelist, **kwargs):
             som_key = "-".join(som_key_parts)
 
             d_som1.attr_list[som_key] = filelist
-            if b_som1 is not None:
-                b_som1.attr_list[som_key] = filelist
         else:
             # Previously written files already have this structure imposed
             pass
 
-    return (d_som1, b_som1)
+    return d_som1
 
 if __name__ == "__main__":
 
@@ -264,12 +218,9 @@ if __name__ == "__main__":
     my_paths = ("/entry/bank1", 1)
 
     signal_roi_file = "../hlr_test/files/REF_L_1845_signal_Pid.txt"
-    bkg_roi_file = "../hlr_test/files/REF_L_1845_background_Pid.txt"
 
-    (d_som, b_som) = add_files(my_files, Data_Paths=my_paths,
-                               Signal_ROI=signal_roi_file,
-                               Bkg_ROI=bkg_roi_file, Verbose=True)
+    d_som = add_files(my_files, Data_Paths=my_paths,
+                      Signal_ROI=signal_roi_file,
+                      Verbose=True)
 
     print "Length Data:", len(d_som)
-    if b_som is not None:
-        print "Length Background:", len(b_som)
