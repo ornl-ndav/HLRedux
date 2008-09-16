@@ -56,6 +56,7 @@ from hlr_process_igs_data import process_igs_data
 from hlr_process_ref_data import process_ref_data
 from hlr_process_reflp_data import process_reflp_data
 from hlr_process_sas_data import process_sas_data
+from hlr_rebin_axis_1D_frac import *
 from hlr_rebin_efficiency import *
 from hlr_rebin_monitor import *
 from hlr_shift_spectrum import *
