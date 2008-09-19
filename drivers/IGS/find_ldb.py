@@ -216,6 +216,18 @@ def run(config, tim=None):
     else:
         pass
 
+    # Only do this if the above checks pass
+    if config.niter != 0:
+        # Empirically derived check to see if iteration will converge
+        ratio_small_parts = __calculate_ratio(config, config.cwdb_small)
+        ratio_small = __make_ratio(ratio_small_parts)
+        
+        import utils
+        if utils.compare(ratio_small, ratio_min) <= 0:
+            old_niter = config.niter
+            config.niter = 0
+            config.comments = ["find_ldb: Convergence criteria failed!"]
+
     # Steps 6-7
     wdb_try = 0.0
     ratio_try = 0.0
@@ -348,6 +360,11 @@ if __name__ == "__main__":
                       help="Specify the maximum value of the "\
                       +"wavelength-dependent background")
 
+    parser.add_option("", "--cwdb-small", dest="cwdb_small", type="float",
+                      help="Specify a small value of the "\
+                      +"wavelength-dependent background")    
+    parser.set_defaults(cwdb_small=1.0e-14)
+    
     parser.add_option("", "--amr-verbose", action="store_true",
                       dest="amr_verbose", help="Flag to turn on the "\
                       +"verbosity of the amorphous_reduction_sqe code.")
@@ -435,6 +452,10 @@ if __name__ == "__main__":
     # Set the maximum wavelength-dependent background constant
     if hlr_utils.cli_provide_override(configure, "cwdb_max", "--cwdb-max"):
         configure.cwdb_max = options.cwdb_max
+
+    # Set the small wavelength-dependent background constant
+    if hlr_utils.cli_provide_override(configure, "cwdb_small", "--cwdb-small"):
+        configure.cwdb_small = options.cwdb_small        
 
     # Set the verbosity for the amorphous_reduction_sqe code
     if hlr_utils.cli_provide_override(configure, "amr_verbose",
