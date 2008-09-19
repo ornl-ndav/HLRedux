@@ -400,7 +400,6 @@ def run(config, tim=None):
                                         "negcos_param_array",
                                         config.ncospol_bins.toNessiList(),
                                         rebin_axis=config.E_bins.toNessiList(),
-                                        pixnorm=True,
                                         prnorm="azimuthal",
                                         y_label="counts",
                                         y_units="counts / (ueV * rads)",
