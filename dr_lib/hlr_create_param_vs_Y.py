@@ -229,7 +229,7 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
             prrange[i] = math.fabs(max_val - min_val)
 
     # If pixel normalization tracking enabled, divided slices by pixel counts
-    if pixnorm:
+    if pixnorm or prnorm:
         tmp_y = nessi_list.NessiList(N_tot)
         tmp_var_y = nessi_list.NessiList(N_tot)
 
@@ -240,11 +240,13 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
             slice_y = so_dim.y[start:end]
             slice_var_y = so_dim.var_y[start:end]
 
+            divconst = 1.0
+            
+            if pixnorm:
+                divconst *= pixarr[i]
             # Scale division constant if parameter range normalization enabled
             if prnorm:
-                divconst = pixarr[i] * prrange[i]
-            else:
-                divconst = pixarr[i]
+                divconst *= prrange[i]
 
             (dslice_y, dslice_var_y) = array_manip.div_ncerr(slice_y,
                                                              slice_var_y,
