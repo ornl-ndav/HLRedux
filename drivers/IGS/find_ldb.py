@@ -224,6 +224,9 @@ def run(config, tim=None):
         
         import utils
         if utils.compare(ratio_small, ratio_min) <= 0:
+            print "Ratio from small constant is less than or equal to "\
+                  +"ratio from minimum. Iteration will not converge. Small: "\
+                  +"%f, Min: %f" % (ratio_small, ratio_min)
             old_niter = config.niter
             config.niter = 0
             config.comments = ["find_ldb: Convergence criteria failed!"]
