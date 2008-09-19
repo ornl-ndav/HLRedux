@@ -177,7 +177,7 @@ def AmrConfiguration(parser, configure, options, args):
 
     # Set the negative cosine polar angle bins
     if hlr_utils.cli_provide_override(configure, "ncospol_bins",
-                                      "--ncos-pol-bins"):
+                                      "--ncos-polar-bins"):
         configure.ncospol_bins = hlr_utils.AxisFromString(options.ncospol_bins)
 
     # Make sure only momentum transfer or negative cosine polar binning is set
@@ -185,7 +185,7 @@ def AmrConfiguration(parser, configure, options, args):
         configure.ncospol_bins is not None) or \
         (configure.Q_bins is None and configure.ncospol_bins is None):
         parser.error("Please specify either --mom-trans-bins or "\
-                     +"--ncos-pol-bins")
+                     +"--ncos-polar-bins")
 
     # Set the final data rescaling constant
     if hlr_utils.cli_provide_override(configure, "rescale_final",
