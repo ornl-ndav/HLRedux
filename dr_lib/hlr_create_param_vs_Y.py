@@ -86,6 +86,7 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
     """
     import array_manip
     import common_lib
+    import dr_lib
     import hlr_utils
     import nessi_list
     import SOM
@@ -139,7 +140,7 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
 
     # Rebin original data to rebin_axis if necessary
     if rebin_axis is not None:
-        som1 = common_lib.rebin_axis_1D_frac(som, rebin_axis)
+        (som1, som2) = dr_lib.rebin_axis_1D_frac(som, rebin_axis)
         len_arb_axis = len(rebin_axis) - offset
         so_dim.axis[arb_axis_loc].val = rebin_axis
     else:
@@ -172,6 +173,9 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
     N_tot = len_param_axis * len_arb_axis
     so_dim.y = nessi_list.NessiList(N_tot)
     so_dim.var_y = nessi_list.NessiList(N_tot)
+    if rebin_axis is not None:
+        frac_area = nessi_list.NessiList(N_tot)
+        frac_area_err2 = nessi_list.NessiList(N_tot)
 
     # Loop through data and create 2D spectrum
     len_som = hlr_utils.get_length(som1)
@@ -192,7 +196,21 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
                                                          so_dim.var_y,
                                                          val,
                                                          err2,
-                                                         a_start=start)        
+                                                         a_start=start)
+        if rebin_axis is not None:
+            val1 = hlr_utils.get_value(som2, i, "SOM", "y")
+            err1_2 = hlr_utils.get_err2(som2, i, "SOM", "y")
+            (frac_area, frac_area_err2) = array_manip.add_ncerr(frac_area,
+                                                                frac_area_err2,
+                                                                val1,
+                                                                err1_2,
+                                                                a_start=start)
+
+    if rebin_axis is not None:
+        (so_dim.y, so_dim.var_y) = array_manip.div_ncerr(so_dim.y,
+                                                         so_dim.var_y,
+                                                         frac_area,
+                                                         frac_area_err2)
 
     # If parameter range normalization enabled, find the range for the
     # parameter
@@ -200,8 +218,14 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
         import math
         prrange = nessi_list.NessiList(len_param_axis)
         for i in xrange(len(prrange)):
-            max_val = max(prarr[i])
-            min_val = min(prarr[i])
+            try:
+                max_val = max(prarr[i])
+            except ValueError:
+                max_val = 0.0
+            try:
+                min_val = min(prarr[i])
+            except ValueError:
+                min_val = 0.0
             prrange[i] = math.fabs(max_val - min_val)
 
     # If pixel normalization tracking enabled, divided slices by pixel counts
