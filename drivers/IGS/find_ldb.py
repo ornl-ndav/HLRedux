@@ -219,12 +219,14 @@ def run(config, tim=None):
     # Only do this if the above checks pass
     if config.niter != 0:
         # Empirically derived check to see if iteration will converge
+        # Step 6
         ratio_small_parts = __calculate_ratio(config, config.cwdb_small)
         ratio_small = __make_ratio(ratio_small_parts)
 
         if tim is not None:
             tim.getTime(msg="After small ratio calculation ")
-        
+
+        # Step 7
         import utils
         if utils.compare(ratio_small, ratio_min) <= 0:
             print "Ratio from small constant is less than or equal to "\
@@ -234,7 +236,7 @@ def run(config, tim=None):
             config.niter = 0
             config.comments = ["find_ldb: Convergence criteria failed!"]
 
-    # Steps 6-7
+    # Steps 8-9
     wdb_try = 0.0
     ratio_try = 0.0
     
@@ -289,7 +291,7 @@ def run(config, tim=None):
                                                         counter)
         config.comments = ["find_ldb: Success!"]
 
-    # Step 8
+    # Step 10
     # Set the create_output flag to True to get the output file from this run
     config.create_output = True
     config.verbose = config.amr_verbose
