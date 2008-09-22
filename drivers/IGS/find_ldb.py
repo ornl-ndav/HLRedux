@@ -392,6 +392,7 @@ if __name__ == "__main__":
     # Remove some other unneeded options
     parser.remove_option("--split")
     parser.remove_option("--lambda-bins")
+    parser.remove_option("--ncos-polar-bins")
     # This one is handled by the loop
     parser.remove_option("--ldb-const")
     # Block the rescaling as this causes havoc with the looping
