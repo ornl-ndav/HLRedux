@@ -63,6 +63,10 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
                      given bin.
     @type prnorm: C{string}
 
+    @keyword binnorm: A flag that turns on the scaling of each stripe of the
+                      y-axis by the individual bins widths from the y-axis.
+    @type binnorm: C{boolean}
+
     @keyword so_id: The identifier represents a number, string, tuple or other
                     object that describes the resulting C{SO}.
     @type so_id: C{int}, C{string}, C{tuple}, C{pixel ID}
@@ -103,6 +107,11 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
         pixnorm = kwargs["pixnorm"]
     except KeyError:
         pixnorm = False
+
+    try:
+        binnorm = kwargs["binnorm"]
+    except KeyError:
+        binnorm = False        
 
     # Check for prnorm flag
     try:
@@ -261,7 +270,37 @@ def create_param_vs_Y(som, param, param_func, param_axis, **kwargs):
 
         so_dim.y = tmp_y
         so_dim.var_y = tmp_var_y
-    
+
+    if binnorm:
+        tmp_y = nessi_list.NessiList(N_tot)
+        tmp_var_y = nessi_list.NessiList(N_tot)
+        
+        if rebin_axis is not None:
+            bin_const = utils.calc_bin_widths(rebin_axis)
+        else:
+            bin_const = utils.calc_bin_widths(som1[0].axis[1].val)
+
+        for i in range(len_param_axis):
+            start = i * len_arb_axis
+            end = (i + 1) * len_arb_axis
+            
+            slice_y = so_dim.y[start:end]
+            slice_var_y = so_dim.var_y[start:end]
+            
+            (dslice_y, dslice_var_y) = array_manip.mult_ncerr(slice_y,
+                                                              slice_var_y,
+                                                              bin_const[0],
+                                                              bin_const[1])
+            
+            (tmp_y, tmp_var_y) = array_manip.add_ncerr(tmp_y,
+                                                       tmp_var_y,
+                                                       dslice_y,
+                                                       dslice_var_y,
+                                                       a_start=start)
+
+        so_dim.y = tmp_y
+        so_dim.var_y = tmp_var_y
+
     # Create final 2D spectrum object container
     comb_som = SOM.SOM()
     comb_som.copyAttributes(som1)
