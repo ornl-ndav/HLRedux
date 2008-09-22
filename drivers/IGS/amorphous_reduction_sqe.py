@@ -401,9 +401,10 @@ def run(config, tim=None):
                                         config.ncospol_bins.toNessiList(),
                                         rebin_axis=config.E_bins.toNessiList(),
                                         y_label="counts",
-                                        y_units="counts / (ueV * rads)",
-                                        x_labels=["Angle", "Energy Transfer"], 
-                                        x_units=["rads", "ueV"])
+                                        y_units="counts / ueV",
+                                        x_labels=["-cos(polar)",
+                                                  "Energy Transfer"], 
+                                        x_units=["", "ueV"])
 
         if tim is not None:
             tim.getTime(msg="After creation of final spectrum ")        
