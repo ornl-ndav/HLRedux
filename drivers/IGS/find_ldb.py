@@ -221,6 +221,9 @@ def run(config, tim=None):
         # Empirically derived check to see if iteration will converge
         ratio_small_parts = __calculate_ratio(config, config.cwdb_small)
         ratio_small = __make_ratio(ratio_small_parts)
+
+        if tim is not None:
+            tim.getTime(msg="After small ratio calculation ")
         
         import utils
         if utils.compare(ratio_small, ratio_min) <= 0:
