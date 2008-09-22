@@ -203,6 +203,12 @@ def plot_1D_slice(som, axis, xslice, yslice, **kwargs):
     except KeyError:
         index = False
 
+    try:
+        xlabel = kwargs["xlabel"]
+        del kwargs["xlabel"]
+    except KeyError:
+        xlabel = None
+
     [(x, y, z, var_z)] = som.toXY(withYvar=True)
 
     # Get dimensions of data
@@ -231,11 +237,13 @@ def plot_1D_slice(som, axis, xslice, yslice, **kwargs):
     # Setup axis specific values
     if axis == "y":
          naxis = 0
-         xlabel = som.getAxisLabel(1) + " [" + som.getAxisUnits(1) + "]"
+         if xlabel is None:
+             xlabel = som.getAxisLabel(1) + " [" + som.getAxisUnits(1) + "]"
          xp = y[sy]
     elif axis == "x":
         naxis = 1
-        xlabel = som.getAxisLabel(0) + " [" + som.getAxisUnits(0) + "]"
+        if xlabel is None:
+            xlabel = som.getAxisLabel(0) + " [" + som.getAxisUnits(0) + "]"
         xp = x[sx]
     else:
         raise RuntimeError("Only understand x or y for axis and not: %s" \
