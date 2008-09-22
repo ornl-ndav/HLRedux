@@ -149,7 +149,7 @@ def run(config, tim=None):
                                        binnorm=True,
                                        y_label="S",
                                        y_units="Counts / A^-1 m",
-                                       x_labels=["radius", "Q"],
+                                       x_labels=["Radius", "Q"],
                                        x_units=["m", "1/Angstroms"])
 
         hlr_utils.write_file(config.output, "text/Dave2d", d_som5_1,
@@ -167,7 +167,7 @@ def run(config, tim=None):
                                        binnorm=True,
                                        y_label="S",
                                        y_units="Counts / A^-1 rads",
-                                       x_labels=["theta", "Q"],
+                                       x_labels=["Polar Angle", "Q"],
                                        x_units=["rads", "1/Angstroms"])
 
         hlr_utils.write_file(config.output, "text/Dave2d", d_som5_1,
