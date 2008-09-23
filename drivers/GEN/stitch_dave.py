@@ -111,15 +111,16 @@ if __name__ == "__main__":
     import hlr_utils
 
     # Make description for driver
-    result = []
-    result.append("This driver reads in DAVE 2D ASCII files containing one")
-    result.append("bin in the slowest running axis, combines them into a")
-    result.append("new inclusive spectrum and writes that out to file.")
+    description = []
+    description.append("This driver reads in DAVE 2D ASCII files containing")
+    description.append("one bin in the slowest running axis, combines them")
+    description.append("into a new inclusive spectrum and writes that out to")
+    description.append("file.")
 
     # set up the options available
     parser = hlr_utils.BasicOptions("usage: %prog [options] <datafile>", None,
                                     None, hlr_utils.program_version(), 'error',
-                                    " ".join(result))
+                                    " ".join(description))
 
     # Specify the rescaling constant
     parser.add_option("-r", "--rescale", dest="rescale", help="Specify a "\
