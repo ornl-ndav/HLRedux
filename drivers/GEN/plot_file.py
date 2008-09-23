@@ -65,7 +65,7 @@ def run(config):
             drplot.plot_1D_slices(d_som, "x", config.range,
                                   logx=config.logx, logy=config.logy)
         else:
-            drplot.plot_2D_so(d_som, logz=config.logz)
+            drplot.plot_2D_so(d_som, logz=config.logz, box=config.box)
     elif dst_type == "text/num-info":
         drplot.plot_numinfo(d_som)
     else:
@@ -160,6 +160,10 @@ if __name__ == "__main__":
     parser.add_option("", "--slicey", dest="slicey", action="store_true",
                       help="Project a 2D distribution along y.")
     parser.set_defaults(slicey=False)
+
+    parser.add_option("-b", "--box", dest="box", action="store_true",
+                      help="Plot 2D dsitribution as a box plot.")
+    parser.set_defaults(box=False)
     
     # Do not need to use the following options
     parser.remove_option("--config")
@@ -218,6 +222,9 @@ if __name__ == "__main__":
 
     # Set the flag to make slices along the x-axis
     configure.slicey = options.slicey
+
+    # Set the flag to make a 2D box plot
+    configure.box = options.box
 
     # Run the program
     run(configure)
