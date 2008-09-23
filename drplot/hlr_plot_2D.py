@@ -104,6 +104,9 @@ def plot_2D_arr(x, y, z, **kwargs):
 
     @keyword nocb: A flag that turns of the colorbar for the plot.
     @type nocb: C{bool}
+
+    @keyword box: A flag that turns on creating a box plot.
+    @type box: C{bool}
     
     @keyword xlabel: The label for the independent axis.
     @type xlabel: C{string}
@@ -147,13 +150,26 @@ def plot_2D_arr(x, y, z, **kwargs):
     except KeyError:
         nocb = False        
 
-    if logz:
+    try:
+        box = kwargs["box"]
+    except KeyError:
+        box = False
+
+    if logz and not box:
         import matplotlib
         mylocator = matplotlib.ticker.LogLocator()
     else:
         mylocator = None
 
-    pylab.contourf(x, y, z, cmap=colormap, locator=mylocator)
+    if logz and box:
+        lognorm = drplot.log_for_pcolor(z)
+    else:
+        lognorm = None
+
+    if not box:
+        pylab.contourf(x, y, z, cmap=colormap, locator=mylocator)
+    else:
+        pylab.pcolor(x, y, z, cmap=colormap, norm=lognorm)
     pylab.xlabel(xlabel)
     pylab.ylabel(ylabel)
     pylab.title(title)
