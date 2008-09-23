@@ -117,6 +117,8 @@ def plot_2D_arr(x, y, z, **kwargs):
     @keyword title: The title for the plot
     @type title: C{string}
     """
+    import matplotlib
+            
     # Lookup all the keywords
 
     try:
@@ -137,7 +139,6 @@ def plot_2D_arr(x, y, z, **kwargs):
     try:
         colormap = kwargs["colormap"]
     except KeyError:
-        import matplotlib
         colormap = matplotlib.cm.hot
 
     try:
@@ -156,7 +157,6 @@ def plot_2D_arr(x, y, z, **kwargs):
         box = False
 
     if logz and not box:
-        import matplotlib
         mylocator = matplotlib.ticker.LogLocator()
     else:
         mylocator = None
