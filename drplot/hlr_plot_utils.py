@@ -81,3 +81,31 @@ def clean_1D_data(action, axis="y", *args):
         raise RuntimeError("Do not understand cleaning action: %s" % action)
     
     return (x, y, var_y, var_x)
+
+def log_for_pcolor(data):
+    """
+    This utility function parses a list of data looking for the maximum and
+    minimum non-negative, non-zero values and create an object that will handle
+    creating a C{matplotlib.colors.LogNorm} object for a logarithmic z axis for
+    the C{pylab.pcolor} plotting function.
+    
+    @param data: The list of data to search
+    @type data: C{NumPy.array}
+    
+    
+    @return: The object for handling logarithmic colors
+    @rtype: C{matplotlib.colors.LogNorm}
+    """
+    import matplotlib.colors
+    
+    idxs = numpy.nonzero(data)
+    import itertools
+    data_min = 1.0e+302
+    for (i, j) in itertools.izip(idxs[0],idxs[1]):
+        if data[i][j] < 0.0:
+            continue
+        else:
+            if data[i][j] < data_min:
+                data_min = data[i][j]
+
+    return matplotlib.colors.LogNorm(vmin=data_min)
