@@ -252,10 +252,10 @@ def plot_1D_slice(som, axis, xslice, yslice, **kwargs):
 
     # Setup axis specific values
     if axis == "y":
-         naxis = 0
-         if xlabel is None:
-             xlabel = som.getAxisLabel(1) + " [" + som.getAxisUnits(1) + "]"
-         xp = y[sy]
+        naxis = 0
+        if xlabel is None:
+            xlabel = som.getAxisLabel(1) + " [" + som.getAxisUnits(1) + "]"
+        xp = y[sy]
     elif axis == "x":
         naxis = 1
         if xlabel is None:
