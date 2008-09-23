@@ -270,7 +270,7 @@ def plot_1D_slice(som, axis, xslice, yslice, **kwargs):
 
     drplot.plot_1D_arr(xp, yp, var_yp, xlabel=xlabel, **kwargs)
 
-def plot_1D_slices(som, axis, range, **kwargs):
+def plot_1D_slices(som, axis, arange, **kwargs):
     """
     This function plots multiple 1D slices from a 2D spectrum. The function
     requires the axis to project onto and a range of slices to view. NOTE: This
@@ -283,9 +283,9 @@ def plot_1D_slices(som, axis, range, **kwargs):
     @param axis: The particular axis to clean. This is either I{x} or I{y}.
     @type axis: C{string}
 
-    @param range: A set of axis values that determines the slices to view in
+    @param arange: A set of axis values that determines the slices to view in
                   the format of (min, max).
-    @type range: C{tuple} of two numbers
+    @type arange: C{tuple} of two numbers
 
     @param kwargs: A list of keyword arguments that the function accepts. The
                    function also takes keywords for L{drplot.plot_1D_slice}.
@@ -303,8 +303,8 @@ def plot_1D_slices(som, axis, range, **kwargs):
     saxis = som[0].axis[iaxis].val
     ilabel = som.getAxisLabel(iaxis)
     iunits = som.getAxisUnits(iaxis)
-    sidx = __find_index(saxis.toNumPy(), range[0])
-    eidx = __find_index(saxis.toNumPy(), range[1])
+    sidx = __find_index(saxis.toNumPy(), arange[0])
+    eidx = __find_index(saxis.toNumPy(), arange[1])
 
     if sidx is None and eidx is None:
         slice_range = (0, len(saxis))
