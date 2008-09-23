@@ -100,13 +100,13 @@ def plot_2D_arr(x, y, z, **kwargs):
     @type colormap: C{matplotlib.cm}
 
     @keyword logz: A flag that sets the z-axis on a logarithmic scale.
-    @type logz: C{bool}
+    @type logz: C{boolean}
 
     @keyword nocb: A flag that turns of the colorbar for the plot.
-    @type nocb: C{bool}
+    @type nocb: C{boolean}
 
     @keyword box: A flag that turns on creating a box plot.
-    @type box: C{bool}
+    @type box: C{boolean}
     
     @keyword xlabel: The label for the independent axis.
     @type xlabel: C{string}
