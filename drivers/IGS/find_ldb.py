@@ -202,7 +202,7 @@ def run(config, tim=None):
             print "Ratio from minimum cwdb is greater than "\
                       +"requested ratio. Decrease the minimum cwdb "\
                       +"parameter. Min: %f, Given Ratio: %f" \
-                      %(ratio_min, config.ratio)
+                      % (ratio_min, config.ratio)
             old_niter = config.niter
             config.niter = 0
             config.comments = ["find_ldb: Range failure!"]
@@ -341,9 +341,9 @@ if __name__ == "__main__":
 
     # Add find_ldb related options
     parser.add_option("", "--et-int-range", dest="et_int_range", help="Set "\
-                      +"the minimum and maximum values of the energy tranfer "\
-                      +"integration range. Also, set the bin width for "\
-                      +"energy transfer that will be used during the "\
+                      +"the minimum and maximum values of the energy "\
+                      +"transfer integration range. Also, set the bin width "\
+                      +"for energy transfer that will be used during the "\
                       +"calculation.")
     
     parser.add_option("", "--detbal-temp", dest="detbal_temp", help="Specify "\
@@ -393,6 +393,7 @@ if __name__ == "__main__":
     parser.remove_option("--dump-energy")
     parser.remove_option("--dump-ei")
     parser.remove_option("--dump-dslin")
+    parser.remove_option("--dump-norm")
 
     # Remove some other unneeded options
     parser.remove_option("--split")
