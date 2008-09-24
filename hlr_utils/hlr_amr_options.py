@@ -110,6 +110,12 @@ class AmrOptions(hlr_igs_options.IgsOptions):
                         +"scattering background information summed over "\
                         +"all pixels. Creates a *.lin file.")
         self.set_defaults(dump_dslin=False)
+
+        self.add_option("", "--dump-norm", action="store_true",
+                        dest="dump_norm", help="Flag to dump the wavelength "\
+                        +"information after vanadium normalization for all"\
+                        +"pixels. Creates a *.wvn file.")
+        self.set_defaults(dump_norm=False)
         
         self.add_option("", "--dump-energy", action="store_true",
                         dest="dump_energy",
@@ -222,6 +228,10 @@ def AmrConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "dump_dslin",
                                       "--dump-dslin"):
         configure.dump_dslin = options.dump_dslin
+
+    # Set the ability to dump the wavelength information after vanadium norm
+    if hlr_utils.cli_provide_override(configure, "dump_norm", "--dump-norm"):
+        configure.dump_norm = options.dump_norm
         
     # Set the ability to dump the energy transfer information
     if hlr_utils.cli_provide_override(configure, "dump_energy",
@@ -236,6 +246,7 @@ def AmrConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "dump_all", "--dump-all"):
         if options.dump_all:
             configure.dump_dslin = True
+            configure.dump_norm = True
             configure.dump_energy = True
             configure.dump_initial_energy = True
 
