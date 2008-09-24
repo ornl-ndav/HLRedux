@@ -393,6 +393,7 @@ if __name__ == "__main__":
     parser.remove_option("--dump-energy")
     parser.remove_option("--dump-ei")
     parser.remove_option("--dump-dslin")
+    parser.remove_option("--dump-norm")
 
     # Remove some other unneeded options
     parser.remove_option("--split")
