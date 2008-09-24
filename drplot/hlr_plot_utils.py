@@ -42,11 +42,11 @@ def clean_1D_data(action, axis="y", *args):
                    2. Dependent axis
                    3. Uncertainty on the dependent axis
                    4. Uncertainty on the independent axis
-    @type args: C{NumPy} arrays
+    @type args: C{NumPy.array}s
     
 
     @return: The cleaned arrays. The order is I{(x, y, var_y, var_x)}.
-    @rtype: C{tuple} of C{NumPy} arrays
+    @rtype: C{tuple} of C{NumPy.array}s
 
 
     @raise RuntimeError: The requested action is not recognized

@@ -202,7 +202,7 @@ def run(config, tim=None):
             print "Ratio from minimum cwdb is greater than "\
                       +"requested ratio. Decrease the minimum cwdb "\
                       +"parameter. Min: %f, Given Ratio: %f" \
-                      %(ratio_min, config.ratio)
+                      % (ratio_min, config.ratio)
             old_niter = config.niter
             config.niter = 0
             config.comments = ["find_ldb: Range failure!"]

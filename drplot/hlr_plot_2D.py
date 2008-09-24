@@ -100,13 +100,13 @@ def plot_2D_arr(x, y, z, **kwargs):
     @type colormap: C{matplotlib.cm}
 
     @keyword logz: A flag that sets the z-axis on a logarithmic scale.
-    @type logz: C{bool}
+    @type logz: C{boolean}
 
     @keyword nocb: A flag that turns of the colorbar for the plot.
-    @type nocb: C{bool}
+    @type nocb: C{boolean}
 
     @keyword box: A flag that turns on creating a box plot.
-    @type box: C{bool}
+    @type box: C{boolean}
     
     @keyword xlabel: The label for the independent axis.
     @type xlabel: C{string}
@@ -117,6 +117,8 @@ def plot_2D_arr(x, y, z, **kwargs):
     @keyword title: The title for the plot
     @type title: C{string}
     """
+    import matplotlib
+            
     # Lookup all the keywords
 
     try:
@@ -137,7 +139,6 @@ def plot_2D_arr(x, y, z, **kwargs):
     try:
         colormap = kwargs["colormap"]
     except KeyError:
-        import matplotlib
         colormap = matplotlib.cm.hot
 
     try:
@@ -156,7 +157,6 @@ def plot_2D_arr(x, y, z, **kwargs):
         box = False
 
     if logz and not box:
-        import matplotlib
         mylocator = matplotlib.ticker.LogLocator()
     else:
         mylocator = None
@@ -252,10 +252,10 @@ def plot_1D_slice(som, axis, xslice, yslice, **kwargs):
 
     # Setup axis specific values
     if axis == "y":
-         naxis = 0
-         if xlabel is None:
-             xlabel = som.getAxisLabel(1) + " [" + som.getAxisUnits(1) + "]"
-         xp = y[sy]
+        naxis = 0
+        if xlabel is None:
+            xlabel = som.getAxisLabel(1) + " [" + som.getAxisUnits(1) + "]"
+        xp = y[sy]
     elif axis == "x":
         naxis = 1
         if xlabel is None:
@@ -270,7 +270,7 @@ def plot_1D_slice(som, axis, xslice, yslice, **kwargs):
 
     drplot.plot_1D_arr(xp, yp, var_yp, xlabel=xlabel, **kwargs)
 
-def plot_1D_slices(som, axis, range, **kwargs):
+def plot_1D_slices(som, axis, arange, **kwargs):
     """
     This function plots multiple 1D slices from a 2D spectrum. The function
     requires the axis to project onto and a range of slices to view. NOTE: This
@@ -283,9 +283,9 @@ def plot_1D_slices(som, axis, range, **kwargs):
     @param axis: The particular axis to clean. This is either I{x} or I{y}.
     @type axis: C{string}
 
-    @param range: A set of axis values that determines the slices to view in
+    @param arange: A set of axis values that determines the slices to view in
                   the format of (min, max).
-    @type range: C{tuple} of two numbers
+    @type arange: C{tuple} of two numbers
 
     @param kwargs: A list of keyword arguments that the function accepts. The
                    function also takes keywords for L{drplot.plot_1D_slice}.
@@ -303,8 +303,8 @@ def plot_1D_slices(som, axis, range, **kwargs):
     saxis = som[0].axis[iaxis].val
     ilabel = som.getAxisLabel(iaxis)
     iunits = som.getAxisUnits(iaxis)
-    sidx = __find_index(saxis.toNumPy(), range[0])
-    eidx = __find_index(saxis.toNumPy(), range[1])
+    sidx = __find_index(saxis.toNumPy(), arange[0])
+    eidx = __find_index(saxis.toNumPy(), arange[1])
 
     if sidx is None and eidx is None:
         slice_range = (0, len(saxis))
