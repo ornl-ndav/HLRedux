@@ -94,16 +94,16 @@ def plot_1D_arr(x, y, var_y=None, var_x=None, **kwargs):
     I{pylab.show()}.
 
     @param x: The independent axis
-    @type x: C{NumPy} array
+    @type x: C{NumPy.array}
 
     @param y: The dependent axis
-    @type y: C{NumPy} array
+    @type y: C{NumPy.array}
 
     @param var_y: The uncertainty of the dependent axis
-    @type var_y: C{NumPy} array
+    @type var_y: C{NumPy.array}
 
     @param var_x: The uncertainty of the independent axis
-    @type var_x: C{NumPy} array
+    @type var_x: C{NumPy.array}
 
     @param kwargs: A list of keyword arguments that the function accepts.
 

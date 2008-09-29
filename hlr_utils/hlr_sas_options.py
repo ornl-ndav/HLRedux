@@ -119,8 +119,8 @@ class SansOptions(hlr_utils.InstOptions):
 
         self.add_option("", "--r-bins", dest="r_bins",
                         help="Specify the minimum and maximum radius "\
-                        +"values, the radius bin width in cm and the type "\
-                        +"(lin or log)")
+                        +"values, the radius bin width in meters and the "\
+                        +"type (lin or log)")
 
         self.add_option("", "--time-zero-offset-det",
                         dest="time_zero_offset_det",

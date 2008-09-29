@@ -349,6 +349,20 @@ def run(config, tim=None):
 
     del d_som3, norm_int
 
+    if config.dump_norm:
+        if tim is not None:
+            tim.getTime(False)
+
+        hlr_utils.write_file(config.output, "text/Spec", d_som4,
+                             output_ext="wvn",
+                             data_ext=config.ext_replacement,    
+                             path_replacement=config.path_replacement,
+                             verbose=config.verbose,
+                             message="wavelength (vanadium norm) information")
+
+        if tim is not None:
+            tim.getTime(msg="After writing wavelength (vanadium norm) info ")
+
     # Steps 33 to end: Creating S(Q,E)
     if config.Q_bins is not None:
         if config.verbose:
