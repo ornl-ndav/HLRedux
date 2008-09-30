@@ -50,7 +50,7 @@ if __name__ == "__main__":
 
     # Set up the options available
     parser = hlr_utils.DgsOptions("usage: %prog [options] <datafile>", None,
-                                  hlr_utils.program_version(), 'error',
+                                  None, hlr_utils.program_version(), 'error',
                                   " ".join(result))
 
     # Add dgs_reduction specific options
