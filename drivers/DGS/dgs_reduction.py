@@ -47,7 +47,9 @@ if __name__ == "__main__":
 
     # Make description for driver
     result = []
-
+    result.append("This driver runs the data reduction for the Direct")
+    result.append("Geometry Spectrometer class of instruments.")
+    
     # Set up the options available
     parser = hlr_utils.DgsOptions("usage: %prog [options] <datafile>", None,
                                   None, hlr_utils.program_version(), 'error',
