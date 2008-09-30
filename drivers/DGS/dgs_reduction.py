@@ -41,7 +41,19 @@ def run(config, tim=None):
                            timing evaluations.
     @type tim: C{sns_time.DiffTime}
     """
-    pass
+    if tim is not None:
+        tim.getTime(False)
+        old_time = tim.getOldTime()
+
+    if config.data is None:
+        raise RuntimeError("Need to pass a data filename to the driver "\
+                           +"script.")
+
+    so_axis = "time_of_flight"
+
+    if t is not None:
+        t.setOldTime(ot)
+        t.getTime(msg="Total Running Time")
 
 if __name__ == "__main__":
 
