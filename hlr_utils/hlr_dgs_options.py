@@ -36,7 +36,7 @@ class DgsOptions(hlr_options.InstOptions):
                  version=None, conflict_handler='error', description=None,
                  **kwargs):
         """
-        Constructor for C{IgsOptions}
+        Constructor for C{DgsOptions}
 
         @param usage: (OPTIONAL) The correct usage of program in which the
                                  option class is used
