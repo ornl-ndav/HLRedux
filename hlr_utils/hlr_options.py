@@ -298,7 +298,17 @@ class InstOptions(BasicOptions):
                             help="Specify the open beam file")
 
             self.add_option("", "--dkcur",
-                            help="Specify the dark current file")            
+                            help="Specify the dark current file")
+
+        elif instrument == "DGS":
+            self.add_option("", "--ecan",
+                            help="Specify the empty sample container file")
+
+            self.add_option("", "--bcan",
+                            help="Specify the black sample container file")
+
+            self.add_option("", "--dkcur",
+                            help="Specify the dark current file")
 
         else:
             pass
@@ -385,6 +395,25 @@ def InstConfiguration(parser, configure, options, args, **kwargs):
                                                        configure.inst,
                                                        configure.facility)
 
+        # Set the empty can file list
+        if hlr_utils.cli_provide_override(configure, "dkcur", "--dkcur"):
+            configure.dkcur = hlr_utils.determine_files(options.dkcur,
+                                                        configure.inst,
+                                                        configure.facility)
+
+    elif instrument == "DGS":
+        # Set the empty can file list
+        if hlr_utils.cli_provide_override(configure, "ecan", "--ecan"):
+            configure.ecan = hlr_utils.determine_files(options.ecan,
+                                                       configure.inst,
+                                                       configure.facility)
+
+        # Set the black can file list
+        if hlr_utils.cli_provide_override(configure, "bcan", "--bcan"):
+            configure.bcan = hlr_utils.determine_files(options.bcan,
+                                                       configure.inst,
+                                                       configure.facility)
+        
         # Set the empty can file list
         if hlr_utils.cli_provide_override(configure, "dkcur", "--dkcur"):
             configure.dkcur = hlr_utils.determine_files(options.dkcur,
