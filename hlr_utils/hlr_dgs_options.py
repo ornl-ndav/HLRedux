@@ -66,6 +66,14 @@ class DgsOptions(hlr_options.InstOptions):
                                          Option, version, conflict_handler,
                                          description, inst="DGS")
 
+        self.add_option("", "--usmon-path", dest="usmon_path",
+                        help="Specify the comma separated list of upstream "\
+                        +"monitor path and signal.")
+
+        self.add_option("", "--dsmon-path", dest="dsmon_path",
+                        help="Specify the comma separated list of downstream "\
+                        +"monitor path and signal.")        
+
 def DgsConfiguration(parser, configure, options, args):
     """
     This function sets the incoming C{Configure} object with all the options
@@ -86,3 +94,11 @@ def DgsConfiguration(parser, configure, options, args):
 
     # Call the configuration setter for InstOptions
     hlr_options.InstConfiguration(parser, configure, options, args, inst="DGS")
+
+    # Set the upstream monitor path
+    if hlr_utils.cli_provide_override(configure, "usmon_path", "--usmon-path"):
+        configure.usmon_path = hlr_utils.NxPath(options.usmon_path)
+
+    # Set the downstream monitor path
+    if hlr_utils.cli_provide_override(configure, "dsmon_path", "--dsmon-path"):
+        configure.dsmon_path = hlr_utils.NxPath(options.dsmon_path)        
