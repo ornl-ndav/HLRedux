@@ -72,7 +72,12 @@ class DgsOptions(hlr_options.InstOptions):
 
         self.add_option("", "--dsmon-path", dest="dsmon_path",
                         help="Specify the comma separated list of downstream "\
-                        +"monitor path and signal.")        
+                        +"monitor path and signal.")
+
+        self.add_option("", "--energy-bins", dest="E_bins",
+                        help="Specify the minimum and maximum energy values "\
+                        +"and the energy bin width in meV")
+        
 
 def DgsConfiguration(parser, configure, options, args):
     """
@@ -102,3 +107,11 @@ def DgsConfiguration(parser, configure, options, args):
     # Set the downstream monitor path
     if hlr_utils.cli_provide_override(configure, "dsmon_path", "--dsmon-path"):
         configure.dsmon_path = hlr_utils.NxPath(options.dsmon_path)        
+
+    # Set the energy transfer bins
+    if hlr_utils.cli_provide_override(configure, "E_bins", "--energy-bins"):
+        configure.E_bins = hlr_utils.AxisFromString(options.E_bins)
+
+    if configure.E_bins is None:
+        parser.error("You must provide energy transfer binning via the "\
+                     +"energy-bins option")        
