@@ -55,6 +55,7 @@ def calibrate_dgs_data(datalist, conf, **kwargs):
     @return: Object that has undergone all requested processing steps
     @rtype: C{SOM.SOM}
     """
+    import dr_lib
     import hlr_utils
 
     # Check keywords
@@ -81,7 +82,7 @@ def calibrate_dgs_data(datalist, conf, **kwargs):
     data_paths = conf.data_paths.toPath()
 
     dp_som0 = dr_lib.add_files(datalist, Data_Paths=data_paths,
-                               SO_Axis=so_axis, Signal_ROI=conf.roi_file,
+                               SO_Axis=conf.so_axis, Signal_ROI=conf.roi_file,
                                dataset_type=dataset_type,
                                dst_type=dst_type,
                                Verbose=conf.verbose, Timer=t)
