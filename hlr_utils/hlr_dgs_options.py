@@ -75,8 +75,8 @@ class DgsOptions(hlr_options.InstOptions):
                         +"monitor path and signal.")
 
         self.add_option("", "--initial-energy", dest="initial_energy",
-                        help="Specify the initial energy for the reduction in"\
-                        +"in units of meV")
+                        help="Specify the initial energy, err^2 for the "\
+                        +"reduction in units of meV")
 
         self.add_option("", "--time-zero-offset", dest="time_zero_offset",
                         help="Specify the time-zero offset, err^2 in units "\
@@ -119,7 +119,7 @@ def DgsConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "initial_energy",
                                       "--initial-energy"):
         configure.initial_energy = hlr_utils.DrParameterFromString(\
-            options.initial_energy)
+            options.initial_energy, True)
 
     # Set the time-zero offset
     if hlr_utils.cli_provide_override(configure, "time_zero_offset",
