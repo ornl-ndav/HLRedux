@@ -59,7 +59,7 @@ def run(config, tim=None):
     else:
         inst_geom_dst = None
 
-    so_axis = "time_of_flight"
+    config.so_axis = "time_of_flight"
 
     # Step 0: Read in dark current data
 
