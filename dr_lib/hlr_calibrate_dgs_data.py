@@ -24,6 +24,13 @@
 
 def calibrate_dgs_data(datalist, conf, **kwargs):
     """
+    This function combines Steps 3 through 6 in Section 2.1.1 of the data
+    reduction process for Direct Geometry Spectrometers as specified by the
+    document at 
+    U{http://neutrons.ornl.gov/asg/projects/SCL/reqspec/DR_Lib_RS.doc}. The
+    function takes a list of file names, a L{hlr_utils.Configure} object and
+    processes the data accordingly.
+    
     @param datalist: A list containing the filenames of the data to be
                      processed.
     @type datalist: C{list} of C{string}s
@@ -78,6 +85,9 @@ def calibrate_dgs_data(datalist, conf, **kwargs):
                                dataset_type=dataset_type,
                                dst_type=dst_type,
                                Verbose=conf.verbose, Timer=t)
+
+    if t is not None:
+        t.getTime(msg="After reading %s " % dataset_type)
 
     dp_som1 = dr_lib.fix_bin_contents(dp_som0)
 
