@@ -115,7 +115,7 @@ def calibrate_dgs_data(datalist, conf, **kwargs):
     del dm_som0
 
     if conf.inst_geom is not None:
-        i_geom_dst.setGeometry(conf.mon_path.toPath(), dm_som1)
+        i_geom_dst.setGeometry(conf.dsmon_path.toPath(), dm_som1)
     
     # Step 3: Integrate the downstream monitor
     if conf.verbose:
