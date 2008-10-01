@@ -78,6 +78,10 @@ if __name__ == "__main__":
                                   None, hlr_utils.program_version(), 'error',
                                   " ".join(description))
 
+    # Set defaults for options
+    parser.set_defaults(usmon_path="/entry/monitor1,1")
+    parser.set_defaults(dsmon_path="/entry/monitor2,1")
+
     # Add dgs_reduction specific options
     parser.add_option("", "--timing", action="store_true", dest="timing",
                       help="Flag to turn on timing of code")
