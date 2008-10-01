@@ -39,6 +39,8 @@ def run(config, tim=None):
                            timing evaluations.
     @type tim: C{sns_time.DiffTime}
     """
+    import DST
+    
     if tim is not None:
         tim.getTime(False)
         old_time = tim.getOldTime()
@@ -46,6 +48,16 @@ def run(config, tim=None):
     if config.data is None:
         raise RuntimeError("Need to pass a data filename to the driver "\
                            +"script.")
+
+    # Read in geometry if one is provided
+    if config.inst_geom is not None:
+        if config.verbose:
+            print "Reading in instrument geometry file"
+            
+        inst_geom_dst = DST.getInstance("application/x-NxsGeom",
+                                        config.inst_geom)
+    else:
+        inst_geom_dst = None
 
     so_axis = "time_of_flight"
 
