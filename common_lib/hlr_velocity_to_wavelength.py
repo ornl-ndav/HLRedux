@@ -51,7 +51,7 @@ def velocity_to_wavelength(obj, **kwargs):
 
 
     @raise TypeError: The incoming object is not a type the function recognizes
-    @raise RuntimeError: The C{SOM} x-axis units are not I{Angstroms}
+    @raise RuntimeError: The C{SOM} x-axis units are not I{meters/microseconds}
     """
     # import the helper functions
     import hlr_utils
