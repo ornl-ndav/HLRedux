@@ -87,9 +87,9 @@ def run(config, tim=None):
 
     # Step 18: Normalize sample data by integrated values
     
-    if t is not None:
-        t.setOldTime(ot)
-        t.getTime(msg="Total Running Time")
+    if tim is not None:
+        tim.setOldTime(old_time)
+        tim.getTime(msg="Total Running Time")
 
 if __name__ == "__main__":
     import hlr_utils
