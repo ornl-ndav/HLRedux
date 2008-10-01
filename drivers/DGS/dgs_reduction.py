@@ -61,6 +61,28 @@ def run(config, tim=None):
 
     so_axis = "time_of_flight"
 
+    # Step 0: Read in dark current data
+
+    # Step 1: Integrate dark current spectra
+
+    # Step 2: Scale integrated spectra by dark current acquisition time
+
+    # Perform Steps 3-6 on black can data
+
+    # Perform Steps 3-6 on empty can data    
+
+    # Perform Steps 3-6 on normalization data
+
+    # Perform Steps 3-6 on sample data
+
+    # Perform Steps 7-16 on sample data
+    
+    # Perform Steps 7-16 on normalization data
+
+    # Step 17: Integrate normalization spectra
+
+    # Step 18: Normalize sample data by integrated values
+    
     if t is not None:
         t.setOldTime(ot)
         t.getTime(msg="Total Running Time")
