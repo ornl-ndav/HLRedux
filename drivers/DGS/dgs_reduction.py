@@ -27,8 +27,6 @@ This program covers the functionality outlined in B{Section 2.1.1 General
 sample reduction} in
 U{http://neutrons.ornl.gov/asg/projects/SCL/reqspec/DR_Lib_RS.doc}
 """
-import hlr_utils
-
 def run(config, tim=None):
     """
     This method is where the data reduction process gets done.
@@ -56,16 +54,17 @@ def run(config, tim=None):
         t.getTime(msg="Total Running Time")
 
 if __name__ == "__main__":
+    import hlr_utils
 
     # Make description for driver
-    result = []
-    result.append("This driver runs the data reduction for the Direct")
-    result.append("Geometry Spectrometer class of instruments.")
+    description = []
+    description.append("This driver runs the data reduction for the Direct")
+    description.append("Geometry Spectrometer class of instruments.")
     
     # Set up the options available
     parser = hlr_utils.DgsOptions("usage: %prog [options] <datafile>", None,
                                   None, hlr_utils.program_version(), 'error',
-                                  " ".join(result))
+                                  " ".join(description))
 
     # Add dgs_reduction specific options
     parser.add_option("", "--timing", action="store_true", dest="timing",
