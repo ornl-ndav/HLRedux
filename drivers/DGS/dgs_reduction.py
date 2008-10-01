@@ -80,6 +80,9 @@ def run(config, tim=None):
                                        timer=tim)
 
     # Perform Steps 7-16 on sample data
+    d_som2 = dr_lib.process_dgs_data(d_som2, config, timer=tim)
+
+    del d_som1
     
     # Perform Steps 7-16 on normalization data
 
