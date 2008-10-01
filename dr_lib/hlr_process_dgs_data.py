@@ -50,5 +50,37 @@ def process_dgs_data(obj, conf, **kwargs):
     @return: Object that has undergone all requested processing steps
     @rtype: C{SOM.SOM}
     """
+    import hlr_utils
+
+    # Check keywords
+    try:
+        dataset_type = kwargs["dataset_type"]
+    except KeyError:
+        dataset_type = "data"
+
+    try:
+        t = kwargs["timer"]
+    except KeyError:
+        t = None
+
+    # Step 7: Create black can background contribution
+
+    # Step 8: Create empty can background contribution
+
+    # Step 9: Create background spectra
+
+    # Step 10: Subtract background from data
+
+    # Step 11: Calculate initial velocity
+
+    # Step 12: Calculate the time-zero offset
+
+    # Step 13: Convert time-of-flight to final velocity
+
+    # Step 14: Convert final velocity to final wavelength
+
+    # Step 15: Rebin the detector efficiency to the detector pixel axis
+
+    # Step 16: Divide the detector pixel spectra by the detector efficiency
 
     return obj
