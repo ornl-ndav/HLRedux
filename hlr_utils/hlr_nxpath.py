@@ -37,21 +37,29 @@ class NxPath(object):
         @param infostr: Comma-separated values for I{NeXus} paths and signals.
         @type infostr: C{string}
         """
-        mylist = infostr.split(',')
-        self.__length = len(mylist)
-
-        if self.__length == 2:
-            use_extend = True
-        else:
-            use_extend = False
-            
         self.__data_paths = []
-            
-        for i in range(0, len(mylist), 2):
-            if use_extend:
-                self.__data_paths.extend((mylist[i], int(mylist[i + 1])))
+        
+        if infostr[0].isdigit():
+            import sns_inst_util
+            banks = sns_inst_util.generateList([infostr])
+            for bank in banks:
+                self.__data_paths.append(("/entry/bank"+str(bank), 1))
+
+            self.__length = len(self.__data_paths)
+        else:
+            mylist = infostr.split(',')
+            self.__length = len(mylist)
+
+            if self.__length == 2:
+                use_extend = True
             else:
-                self.__data_paths.append((mylist[i], int(mylist[i + 1])))
+                use_extend = False
+            
+            for i in range(0, len(mylist), 2):
+                if use_extend:
+                    self.__data_paths.extend((mylist[i], int(mylist[i + 1])))
+                else:
+                    self.__data_paths.append((mylist[i], int(mylist[i + 1])))
 
     def __repr__(self):
         """
