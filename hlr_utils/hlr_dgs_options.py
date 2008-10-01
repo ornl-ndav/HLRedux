@@ -74,6 +74,10 @@ class DgsOptions(hlr_options.InstOptions):
                         help="Specify the comma separated list of downstream "\
                         +"monitor path and signal.")
 
+        self.add_option("", "--roi-file", dest="roi_file",
+                        help="Specify a file that contains a list of pixel "\
+                        +"ids to be read from the data")
+
         self.add_option("", "--initial-energy", dest="initial_energy",
                         help="Specify the initial energy, err^2 for the "\
                         +"reduction in units of meV")
@@ -114,6 +118,11 @@ def DgsConfiguration(parser, configure, options, args):
     # Set the downstream monitor path
     if hlr_utils.cli_provide_override(configure, "dsmon_path", "--dsmon-path"):
         configure.dsmon_path = hlr_utils.NxPath(options.dsmon_path)        
+
+    # Set the ROI file
+    if hlr_utils.cli_provide_override(configure, "roi_file", "--roi-file"):
+        configure.roi_file = hlr_utils.determine_files(options.roi_file,
+                                                       one_file=True)
 
     # Set the initial energy
     if hlr_utils.cli_provide_override(configure, "initial_energy",
