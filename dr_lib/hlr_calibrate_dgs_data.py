@@ -97,4 +97,35 @@ def calibrate_dgs_data(datalist, conf, **kwargs):
     if conf.inst_geom is not None:
         i_geom_dst.setGeometry(conf.data_paths.toPath(), dp_som1)
 
+    # Open the downstream monitor
+    if conf.verbose:
+        print "Reading in monitor data from %s file" % dataset_type
+
+    dm_som0 = dr_lib.add_files(datalist, Data_Paths=conf.mon_path.toPath(),
+                               SO_Axis=so_axis,
+                               dataset_type=dataset_type,
+                               Verbose=conf.verbose,
+                               Timer=t)
+        
+    if t is not None:
+        t.getTime(msg="After reading monitor data ")
+
+    dm_som1 = dr_lib.fix_bin_contents(dm_som0)
+    
+    del dm_som0
+
+    if conf.inst_geom is not None:
+        i_geom_dst.setGeometry(conf.mon_path.toPath(), dm_som1)
+    
+    # Step 3: Integrate the downstream monitor
+    if conf.verbose:
+        print "Integrating downstream monitor spectrum"
+
+    if t is not None:
+        t.getTime(False)
+
+
+    if t is not None:
+        t.getTime(msg="After integrating downstream monitor spectrum ")
+
     return dp_som1
