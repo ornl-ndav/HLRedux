@@ -78,6 +78,10 @@ class DgsOptions(hlr_options.InstOptions):
                         help="Specify the initial energy for the reduction in"\
                         +"in units of meV")
 
+        self.add_option("", "--time-zero-offset", dest="time_zero_offset",
+                        help="Specify the time-zero offset, err^2 in units "\
+                        +"of microseconds")
+
         self.add_option("", "--energy-bins", dest="E_bins",
                         help="Specify the minimum and maximum energy values "\
                         +"and the energy bin width in meV")
@@ -116,6 +120,12 @@ def DgsConfiguration(parser, configure, options, args):
                                       "--initial-energy"):
         configure.initial_energy = hlr_utils.DrParameterFromString(\
             options.initial_energy)
+
+    # Set the time-zero offset
+    if hlr_utils.cli_provide_override(configure, "time_zero_offset",
+                                      "--time-zero-offset"):    
+        configure.time_zero_offset = hlr_utils.DrParameterFromString(\
+            options.time_zero_offset, True)
 
     # Set the energy transfer bins
     if hlr_utils.cli_provide_override(configure, "E_bins", "--energy-bins"):
