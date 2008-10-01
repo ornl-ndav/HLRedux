@@ -50,6 +50,7 @@ def process_dgs_data(obj, conf, **kwargs):
     @return: Object that has undergone all requested processing steps
     @rtype: C{SOM.SOM}
     """
+    import common_lib
     import hlr_utils
 
     # Check keywords
@@ -72,8 +73,21 @@ def process_dgs_data(obj, conf, **kwargs):
     # Step 10: Subtract background from data
 
     # Step 11: Calculate initial velocity
+    if conf.initial_energy is not None:
+        initial_wavelength = common_lib.energy_to_wavelength(\
+            conf.initial_energy.toValErrTuple())
+        initial_velocity = common_lib.wavelength_to_velocity(\
+            initial_wavelength)
+    else:
+        # This should actually calculate it, but don't have a way right now
+        pass
 
     # Step 12: Calculate the time-zero offset
+    if conf.time_zero_offset is not None:
+        time_zero_offset = conf.time_zero_offset.toValErrTuple()
+    else:
+        # This should actually calculate it, but don't have a way right now
+        time_zero_offset = (0.0, 0.0)
 
     # Step 13: Convert time-of-flight to final velocity
 
