@@ -1,4 +1,4 @@
 #!/bin/sh
 
 loc=`python -c "import drivers.DGS; print drivers.DGS.__path__[0]"`
-python $loc/dgs_reduction.py
+python $loc/dgs_reduction.py $@
