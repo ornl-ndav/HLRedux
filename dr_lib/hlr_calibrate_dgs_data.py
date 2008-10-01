@@ -101,7 +101,7 @@ def calibrate_dgs_data(datalist, conf, **kwargs):
     if conf.verbose:
         print "Reading in monitor data from %s file" % dataset_type
 
-    dm_som0 = dr_lib.add_files(datalist, Data_Paths=conf.mon_path.toPath(),
+    dm_som0 = dr_lib.add_files(datalist, Data_Paths=conf.dsmon_path.toPath(),
                                SO_Axis=so_axis,
                                dataset_type=dataset_type,
                                Verbose=conf.verbose,
