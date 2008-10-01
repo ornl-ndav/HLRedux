@@ -51,6 +51,7 @@ from hlr_wavelength_to_d_spacing import *
 from hlr_wavelength_to_energy import *
 from hlr_wavelength_to_scalar_k import *
 from hlr_wavelength_to_scalar_Q import *
+from hlr_wavelength_to_velocity import *
 from hlr_weighted_average import *
 
 from HLR_version import version as __version__
