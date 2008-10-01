@@ -39,6 +39,7 @@ def run(config, tim=None):
                            timing evaluations.
     @type tim: C{sns_time.DiffTime}
     """
+    import dr_lib
     import DST
     
     if tim is not None:
@@ -74,6 +75,9 @@ def run(config, tim=None):
     # Perform Steps 3-6 on normalization data
 
     # Perform Steps 3-6 on sample data
+    d_som1 = dr_lib.calibrate_dgs_data(config.data, config,
+                                       inst_geom_dst=inst_geom_dst,
+                                       timer=tim)
 
     # Perform Steps 7-16 on sample data
     
