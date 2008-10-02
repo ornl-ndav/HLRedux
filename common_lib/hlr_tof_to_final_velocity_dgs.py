@@ -50,6 +50,10 @@ def tof_to_final_velocity_dgs(obj, velocity_i, time_zero_offset, **kwargs):
                                    and its associated error^2
     @type dist_sample_detector: C{tuple} or C{list} of C{tuple}s
 
+    @keyword run_filter: This determines if the filter on the negative
+                         velocities is run. The default setting is True.
+    @type run_filter: C{boolean}
+
     @keyword units: The expected units for this function. The default for this
                     function is I{microseconds}
     @type units: C{string}
@@ -84,6 +88,11 @@ def tof_to_final_velocity_dgs(obj, velocity_i, time_zero_offset, **kwargs):
         units = kwargs["units"]
     except KeyError:
         units = "microseconds"
+
+    try:
+        run_filter = kwargs["run_filter"]
+    except KeyError:
+        run_filter = True
 
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
@@ -169,7 +178,22 @@ def tof_to_final_velocity_dgs(obj, velocity_i, time_zero_offset, **kwargs):
                                                          time_zero_offset[1],
                                                          L_s, L_s_err2,
                                                          L_d, L_d_err2)
-        
+
+        # Remove all velocities < 0
+        if run_filter:
+            index = 0
+            for val in value[0]:
+                if val >= 0:
+                    break
+                index += 1
+
+            value[0].__delslice__(0, index)
+            value[1].__delslice__(0, index)
+            map_so.y.__delslice__(0, index)
+            map_so.var_y.__delslice__(0, index)
+        else:
+            pass
+
         hlr_utils.result_insert(result, res_descr, value, map_so, "x", axis)
         
     return result
