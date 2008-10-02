@@ -180,6 +180,8 @@ if __name__ == "__main__":
 
     vel_i = (1.0, 0.0)
     tz_off = (1.0, 0.0)
+    d_ss = (15.0, 0.1)
+    d_sd = (1.0, 0.05)
 
     som1 = hlr_test.generate_som()
     som1.setAllAxisUnits(["microseconds"])
@@ -191,3 +193,9 @@ if __name__ == "__main__":
 
     print "********** tof_to_final_velocity_dgs"
     print "* som  :", tof_to_final_velocity_dgs(som1, vel_i, tz_off)
+    print "* so   :", tof_to_final_velocity_dgs(som1[0], vel_i, tz_off,
+                                                dist_source_sample=d_ss,
+                                                dist_sample_detector=d_sd)
+    print "* scal :", tof_to_final_velocity_dgs((100, 100), vel_i, tz_off,
+                                                dist_source_sample=d_ss,
+                                                dist_sample_detector=d_sd)
