@@ -92,8 +92,8 @@ def run(config, tim=None):
     # Step 18: Normalize sample data by integrated values
 
     # Step 19: Calculate the initial energy
-    if conf.initial_energy is not None:
-        d_som2.attr_list["Initial_Energy"] = conf.initial_energy
+    if config.initial_energy is not None:
+        d_som2.attr_list["Initial_Energy"] = config.initial_energy
 
     # Steps 20-21: Calculate the energy transfer
     d_som3 = dr_lib.energy_transfer(d_som2, "DGS", "Initial_Energy")
