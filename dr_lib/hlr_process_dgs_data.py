@@ -91,7 +91,8 @@ def process_dgs_data(obj, conf, **kwargs):
 
     # Step 13: Convert time-of-flight to final velocity
     obj1 = common_lib.tof_to_final_velocity_dgs(obj, initial_velocity,
-                                                time_zero_offset)
+                                                time_zero_offset,
+                                                units="microsecond")
 
     del obj
     # Step 14: Convert final velocity to final wavelength
