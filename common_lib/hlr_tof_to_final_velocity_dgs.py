@@ -22,7 +22,7 @@
 
 # $Id$
 
-def tof_to_final_velocity_dgs(obj. **kwargs):
+def tof_to_final_velocity_dgs(obj. velocity_i, time_zero_offset, **kwargs):
     """
     This function converts a primary axis of a C{SOM} or C{SO} from
     time-of-flight to final_velocity_dgs. The time-of-flight axis for a
@@ -33,14 +33,14 @@ def tof_to_final_velocity_dgs(obj. **kwargs):
 
     @param obj: Object to be converted
     @type obj: C{SOM.SOM}, C{SOM.SO} or C{tuple}
-    
-    @param kwargs: A list of keyword arguments that the function accepts:
 
-    @keyword velocity_i: The initial velocity and its associated error^2
+    @param velocity_i: The initial velocity and its associated error^2
     @type velocity_i: C{tuple}
     
-    @keyword time_zero_offset: The time zero offset and its associated error^2
-    @type time_zer_offset: C{tuple}
+    @param time_zero_offset: The time zero offset and its associated error^2
+    @type time_zero_offset: C{tuple}
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
     
     @keyword dist_source_sample: The source to sample distance information and
                                  its associated error^2
@@ -94,5 +94,59 @@ def tof_to_final_velocity_dgs(obj. **kwargs):
         units = kwargs["units"]
     except KeyError:
         units = "microseconds"
+
+    # Primary axis for transformation. If a SO is passed, the function, will
+    # assume the axis for transformation is at the 0 position
+    if o_descr == "SOM":
+        axis = hlr_utils.one_d_units(obj, units)
+    else:
+        axis = 0
+
+    result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
+    if res_descr == "SOM":
+        result = hlr_utils.force_units(result, "meters/microseconds", axis)
+        result.setAxisLabel(axis, "velocity")
+        result.setYUnits("Counts/meters/microseconds")
+        result.setYLabel("Intensity")
+    else:
+        pass
+
+    # Where to get instrument information
+    if dist_source_sample is None or dist_sample_detector is None:
+        if o_descr == "SOM":
+            try:
+                obj.attr_list.instrument.get_primary()
+                inst = obj.attr_list.instrument
+            except RuntimeError:
+                raise RuntimeError("A detector was not provided!")
+        else:
+            if dist_source_sample is None and dist_sample_detector is None:
+                raise RuntimeError("If a SOM is not passed, the "\
+                                   +"source-sample and sample-detector "\
+                                   +"distances must be provided.")
+            elif dist_source_sample is None:
+                raise RuntimeError("If a SOM is not passed, the "\
+                                   +"source-sample distance must be provided.")
+            elif dist_sample_detector is None:
+                raise RuntimeError("If a SOM is not passed, the "\
+                                   +"sample-detector distance must be "\
+                                   +"provided.")
+            else:
+                raise RuntimeError("If you get here, see Steve Miller for "\
+                                   +"your mug.")
+    else:
+        pass
+
+    if dist_source_sample is not None:
+        ls_descr = hlr_utils.get_descr(dist_source_sample)
+    # Do nothing, go on
+    else:
+        pass
+
+    if dist_sample_detector is not None:
+        ld_descr = hlr_utils.get_descr(dist_sample_detector)
+    # Do nothing, go on
+    else:
+        pass
 
     return result
