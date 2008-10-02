@@ -39,6 +39,7 @@ def run(config, tim=None):
                            timing evaluations.
     @type tim: C{sns_time.DiffTime}
     """
+    import common_lib
     import dr_lib
     import DST
     
@@ -99,11 +100,15 @@ def run(config, tim=None):
 
     del d_som2
 
+    # Rebin energy transfer spectra
+    d_som4 = common_lib.rebin_axis_1D(d_som3, config.E_bins.toNessiList())
+
+    del d_som3
 
     # Write out RMD file
-    d_som3.attr_list["config"] = config
+    d_som4.attr_list["config"] = config
 
-    hlr_utils.write_file(config.output, "text/rmd", d_som3,
+    hlr_utils.write_file(config.output, "text/rmd", d_som4,
                          output_ext="rmd",
                          data_ext=config.ext_replacement,         
                          path_replacement=config.path_replacement,
