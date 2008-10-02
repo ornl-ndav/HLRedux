@@ -22,7 +22,7 @@
 
 # $Id$
 
-def tof_to_final_velocity_dgs(obj. velocity_i, time_zero_offset, **kwargs):
+def tof_to_final_velocity_dgs(obj, velocity_i, time_zero_offset, **kwargs):
     """
     This function converts a primary axis of a C{SOM} or C{SO} from
     time-of-flight to final_velocity_dgs. The time-of-flight axis for a
@@ -190,4 +190,4 @@ if __name__ == "__main__":
     print "* ", som1[1]
 
     print "********** tof_to_final_velocity_dgs"
-    print "* som  :", tof_to_final_velocity_dgs(som1)
+    print "* som  :", tof_to_final_velocity_dgs(som1, vel_i, tz_off)
