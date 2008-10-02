@@ -63,5 +63,36 @@ def tof_to_final_velocity_dgs(obj. **kwargs):
     @raise TypeError: The incoming object is not a type the function recognizes
     @raise RuntimeError: The C{SOM} x-axis units are not I{microseconds}
     """
+    import hlr_utils
 
-    return obj
+    # set up for working through data
+    (result, res_descr) = hlr_utils.empty_result(obj)
+    o_descr = hlr_utils.get_descr(obj)
+
+    # Setup keyword arguments
+    try:
+        velocity_i = kwargs["velocity_i"]
+    except KeyError:
+        velocity_i = None
+
+    try:
+        time_zero_offset = kwargs["time_zero_offset"]
+    except KeyError:
+        time_zero_offset = None
+
+    try:
+        dist_source_sample = kwargs["dist_source_sample"]
+    except KeyError:
+        dist_source_sample = None
+
+    try:
+        dist_sample_detector = kwargs["dist_sample_detector"]
+    except KeyError:
+        dist_sample_detector = None
+
+    try:
+        units = kwargs["units"]
+    except KeyError:
+        units = "microseconds"
+
+    return result
