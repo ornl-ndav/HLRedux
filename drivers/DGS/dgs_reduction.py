@@ -89,6 +89,15 @@ def run(config, tim=None):
     # Step 17: Integrate normalization spectra
 
     # Step 18: Normalize sample data by integrated values
+
+    # Step 19: Calculate the initial energy
+    if conf.initial_energy is not None:
+        d_som2.attr_list["Initial_Energy"] = conf.initial_energy
+
+    # Steps 20-21: Calculate the energy transfer
+    d_som3 = dr_lib.energy_transfer(d_som2, "DGS", "Initial_Energy")
+
+    del d_som2
     
     if tim is not None:
         tim.setOldTime(old_time)
