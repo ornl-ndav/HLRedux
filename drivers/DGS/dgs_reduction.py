@@ -98,6 +98,17 @@ def run(config, tim=None):
     d_som3 = dr_lib.energy_transfer(d_som2, "DGS", "Initial_Energy")
 
     del d_som2
+
+
+    # Write out RMD file
+    d_som3.attr_list["config"] = config
+
+    hlr_utils.write_file(config.output, "text/rmd", d_som3,
+                         output_ext="rmd",
+                         data_ext=config.ext_replacement,         
+                         path_replacement=config.path_replacement,
+                         verbose=config.verbose,
+                         message="metadata")
     
     if tim is not None:
         tim.setOldTime(old_time)
