@@ -139,6 +139,39 @@ def tof_to_final_velocity_dgs(obj. velocity_i, time_zero_offset, **kwargs):
     else:
         pass
 
+    # iterate through the values
+    import axis_manip
+
+    len_obj = hlr_utils.get_length(obj)
+    for i in xrange(len_obj):
+        val = hlr_utils.get_value(obj, i, o_descr, "x", axis)
+        err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
+
+        map_so = hlr_utils.get_map_so(obj, None, i)
+
+        if dist_source_sample is None:
+            (L_s, L_s_err2) = hlr_utils.get_parameter("primary", map_so, inst)
+        else:
+            L_s = hlr_utils.get_value(dist_source_sample, i, ls_descr)
+            L_s_err2 = hlr_utils.get_err2(dist_source_sample, i, ls_descr)
+
+        if dist_sample_detector is None:
+            (L_d, L_d_err2) = hlr_utils.get_parameter("secondary", map_so,
+                                                      inst)
+        else:
+            L_d = hlr_utils.get_value(dist_sample_detector, i, ld_descr)
+            L_d_err2 = hlr_utils.get_err2(dist_sample_detector, i, ld_descr)
+
+        value = axis_manip.tof_to_initial_wavelength_igs(val, err2,
+                                                         velocity_i[0],
+                                                         velocity_i[1],
+                                                         time_zero_offset[0],
+                                                         time_zero_offset[1],
+                                                         L_s, L_s_err2,
+                                                         L_d, L_d_err2)
+        
+        hlr_utils.result_insert(result, res_descr, value, map_so, "x", axis)
+        
     return result
 
 if __name__ == "__main__":
