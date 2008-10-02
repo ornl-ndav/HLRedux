@@ -71,16 +71,6 @@ def tof_to_final_velocity_dgs(obj. velocity_i, time_zero_offset, **kwargs):
 
     # Setup keyword arguments
     try:
-        velocity_i = kwargs["velocity_i"]
-    except KeyError:
-        velocity_i = None
-
-    try:
-        time_zero_offset = kwargs["time_zero_offset"]
-    except KeyError:
-        time_zero_offset = None
-
-    try:
         dist_source_sample = kwargs["dist_source_sample"]
     except KeyError:
         dist_source_sample = None
