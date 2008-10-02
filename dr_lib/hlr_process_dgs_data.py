@@ -90,11 +90,16 @@ def process_dgs_data(obj, conf, **kwargs):
         time_zero_offset = (0.0, 0.0)
 
     # Step 13: Convert time-of-flight to final velocity
+    obj1 = common_lib.tof_to_final_velocity_dgs(obj, initial_velocity,
+                                                time_zero_offset)
 
+    del obj
     # Step 14: Convert final velocity to final wavelength
+    obj2 = common_lib.velocity_to_wavelength(obj1)
 
+    del obj1
     # Step 15: Rebin the detector efficiency to the detector pixel axis
 
     # Step 16: Divide the detector pixel spectra by the detector efficiency
 
-    return obj
+    return obj2
