@@ -216,10 +216,13 @@ if __name__ == "__main__":
     print "* ", som1[1]
 
     print "********** tof_to_final_velocity_dgs"
-    print "* som  :", tof_to_final_velocity_dgs(som1, vel_i, tz_off)
+    print "* som  :", tof_to_final_velocity_dgs(som1, vel_i, tz_off,
+                                                run_filter=False)
     print "* so   :", tof_to_final_velocity_dgs(som1[0], vel_i, tz_off,
                                                 dist_source_sample=d_ss,
-                                                dist_sample_detector=d_sd)
+                                                dist_sample_detector=d_sd,
+                                                run_filter=False)
     print "* scal :", tof_to_final_velocity_dgs((100, 100), vel_i, tz_off,
                                                 dist_source_sample=d_ss,
-                                                dist_sample_detector=d_sd)
+                                                dist_sample_detector=d_sd,
+                                                run_filter=False)
