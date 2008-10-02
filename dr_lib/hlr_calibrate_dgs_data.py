@@ -96,7 +96,8 @@ def calibrate_dgs_data(datalist, conf, **kwargs):
 
     if conf.inst_geom is not None:
         i_geom_dst.setGeometry(conf.data_paths.toPath(), dp_som1)
-
+    """
+    #FIXME
     # Open the downstream monitor
     if conf.verbose:
         print "Reading in monitor data from %s file" % dataset_type
@@ -127,5 +128,5 @@ def calibrate_dgs_data(datalist, conf, **kwargs):
 
     if t is not None:
         t.getTime(msg="After integrating downstream monitor spectrum ")
-
+    """
     return dp_som1
