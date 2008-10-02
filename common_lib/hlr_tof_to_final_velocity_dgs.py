@@ -140,3 +140,21 @@ def tof_to_final_velocity_dgs(obj. velocity_i, time_zero_offset, **kwargs):
         pass
 
     return result
+
+if __name__ == "__main__":
+    import hlr_test
+    import SOM
+
+    vel_i = (1.0, 0.0)
+    tz_off = (1.0, 0.0)
+
+    som1 = hlr_test.generate_som()
+    som1.setAllAxisUnits(["microseconds"])
+    som1.attr_list.instrument = SOM.ASG_Instrument()
+    
+    print "********** SOM1"
+    print "* ", som1[0]
+    print "* ", som1[1]
+
+    print "********** tof_to_final_velocity_dgs"
+    print "* som  :", tof_to_final_velocity_dgs(som1)
