@@ -40,7 +40,18 @@ def create_Qvec_vs_E_dgs(som, E_i):
     l_i = common_lib.energy_to_wavelength(E_i)
     k_i = common_lib.wavelength_to_scalar_k(l_i)
 
-    len_som = hlr_utils.get_length(som)
+    # Since all the data is rebinned to the same energy transfer axis, we can
+    # calculate the final energy axis once
+    E_t = som[0].axis[0].val
+    if som[0].axis[0].var is not None:
+        E_t_err2 = som[0].axis[0].var
+    else:
+        import nessi_list
+        E_t_err2 = nessi_list.NessiList(len(E_t))        
 
+    E_f = common_lib.sub_ncerr(E_i, (E_t, E_t_err2))
+
+    # Iterate though the data
+    len_som = hlr_utils.get_length(som)
     for i in xrange(len_som):
         pass
