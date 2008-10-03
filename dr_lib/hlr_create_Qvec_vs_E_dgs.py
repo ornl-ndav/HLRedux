@@ -33,6 +33,7 @@ def create_Qvec_vs_E_dgs(som, E_i):
     @param E_i: The initial energy for the given data.
     @type E_i: C{tuple}
     """
+    import array_manip
     import axis_manip
     import common_lib
     import hlr_utils
@@ -50,11 +51,11 @@ def create_Qvec_vs_E_dgs(som, E_i):
         import nessi_list
         E_t_err2 = nessi_list.NessiList(len(E_t))        
 
-    E_f = common_lib.sub_ncerr(E_i, (E_t, E_t_err2))
+    E_f = array_manip.sub_ncerr(E_i[0], E_i[1], E_t, E_t_err2)
     
     # Now we can get the final wavevector
-    l_f = common_lib.energy_to_wavelength(E_f)
-    k_f = common_lib.wavelength_to_scalar_k(l_f)
+    l_f = axis_manip.energy_to_wavelength(E_f[0], E_f[1])
+    k_f = axis_manip.wavelength_to_scalar_k(l_f[0], l_f[1])
 
     # Grab the instrument from the som
     inst = som.attr_list.instrument
