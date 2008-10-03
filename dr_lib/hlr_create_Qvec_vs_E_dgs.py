@@ -55,7 +55,15 @@ def create_Qvec_vs_E_dgs(som, E_i):
     l_f = common_lib.energy_wavelength(E_f)
     k_f = common_lib.wavelength_to_scalar_k(l_f)
 
+    # Grab the instrument from the som
+    inst = som.attr_list.instrument
+
     # Iterate though the data
     len_som = hlr_utils.get_length(som)
     for i in xrange(len_som):
-        pass
+        map_so = hlr_utils.get_map_so(som, None, i)
+
+        polar = hlr_utils.get_parameter("polar", map_so, inst)
+        azi = hlr_utils.get_parameter("azimuthal", map_so, inst)
+
+    
