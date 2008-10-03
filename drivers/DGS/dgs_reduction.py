@@ -96,11 +96,15 @@ def run(config, tim=None):
         d_som2.attr_list["Initial_Energy"] = config.initial_energy
 
     # Steps 20-21: Calculate the energy transfer
+    if config.verbose:
+        print "Calculating energy transfer"
     d_som3 = dr_lib.energy_transfer(d_som2, "DGS", "Initial_Energy")
 
     del d_som2
 
     # Rebin energy transfer spectra
+    if config.verbose:
+        print "Rebinning to final energy transfer axis"
     d_som4 = common_lib.rebin_axis_1D(d_som3, config.E_bins.toNessiList())
 
     del d_som3
@@ -116,6 +120,8 @@ def run(config, tim=None):
     del d_som4_1
 
     # Create Qvec vs E spectrum
+    if config.verbose:
+        print "Creating S(Qvec, E)"
     dr_lib.create_Qvec_vs_E_dgs(d_som4, config.initial_energy.toValErrTuple())
 
     # Write out RMD file
