@@ -37,6 +37,7 @@ from hlr_calibrate_dgs_data import *
 from hlr_create_axis_from_data import *
 from hlr_create_E_vs_Q_igs import create_E_vs_Q_igs
 from hlr_create_param_vs_Y import *
+from hlr_create_Qvec_vs_E_dgs import create_Qvec_vs_E_dgs
 from hlr_convert_single_to_list import *
 from hlr_create_X_vs_pixpos import *
 from hlr_cut_spectra import *
