@@ -52,7 +52,7 @@ def create_Qvec_vs_E_dgs(som, E_i):
     E_f = common_lib.sub_ncerr(E_i, (E_t, E_t_err2))
     
     # Now we can get the final wavevector
-    l_f = common_lib.energy_wavelength(E_f)
+    l_f = common_lib.energy_to_wavelength(E_f)
     k_f = common_lib.wavelength_to_scalar_k(l_f)
 
     # Grab the instrument from the som
