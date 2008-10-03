@@ -91,12 +91,16 @@ def process_dgs_data(obj, conf, **kwargs):
         time_zero_offset = (0.0, 0.0)
 
     # Step 13: Convert time-of-flight to final velocity
+    if conf.verbose:
+        print "Converting TOF to final velocity DGS"
     obj1 = common_lib.tof_to_final_velocity_dgs(obj, initial_velocity,
                                                 time_zero_offset,
                                                 units="microsecond")
 
     del obj
     # Step 14: Convert final velocity to final wavelength
+    if conf.verbose:
+        print "Converting final velocity DGS to final wavelength"
     obj2 = common_lib.velocity_to_wavelength(obj1)
 
     obj2_1 = dr_lib.sum_all_spectra(obj2,
