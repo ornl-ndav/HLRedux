@@ -86,6 +86,11 @@ class DgsOptions(hlr_options.InstOptions):
                         help="Specify the time-zero offset, err^2 in units "\
                         +"of microseconds")
 
+        self.add_option("", "--lambda-bins", dest="lambda_bins",
+                        help="Specify the minimum and maximum wavelength "\
+                        +"values and the wavelength bin width in Angstroms")
+        self.set_defaults(lambda_bins="0.0,10.0,0.1")
+
         self.add_option("", "--energy-bins", dest="E_bins",
                         help="Specify the minimum and maximum energy values "\
                         +"and the energy bin width in meV")
@@ -143,3 +148,8 @@ def DgsConfiguration(parser, configure, options, args):
     if configure.E_bins is None:
         parser.error("You must provide energy transfer binning via the "\
                      +"energy-bins option")        
+
+    # Set the wavelength bins
+    if hlr_utils.cli_provide_override(configure, "lambda_bins",
+                                      "--lambda-bins"):
+        configure.lambda_bins = hlr_utils.AxisFromString(options.lambda_bins)
