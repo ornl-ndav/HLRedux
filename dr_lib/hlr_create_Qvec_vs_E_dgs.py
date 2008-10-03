@@ -33,6 +33,7 @@ def create_Qvec_vs_E_dgs(som, E_i):
     @param E_i: The initial energy for the given data.
     @type E_i: C{tuple}
     """
+    import axis_manip
     import common_lib
     import hlr_utils
 
@@ -66,4 +67,10 @@ def create_Qvec_vs_E_dgs(som, E_i):
         polar = hlr_utils.get_parameter("polar", map_so, inst)
         azi = hlr_utils.get_parameter("azimuthal", map_so, inst)
 
-    
+        (Qx, Qx_err2,
+         Qy, Qy_err2,
+         Qz, Qz_err2) = axis_manip.init_scatt_wavevector_to_Q(k_i[0], k_i[1],
+                                                              k_f[0], k_f[1],
+                                                              azi[0], azi[1],
+                                                              polar[0],
+                                                              polar[1])
