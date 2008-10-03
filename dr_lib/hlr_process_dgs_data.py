@@ -51,6 +51,7 @@ def process_dgs_data(obj, conf, **kwargs):
     @rtype: C{SOM.SOM}
     """
     import common_lib
+    import dr_lib
     import hlr_utils
 
     # Check keywords
@@ -97,6 +98,15 @@ def process_dgs_data(obj, conf, **kwargs):
     del obj
     # Step 14: Convert final velocity to final wavelength
     obj2 = common_lib.velocity_to_wavelength(obj1)
+
+    obj2_1 = dr_lib.sum_all_spectra(obj2,
+                                    rebin_axis=conf.lambda_bins.toNessiList())
+    hlr_utils.write_file(conf.output, "text/Spec", obj2_1,
+                         output_ext="fwv",
+                         data_ext=conf.ext_replacement,    
+                         path_replacement=conf.path_replacement,
+                         verbose=conf.verbose,
+                         message="combined final wavelength information")
 
     del obj1
     # Step 15: Rebin the detector efficiency to the detector pixel axis
