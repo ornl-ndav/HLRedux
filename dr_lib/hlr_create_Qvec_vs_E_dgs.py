@@ -22,7 +22,7 @@
 
 # $Id$
 
-def create_Qvec_vs_E_dgs(som, initial_energy):
+def create_Qvec_vs_E_dgs(som, E_i):
     """
     This function starts with the energy transfer axis from DGS reduction and
     turns this into a 4D spectra with Qx, Qy, Qz and Et axes.
@@ -30,11 +30,16 @@ def create_Qvec_vs_E_dgs(som, initial_energy):
     @param som: The input object with initial IGS wavelength axis
     @type som: C{SOM.SOM}
 
-    @param initial_energy: The initial energy for the given data.
-    @type initial_energy: C{tuple}
+    @param E_i: The initial energy for the given data.
+    @type E_i: C{tuple}
     """
+    import common_lib
     import hlr_utils
-    
+
+    # Convert initial energy to initial wavevector
+    l_i = common_lib.energy_to_wavelength(E_i)
+    k_i = common_lib.wavelength_to_scalar_k(l_i)
+
     len_som = hlr_utils.get_length(som)
 
     for i in xrange(len_som):
