@@ -100,6 +100,8 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
         polar = hlr_utils.get_parameter("polar", map_so, inst)
         azi = hlr_utils.get_parameter("azimuthal", map_so, inst)
 
+        cangles = corner_angles[str(map_so.id)]
+
         (Qx, Qx_err2,
          Qy, Qy_err2,
          Qz, Qz_err2) = axis_manip.init_scatt_wavevector_to_Q(k_i[0], k_i[1],
