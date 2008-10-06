@@ -34,6 +34,14 @@ class Angles(object):
         """
         Object constructor
         """
+        self.__polar = None
+        self.__azi = None
+
+    def setAzimuthal(self, azi):
+        self.__azi = azi
+
+    def setPolar(self, polar):
+        self.__polar = polar
 
 def get_corner_geometry(filename):
     """
@@ -47,5 +55,30 @@ def get_corner_geometry(filename):
     @return: The angle information for the particular DGS instrument.
     @rtype: C{dict}
     """
+    import SOM
 
-    return None
+    infile = open(hlr_utils.fix_filename(filename), "r")
+
+    angle_info = {}
+    counter = 0
+    nexus_id = None
+    angle_obj = None
+    for line in infile:
+        if line.startswith("b"):
+            nexus_id = SOM.NeXusId.fromString(line.rstrip()).toTuple()
+            counter = 0
+            angle_obj = Angles()
+        else:
+            angle_list = line.rstrip().split(' ')
+            angles = [float(angle) for angle in angle_list]
+            if counter == 1:
+                angle_obj.setPolar(angles)
+            else:
+                angle_obj.setAzimuthal(angles)
+
+        if counter == 2:
+            angle_info[str(nexus_id)] = angle_obj
+
+        counter += 1
+
+    return angle_info
