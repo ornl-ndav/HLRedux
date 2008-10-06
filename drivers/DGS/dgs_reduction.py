@@ -116,15 +116,16 @@ def run(config, tim=None):
 
     del d_som3
 
-    d_som4_1 = dr_lib.sum_all_spectra(d_som4)
-    hlr_utils.write_file(config.output, "text/Spec", d_som4_1,
-                         output_ext="et",
-                         data_ext=config.ext_replacement,    
-                         path_replacement=config.path_replacement,
-                         verbose=config.verbose,
-                         message="combined energy transfer information")
+    if config.dump_et_comb:
+        d_som4_1 = dr_lib.sum_all_spectra(d_som4)
+        hlr_utils.write_file(config.output, "text/Spec", d_som4_1,
+                             output_ext="et",
+                             data_ext=config.ext_replacement,    
+                             path_replacement=config.path_replacement,
+                             verbose=config.verbose,
+                             message="combined energy transfer information")
 
-    del d_som4_1
+        del d_som4_1
 
     # Create Qvec vs E spectrum
     if config.verbose:
