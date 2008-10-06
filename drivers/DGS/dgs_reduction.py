@@ -134,7 +134,8 @@ def run(config, tim=None):
     if tim is not None:
         tim.getTime(False)
         
-    dr_lib.create_Qvec_vs_E_dgs(d_som4, config.initial_energy.toValErrTuple())
+    dr_lib.create_Qvec_vs_E_dgs(d_som4, config.initial_energy.toValErrTuple(),
+                                timer=tim)
 
     if tim is not None:
         tim.getTime(msg="After calculating final spectrum ")    
