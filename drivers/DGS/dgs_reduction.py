@@ -135,6 +135,7 @@ def run(config, tim=None):
         tim.getTime(False)
         
     dr_lib.create_Qvec_vs_E_dgs(d_som4, config.initial_energy.toValErrTuple(),
+                                corner_geom=config.corner_geom,
                                 timer=tim)
 
     if tim is not None:
