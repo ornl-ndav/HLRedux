@@ -37,6 +37,12 @@ class Angles(object):
         self.__polar = None
         self.__azi = None
 
+    def getAzimuthal(self, index):
+        return self.__azi[index]
+
+    def getPolar(self, index):
+        return self.__polar[index]
+
     def setAzimuthal(self, azi):
         self.__azi = azi
 
