@@ -20,31 +20,32 @@
 # its use would not infringe privately owned rights.
 #
 
-"""
-The functions and objects in this module provide support functionality for
-handling various data reduction requests.
-"""
+# $Id$
 
-from hlr_1D_units import *
-from hlr_2D_helper import *
-from hlr_amr_options import AmrOptions, AmrConfiguration
-from hlr_axis_object import *
-from hlr_bisect_helper import bisect_helper
-from hlr_config import Configure, ConfigFromXml
-from hlr_dgs_options import DgsOptions, DgsConfiguration
-from hlr_drparameter import *
-from hlr_fix_index import *
-from hlr_geom_helper import *
-from hlr_igs_options import IgsOptions, IgsConfiguration
-from hlr_math_compatible import *
-from hlr_nxpath import *
-from hlr_options import *
-from hlr_ref_options import RefOptions, RefConfiguration
-from hlr_sas_options import SansOptions, SansConfiguration
-from hlr_data_helper import *
-from hlr_driver_helper import *
+import hlr_utils
 
-from HLR_version import version as __version__
+class Angles(object):
+    """
+    This is a helper object for storing the angle information for the corners
+    of DGS instrument pixels.
+    """
 
-#version
-__id__ = "$Id$"
+    def __init__(self):
+        """
+        Object constructor
+        """
+
+def get_corner_geometry(filename):
+    """
+    This function will read in a geometry file containing the corner angle
+    information for DGS instruments.
+
+    @param filename: The name of the geometry file to read.
+    @type filename: C{string}
+
+
+    @return: The angle information for the particular DGS instrument.
+    @rtype: C{dict}
+    """
+
+    return None
