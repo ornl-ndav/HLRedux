@@ -98,7 +98,14 @@ def run(config, tim=None):
     # Steps 20-21: Calculate the energy transfer
     if config.verbose:
         print "Calculating energy transfer"
+
+    if tim is not None:
+        tim.getTime(False)
+    
     d_som3 = dr_lib.energy_transfer(d_som2, "DGS", "Initial_Energy")
+
+    if tim is not None:
+        tim.getTime(msg="After calculating energy transfer ")
 
     del d_som2
 
@@ -122,7 +129,14 @@ def run(config, tim=None):
     # Create Qvec vs E spectrum
     if config.verbose:
         print "Creating S(Qvec, E)"
+
+    if tim is not None:
+        tim.getTime(False)
+        
     dr_lib.create_Qvec_vs_E_dgs(d_som4, config.initial_energy.toValErrTuple())
+
+    if tim is not None:
+        tim.getTime(msg="After calculating final spectrum ")    
 
     # Write out RMD file
     d_som4.attr_list["config"] = config
