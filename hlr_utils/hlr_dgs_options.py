@@ -86,6 +86,10 @@ class DgsOptions(hlr_options.InstOptions):
                         help="Specify the time-zero offset, err^2 in units "\
                         +"of microseconds")
 
+        self.add_option("", "--corner-geom", dest="corner_geom",
+                        help="Specify the file containing the corner "\
+                        +"geometry information.")
+
         self.add_option("", "--lambda-bins", dest="lambda_bins",
                         help="Specify the minimum and maximum wavelength "\
                         +"values and the wavelength bin width in Angstroms")
@@ -152,6 +156,15 @@ def DgsConfiguration(parser, configure, options, args):
                                       "--time-zero-offset"):    
         configure.time_zero_offset = hlr_utils.DrParameterFromString(\
             options.time_zero_offset, True)
+
+    # Set the corner geometry information file
+    if hlr_utils.cli_provide_override(configure, "corner_geom",
+                                      "--corner-geom"):
+        configure.corner_geom = options.corner_geom
+
+    if configure.corner_geom is None:
+        parser.error("You must provide a corner geometry file via the "\
+                     +"corner-geom option!")
 
     # Set the energy transfer bins
     if hlr_utils.cli_provide_override(configure, "E_bins", "--energy-bins"):
