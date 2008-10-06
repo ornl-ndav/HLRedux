@@ -65,6 +65,9 @@ def create_Qvec_vs_E_dgs(som, E_i):
     for i in xrange(len_som):
         map_so = hlr_utils.get_map_so(som, None, i)
 
+        yval = hlr_utils.get_value(som, i, "SOM", "y")
+        yerr2 = hlr_utils.get_err2(som, i, "SOM", "y")
+
         polar = hlr_utils.get_parameter("polar", map_so, inst)
         azi = hlr_utils.get_parameter("azimuthal", map_so, inst)
 
