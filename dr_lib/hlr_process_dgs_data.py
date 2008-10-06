@@ -74,6 +74,12 @@ def process_dgs_data(obj, conf, **kwargs):
     # Step 10: Subtract background from data
 
     # Step 11: Calculate initial velocity
+    if conf.verbose:
+        print "Calculating initial velocity"
+
+    if t is not None:
+        t.getTime(False)
+        
     if conf.initial_energy is not None:
         initial_wavelength = common_lib.energy_to_wavelength(\
             conf.initial_energy.toValErrTuple())
@@ -82,6 +88,9 @@ def process_dgs_data(obj, conf, **kwargs):
     else:
         # This should actually calculate it, but don't have a way right now
         pass
+
+    if t is not None:
+        t.getTime(msg="After calculating initial velocity ")
 
     # Step 12: Calculate the time-zero offset
     if conf.time_zero_offset is not None:
@@ -93,15 +102,29 @@ def process_dgs_data(obj, conf, **kwargs):
     # Step 13: Convert time-of-flight to final velocity
     if conf.verbose:
         print "Converting TOF to final velocity DGS"
+
+    if t is not None:
+        t.getTime(False)
+        
     obj1 = common_lib.tof_to_final_velocity_dgs(obj, initial_velocity,
                                                 time_zero_offset,
                                                 units="microsecond")
 
+    if t is not None:
+        t.getTime(msg="After calculating TOF to final velocity DGS ")
+        
     del obj
     # Step 14: Convert final velocity to final wavelength
     if conf.verbose:
         print "Converting final velocity DGS to final wavelength"
+
+    if t is not None:
+        t.getTime(False)
+        
     obj2 = common_lib.velocity_to_wavelength(obj1)
+
+    if t is not None:
+        t.getTime(msg="After calculating velocity to wavelength ")
 
     obj2_1 = dr_lib.sum_all_spectra(obj2,
                                     rebin_axis=conf.lambda_bins.toNessiList())
