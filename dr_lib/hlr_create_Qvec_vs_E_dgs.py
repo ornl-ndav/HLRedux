@@ -22,7 +22,7 @@
 
 # $Id$
 
-def create_Qvec_vs_E_dgs(som, E_i):
+def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
     """
     This function starts with the energy transfer axis from DGS reduction and
     turns this into a 4D spectra with Qx, Qy, Qz and Et axes.
@@ -32,11 +32,22 @@ def create_Qvec_vs_E_dgs(som, E_i):
 
     @param E_i: The initial energy for the given data.
     @type E_i: C{tuple}
+
+    @param kwargs: A list of keyword arguments that the function accepts:
+
+    @keyword timer: Timing object so the function can perform timing estimates.
+    @type timer: C{sns_timer.DiffTime}
     """
     import array_manip
     import axis_manip
     import common_lib
     import hlr_utils
+
+    # Check keywords
+    try:
+        t = kwargs["timer"]
+    except KeyError:
+        t = None
 
     # Convert initial energy to initial wavevector
     l_i = common_lib.energy_to_wavelength(E_i)
