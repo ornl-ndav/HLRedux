@@ -37,6 +37,10 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
 
     @keyword timer: Timing object so the function can perform timing estimates.
     @type timer: C{sns_timer.DiffTime}
+
+    @keyword corner_geom: The filename that contains the corner geometry
+                          information.
+    @type corner_geom: C{string}
     """
     import array_manip
     import axis_manip
@@ -48,6 +52,11 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
         t = kwargs["timer"]
     except KeyError:
         t = None
+
+    try:
+        corner_geom = kwargs["corner_geom"]
+    except KeyError:
+        corner_geom = ""
 
     # Convert initial energy to initial wavevector
     l_i = common_lib.energy_to_wavelength(E_i)
@@ -70,6 +79,15 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
 
     # Grab the instrument from the som
     inst = som.attr_list.instrument
+
+    # Get the corner geoemetry information
+    if t is not None:
+        t.getTime(False)
+        
+    corner_angles = hlr_utils.get_corner_geometry(corner_geom)
+
+    if t is not None:
+        t.getTime(msg="After reading in corner geometry information ")
 
     # Iterate though the data
     len_som = hlr_utils.get_length(som)
