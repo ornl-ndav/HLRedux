@@ -126,14 +126,17 @@ def process_dgs_data(obj, conf, **kwargs):
     if t is not None:
         t.getTime(msg="After calculating velocity to wavelength ")
 
-    obj2_1 = dr_lib.sum_all_spectra(obj2,
-                                    rebin_axis=conf.lambda_bins.toNessiList())
-    hlr_utils.write_file(conf.output, "text/Spec", obj2_1,
-                         output_ext="fwv",
-                         data_ext=conf.ext_replacement,    
-                         path_replacement=conf.path_replacement,
-                         verbose=conf.verbose,
-                         message="combined final wavelength information")
+    if conf.dump_wave_comb:
+        obj2_1 = dr_lib.sum_all_spectra(obj2,
+                                     rebin_axis=conf.lambda_bins.toNessiList())
+        hlr_utils.write_file(conf.output, "text/Spec", obj2_1,
+                             output_ext="fwv",
+                             data_ext=conf.ext_replacement,    
+                             path_replacement=conf.path_replacement,
+                             verbose=conf.verbose,
+                             message="combined final wavelength information")
+
+        del obj2_1
 
     del obj1
     # Step 15: Rebin the detector efficiency to the detector pixel axis
