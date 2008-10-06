@@ -109,3 +109,39 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
                                                               azi[0], azi[1],
                                                               polar[0],
                                                               polar[1])
+
+        (Qx1, Qx1_err2,
+         Qy1, Qy1_err2,
+         Qz1, Qz1_err2) = axis_manip.init_scatt_wavevector_to_Q(k_i[0], k_i[1],
+                                                       k_f[0], k_f[1],
+                                                       cangles.getAzimuthal(0),
+                                                       0.0,
+                                                       cangles.getPolar(0),
+                                                       0.0)
+
+        (Qx2, Qx2_err2,
+         Qy2, Qy2_err2,
+         Qz2, Qz2_err2) = axis_manip.init_scatt_wavevector_to_Q(k_i[0], k_i[1],
+                                                       k_f[0], k_f[1],
+                                                       cangles.getAzimuthal(1),
+                                                       0.0,
+                                                       cangles.getPolar(1),
+                                                       0.0)
+
+        (Qx3, Qx3_err2,
+         Qy3, Qy3_err2,
+         Qz3, Qz3_err2) = axis_manip.init_scatt_wavevector_to_Q(k_i[0], k_i[1],
+                                                       k_f[0], k_f[1],
+                                                       cangles.getAzimuthal(2),
+                                                       0.0,
+                                                       cangles.getPolar(2),
+                                                       0.0)
+        
+        (Qx4, Qx4_err2,
+         Qy4, Qy4_err2,
+         Qz4, Qz4_err2) = axis_manip.init_scatt_wavevector_to_Q(k_i[0], k_i[1],
+                                                       k_f[0], k_f[1],
+                                                       cangles.getAzimuthal(3),
+                                                       0.0,
+                                                       cangles.getPolar(3),
+                                                       0.0)
