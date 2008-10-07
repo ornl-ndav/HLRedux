@@ -112,7 +112,14 @@ def run(config, tim=None):
     # Rebin energy transfer spectra
     if config.verbose:
         print "Rebinning to final energy transfer axis"
+
+    if tim is not None:
+        tim.getTime(False)
+        
     d_som4 = common_lib.rebin_axis_1D(d_som3, config.E_bins.toNessiList())
+
+    if tim is not None:
+        tim.getTime(msg="After rebinning energy transfer ")
 
     del d_som3
 
