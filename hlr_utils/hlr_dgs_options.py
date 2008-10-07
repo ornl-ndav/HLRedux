@@ -99,6 +99,21 @@ class DgsOptions(hlr_options.InstOptions):
                         help="Specify the minimum and maximum energy values "\
                         +"and the energy bin width in meV")
 
+        self.add_option("", "--qx-bins", dest="Qx_bins",
+                        help="Specify the minimum, maximum and bin widt of "\
+                        +"the x-component of the momentum transfer in "\
+                        +"1/Angstroms.")
+
+        self.add_option("", "--qy-bins", dest="Qy_bins",
+                        help="Specify the minimum, maximum and bin widt of "\
+                        +"the y-component of the momentum transfer in "\
+                        +"1/Angstroms.")
+
+        self.add_option("", "--qz-bins", dest="Qz_bins",
+                        help="Specify the minimum, maximum and bin widt of "\
+                        +"the z-component of the momentum transfer in "\
+                        +"1/Angstroms.")        
+
         self.add_option("", "--dump-wave-comb", action="store_true",
                         dest="dump_wave_comb",
                         help="Flag to dump the wavelength information for all"\
@@ -174,6 +189,18 @@ def DgsConfiguration(parser, configure, options, args):
         parser.error("You must provide energy transfer binning via the "\
                      +"energy-bins option")        
 
+    # Set the x-component of the momentum transfer bins
+    if hlr_utils.cli_provide_override(configure, "Qx_bins", "--qx-bins"):
+        configure.Qx_bins = hlr_utils.AxisFromString(options.Qx_bins)
+
+    # Set the y-component of the momentum transfer bins
+    if hlr_utils.cli_provide_override(configure, "Qy_bins", "--qy-bins"):
+        configure.Qy_bins = hlr_utils.AxisFromString(options.Qy_bins)
+
+    # Set the z-component of the momentum transfer bins
+    if hlr_utils.cli_provide_override(configure, "Qz_bins", "--qz-bins"):
+        configure.Qz_bins = hlr_utils.AxisFromString(options.Qz_bins)        
+        
     # Set the wavelength bins
     if hlr_utils.cli_provide_override(configure, "lambda_bins",
                                       "--lambda-bins"):
