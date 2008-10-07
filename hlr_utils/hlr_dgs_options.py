@@ -86,6 +86,14 @@ class DgsOptions(hlr_options.InstOptions):
                         help="Specify the time-zero offset, err^2 in units "\
                         +"of microseconds")
 
+        self.add_option("", "--data-trans-coeff", dest="data_trans_coeff",
+                        help="Specify the transmission coefficient value and "\
+                        +"err^2 for the sample data background.")
+        
+        self.add_option("", "--norm-trans-coeff", dest="norm_trans_coeff",
+                        help="Specify the transmission coefficient value and "\
+                        +"err^2 for the normalization data background.")
+
         self.add_option("", "--corner-geom", dest="corner_geom",
                         help="Specify the file containing the corner "\
                         +"geometry information.")
@@ -171,6 +179,18 @@ def DgsConfiguration(parser, configure, options, args):
                                       "--time-zero-offset"):    
         configure.time_zero_offset = hlr_utils.DrParameterFromString(\
             options.time_zero_offset, True)
+
+    # Set the transmission coefficient for the sample data background
+    if hlr_utils.cli_provide_override(configure, "data_trans_coeff",
+                                      "--data-trans-coeff"):
+        configure.data_trans_coeff = hlr_utils.DrParameterFromString(\
+            options.data_trans_coeff, True)
+
+    # Set the transmission coefficient for the normalization background
+    if hlr_utils.cli_provide_override(configure, "norm_trans_coeff",
+                                      "--norm-trans-coeff"):
+        configure.norm_trans_coeff = hlr_utils.DrParameterFromString(\
+            options.norm_trans_coeff, True)        
 
     # Set the corner geometry information file
     if hlr_utils.cli_provide_override(configure, "corner_geom",
