@@ -129,4 +129,11 @@ def calibrate_dgs_data(datalist, conf, **kwargs):
     if t is not None:
         t.getTime(msg="After integrating downstream monitor spectrum ")
     """
+
+    # Step 4: Divide data set by summed monitor spectrum
+
+    # Step 5: Scale dark current by data set measurement time
+
+    # Step 6: Subtract scaled dark current from data set
+    
     return dp_som1
