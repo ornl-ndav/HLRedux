@@ -109,6 +109,15 @@ def run(config, tim=None):
     del d_som1
     
     # Perform Steps 7-16 on normalization data
+    if n_som1 is not None:
+        n_som2 = dr_lib.process_dgs_data(n_som1, config, b_som1, e_som1,
+                                       dataset_type="normalization",
+                                       config.norm_trans_coeff.toValErrTuple(),
+                                       timer=tim)
+    else:
+        n_som2 = n_som1
+        
+    del n_som1
 
     # Step 17: Integrate normalization spectra
 
