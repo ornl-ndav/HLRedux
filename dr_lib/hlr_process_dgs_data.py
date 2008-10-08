@@ -22,7 +22,7 @@
 
 # $Id$
 
-def process_dgs_data(obj, conf, **kwargs):
+def process_dgs_data(obj, conf, bcan, ecan, tcoeff, **kwargs):
     """
     This function combines Steps 7 through 16 in Section 2.1.1 of the data
     reduction process for Direct Geometry Spectrometers as specified by the
@@ -36,6 +36,16 @@ def process_dgs_data(obj, conf, **kwargs):
 
     @param conf: Object that contains the current setup of the driver.
     @type conf: L{hlr_utils.Configure}
+
+    @param bcan: The object containing the black can data.
+    @type bcan: C{SOM.SOM}
+
+    @param ecan: The object containing the empty can data.
+    @type ecan: C{SOM.SOM}
+
+    @param tcoeff: The transmission coefficient appropriate to the given data
+                   set.
+    @type: C{tuple}
     
     @param kwargs: A list of keyword arguments that the function accepts:
 
@@ -66,12 +76,39 @@ def process_dgs_data(obj, conf, **kwargs):
         t = None
 
     # Step 7: Create black can background contribution
+    if bcan is not None:
+        bccoeff = common_lib.sub_ncerr((1.0, 0.0), tcoeff)
+        bcan1 = common_lib.mult_ncerr(bcan, bccoeff)
+        del bcan
+    else:
+        bcan1 = None
 
     # Step 8: Create empty can background contribution
+    if ecan is not None:
+        ecan1 = common_lib.mult_ncerr(ecan, tcoeff)
+        del ecan
+    else:
+        ecan1 = None
 
     # Step 9: Create background spectra
+    if bcan1 is not None and ecan1 is not None:
+        b_som = common_lib.add_ncerr(bcan1, ecan1)
+    elif bcan1 is not None and ecan1 is None:
+        b_som = bcan1
+    elif bcan1 is None and ecan1 is not None:
+        b_som = ecan1
+    else:
+        b_som = None
 
+    del bcan1, ecan1
+        
     # Step 10: Subtract background from data
+    obj1 = dr_lib.subtract_bkg_from_data(obj, b_som, verbose=conf.verbose,
+                                         timer=t,
+                                         dataset1=dataset_type,
+                                         dataset2="background")
+
+    del obj, b_som
 
     # Step 11: Calculate initial velocity
     if conf.verbose:
@@ -106,14 +143,15 @@ def process_dgs_data(obj, conf, **kwargs):
     if t is not None:
         t.getTime(False)
         
-    obj1 = common_lib.tof_to_final_velocity_dgs(obj, initial_velocity,
+    obj2 = common_lib.tof_to_final_velocity_dgs(obj1, initial_velocity,
                                                 time_zero_offset,
                                                 units="microsecond")
 
     if t is not None:
         t.getTime(msg="After calculating TOF to final velocity DGS ")
         
-    del obj
+    del obj1
+    
     # Step 14: Convert final velocity to final wavelength
     if conf.verbose:
         print "Converting final velocity DGS to final wavelength"
@@ -121,26 +159,27 @@ def process_dgs_data(obj, conf, **kwargs):
     if t is not None:
         t.getTime(False)
         
-    obj2 = common_lib.velocity_to_wavelength(obj1)
+    obj3 = common_lib.velocity_to_wavelength(obj2)
 
     if t is not None:
         t.getTime(msg="After calculating velocity to wavelength ")
 
+    del obj2
+
     if conf.dump_wave_comb:
-        obj2_1 = dr_lib.sum_all_spectra(obj2,
+        obj3_1 = dr_lib.sum_all_spectra(obj3,
                                      rebin_axis=conf.lambda_bins.toNessiList())
-        hlr_utils.write_file(conf.output, "text/Spec", obj2_1,
+        hlr_utils.write_file(conf.output, "text/Spec", obj3_1,
                              output_ext="fwv",
                              data_ext=conf.ext_replacement,    
                              path_replacement=conf.path_replacement,
                              verbose=conf.verbose,
                              message="combined final wavelength information")
 
-        del obj2_1
+        del obj3_1
 
-    del obj1
     # Step 15: Rebin the detector efficiency to the detector pixel axis
 
     # Step 16: Divide the detector pixel spectra by the detector efficiency
 
-    return obj2
+    return obj3
