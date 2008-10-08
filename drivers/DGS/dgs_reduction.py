@@ -120,12 +120,42 @@ def run(config, tim=None):
     del n_som1
 
     # Step 17: Integrate normalization spectra
+    if n_som2 is not None:
+        if config.verbose:
+            print "Integrating normalization spectra"
+
+        if tim is not None:
+            tim.getTime(False)
+
+        norm_int = dr_lib.integrate_spectra(n_som2)
+
+        if tim is not None:
+            tim.getTime(msg="After integrating normalization spectra ")
+    else:
+        norm_int = n_som2
+        
+    del n_som2
 
     # Step 18: Normalize sample data by integrated values
+    if norm_int is not None:
+        if config.verbose:
+            print "Normalizing data by normalization data"
+
+        if tim is not None:
+            tim.getTime(False)
+
+        d_som3 = common_lib.div_ncerr(d_som2, norm_int)            
+
+        if tim is not None:
+            tim.getTime(msg="After normalizing data ")
+    else:
+        d_som3 = d_som2
+
+    del d_som2, norm_int
 
     # Step 19: Calculate the initial energy
     if config.initial_energy is not None:
-        d_som2.attr_list["Initial_Energy"] = config.initial_energy
+        d_som3.attr_list["Initial_Energy"] = config.initial_energy
 
     # Steps 20-21: Calculate the energy transfer
     if config.verbose:
@@ -134,12 +164,12 @@ def run(config, tim=None):
     if tim is not None:
         tim.getTime(False)
     
-    d_som3 = dr_lib.energy_transfer(d_som2, "DGS", "Initial_Energy")
+    d_som4 = dr_lib.energy_transfer(d_som3, "DGS", "Initial_Energy")
 
     if tim is not None:
         tim.getTime(msg="After calculating energy transfer ")
 
-    del d_som2
+    del d_som3
 
     # Rebin energy transfer spectra
     if config.verbose:
@@ -148,23 +178,23 @@ def run(config, tim=None):
     if tim is not None:
         tim.getTime(False)
         
-    d_som4 = common_lib.rebin_axis_1D(d_som3, config.E_bins.toNessiList())
+    d_som5 = common_lib.rebin_axis_1D(d_som4, config.E_bins.toNessiList())
 
     if tim is not None:
         tim.getTime(msg="After rebinning energy transfer ")
 
-    del d_som3
+    del d_som4
 
     if config.dump_et_comb:
-        d_som4_1 = dr_lib.sum_all_spectra(d_som4)
-        hlr_utils.write_file(config.output, "text/Spec", d_som4_1,
+        d_som5_1 = dr_lib.sum_all_spectra(d_som5)
+        hlr_utils.write_file(config.output, "text/Spec", d_som5_1,
                              output_ext="et",
                              data_ext=config.ext_replacement,    
                              path_replacement=config.path_replacement,
                              verbose=config.verbose,
                              message="combined energy transfer information")
 
-        del d_som4_1
+        del d_som5_1
 
     # Create Qvec vs E spectrum
     if config.verbose:
@@ -173,7 +203,7 @@ def run(config, tim=None):
     if tim is not None:
         tim.getTime(False)
         
-    dr_lib.create_Qvec_vs_E_dgs(d_som4, config.initial_energy.toValErrTuple(),
+    dr_lib.create_Qvec_vs_E_dgs(d_som5, config.initial_energy.toValErrTuple(),
                                 corner_geom=config.corner_geom,
                                 timer=tim)
 
@@ -181,9 +211,9 @@ def run(config, tim=None):
         tim.getTime(msg="After calculating final spectrum ")    
 
     # Write out RMD file
-    d_som4.attr_list["config"] = config
+    d_som5.attr_list["config"] = config
 
-    hlr_utils.write_file(config.output, "text/rmd", d_som4,
+    hlr_utils.write_file(config.output, "text/rmd", d_som5,
                          output_ext="rmd",
                          data_ext=config.ext_replacement,         
                          path_replacement=config.path_replacement,
