@@ -102,18 +102,29 @@ def run(config, tim=None):
                                        timer=tim)
 
     # Perform Steps 7-16 on sample data
+    if config.data_trans_coeff is None:
+        data_trans_coeff = None
+    else:
+        data_trans_coeff = config.data_trans_coeff.toValErrTuple()
+    
     d_som2 = dr_lib.process_dgs_data(d_som1, config, b_som1, e_som1,
-                                     config.data_trans_coeff.toValErrTuple(),
+                                     data_trans_coeff,
                                      timer=tim)
 
     del d_som1
     
     # Perform Steps 7-16 on normalization data
     if n_som1 is not None:
+        if config.norm_trans_coeff is None:
+            norm_trans_coeff = None
+        else:
+            norm_trans_coeff = config.norm_trans_coeff.toValErrTuple()
+
+        
         n_som2 = dr_lib.process_dgs_data(n_som1, config, b_som1, e_som1,
-                                      config.norm_trans_coeff.toValErrTuple(),
-                                      dataset_type="normalization",
-                                      timer=tim)
+                                         norm_trans_coeff,
+                                         dataset_type="normalization",
+                                         timer=tim)
     else:
         n_som2 = n_som1
         
