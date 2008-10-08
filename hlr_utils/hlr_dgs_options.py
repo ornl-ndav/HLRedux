@@ -108,17 +108,17 @@ class DgsOptions(hlr_options.InstOptions):
                         +"and the energy bin width in meV")
 
         self.add_option("", "--qx-bins", dest="Qx_bins",
-                        help="Specify the minimum, maximum and bin widt of "\
+                        help="Specify the minimum, maximum and bin width of "\
                         +"the x-component of the momentum transfer in "\
                         +"1/Angstroms.")
 
         self.add_option("", "--qy-bins", dest="Qy_bins",
-                        help="Specify the minimum, maximum and bin widt of "\
+                        help="Specify the minimum, maximum and bin width of "\
                         +"the y-component of the momentum transfer in "\
                         +"1/Angstroms.")
 
         self.add_option("", "--qz-bins", dest="Qz_bins",
-                        help="Specify the minimum, maximum and bin widt of "\
+                        help="Specify the minimum, maximum and bin width of "\
                         +"the z-component of the momentum transfer in "\
                         +"1/Angstroms.")        
 
