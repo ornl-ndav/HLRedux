@@ -70,10 +70,31 @@ def run(config, tim=None):
     # Step 2: Scale integrated spectra by dark current acquisition time
 
     # Perform Steps 3-6 on black can data
+    if config.bcan is not None:
+        b_som1 = dr_lib.calibrate_dgs_data(config.bcan, config,
+                                           dataset_type="black_can",
+                                           inst_geom_dst=inst_geom_dst,
+                                           timer=tim)
+    else:
+        b_som1 = None
 
     # Perform Steps 3-6 on empty can data    
+    if config.ecan is not None:
+        e_som1 = dr_lib.calibrate_dgs_data(config.ecan, config,
+                                           dataset_type="empty_can",
+                                           inst_geom_dst=inst_geom_dst,
+                                           timer=tim)
+    else:
+        e_som1 = None
 
     # Perform Steps 3-6 on normalization data
+    if config.norm is not None:
+        n_som1 = dr_lib.calibrate_dgs_data(config.norm, config,
+                                           dataset_type="normalization",
+                                           inst_geom_dst=inst_geom_dst,
+                                           timer=tim)
+    else:
+        n_som1 = None
 
     # Perform Steps 3-6 on sample data
     d_som1 = dr_lib.calibrate_dgs_data(config.data, config,
