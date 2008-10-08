@@ -77,22 +77,53 @@ def process_dgs_data(obj, conf, bcan, ecan, tcoeff, **kwargs):
 
     # Step 7: Create black can background contribution
     if bcan is not None:
+        if conf.verbose:
+            print "Creating black can background contribution for %s" \
+                  % dataset_type
+
+        if t is not None:
+            t.getTime(False)
+            
         bccoeff = common_lib.sub_ncerr((1.0, 0.0), tcoeff)
         bcan1 = common_lib.mult_ncerr(bcan, bccoeff)
+
+        if t is not None:
+            t.getTime(msg="After creating black can background contribution ")
+        
         del bcan
     else:
         bcan1 = None
 
     # Step 8: Create empty can background contribution
     if ecan is not None:
+        if conf.verbose:
+            print "Creating empty can background contribution for %s" \
+                  % dataset_type
+
+        if t is not None:
+            t.getTime(False)
+        
         ecan1 = common_lib.mult_ncerr(ecan, tcoeff)
+
+        if t is not None:
+            t.getTime(msg="After creating empty can background contribution ")
+        
         del ecan
     else:
         ecan1 = None
 
     # Step 9: Create background spectra
+    if bcan1 is not None or ecan1 is not None and conf.verbose:
+        print "Creating background spectra for %s" % dataset_type
+    
     if bcan1 is not None and ecan1 is not None:
+        if t is not None:
+            t.getTime(False)
+
         b_som = common_lib.add_ncerr(bcan1, ecan1)
+
+        if t is not None:
+            t.getTime(msg="After creating background spectra ")
     elif bcan1 is not None and ecan1 is None:
         b_som = bcan1
     elif bcan1 is None and ecan1 is not None:
