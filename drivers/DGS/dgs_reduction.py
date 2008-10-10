@@ -63,10 +63,11 @@ def run(config, tim=None):
 
     config.so_axis = "time_of_flight"
 
-    # Steps 1-3: Produce a scaled summed dark current dataset
-    dc_som = dr_lib.scaled_summed_data(config.dkcur, config,
-                                       dataset_type="dark_current",
-                                       timer=tim)
+    # Step 0: Read in dark current data
+
+    # Step 1: Integrate dark current spectra
+
+    # Step 2: Scale integrated spectra by dark current acquisition time
 
     # Perform Steps 3-6 on black can data
     if config.bcan is not None:

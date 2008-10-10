@@ -194,9 +194,6 @@ def tof_to_final_velocity_dgs(obj, velocity_i, time_zero_offset, **kwargs):
         else:
             pass
 
-        if i == 0:
-            print "G:", value[0]
-
         hlr_utils.result_insert(result, res_descr, value, map_so, "x", axis)
         
     return result

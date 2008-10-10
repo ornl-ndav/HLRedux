@@ -65,7 +65,6 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
     # Since all the data is rebinned to the same energy transfer axis, we can
     # calculate the final energy axis once
     E_t = som[0].axis[0].val
-    print "K:", E_t
     if som[0].axis[0].var is not None:
         E_t_err2 = som[0].axis[0].var
     else:
@@ -73,13 +72,10 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
         E_t_err2 = nessi_list.NessiList(len(E_t))        
 
     E_f = array_manip.sub_ncerr(E_i[0], E_i[1], E_t, E_t_err2)
-    print "A:", E_f[0]
     
     # Now we can get the final wavevector
     l_f = axis_manip.energy_to_wavelength(E_f[0], E_f[1])
-    print "B:", l_f[0]
     k_f = axis_manip.wavelength_to_scalar_k(l_f[0], l_f[1])
-    print "C:", k_f[0]
 
     # Grab the instrument from the som
     inst = som.attr_list.instrument
@@ -97,8 +93,7 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
     len_som = hlr_utils.get_length(som)
     for i in xrange(len_som):
         map_so = hlr_utils.get_map_so(som, None, i)
-        if i == 0:
-            print map_so.id
+
         yval = hlr_utils.get_value(som, i, "SOM", "y")
         yerr2 = hlr_utils.get_err2(som, i, "SOM", "y")
 
@@ -150,23 +145,3 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
                                                        0.0,
                                                        cangles.getPolar(3),
                                                        0.0)
-
-
-        if i == 0:
-            print Qx, Qx1, Qx2, Qx3, Qx4
-            print Qy, Qy1, Qy2, Qy3, Qy4
-            print Qz, Qz1, Qz2, Qz3, Qz4
-
-            filename = "output_%s_%d_%d.in" % (map_so.id[0], map_so.id[1][0],
-                                               map_so.id[1][1])
-
-            ofile = open(filename, "w")
-            str_format = "%f, %f, %f, 0.0"
-            print >> ofile, str_format % (Qx1[0], Qy1[0], Qz1[0])
-            print >> ofile, str_format % (Qx2[0], Qy2[0], Qz2[0])
-            print >> ofile, str_format % (Qx3[0], Qy3[0], Qz3[0])
-            print >> ofile, str_format % (Qx4[0], Qy4[0], Qz4[0])
-            print >> ofile, str_format % (Qx1[1], Qy1[1], Qz1[1])
-            print >> ofile, str_format % (Qx2[1], Qy2[1], Qz2[1])
-            print >> ofile, str_format % (Qx3[1], Qy3[1], Qz3[1])
-            print >> ofile, str_format % (Qx4[1], Qy4[1], Qz4[1])
