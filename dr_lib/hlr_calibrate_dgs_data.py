@@ -80,43 +80,36 @@ def calibrate_dgs_data(datalist, conf, **kwargs):
 
     dst_type = "application/x-NeXus"
     data_paths = conf.data_paths.toPath()
+    mon_paths= conf.usmon_path.toPath()
 
-    dp_som0 = dr_lib.add_files(datalist, Data_Paths=data_paths,
-                               SO_Axis=conf.so_axis, Signal_ROI=conf.roi_file,
-                               dataset_type=dataset_type,
-                               dst_type=dst_type,
-                               Verbose=conf.verbose, Timer=t)
+    (dp_som0, dm_som0) = dr_lib.add_files_dm(datalist, Data_Paths=data_paths,
+                                             Mon_Paths=mon_paths,
+                                             SO_Axis=conf.so_axis,
+                                             Signal_ROI=conf.roi_file,
+                                             dataset_type=dataset_type,
+                                             dst_type=dst_type,
+                                             Verbose=conf.verbose, Timer=t)
 
     if t is not None:
         t.getTime(msg="After reading %s " % dataset_type)
 
     dp_som1 = dr_lib.fix_bin_contents(dp_som0)
 
-    del dp_som0    
+    del dp_som0
 
+    if dm_som0 is not None:
+        dm_som1 = dr_lib.fix_bin_contents(dm_som0)
+    else:
+        dm_som1 = dm_som0
+
+    del dm_som0    
+
+    # Override geometry if necessary
     if conf.inst_geom is not None:
-        i_geom_dst.setGeometry(conf.data_paths.toPath(), dp_som1)
-    """
-    #FIXME
-    # Open the downstream monitor
-    if conf.verbose:
-        print "Reading in monitor data from %s file" % dataset_type
+        i_geom_dst.setGeometry(data_paths, dp_som1)
 
-    dm_som0 = dr_lib.add_files(datalist, Data_Paths=conf.dsmon_path.toPath(),
-                               SO_Axis=conf.so_axis,
-                               dataset_type=dataset_type,
-                               Verbose=conf.verbose,
-                               Timer=t)
-        
-    if t is not None:
-        t.getTime(msg="After reading monitor data ")
-
-    dm_som1 = dr_lib.fix_bin_contents(dm_som0)
-    
-    del dm_som0
-
-    if conf.inst_geom is not None:
-        i_geom_dst.setGeometry(conf.dsmon_path.toPath(), dm_som1)
+    if conf.inst_geom is not None and dm_som1 is not None:
+        i_geom_dst.setGeometry(mon_paths, dm_som1)
     
     # Step 3: Integrate the downstream monitor
     if conf.verbose:
@@ -128,7 +121,6 @@ def calibrate_dgs_data(datalist, conf, **kwargs):
 
     if t is not None:
         t.getTime(msg="After integrating downstream monitor spectrum ")
-    """
 
     # Step 4: Divide data set by summed monitor spectrum
 
