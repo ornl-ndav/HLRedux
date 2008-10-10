@@ -90,6 +90,11 @@ class DgsOptions(hlr_options.InstOptions):
                         dest="no_mon_norm",
                         help="Flag for turning off monitor normalization")
 
+        self.add_option("", "--pc-norm", action="store_true", dest="pc_norm",
+                        help="Flag for performing proton charge "\
+                        +"normalization. This will only be done if monitor "\
+                        +"normalization is turned off.")
+
         self.add_option("", "--data-trans-coeff", dest="data_trans_coeff",
                         help="Specify the transmission coefficient value and "\
                         +"err^2 for the sample data background.")
@@ -188,6 +193,11 @@ def DgsConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "no_mon_norm",
                                       "--no-mon-norm"):
         configure.no_mon_norm = options.no_mon_norm
+
+    # Set proton charge normalizatoin flag
+    if hlr_utils.cli_provide_override(configure, "pc_norm",
+                                      "--pc-norm"):
+        configure.pc_norm = options.pc_norm        
 
     # Set the transmission coefficient for the sample data background
     if hlr_utils.cli_provide_override(configure, "data_trans_coeff",
