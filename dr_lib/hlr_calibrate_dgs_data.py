@@ -117,17 +117,35 @@ def calibrate_dgs_data(datalist, conf, **kwargs):
     if conf.inst_geom is not None and dm_som1 is not None:
         i_geom_dst.setGeometry(mon_paths, dm_som1)
     
-    # Step 3: Integrate the downstream monitor
+    # Step 3: Integrate the upstream monitor
     if conf.verbose:
-        print "Integrating downstream monitor spectrum"
+        print "Integrating upstream monitor spectrum"
 
     if t is not None:
         t.getTime(False)
 
+    if dm_som1 is not None:
+        if conf.mon_int_range is None:
+            start_val = 0
+            end_val = -1
+            is_bin = True
+        else:
+            start_val = conf.mon_int_range[0]
+            end_val = conf.mon_int_range[1]
+            is_bin = False
+        
+        dm_som2 = dr_lib.integrate_spectra(dm_som1, start=start_val,
+                                           end=end_val,
+                                           bin_index=is_bin,
+                                           width=True)
+    else:
+        dm_som2 = dm_som1
 
     if t is not None:
-        t.getTime(msg="After integrating downstream monitor spectrum ")
+        t.getTime(msg="After integrating upstream monitor spectrum ")
 
+    del dm_som1
+    
     # Step 4: Divide data set by summed monitor spectrum
 
     # Step 5: Scale dark current by data set measurement time
