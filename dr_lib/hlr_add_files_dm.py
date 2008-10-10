@@ -126,7 +126,95 @@ def add_files_dm(filelist, **kwargs):
     except KeyError:
         timer = None
 
+    dst_type == "application/x-NeXus"
+    counter = 0
 
+    for filename in filelist:
+        if verbose:
+            print "File:", filename
+            
+        try:
+            data_dst = DST.getInstance(dst_type, filename)
+        except SystemError:
+            print "ERROR: Failed to data read file %s" % filename
+            sys.exit(-1)
 
-    return (None, None)
+        if verbose:
+            print "Reading data file %d" % counter
+
+        if counter == 0:
+            d_som1 = data_dst.getSOM(data_paths, so_axis, roi_file=signal_roi)
+            d_som1.rekeyNxPars(dataset_type)
+
+            if verbose:
+                print "# Signal SO:", len(d_som1)
+                print "# TOF:", len(d_som1[0])
+                print "# TOF Axis:", len(d_som1[0].axis[0].val)
+
+            if timer is not None:
+                timer.getTime(msg="After reading data")
+
+        if verbose:
+            print "Reading monitor %d" % counter
+
+        if counter == 0:
+            m_som1 = data_dst.getSOM(mon_paths, so_axis)
+            m_som1.rekeyNxPars(dataset_type)
+
+            if verbose and m_som1 is not None:
+                print "# Monitor SO:", len(m_som1)
+                print "# TOF:", len(m_som1[0])
+                print "# TOF Axis:", len(m_som1[0].axis[0].val)
+
+            if timer is not None:
+                timer.getTime(msg="After reading monitor data")
+
+        else:
+            d_som_t = data_dst.getSOM(data_paths, so_axis, roi_file=signal_roi)
+            d_som_t.rekeyNxPars(dataset_type)
+            
+            if timer is not None:
+                timer.getTime(msg="After reading data")
+
+            m_som_t = data_dst.getSOM(mon_paths, so_axis)
+            m_som_t.rekeyNxPars(dataset_type)
+            
+            if timer is not None:
+                timer.getTime(msg="After reading monitor data")
+
+            d_som1 = common_lib.add_ncerr(d_som_t, d_som1, add_nxpars=True)
+
+            if timer is not None:
+                timer.getTime(msg="After adding data spectra")
+
+            del d_som_t
+
+            if timer is not None:
+                timer.getTime(msg="After data SOM deletion")
+                
+            m_som1 = common_lib.add_ncerr(m_som_t, m_som1, add_nxpars=True)
+
+            if timer is not None:
+                timer.getTime(msg="After adding monitor spectra")
+
+            del m_som_t            
+
+            if timer is not None:
+                timer.getTime(msg="After monitor SOM deletion")
+                
+        data_dst.release_resource()
+        del data_dst
+        counter += 1
+
+        if timer is not None:
+            timer.getTime(msg="After resource release and DST deletion")
+
+        som_key_parts = [dataset_type, "filename"]
+        som_key = "-".join(som_key_parts)
+        
+        d_som1.attr_list[som_key] = filelist
+        if m_som1 is not None:
+            m_som1.attr_list[som_key] = filelist
+
+    return (d_som1, m_som1)
     
