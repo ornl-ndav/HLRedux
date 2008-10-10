@@ -96,7 +96,7 @@ class DgsOptions(hlr_options.InstOptions):
                         +"normalization is turned off.")
 
         self.add_option("", "--mon-int-range", dest="mon_int_range",
-                        type="float", args=2, help="Set the minimum and "\
+                        type="float", nargs=2, help="Set the minimum and "\
                         +"maximum values in TOF [microseconds] for the "\
                         +"integration of the monitor.")
                         
