@@ -85,6 +85,9 @@ def calibrate_dgs_data(datalist, conf, **kwargs):
     else:
         mon_paths= conf.usmon_path.toPath()
 
+    if t is not None:
+        oldtime = t.getOldTime()
+
     (dp_som0, dm_som0) = dr_lib.add_files_dm(datalist, Data_Paths=data_paths,
                                              Mon_Paths=mon_paths,
                                              SO_Axis=conf.so_axis,
@@ -93,6 +96,7 @@ def calibrate_dgs_data(datalist, conf, **kwargs):
                                              Verbose=conf.verbose, Timer=t)
 
     if t is not None:
+        t.setOldTime(oldtime)
         t.getTime(msg="After reading %s " % dataset_type)
 
     dp_som1 = dr_lib.fix_bin_contents(dp_som0)
