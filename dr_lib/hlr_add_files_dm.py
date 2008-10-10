@@ -113,7 +113,7 @@ def add_files_dm(filelist, **kwargs):
     except KeyError:
         timer = None
 
-    dst_type == "application/x-NeXus"
+    dst_type = "application/x-NeXus"
     counter = 0
 
     for filename in filelist:
@@ -141,33 +141,29 @@ def add_files_dm(filelist, **kwargs):
             if timer is not None:
                 timer.getTime(msg="After reading data")
 
-        if verbose:
-            print "Reading monitor %d" % counter
+            if mon_paths is not None:
+                if verbose:
+                    print "Reading monitor %d" % counter
 
-        if counter == 0:
-            m_som1 = data_dst.getSOM(mon_paths, so_axis)
-            m_som1.rekeyNxPars(dataset_type)
+                if counter == 0:
+                    m_som1 = data_dst.getSOM(mon_paths, so_axis)
+                    m_som1.rekeyNxPars(dataset_type)
 
-            if verbose and m_som1 is not None:
-                print "# Monitor SO:", len(m_som1)
-                print "# TOF:", len(m_som1[0])
-                print "# TOF Axis:", len(m_som1[0].axis[0].val)
+                if verbose:
+                    print "# Monitor SO:", len(m_som1)
+                    print "# TOF:", len(m_som1[0])
+                    print "# TOF Axis:", len(m_som1[0].axis[0].val)
 
-            if timer is not None:
-                timer.getTime(msg="After reading monitor data")
-
+                if timer is not None:
+                    timer.getTime(msg="After reading monitor data")
+            else:
+                m_som1 = None
         else:
             d_som_t = data_dst.getSOM(data_paths, so_axis, roi_file=signal_roi)
             d_som_t.rekeyNxPars(dataset_type)
             
             if timer is not None:
                 timer.getTime(msg="After reading data")
-
-            m_som_t = data_dst.getSOM(mon_paths, so_axis)
-            m_som_t.rekeyNxPars(dataset_type)
-            
-            if timer is not None:
-                timer.getTime(msg="After reading monitor data")
 
             d_som1 = common_lib.add_ncerr(d_som_t, d_som1, add_nxpars=True)
 
@@ -178,16 +174,23 @@ def add_files_dm(filelist, **kwargs):
 
             if timer is not None:
                 timer.getTime(msg="After data SOM deletion")
+
+            if mon_paths is not None:
+                m_som_t = data_dst.getSOM(mon_paths, so_axis)
+                m_som_t.rekeyNxPars(dataset_type)
                 
-            m_som1 = common_lib.add_ncerr(m_som_t, m_som1, add_nxpars=True)
+                if timer is not None:
+                    timer.getTime(msg="After reading monitor data")
 
-            if timer is not None:
-                timer.getTime(msg="After adding monitor spectra")
+                m_som1 = common_lib.add_ncerr(m_som_t, m_som1, add_nxpars=True)
 
-            del m_som_t            
+                if timer is not None:
+                    timer.getTime(msg="After adding monitor spectra")
 
-            if timer is not None:
-                timer.getTime(msg="After monitor SOM deletion")
+                del m_som_t            
+
+                if timer is not None:
+                    timer.getTime(msg="After monitor SOM deletion")
                 
         data_dst.release_resource()
         del data_dst
