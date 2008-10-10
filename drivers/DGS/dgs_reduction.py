@@ -70,7 +70,7 @@ def run(config, tim=None):
 
     # Perform Steps 3-6 on black can data
     if config.bcan is not None:
-        b_som1 = dr_lib.calibrate_dgs_data(config.bcan, config,
+        b_som1 = dr_lib.calibrate_dgs_data(config.bcan, config, dc_som,
                                            dataset_type="black_can",
                                            inst_geom_dst=inst_geom_dst,
                                            timer=tim)
@@ -79,7 +79,7 @@ def run(config, tim=None):
 
     # Perform Steps 3-6 on empty can data    
     if config.ecan is not None:
-        e_som1 = dr_lib.calibrate_dgs_data(config.ecan, config,
+        e_som1 = dr_lib.calibrate_dgs_data(config.ecan, config, dc_som,
                                            dataset_type="empty_can",
                                            inst_geom_dst=inst_geom_dst,
                                            timer=tim)
@@ -88,7 +88,7 @@ def run(config, tim=None):
 
     # Perform Steps 3-6 on normalization data
     if config.norm is not None:
-        n_som1 = dr_lib.calibrate_dgs_data(config.norm, config,
+        n_som1 = dr_lib.calibrate_dgs_data(config.norm, config, dc_som,
                                            dataset_type="normalization",
                                            inst_geom_dst=inst_geom_dst,
                                            timer=tim)
@@ -96,7 +96,7 @@ def run(config, tim=None):
         n_som1 = None
 
     # Perform Steps 3-6 on sample data
-    d_som1 = dr_lib.calibrate_dgs_data(config.data, config,
+    d_som1 = dr_lib.calibrate_dgs_data(config.data, config, dc_som,
                                        inst_geom_dst=inst_geom_dst,
                                        timer=tim)
 
