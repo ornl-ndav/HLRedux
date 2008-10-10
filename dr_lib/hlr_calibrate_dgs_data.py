@@ -22,7 +22,7 @@
 
 # $Id$
 
-def calibrate_dgs_data(datalist, conf, **kwargs):
+def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
     """
     This function combines Steps 3 through 6 in Section 2.1.1 of the data
     reduction process for Direct Geometry Spectrometers as specified by the
@@ -37,6 +37,9 @@ def calibrate_dgs_data(datalist, conf, **kwargs):
     
     @param conf: Object that contains the current setup of the driver.
     @type conf: L{hlr_utils.Configure}
+
+    @param dkcur: The object containing the TOF dark current data.
+    @type dkcur: C{SOM.SOM}
     
     @param kwargs: A list of keyword arguments that the function accepts:
     
@@ -181,6 +184,23 @@ def calibrate_dgs_data(datalist, conf, **kwargs):
     del dp_som1, dm_som2
 
     # Step 5: Scale dark current by data set measurement time
+    if dkcur is not None:
+        if conf.verbose:
+            print "Scaling dark current by %s acquisition time" % dataset_type
+
+        if t is not None:
+            t.getTime(False)
+
+        dstime_tag = dataset_type+"-duration"
+        dstime = dp_som2.attr_list[dstime_tag]
+
+        dkcur1 = common_lib.div_ncerr(dkcur, (dstime.getValue(), 0.0))
+
+        if t is not None:
+            t.getTime(msg="After scaling dark current by %s acquisition time" \
+                      % dataset_type)        
+    else:
+        dkcur1 = dkcur
 
     # Step 6: Subtract scaled dark current from data set
     
