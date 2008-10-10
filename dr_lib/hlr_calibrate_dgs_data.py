@@ -80,7 +80,10 @@ def calibrate_dgs_data(datalist, conf, **kwargs):
 
     dst_type = "application/x-NeXus"
     data_paths = conf.data_paths.toPath()
-    mon_paths= conf.usmon_path.toPath()
+    if conf.no_mon_norm:
+        mon_paths = None
+    else:
+        mon_paths= conf.usmon_path.toPath()
 
     (dp_som0, dm_som0) = dr_lib.add_files_dm(datalist, Data_Paths=data_paths,
                                              Mon_Paths=mon_paths,
