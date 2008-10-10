@@ -55,6 +55,7 @@ def calibrate_dgs_data(datalist, conf, **kwargs):
     @return: Object that has undergone all requested processing steps
     @rtype: C{SOM.SOM}
     """
+    import common_lib
     import dr_lib
     import hlr_utils
 
@@ -147,9 +148,41 @@ def calibrate_dgs_data(datalist, conf, **kwargs):
     del dm_som1
     
     # Step 4: Divide data set by summed monitor spectrum
+    if dm_som2 is not None:
+        if conf.verbose:
+            print "Normalizing %s by monitor sum" % dataset_type
+
+        if t is not None:
+            t.getTime(False)
+
+        dp_som2 = common_lib.div_ncerr(dp_som1, dm_som2, length_one_som=True)
+
+        if t is not None:
+            t.getTime(msg="After normalizing %s by monitor sum" % dataset_type)
+
+    elif conf.pc_norm:
+        if conf.verbose:
+            print "Normalizing %s by proton charge" % dataset_type
+
+        pc_tag = dataset_type+"-proton_charge"
+        pc = dp_som1.attr_list[pc_tag]
+
+        if t is not None:
+            t.getTime(False)
+
+        dp_som2 = common_lib.div_ncerr(dp_som1, (pc.getValue(), 0.0))
+
+        if t is not None:
+            t.getTime(msg="After normalizing %s by proton charge" \
+                      % dataset_type)
+
+    else:
+        dp_som2 = dp_som1
+
+    del dp_som1, dm_som2
 
     # Step 5: Scale dark current by data set measurement time
 
     # Step 6: Subtract scaled dark current from data set
     
-    return dp_som1
+    return dp_som2
