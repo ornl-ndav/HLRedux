@@ -126,6 +126,9 @@ def add_files_dm(filelist, **kwargs):
             print "ERROR: Failed to data read file %s" % filename
             sys.exit(-1)
 
+        if timer is not None:
+                timer.getTime(msg="After parsing file")
+
         if verbose:
             print "Reading data file %d" % counter
 
