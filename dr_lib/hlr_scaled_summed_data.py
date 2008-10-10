@@ -22,7 +22,7 @@
 
 # $Id$
 
-def scaled_summed_data(datalist, conf **kwargs):
+def scaled_summed_data(datalist, conf, **kwargs):
     """
     This function takes a list of TOF datafiles, creates the dataset
     representation, integrates each pixel spectrum and then scales those
@@ -51,9 +51,9 @@ def scaled_summed_data(datalist, conf **kwargs):
     # Kick-out is no data list is present
     if datalist is None:
         return None
-    
+
+    import common_lib
     import dr_lib
-    import hlr_utils
 
     # Check keywords
     try:
@@ -86,5 +86,35 @@ def scaled_summed_data(datalist, conf **kwargs):
 
     del dp_som0    
 
+    if conf.verbose:
+        print "Integrating %s data" % dataset_type
+        
+    if t is not None:
+        t.getTime(False)
 
-    return dp_som1
+    dp_som2 = dr_lib.integrate_spectra(dp_som1, width=True)
+
+    if t is not None:
+        t.getTime(msg="After integrating %s data " % dataset_type)
+
+    del dp_som1
+
+    # Make dataset duration tag
+    duration_tag = dataset_type+"-duration"
+    duration = dp_som2.attr_list[duration_tag]
+
+    if conf.verbose:
+        print "Scaling %s integration by acquisition duration " % dataset_type
+
+    if t is not None:
+        t.getTime(False)
+ 
+    dp_som3 = common_lib.div_ncerr(dp_som2, (duration.getValue(), 0.0))
+
+    if t is not None:
+        t.getTime("After scaling %s integration by acquisition duration " \
+                  % dataset_type)
+
+    del dp_som2
+
+    return dp_som3
