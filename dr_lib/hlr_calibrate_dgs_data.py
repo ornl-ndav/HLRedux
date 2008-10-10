@@ -119,13 +119,13 @@ def calibrate_dgs_data(datalist, conf, **kwargs):
         i_geom_dst.setGeometry(mon_paths, dm_som1)
     
     # Step 3: Integrate the upstream monitor
-    if conf.verbose:
-        print "Integrating upstream monitor spectrum"
-
-    if t is not None:
-        t.getTime(False)
-
     if dm_som1 is not None:
+        if conf.verbose:
+            print "Integrating upstream monitor spectrum"
+
+        if t is not None:
+            t.getTime(False)
+        
         if conf.mon_int_range is None:
             start_val = 0
             end_val = -1
@@ -139,11 +139,10 @@ def calibrate_dgs_data(datalist, conf, **kwargs):
                                            end=end_val,
                                            bin_index=is_bin,
                                            width=True)
+        if t is not None:
+            t.getTime(msg="After integrating upstream monitor spectrum ")
     else:
         dm_som2 = dm_som1
-
-    if t is not None:
-        t.getTime(msg="After integrating upstream monitor spectrum ")
 
     del dm_som1
     
