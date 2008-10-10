@@ -139,6 +139,9 @@ def velocity_to_wavelength(obj, **kwargs):
         else:
             pass
 
+        if i == 0:
+            print "F:", rev_value[0]
+
         hlr_utils.result_insert(result, res_descr, rev_value, map_so, "x",
                                 axis)
 

@@ -156,6 +156,9 @@ def energy_transfer(obj, itype, axis_const, **kwargs):
             (E_i, E_i_err2) = axis_c.toValErrTuple()
             (E_f, E_f_err2) = axis_manip.wavelength_to_energy(l_f, l_f_err2)
 
+        if i == 0:
+            print "Q:", E_f
+
         if scale:
             # Scale counts by lambda_f / lambda_i
             if itype == "IGS":
@@ -173,6 +176,9 @@ def energy_transfer(obj, itype, axis_const, **kwargs):
             scale_y = (y_val, y_err2)
 
         value = array_manip.sub_ncerr(E_i, E_i_err2, E_f, E_f_err2)
+
+        if i == 0:
+            print "W:", value[0]
 
         if change_units:
             # Convert from meV to ueV
@@ -195,6 +201,9 @@ def energy_transfer(obj, itype, axis_const, **kwargs):
         value_y = axis_manip.reverse_array_cp(scale_y[0])
         value_var_y = axis_manip.reverse_array_cp(scale_y[1])
         value_x = axis_manip.reverse_array_cp(value2[0])
+
+        if i == 0:
+            print "J:", value_x
 
         hlr_utils.result_insert(result, res_descr, (value_y, value_var_y),
                                 map_so, "all", 0, [value_x])

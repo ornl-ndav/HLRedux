@@ -95,6 +95,11 @@ class DgsOptions(hlr_options.InstOptions):
                         +"normalization. This will only be done if monitor "\
                         +"normalization is turned off.")
 
+        self.add_option("", "--mon-int-range", dest="mon_int_range",
+                        type="float", args=2, help="Set the minimum and "\
+                        +"maximum values in TOF [microseconds] for the "\
+                        +"integration of the monitor.")
+                        
         self.add_option("", "--data-trans-coeff", dest="data_trans_coeff",
                         help="Specify the transmission coefficient value and "\
                         +"err^2 for the sample data background.")
@@ -198,6 +203,11 @@ def DgsConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "pc_norm",
                                       "--pc-norm"):
         configure.pc_norm = options.pc_norm        
+
+    # Set the TOF range for the monitor integration
+    if hlr_utils.cli_provide_override(configure, "mon_int_range",
+                                      "--mon-int-range"):
+        configure.mon_int_range = options.mon_int_range
 
     # Set the transmission coefficient for the sample data background
     if hlr_utils.cli_provide_override(configure, "data_trans_coeff",
