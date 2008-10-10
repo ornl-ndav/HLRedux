@@ -86,6 +86,10 @@ class DgsOptions(hlr_options.InstOptions):
                         help="Specify the time-zero offset, err^2 in units "\
                         +"of microseconds")
 
+        self.add_option("", "--no-mon-norm", action="store_true",
+                        dest="no_mon_norm",
+                        help="Flag for turning off monitor normalization")
+
         self.add_option("", "--data-trans-coeff", dest="data_trans_coeff",
                         help="Specify the transmission coefficient value and "\
                         +"err^2 for the sample data background.")
@@ -179,6 +183,11 @@ def DgsConfiguration(parser, configure, options, args):
                                       "--time-zero-offset"):    
         configure.time_zero_offset = hlr_utils.DrParameterFromString(\
             options.time_zero_offset, True)
+
+    # Set no_mon_norm flag
+    if hlr_utils.cli_provide_override(configure, "no_mon_norm",
+                                      "--no-mon-norm"):
+        configure.no_mon_norm = options.no_mon_norm
 
     # Set the transmission coefficient for the sample data background
     if hlr_utils.cli_provide_override(configure, "data_trans_coeff",
