@@ -56,10 +56,6 @@ def add_files_dm(filelist, **kwargs):
                            The default value is I{data}.
     @type dataset_type: C{string}
 
-    @keyword dst_type: The type of C{DST} to be created during file read-in.
-                       The default value is I{application/x-NeXus}.
-    @type dst_type: C{string}
-    
     @keyword Verbose: This is a flag to turn on print statments. The default is
                       I{False}.
     @type Verbose: C{boolean}
@@ -106,15 +102,6 @@ def add_files_dm(filelist, **kwargs):
         dataset_type = kwargs["dataset_type"]
     except KeyError:
         dataset_type = "data"
-
-    try:
-        dst_type = kwargs["dst_type"]
-    except KeyError:
-        try:
-            dst_type = hlr_utils.file_peeker(filelist[0])
-        except RuntimeError:
-            # Assume it is a NeXus file, since it is not a DR produced file
-            dst_type = "application/x-NeXus"
 
     try:
         verbose = kwargs["Verbose"]
