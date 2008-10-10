@@ -75,6 +75,58 @@ def add_files_dm(filelist, **kwargs):
     
     @raise SystemExit: If any file cannot be read
     """
+    import sys
+
+    import common_lib
+    import DST
+    import hlr_utils
+    
+    # Parse keywords
+    try:
+        so_axis = kwargs["SO_Axis"]
+    except KeyError:
+        so_axis = "time_of_flight"
+    
+    try:
+        data_paths = kwargs["Data_Paths"]
+    except KeyError:
+        data_paths = None
+
+    try:
+        mon_paths = kwargs["Mon_Paths"]
+    except KeyError:
+        mon_paths = None        
+
+    try:
+        signal_roi = kwargs["Signal_ROI"]
+    except KeyError:
+        signal_roi = None 
+
+    try:
+        dataset_type = kwargs["dataset_type"]
+    except KeyError:
+        dataset_type = "data"
+
+    try:
+        dst_type = kwargs["dst_type"]
+    except KeyError:
+        try:
+            dst_type = hlr_utils.file_peeker(filelist[0])
+        except RuntimeError:
+            # Assume it is a NeXus file, since it is not a DR produced file
+            dst_type = "application/x-NeXus"
+
+    try:
+        verbose = kwargs["Verbose"]
+    except KeyError:
+        verbose = False
+
+    try:
+        timer = kwargs["Timer"]
+    except KeyError:
+        timer = None
+
+
 
     return (None, None)
     
