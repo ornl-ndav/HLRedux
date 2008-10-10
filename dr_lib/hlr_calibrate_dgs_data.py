@@ -87,7 +87,6 @@ def calibrate_dgs_data(datalist, conf, **kwargs):
                                              SO_Axis=conf.so_axis,
                                              Signal_ROI=conf.roi_file,
                                              dataset_type=dataset_type,
-                                             dst_type=dst_type,
                                              Verbose=conf.verbose, Timer=t)
 
     if t is not None:
