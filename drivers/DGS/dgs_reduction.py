@@ -174,7 +174,8 @@ def run(config, tim=None):
     if tim is not None:
         tim.getTime(False)
     
-    d_som4 = dr_lib.energy_transfer(d_som3, "DGS", "Initial_Energy")
+    d_som4 = dr_lib.energy_transfer(d_som3, "DGS", "Initial_Energy",
+                                    lojac=True)
 
     if tim is not None:
         tim.getTime(msg="After calculating energy transfer ")
