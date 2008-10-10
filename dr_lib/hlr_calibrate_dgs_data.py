@@ -87,7 +87,7 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
     if conf.no_mon_norm:
         mon_paths = None
     else:
-        mon_paths= conf.usmon_path.toPath()
+        mon_paths = conf.usmon_path.toPath()
 
     if t is not None:
         oldtime = t.getOldTime()
@@ -203,5 +203,19 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
         dkcur1 = dkcur
 
     # Step 6: Subtract scaled dark current from data set
+    if dkcur1 is not None:
+        if conf.verbose:
+            print "Scaling %s by scaled dark current" % dataset_type
+
+        if t is not None:
+            t.getTime(False)
+
+        dp_som3 = common_lib.div_ncerr(dp_som2, dkcur1)
+
+        if t is not None:
+            t.getTime(msg="After scaling %s by scaled dark current" \
+                      % dataset_type)
+    else:
+        dp_som3 = dp_som2
     
-    return dp_som2
+    return dp_som3
