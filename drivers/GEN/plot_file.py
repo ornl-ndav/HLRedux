@@ -54,16 +54,20 @@ def run(config):
     elif dst_type == "text/Dave2d":
         if config.projx:
             drplot.plot_1D_slice(d_som, "y", config.range, (None, None),
-                                 logx=config.logx, logy=config.logy)
+                                 logx=config.logx, logy=config.logy,
+                                 line=config.line)
         elif config.projy:
             drplot.plot_1D_slice(d_som, "x", (None, None), config.range,
-                                 logx=config.logx, logy=config.logy)
+                                 logx=config.logx, logy=config.logy,
+                                 line=config.line)
         elif config.slicex:
             drplot.plot_1D_slices(d_som, "y", config.range,
-                                 logx=config.logx, logy=config.logy)
+                                  logx=config.logx, logy=config.logy,
+                                  line=config.line)
         elif config.slicey:
             drplot.plot_1D_slices(d_som, "x", config.range,
-                                  logx=config.logx, logy=config.logy)
+                                  logx=config.logx, logy=config.logy,
+                                  line=config.line)
         else:
             drplot.plot_2D_so(d_som, logz=config.logz, box=config.box)
     elif dst_type == "text/num-info":
@@ -105,7 +109,7 @@ def __plot_a3c(som, conf):
 
             try:
                 drplot.plot_1D_so(som, pid, title=pid, logy=conf.logy,
-                                  logx=conf.logx)
+                                  logx=conf.logx, line=conf.line)
             except ValueError:
                 # All data got filtered
                 pass
@@ -162,6 +166,9 @@ if __name__ == "__main__":
                       help="Show y distributions for each x from a 2D "\
                       +"distribution.")
     parser.set_defaults(slicey=False)
+
+    parser.add_option("-l", "--line", dest="line", action="store_true",
+                      help="Draw a line connecting points for 1D plots.")
 
     parser.add_option("-b", "--box", dest="box", action="store_true",
                       help="Plot 2D distribution as a box plot.")
@@ -224,6 +231,9 @@ if __name__ == "__main__":
 
     # Set the flag to make slices along the x-axis
     configure.slicey = options.slicey
+
+    # Set the flag for a connecting line in 1D plots
+    configure.line = options.line
 
     # Set the flag to make a 2D box plot
     configure.box = options.box
