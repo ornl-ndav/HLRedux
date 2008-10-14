@@ -154,11 +154,13 @@ if __name__ == "__main__":
                       +"axis when projecting or slicing a 2D distribution.")
 
     parser.add_option("", "--slicex", dest="slicex", action="store_true",
-                      help="Project a 2D distribution along x.")
+                      help="Show x distributions for each y from a 2D "\
+                      +"distribution.")
     parser.set_defaults(slicex=False)
 
     parser.add_option("", "--slicey", dest="slicey", action="store_true",
-                      help="Project a 2D distribution along y.")
+                      help="Show y distributions for each x from a 2D "\
+                      +"distribution.")
     parser.set_defaults(slicey=False)
 
     parser.add_option("-b", "--box", dest="box", action="store_true",
