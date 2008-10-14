@@ -371,16 +371,9 @@ def __get_slice(islice, isize):
         if islice[1] is None:
             return slice(isize)
         else:
-            if isize == islice[1]:
-                return slice(islice[1])
-            else:
-                return slice(islice[1] + 1)
+            return slice(islice[1])
     else:
         if islice[1] is None:
             return slice(islice[0], isize)
         else:
-            if isize == islice[1]:
-                return slice(islice[0], islice[1])
-            else:
-                return slice(islice[0], islice[1] + 1)
-    
+            return slice(islice[0], islice[1])
