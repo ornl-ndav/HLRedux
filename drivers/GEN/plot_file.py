@@ -162,7 +162,7 @@ if __name__ == "__main__":
     parser.set_defaults(slicey=False)
 
     parser.add_option("-b", "--box", dest="box", action="store_true",
-                      help="Plot 2D dsitribution as a box plot.")
+                      help="Plot 2D distribution as a box plot.")
     parser.set_defaults(box=False)
     
     # Do not need to use the following options
