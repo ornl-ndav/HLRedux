@@ -122,6 +122,9 @@ def plot_1D_arr(x, y, var_y=None, var_x=None, **kwargs):
     @keyword logx: Set the independent axis to logarithmic
     @type logx: C{boolean}
 
+    @keyword line: Turn on the connecting line for the points
+    @type line: C{boolean}
+
     @keyword llabel: Set the legend label for the plot
     @type llabel: C{string}
     """
@@ -153,6 +156,11 @@ def plot_1D_arr(x, y, var_y=None, var_x=None, **kwargs):
         logx = False
 
     try:
+        line = kwargs["line"]
+    except KeyError:
+        line = False        
+
+    try:
         llabel = kwargs["llabel"]
     except KeyError:
         llabel = ""
@@ -180,7 +188,13 @@ def plot_1D_arr(x, y, var_y=None, var_x=None, **kwargs):
         if logx:
             ax.set_xscale("log")
 
-    pylab.errorbar(x, y, var_y, var_x, fmt='o', ls='None', label=llabel)
+    # Set the connection line if requested
+    if line:
+        lline = '-'
+    else:
+        lline = 'None'
+
+    pylab.errorbar(x, y, var_y, var_x, fmt='o', ls=lline, label=llabel)
     pylab.xlabel(xlabel)
     pylab.ylabel(ylabel)
     pylab.title(title)

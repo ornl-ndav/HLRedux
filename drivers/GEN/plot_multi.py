@@ -48,7 +48,8 @@ def run(config):
 
         if dst_type == "text/Spec":
             drplot.plot_1D_so(d_som, d_som[0].id, logx=config.logx,
-                              logy=config.logy, llabel=datafile)
+                              logy=config.logy, llabel=datafile,
+                              line=config.line)
 
             pylab.legend(numpoints=1, loc=config.legpos)
         elif dst_type == "text/Dave2d":
@@ -92,6 +93,9 @@ if __name__ == "__main__":
                       +"of the legend on the graph. Default is 0 (best)")
     parser.set_defaults(legpos=0)
 
+    parser.add_option("-l", "--line", dest="line", action="store_true",
+                      help="Draw a line connecting points for 1D plots.")
+
     # Do not need to use the following options
     parser.remove_option("--config")
     parser.remove_option("--data")
@@ -129,6 +133,9 @@ if __name__ == "__main__":
 
     # Set the legend position
     configure.legpos = options.legpos
+
+    # Set the flag for a connecting line in 1D plots
+    configure.line = options.line
 
     # Run the program
     run(configure)

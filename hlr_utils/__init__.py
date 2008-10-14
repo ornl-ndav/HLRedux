@@ -31,10 +31,8 @@ from hlr_amr_options import AmrOptions, AmrConfiguration
 from hlr_axis_object import *
 from hlr_bisect_helper import bisect_helper
 from hlr_config import Configure, ConfigFromXml
-from hlr_dgs_options import DgsOptions, DgsConfiguration
 from hlr_drparameter import *
 from hlr_fix_index import *
-from hlr_geom_helper import *
 from hlr_igs_options import IgsOptions, IgsConfiguration
 from hlr_math_compatible import *
 from hlr_nxpath import *
