@@ -36,6 +36,7 @@ from hlr_calc_solid_angle import *
 from hlr_calculate_ref_background import *
 from hlr_calibrate_dgs_data import *
 from hlr_create_axis_from_data import *
+from hlr_create_E_vs_Q_dgs import create_E_vs_Q_dgs
 from hlr_create_E_vs_Q_igs import create_E_vs_Q_igs
 from hlr_create_param_vs_Y import *
 from hlr_create_Qvec_vs_E_dgs import create_Qvec_vs_E_dgs
