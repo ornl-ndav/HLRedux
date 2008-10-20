@@ -57,6 +57,7 @@ from hlr_igs_energy_transfer import *
 from hlr_integrate_axis import *
 from hlr_integrate_axis_py import *
 from hlr_integrate_spectra import *
+from hlr_integrate_spectra_py import *
 from hlr_lin_interpolate_spectra import *
 from hlr_process_dgs_data import process_dgs_data
 from hlr_process_igs_data import process_igs_data
