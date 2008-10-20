@@ -130,17 +130,14 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
             t.getTime(False)
         
         if conf.mon_int_range is None:
-            start_val = 0
-            end_val = -1
-            is_bin = True
+            start_val = float("inf")
+            end_val = float("inf")
         else:
             start_val = conf.mon_int_range[0]
             end_val = conf.mon_int_range[1]
-            is_bin = False
         
         dm_som2 = dr_lib.integrate_spectra(dm_som1, start=start_val,
                                            end=end_val,
-                                           bin_index=is_bin,
                                            width=True)
         if t is not None:
             t.getTime(msg="After integrating upstream monitor spectrum ")
