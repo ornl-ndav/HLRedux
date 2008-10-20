@@ -38,22 +38,14 @@ def integrate_axis(obj, **kwargs):
     @keyword end: Value for the end range of the integration.
     @type end: C{float}
     
-    @keyword axis: This is the axis one wishes to manipulate. If no argument is
-                   given the default value is I{y}.
-    @type axis: C{string}=<y or x>
-    
-    @keyword axis_pos: This is position of the axis in the axis array. If no
-                       argument is given, the default value is I{0}.
-    @type axis_pos: C{int}
-    
     @keyword width: This is a flag to turn on the multiplication of the
                     individual bin contents with the bins corresponding width.
     @type width: C{boolean}
 
-    @keyword width_pos: This is position of the x-axis in the axis array from
-                        which to calculate the bin widths in support of the
-                        width flag. If no argument is given, the default value
-                        is I{0}.
+    @keyword width_pos: This is the position of the x-axis in the axis array
+                        from which to calculate the bin widths in support of
+                        the width flag. If no argument is given, the default
+                        value is I{0}.
     @type width_pos: C{int}
 
     
@@ -82,35 +74,13 @@ def integrate_axis(obj, **kwargs):
     try:
         start = kwargs["start"]
     except KeyError:
-        start = 0
+        start = float("inf")
 
     # Check for ending bin
     try: 
         end = kwargs["end"]
-        if end != -1:
-            end += 1
-        else:
-            pass
     except KeyError:
-        end = -1
-
-    # Check for axis keyword argument
-    try:
-        axis = kwargs["axis"]
-    except KeyError:
-        axis = "y"
-        
-    # Check for axis_pos keyword argument
-    try:
-        axis_pos = kwargs["axis_pos"]
-    except KeyError:
-        axis_pos = 0
-
-    # Check for avg keyword argument
-    try:
-        avg = kwargs["avg"]
-    except KeyError:
-        avg = False
+        end = float("inf")
 
     # Check for width keyword argument
     try:
@@ -118,66 +88,38 @@ def integrate_axis(obj, **kwargs):
     except KeyError:
         width = False        
 
-    # Check for width_pos keyword argument
-    try:
-        width_pos = kwargs["width_pos"]
-    except KeyError:
-        width_pos = 0       
-        
+    if width:
+        # Check for width_pos keyword argument
+        try:
+            width_pos = kwargs["width_pos"]
+        except KeyError:
+            width_pos = 0
+    else:
+        width_pos = 0
+
+    import array_manip
+    import utils
+
     integration = float(0)
     integration_error2 = float(0)
+    
+    len_obj = hlr_utils.get_length(obj)
+    for i in xrange(len_obj): 
+        value = hlr_utils.get_value(obj, i, o_descr, "y")
+        error = hlr_utils.get_err2(obj, i, o_descr, "y")
+        x_axis = hlr_utils.get_value(obj, i, o_descr, "x", width_pos)
 
-    import itertools
-    if width:
-        import utils
+        (int_val) = utils.integrate_1D_hist(value, error, x_axis,
+                                            width=width,
+                                            min_int=start,
+                                            max_int=end)
+        (integration,
+         integration_error2) = array_manip.add_ncerr(int_val[0],
+                                                     int_val[1],
+                                                     integration,
+                                                     integration_error2)
 
-    bad_values = ["nan", "inf", "-inf"]
-
-    for i in xrange(hlr_utils.get_length(obj)): 
-        counter = 0  
-
-        value = hlr_utils.get_value(obj, i, o_descr, axis, axis_pos)
-        error = hlr_utils.get_err2(obj, i, o_descr, axis, axis_pos)
-
-        if end == -1:
-            value = value[start:]
-            error = error[start:]
-        else:
-            value = value[start:end]
-            error = error[start:end]
-            
-        if not width:
-            for val, err2 in itertools.izip(value, error):
-                if str(val) in bad_values or str(err2) in bad_values:
-                    continue
-                else:
-                    integration += val
-                    integration_error2 += err2
-                    counter += 1
-        else:
-            if axis == "y":
-                x_axis = hlr_utils.get_value(obj, i, o_descr, "x", width_pos)
-                x_err2 = hlr_utils.get_err2(obj, i, o_descr, "x", width_pos)
-            elif axis == "x":
-                raise RuntimeError("Cannot use width flag with x-axis "\
-                                   +"integration")
-
-            bin_widths = utils.calc_bin_widths(x_axis, x_err2)
-
-            for val, err2, delta in itertools.izip(value, error,
-                                                   bin_widths[0]):
-                if str(val) in bad_values or str(err2) in bad_values:
-                    continue
-                else:
-                    integration += (delta * val)
-                    integration_error2 += (delta * delta * err2)
-                    counter += 1
-        
-    if avg:
-        return (integration / float(counter),
-                integration_error2 / float(counter))
-    else:
-        return (integration, integration_error2)
+    return (integration, integration_error2)
 
 if __name__ == "__main__":
     import hlr_test
@@ -195,9 +137,7 @@ if __name__ == "__main__":
     print "********** integrate_axis"
     print "* som        :", integrate_axis(som1)
     print "* som        :", integrate_axis(som2)
-    print "* som (avg)  :", integrate_axis(som2, avg=True)
     print "* som [2,4]  :", integrate_axis(som2, start=2, end=4)
-    print "* som  (x)   :", integrate_axis(som2, axis="x")
     print "* som (width):", integrate_axis(som1, width=True)
     print "* so         :", integrate_axis(som1[0])
     print "* so  [0,3]  :", integrate_axis(som1[0], start=0, end=3)
