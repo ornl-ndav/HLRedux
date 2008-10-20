@@ -231,7 +231,7 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
                              message="subtracted TOF information")
 
 
-    dtot_int = dr_lib.integrate_axis(dtot, avg=True)
+    dtot_int = dr_lib.integrate_axis_py(dtot, avg=True)
     param_key = dataset_type+"-dt_over_t"
     d_som4.attr_list[param_key] = dtot_int[0]
 
