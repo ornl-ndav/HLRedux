@@ -32,25 +32,20 @@ def integrate_axis(obj, **kwargs):
     
     @param kwargs: A list of keyword arguments that the function accepts:
     
-    @keyword start: Index of the starting bin
-    @type start: C{int}
+    @keyword start: Value for the start range of the integration.
+    @type start: C{float}
     
-    @keyword end: Index of the ending bin. This index is made inclusive by the
-                  function.
-    @type end: C{int}
+    @keyword end: Value for the end range of the integration.
+    @type end: C{float}
     
     @keyword axis: This is the axis one wishes to manipulate. If no argument is
                    given the default value is I{y}.
     @type axis: C{string}=<y or x>
     
     @keyword axis_pos: This is position of the axis in the axis array. If no
-    argument is given, the default value is I{0}.
+                       argument is given, the default value is I{0}.
     @type axis_pos: C{int}
     
-    @keyword avg: This allows the function to calculate a geometrical average.
-    The default value is I{False}.
-    @type avg: C{boolean}
-
     @keyword width: This is a flag to turn on the multiplication of the
                     individual bin contents with the bins corresponding width.
     @type width: C{boolean}
