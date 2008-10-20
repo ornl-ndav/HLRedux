@@ -54,8 +54,6 @@ def integrate_axis(obj, **kwargs):
 
     
     @raise RuntimError: A C{SOM} or C{SO} is not given to the function.
-
-    @raise RuntimeError: The width keyword is used with x-axis integration.
     """
 
     # import the helper functions
