@@ -68,6 +68,14 @@ class IgsOptions(hlr_options.InstOptions):
 
         self.add_option("", "--dead-time", dest="dead_time",
                         help="Dead time with units (no spaces)")
+
+        self.add_option("", "--tof-cut-min", dest="tof_cut_min",
+                        help="Set the minimum TOF channel for spectrum "\
+                        +"cutting")
+
+        self.add_option("", "--tof-cut-max", dest="tof_cut_max",
+                        help="Set the maximum TOF channel for spectrum "\
+                        +"cutting")        
         
         self.add_option("", "--tib-tofs", dest="tib_tofs",
                         help="Specify four TOF values bin for "\
@@ -267,6 +275,16 @@ def IgsConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "dead_time", "--dead-time"):
         configure.dead_time = hlr_utils.DrParameterFromString(\
             options.dead_time)
+
+    # Set the minimum TOF channel for spectrum cutting
+    if hlr_utils.cli_provide_override(configure, "tof_cut_min",
+                                      "--tof-cut-min"):
+        configure.tof_cut_min = options.tof_cut_min
+
+    # Set the maximum TOF channel for spectrum cutting
+    if hlr_utils.cli_provide_override(configure, "tof_cut_max",
+                                      "--tof-cut-max"):
+        configure.tof_cut_max = options.tof_cut_max        
 
     # Set the time-independent background TOFs
     if hlr_utils.cli_provide_override(configure, "tib_tofs", "--tib-tofs"):
