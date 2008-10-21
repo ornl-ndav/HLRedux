@@ -151,9 +151,14 @@ def process_igs_data(datalist, conf, **kwargs):
             # Since we have a NeXus file, we need to continue
             conf.pre_norm = False
 
-    dp_som1 = dr_lib.fix_bin_contents(dp_som0)
+    # Cut the spectra if necessary
+    dp_somA = dr_lib.cut_spectra(dp_som0, conf.tof_cut_min, conf.tof_cut_max)
 
-    del dp_som0    
+    del dp_som0
+
+    dp_som1 = dr_lib.fix_bin_contents(dp_somA)
+
+    del dp_somA    
 
     if conf.inst_geom is not None:
         i_geom_dst.setGeometry(conf.data_paths.toPath(), dp_som1)
