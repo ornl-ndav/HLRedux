@@ -45,7 +45,12 @@ class NxPath(object):
             for bank in banks:
                 self.__data_paths.append(("/entry/bank"+str(bank), 1))
 
-            self.__length = len(self.__data_paths)
+            # Count of entry + signal
+            self.__length = len(banks) * 2
+            
+            # If only one entry, make this a tuple for sure
+            if self.__length == 2:
+                self.__data_paths = (self.__data_paths[0])
         else:
             mylist = infostr.split(',')
             self.__length = len(mylist)
