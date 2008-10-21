@@ -112,7 +112,8 @@ if __name__ == "__main__":
 
     # Make description for driver
     description = []
-    description.append("This driver reads in DAVE 2D ASCII files, performs")
+    description.append("This driver reads in DAVE 2D ASCII files each")
+    description.append("containing a single temperature scan, performs")
     description.append("an integration for each Q bin, and outputs that")
     description.append("information to a file.")
 
