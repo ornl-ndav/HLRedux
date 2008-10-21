@@ -72,6 +72,7 @@ instrument_scripts = {
     'bss_tof_spect_gen',
     'bss_tof_sum_gen',
     'calc_norm_eff',
+    'elastic_scan',
     'find_ldb',
     'find_tib',
     'igs_diff_reduction'
