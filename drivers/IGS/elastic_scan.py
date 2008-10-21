@@ -16,7 +16,6 @@ def run(config):
         raise TypeError("Only Dave2D ASCII files can be handled. Do not "\
                         +"know how to handle %s." % dst_type)
 
-    import dr_lib
     import nessi_list
     import SOM
     
@@ -30,7 +29,6 @@ def run(config):
     so_id = None
     lo_val = -999
     hi_val = -999
-    len_temps = len(config.temps)
     scan = nessi_list.NessiList()
     scan_err2 = nessi_list.NessiList()
     
@@ -158,7 +156,7 @@ if __name__ == "__main__":
     configure.int_range = options.int_range
 
     # Set the temperature list
-    configure.temps = [float(temp) for temp in options.temps.split(',')]
+    configure.temps = [float(T) for T in options.temps.split(',')]
 
     # run the program
     run(configure)
