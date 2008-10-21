@@ -20,9 +20,6 @@
 # its use would not infringe privately owned rights.
 #
 
-# DGS drivers
-from DGS import dgs_reduction
-
 # GEN drivers
 from GEN import agg_dr_files
 from GEN import mask_generator
@@ -39,6 +36,7 @@ from IGS import amorphous_reduction_sqe
 from IGS import bss_tof_spect_gen
 from IGS import bss_tof_sum_gen
 from IGS import calc_norm_eff
+from IGS import elastic_scan
 from IGS import find_ldb
 from IGS import find_tib
 from IGS import igs_diff_reduction
