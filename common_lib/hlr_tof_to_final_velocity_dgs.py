@@ -54,6 +54,11 @@ def tof_to_final_velocity_dgs(obj, velocity_i, time_zero_offset, **kwargs):
                          velocities is run. The default setting is True.
     @type run_filter: C{boolean}
 
+    @keyword lojac: A flag that allows one to turn off the calculation of the
+                    linear-order Jacobian. The default action is True for
+                    histogram data.
+    @type lojac: C{boolean}
+
     @keyword units: The expected units for this function. The default for this
                     function is I{microseconds}
     @type units: C{string}
@@ -93,6 +98,11 @@ def tof_to_final_velocity_dgs(obj, velocity_i, time_zero_offset, **kwargs):
         run_filter = kwargs["run_filter"]
     except KeyError:
         run_filter = True
+
+    try:
+        lojac = kwargs["lojac"]
+    except KeyError:
+        lojac = hlr_utils.check_lojac(obj)        
 
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
@@ -150,6 +160,8 @@ def tof_to_final_velocity_dgs(obj, velocity_i, time_zero_offset, **kwargs):
 
     # iterate through the values
     import axis_manip
+    if lojac:
+        import utils
 
     len_obj = hlr_utils.get_length(obj)
     for i in xrange(len_obj):
@@ -195,13 +207,20 @@ def tof_to_final_velocity_dgs(obj, velocity_i, time_zero_offset, **kwargs):
             value[1].__delslice__(0, index)
             map_so.y.__delslice__(0, index)
             map_so.var_y.__delslice__(0, index)
+            if lojac:
+                val.__delslice__(0, index)
+                err2.__delslice__(0, index)
         else:
             pass
 
-        if i == 0:
-            print "B:", map_so.id, value[0]
-        
-        hlr_utils.result_insert(result, res_descr, value, map_so, "x", axis)
+        if lojac:
+            counts = utils.linear_order_jacobian(val, value[0],
+                                                 map_so.y, map_so.var_y)
+            hlr_utils.result_insert(result, res_descr, value, map_so,
+                                    "all", axis, [value[0]])
+        else:
+            hlr_utils.result_insert(result, res_descr, value, map_so,
+                                    "x", axis)
         
     return result
 
