@@ -171,13 +171,15 @@ def tof_to_final_velocity_dgs(obj, velocity_i, time_zero_offset, **kwargs):
             L_d = hlr_utils.get_value(dist_sample_detector, i, ld_descr)
             L_d_err2 = hlr_utils.get_err2(dist_sample_detector, i, ld_descr)
 
-        value = axis_manip.tof_to_initial_wavelength_igs(val, err2,
-                                                         velocity_i[0],
-                                                         velocity_i[1],
-                                                         time_zero_offset[0],
-                                                         time_zero_offset[1],
-                                                         L_s, L_s_err2,
-                                                         L_d, L_d_err2)
+        value = axis_manip.tof_to_final_velocity_dgs(val, err2,
+                                                     velocity_i[0],
+                                                     velocity_i[1],
+                                                     time_zero_offset[0],
+                                                     time_zero_offset[1],
+                                                     L_s, L_s_err2,
+                                                     L_d, L_d_err2)
+        if i == 0:
+            print "B:", map_so.id, value[0]
 
         # Remove all velocities < 0
         if run_filter:
@@ -186,7 +188,9 @@ def tof_to_final_velocity_dgs(obj, velocity_i, time_zero_offset, **kwargs):
                 if val >= 0:
                     break
                 index += 1
-
+            
+            if i == 0:
+                print "BB:", index
             value[0].__delslice__(0, index)
             value[1].__delslice__(0, index)
             map_so.y.__delslice__(0, index)
@@ -194,6 +198,9 @@ def tof_to_final_velocity_dgs(obj, velocity_i, time_zero_offset, **kwargs):
         else:
             pass
 
+        if i == 0:
+            print "B:", map_so.id, value[0]
+        
         hlr_utils.result_insert(result, res_descr, value, map_so, "x", axis)
         
     return result
