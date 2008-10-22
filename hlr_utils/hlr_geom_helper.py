@@ -49,6 +49,9 @@ class Angles(object):
     def setPolar(self, polar):
         self.__polar = polar
 
+    def __str__(self):
+        return "Polar: "+str(self.__polar)+" Azi: "+str(self.__azi)
+
 def get_corner_geometry(filename):
     """
     This function will read in a geometry file containing the corner angle
