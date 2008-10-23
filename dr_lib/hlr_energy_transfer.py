@@ -206,10 +206,15 @@ def energy_transfer(obj, itype, axis_const, **kwargs):
                 raise RuntimeError("Do not know how to get solid angle from "\
                                    +"%s" % inst.get_name())
             
-        # Reverse the values due to the conversion
-        value_y = axis_manip.reverse_array_cp(scale_y[0])
-        value_var_y = axis_manip.reverse_array_cp(scale_y[1])
-        value_x = axis_manip.reverse_array_cp(value2[0])
+        if itype == "IGS":
+            # Reverse the values due to the conversion
+            value_y = axis_manip.reverse_array_cp(scale_y[0])
+            value_var_y = axis_manip.reverse_array_cp(scale_y[1])
+            value_x = axis_manip.reverse_array_cp(value2[0])
+        else:
+            value_y = scale_y[0]
+            value_var_y = scale_y[1]
+            value_x = value2[0]
 
         hlr_utils.result_insert(result, res_descr, (value_y, value_var_y),
                                 map_so, "all", 0, [value_x])
