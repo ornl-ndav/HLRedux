@@ -72,6 +72,21 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
         E_t_err2 = nessi_list.NessiList(len(E_t))        
 
     E_f = array_manip.sub_ncerr(E_i[0], E_i[1], E_t, E_t_err2)
+
+    # Check for negative final energies which will cause problems with
+    # wavelength conversion due to square root
+    if E_f[0][-1] < 0:
+        E_f[0].reverse()
+        E_f[1].reverse()
+        index = 0
+        for E in E_f[0]:
+            if E >= 0:
+                break
+            index += 1
+        E_f[0].__delslice__(0, index)
+        E_f[1].__delslice__(0, index)
+        E_f[0].reverse()
+        E_f[1].reverse()
     
     # Now we can get the final wavevector
     l_f = axis_manip.energy_to_wavelength(E_f[0], E_f[1])
