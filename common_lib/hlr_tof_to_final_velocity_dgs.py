@@ -214,13 +214,26 @@ def tof_to_final_velocity_dgs(obj, velocity_i, time_zero_offset, **kwargs):
             pass
 
         if lojac:
-            counts = utils.linear_order_jacobian(val, value[0],
-                                                 map_so.y, map_so.var_y)
-            hlr_utils.result_insert(result, res_descr, value, map_so,
-                                    "all", axis, [value[0]])
+            (map_so.y,
+             map_so.var_y) = utils.linear_order_jacobian(val,
+                                                         value[0],
+                                                         map_so.y,
+                                                         map_so.var_y)
+
+        # Need to reverse arrays due to conversion
+        if o_descr != "number":
+            valx = axis_manip.reverse_array_cp(value[0])
+            valxe = axis_manip.reverse_array_cp(value[1])
+            rev_value = (valx, valxe)
         else:
-            hlr_utils.result_insert(result, res_descr, value, map_so,
-                                    "x", axis)
+            rev_value = value
+
+        if map_so is not None:
+            map_so.y = axis_manip.reverse_array_cp(map_so.y)
+            map_so.var_y = axis_manip.reverse_array_cp(map_so.var_y)
+            
+        hlr_utils.result_insert(result, res_descr, rev_value, map_so,
+                                "x", axis)
         
     return result
 
