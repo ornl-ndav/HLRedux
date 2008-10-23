@@ -190,19 +190,15 @@ def tof_to_final_velocity_dgs(obj, velocity_i, time_zero_offset, **kwargs):
                                                      time_zero_offset[1],
                                                      L_s, L_s_err2,
                                                      L_d, L_d_err2)
-        if i == 0:
-            print "B:", map_so.id, value[0]
 
         # Remove all velocities < 0
         if run_filter:
             index = 0
-            for val in value[0]:
-                if val >= 0:
+            for valx in value[0]:
+                if valx >= 0:
                     break
                 index += 1
             
-            if i == 0:
-                print "BB:", index
             value[0].__delslice__(0, index)
             value[1].__delslice__(0, index)
             map_so.y.__delslice__(0, index)
