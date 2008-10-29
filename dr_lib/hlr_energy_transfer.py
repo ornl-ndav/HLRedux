@@ -53,10 +53,6 @@ def energy_transfer(obj, itype, axis_const, **kwargs):
                     and lambda_i/lambda_f for I{DGS}. The default is I{False}.
     @type scale: C{boolean}
 
-    @keyword lojac: A flag that turns on the calculation and application of
-                    the linear-order Jacobian. The default is I{False}.
-    @type lojac: C{boolean}
-
     @keyword sa_norm: A flag to turn on solid angle normlaization.
     @type sa_norm: C{boolean}
 
@@ -112,11 +108,6 @@ def energy_transfer(obj, itype, axis_const, **kwargs):
 
     if sa_norm:
         inst = obj.attr_list.instrument
-
-    try:
-        lojac = kwargs["lojac"]
-    except KeyError:
-        lojac = False
     
     # Primary axis for transformation. 
     axis = hlr_utils.one_d_units(obj, units)
@@ -161,15 +152,9 @@ def energy_transfer(obj, itype, axis_const, **kwargs):
             (E_i, E_i_err2) = axis_manip.wavelength_to_energy(l_i, l_i_err2)
             l_f = hlr_utils.get_special(axis_c, map_so)[:2]
             (E_f, E_f_err2) = axis_manip.wavelength_to_energy(l_f[0], l_f[1])
-            if lojac:
-                (y_val, y_err2) = utils.linear_order_jacobian(l_i, E_i, 
-                                                              y_val, y_err2)  
         else:
             (E_i, E_i_err2) = axis_c.toValErrTuple()
             (E_f, E_f_err2) = axis_manip.wavelength_to_energy(l_f, l_f_err2)
-            if lojac:
-                (y_val, y_err2) = utils.linear_order_jacobian(l_f, E_f, 
-                                                              y_val, y_err2)
 
         if scale:
             # Scale counts by lambda_f / lambda_i
@@ -206,15 +191,10 @@ def energy_transfer(obj, itype, axis_const, **kwargs):
                 raise RuntimeError("Do not know how to get solid angle from "\
                                    +"%s" % inst.get_name())
             
-        if itype == "IGS":
-            # Reverse the values due to the conversion
-            value_y = axis_manip.reverse_array_cp(scale_y[0])
-            value_var_y = axis_manip.reverse_array_cp(scale_y[1])
-            value_x = axis_manip.reverse_array_cp(value2[0])
-        else:
-            value_y = scale_y[0]
-            value_var_y = scale_y[1]
-            value_x = value2[0]
+        # Reverse the values due to the conversion
+        value_y = axis_manip.reverse_array_cp(scale_y[0])
+        value_var_y = axis_manip.reverse_array_cp(scale_y[1])
+        value_x = axis_manip.reverse_array_cp(value2[0])
 
         hlr_utils.result_insert(result, res_descr, (value_y, value_var_y),
                                 map_so, "all", 0, [value_x])

@@ -33,21 +33,26 @@ def integrate_spectra(obj, **kwargs):
     A failing pixel will have the integration tuple set to C{(nan, nan)}.
 
     @param obj: Object containing spectra that will have the integration
-                calculated from them.
+    calculated from them.
     @type obj: C{SOM.SOM} or C{SOM.SO}
     
     @param kwargs: A list of keyword arguments that the function accepts:
     
-    @keyword start: The start range for the integration.
+    @keyword start: Index of the starting bin
     @type start: C{int}
     
-    @keyword end: The end range for the integration. 
+    @keyword end: Index of the ending bin. This index is made inclusive by the
                   function.
     @type end: C{int}
     
     @keyword axis_pos: This is position of the axis in the axis array. If no
-                       argument is given, the default value is I{0}.
+    argument is given, the default value is I{0}.
     @type axis_pos: C{int}
+
+    @keyword bin_index: This is a flag to say that the values in the start and
+    end keyword arguments are either bin indicies (I{True}) or bounds
+    (I{False}). The default value is I{False}.
+    @type bin_index: C{boolean}
 
     @keyword norm: This is a flag to turn on the division of the individual
                    spectrum integrations by the solid angle of the
@@ -98,6 +103,12 @@ def integrate_spectra(obj, **kwargs):
     except KeyError:
         axis_pos = 0
 
+    # Check for bin_index keyword argument
+    try:
+        bin_index = kwargs["bin_index"]
+    except KeyError:
+        bin_index = False
+
     # Check for norm keyword argument
     try:
         norm = kwargs["norm"]
@@ -126,33 +137,51 @@ def integrate_spectra(obj, **kwargs):
         except KeyError:
             width = False
 
-    # If the integration start bound is not given, set to infinity
+    # If the integration start bound is not given, assume the 1st bin
     try:
         i_start = kwargs["start"]
     except KeyError:
-        i_start = float("inf")
+        if bin_index:
+            i_start = 0
+        else:
+            i_start = aobj.axis[axis_pos].val[0]
 
-    # If the integration end bound is not given, set to infinity
+    # If the integration end bound is not given, assume the last bin
     try:
         i_end = kwargs["end"]
     except KeyError:
-        i_end = float("inf")
+        if bin_index:
+            i_end = -1
+        else:
+            i_end = aobj.axis[axis_pos].val[-1]
     
     # iterate through the values
+    import bisect
+
     import dr_lib
 
-    len_obj = hlr_utils.get_length(obj)
-    for i in xrange(len_obj):
+    for i in xrange(hlr_utils.get_length(obj)):
         obj1 = hlr_utils.get_value(obj, i, o_descr, "all")
 
-        # If there's a NaN at the front and back, there are NaN's everywhere
-        if str(obj1.axis[axis_pos].val[0]) == "nan" and \
-               str(obj1.axis[axis_pos].val[-1]) == "nan":
-            print "Range not found:", obj1.id, i_start, i_end, len(obj1)
-            value = (float('nan'), float('nan'))
+        # Find the bin in the y values corresponding to the start bound
+        if not bin_index:
+            b_start = bisect.bisect(obj1.axis[axis_pos].val, i_start) - 1
         else:
-            value = dr_lib.integrate_axis(obj1, start=i_start, end=i_end,
+            b_start = i_start
+
+        # Find the bin in the y values corresponding to the end bound
+        if not bin_index:
+            b_end = bisect.bisect(obj1.axis[axis_pos].val, i_end) - 1
+        else:
+            b_end = i_end
+
+        try:
+            value = dr_lib.integrate_axis(obj1, start=b_start, end=b_end,
                                           width=width)
+        except IndexError:
+            print "Range not found:", obj1.id, b_start, b_end, len(obj1)
+            value = (float('nan'), float('nan'))
+
         if norm:
             if inst.get_name() == "BSS":
                 map_so = hlr_utils.get_map_so(obj, None, i)
@@ -203,4 +232,4 @@ if __name__ == "__main__":
     print "som            :", integrate_spectra(som1)
     print "som (1.5, 3.5) :", integrate_spectra(som1, start=1.5, end=3.5)
     print "som (0.5, 2.75):", integrate_spectra(som1, start=0.5, end=2.75)
-    print "som (total)    :", integrate_spectra(som1, total=True)
+    print "som (total)     :", integrate_spectra(som1, total=True)
