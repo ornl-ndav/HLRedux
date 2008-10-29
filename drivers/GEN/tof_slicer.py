@@ -62,6 +62,7 @@ def run(config):
     if config.dump_pxl:
         hlr_utils.write_file(config.data[0], "text/Spec", d_som1,
                              output_ext="tfp", verbose=config.verbose,
+                             path_replacement=config.path_replacement,
                              message="pixel TOF information")
     else:
         pass
@@ -73,6 +74,7 @@ def run(config):
         if config.dump_sxl:
             hlr_utils.write_file(config.data[0], "text/Spec", d_som2,
                                  output_ext="tsp", verbose=config.verbose,
+                                 path_replacement=config.path_replacement,
                                  message="TIB const sub pixel TOF information")
         
     else:
@@ -94,6 +96,7 @@ def run(config):
 
     hlr_utils.write_file(config.output, "text/Spec", d_som3, replace_ext=False,
                          verbose=config.verbose,
+                         path_replacement=config.path_replacement,
                          message="combined TOF information")
 
 if __name__ == "__main__":

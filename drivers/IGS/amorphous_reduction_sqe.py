@@ -264,7 +264,7 @@ def run(config, tim=None):
     e_som2 = dr_lib.subtract_bkg_from_data(cs_som, bcs_som,
                                            verbose=config.verbose,
                                            timer=tim,
-                                           dataset1="empty_can",
+                                           dataset1="data-empty_can",
                                            dataset2="background",
                                            scale=config.scale_bcs)
 
@@ -280,7 +280,7 @@ def run(config, tim=None):
         e_som3 = dr_lib.subtract_bkg_from_data(e_som1, b_som1,
                                                verbose=config.verbose,
                                                timer=tim,
-                                               dataset1="empty_can",
+                                               dataset1="norm-empty_can",
                                                dataset2="background",
                                                scale=config.scale_bcn)
     else:
