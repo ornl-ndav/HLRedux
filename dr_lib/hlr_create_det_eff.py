@@ -68,7 +68,7 @@ def create_det_eff(obj):
         for bc in axis_bc[0]:
             eff.append(constant * math.exp(-1.0 * exp_const * bc))
 
-        hlr_utils.result_insert(result, (eff, eff_err2), res_descr, map_so)
+        hlr_utils.result_insert(result, res_descr, (eff, eff_err2), map_so)
     
     return result
 
