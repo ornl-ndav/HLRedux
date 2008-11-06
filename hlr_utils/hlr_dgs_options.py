@@ -99,6 +99,10 @@ class DgsOptions(hlr_options.InstOptions):
                         type="float", nargs=2, help="Set the minimum and "\
                         +"maximum values in TOF [microseconds] for the "\
                         +"integration of the monitor.")
+
+        self.add_option("", "--det-eff", dest="det_eff",
+                        help="Specify the detector efficiency file or an "\
+                        +"efficiency tuple (efficiency,error2)")
                         
         self.add_option("", "--data-trans-coeff", dest="data_trans_coeff",
                         help="Specify the transmission coefficient value and "\
@@ -214,6 +218,16 @@ def DgsConfiguration(parser, configure, options, args):
                                       "--mon-int-range"):
         configure.mon_int_range = options.mon_int_range
 
+    # Set the detector efficiency. This can be a tuple (one number for all
+    # pixels) or a file containing numbers for all pixels.
+    if hlr_utils.cli_provide_override(configure, "det_eff", "--det-eff"):
+        try:
+            configure.det_eff = hlr_utils.DrParameterFromString(\
+                options.det_eff, True)
+        except ValueError:
+            configure.det_eff = hlr_utils.determine_files(options.det_eff,
+                                                          one_file=True)
+            
     # Set the transmission coefficient for the sample data background
     if hlr_utils.cli_provide_override(configure, "data_trans_coeff",
                                       "--data-trans-coeff"):
