@@ -71,3 +71,15 @@ def create_det_eff(obj):
         hlr_utils.result_insert(result, (eff, eff_err2), res_descr, map_so)
     
     return result
+
+if __name__ == "__main__":
+    import hlr_test
+
+    som1 = hlr_test.generate_som("histogram", 1, 1)
+    som1.setAllAxisUnits(["Angstroms"])
+
+    print "********** SOM1"
+    print "* ", som1[0]
+
+    print "********** create_det_eff"
+    print "* som: ", create_det_eff(som1)
