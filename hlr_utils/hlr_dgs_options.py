@@ -204,7 +204,7 @@ def DgsConfiguration(parser, configure, options, args):
                                       "--no-mon-norm"):
         configure.no_mon_norm = options.no_mon_norm
 
-    # Set proton charge normalizatoin flag
+    # Set proton charge normalization flag
     if hlr_utils.cli_provide_override(configure, "pc_norm",
                                       "--pc-norm"):
         configure.pc_norm = options.pc_norm        
