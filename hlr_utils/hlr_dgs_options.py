@@ -224,7 +224,7 @@ def DgsConfiguration(parser, configure, options, args):
         try:
             configure.det_eff = hlr_utils.DrParameterFromString(\
                 options.det_eff, True)
-        except ValueError:
+        except RuntimeError:
             configure.det_eff = hlr_utils.determine_files(options.det_eff,
                                                           one_file=True)
             
