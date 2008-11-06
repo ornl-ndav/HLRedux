@@ -209,8 +209,37 @@ def process_dgs_data(obj, conf, bcan, ecan, tcoeff, **kwargs):
 
         del obj3_1
 
-    # Step 15: Rebin the detector efficiency to the detector pixel axis
+    # Step 15: Create the detector efficiency
+    if conf.det_eff is not None:
+        if conf.verbose:
+            print "Creating detector efficiency spectra"
+
+        if t is not None:
+            t.getTime(False)
+            
+        det_eff = dr_lib.create_det_eff(obj3)
+
+        if t is not None:
+            t.getTime(msg="After creating detector efficiency spectra ")
+    else:
+        det_eff = None
 
     # Step 16: Divide the detector pixel spectra by the detector efficiency
+    if det_eff is not None:
+        if conf.verbose:
+            print "Correcting %s for detector efficiency" % dataset_type
 
-    return obj3
+        if t is not None:
+            t.getTime(False)
+
+        obj4 = common_lib.div_ncerr(obj3, det_eff)
+
+        if t is not None:
+            t.getTime(msg="After correcting %s for detector efficiency" \
+                      % dataset_type)
+    else:
+        obj4 = obj3
+
+    del obj3, det_eff
+
+    return obj4
