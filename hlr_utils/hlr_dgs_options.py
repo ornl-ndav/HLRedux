@@ -112,6 +112,11 @@ class DgsOptions(hlr_options.InstOptions):
                         help="Specify the file containing the corner "\
                         +"geometry information.")
 
+        self.add_option("", "--lambda-ratio", action="store_true",
+                        dest="lambda_ratio", help="Flag that turns on the "\
+                        +"lambda ratio scaling (lambda_i/lambda_f) during "\
+                        +"energy transfer conversion.")
+
         self.add_option("", "--lambda-bins", dest="lambda_bins",
                         help="Specify the minimum and maximum wavelength "\
                         +"values and the wavelength bin width in Angstroms")
@@ -229,6 +234,11 @@ def DgsConfiguration(parser, configure, options, args):
     if configure.corner_geom is None:
         parser.error("You must provide a corner geometry file via the "\
                      +"corner-geom option!")
+
+    # Set the lambda ratio flag
+    if hlr_utils.cli_provide_override(configure, "lambda_ratio",
+                                      "--lambda-ratio"):
+        configure.lambda_ratio = options.lambda_ratio
 
     # Set the energy transfer bins
     if hlr_utils.cli_provide_override(configure, "E_bins", "--energy-bins"):
