@@ -60,7 +60,7 @@ def create_det_eff(obj):
         axis = hlr_utils.get_value(obj, i, o_descr, "x", 0)
 
         axis_bc = utils.calc_bin_centers(axis)
-        eff_err2 = nessi_list.NessiList(len(axis_bc))
+        eff_err2 = nessi_list.NessiList(len(axis_bc[0]))
 
         eff = nessi_list.NessiList()
         constant = 1.0
