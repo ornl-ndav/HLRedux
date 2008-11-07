@@ -137,7 +137,15 @@ def run(config, tim=None):
         if tim is not None:
             tim.getTime(False)
 
-        norm_int = dr_lib.integrate_spectra(n_som2)
+        if conf.norm_int_range is None:
+            start_val = float("inf")
+            end_val = float("inf")
+        else:
+            start_val = conf.norm_int_range[0]
+            end_val = conf.norm_int_range[1]
+            
+        norm_int = dr_lib.integrate_spectra(n_som2, start=start_val,
+                                            end=end_val, width=True)
 
         if tim is not None:
             tim.getTime(msg="After integrating normalization spectra ")
