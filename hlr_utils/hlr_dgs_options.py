@@ -112,6 +112,11 @@ class DgsOptions(hlr_options.InstOptions):
                         help="Specify the transmission coefficient value and "\
                         +"err^2 for the normalization data background.")
 
+        self.add_option("", "--norm-int-range", dest="norm_int_range",
+                        type="float", nargs=2, help="Set the minimum and "\
+                        +"maximum values in wavelength [Angstroms] for the "\
+                        +"integration of the vanadium (norm) dataset.")
+
         self.add_option("", "--corner-geom", dest="corner_geom",
                         help="Specify the file containing the corner "\
                         +"geometry information.")
@@ -239,6 +244,11 @@ def DgsConfiguration(parser, configure, options, args):
                                       "--norm-trans-coeff"):
         configure.norm_trans_coeff = hlr_utils.DrParameterFromString(\
             options.norm_trans_coeff, True)        
+
+    # Set the wavelength range for the vanadium normalization integration
+    if hlr_utils.cli_provide_override(configure, "norm_int_range",
+                                      "--norm-int-range"):
+        configure.norm_int_range = options.norm_int_range
 
     # Set the corner geometry information file
     if hlr_utils.cli_provide_override(configure, "corner_geom",
