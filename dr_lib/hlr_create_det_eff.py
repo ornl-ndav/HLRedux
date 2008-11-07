@@ -36,6 +36,10 @@ def create_det_eff(obj):
 
     @return: Object containing the detector efficiency spectra
     @rtype: C{SOM.SOM} or C{SOM.SO}
+
+
+    @raise TypeError: Incoming object is not a C{SOM} or a C{SO}
+    @raise RuntimeError: The C{SOM} x-axis units are not I{Angstroms}
     """
     # import the helper functions
     import hlr_utils
@@ -45,6 +49,16 @@ def create_det_eff(obj):
     # set up for working through data
     (result, res_descr) = hlr_utils.empty_result(obj)
     o_descr = hlr_utils.get_descr(obj)
+
+    if o_descr != "SOM" and o_descr != "SO":
+        raise TypeError("Only SOM or SO objects permitted to create "\
+                        +"efficiency spectra!")
+
+    # Check units on SOM, SO is assumed to be correct
+    if o_descr == "SOM":
+        if not obj.hasAxisUnits("Angstroms"):
+            raise RuntimeError("Incoming object must has a wavelength axis "\
+                               +"with units of Angstroms!")
 
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
 
