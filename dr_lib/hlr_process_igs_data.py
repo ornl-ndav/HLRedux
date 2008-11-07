@@ -424,14 +424,24 @@ def process_igs_data(datalist, conf, **kwargs):
         # Step 11: Convert TOF_begin and TOF_end to wavelength
         if conf.verbose:
             print "Converting TOF_begin and TOF_end to wavelength"
+
+        # Check for time-zero slope information
+        try:
+            tz_slope = conf.time_zero_slope.toValErrTuple()
+        except AttributeError:
+            tz_slope = (0.0, 0.0)
+
+        # Check for time-zero offset information
+        try:
+            tz_offset = conf.time_zero_offset.toValErrTuple()
+        except AttributeError:
+            tz_offset = (0.0, 0.0)            
         
         l_begin = common_lib.tof_to_initial_wavelength_igs_lin_time_zero(\
-            tof_begin, time_zero_slope=conf.time_zero_slope.toValErrTuple(),
-            time_zero_offset=conf.time_zero_offset.toValErrTuple(),
+            tof_begin, time_zero_slope=tz_slope, time_zero_offset=tz_offset,
             iobj=dp_som5, run_filter=False)
         l_end = common_lib.tof_to_initial_wavelength_igs_lin_time_zero(\
-            tof_end, time_zero_slope=conf.time_zero_slope.toValErrTuple(),
-            time_zero_offset=conf.time_zero_offset.toValErrTuple(),
+            tof_end, time_zero_slope=tz_slope, time_zero_offset=tz_offset,
             iobj=dp_som5, run_filter=False)
 
         # Step 12: tof-least-bkg to lambda-least-bkg
