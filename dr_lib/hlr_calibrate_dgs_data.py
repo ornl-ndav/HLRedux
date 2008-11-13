@@ -202,15 +202,15 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
     # Step 6: Subtract scaled dark current from data set
     if dkcur1 is not None:
         if conf.verbose:
-            print "Scaling %s by scaled dark current" % dataset_type
+            print "Subtracting %s by scaled dark current" % dataset_type
 
         if t is not None:
             t.getTime(False)
 
-        dp_som3 = common_lib.div_ncerr(dp_som2, dkcur1)
+        dp_som3 = common_lib.sub_ncerr(dp_som2, dkcur1)
 
         if t is not None:
-            t.getTime(msg="After scaling %s by scaled dark current" \
+            t.getTime(msg="After subtracting %s by scaled dark current" \
                       % dataset_type)
     else:
         dp_som3 = dp_som2
