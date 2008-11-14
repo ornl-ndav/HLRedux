@@ -78,6 +78,10 @@ class DgsOptions(hlr_options.InstOptions):
                         help="Specify a file that contains a list of pixel "\
                         +"ids to be read from the data")
 
+        self.add_option("", "--tib-const", dest="tib_const",
+                        help="Specify the value and err^2 for a "\
+                        +"time-independent background subtraction constant.")
+
         self.add_option("", "--initial-energy", dest="initial_energy",
                         help="Specify the initial energy, err^2 for the "\
                         +"reduction in units of meV")
@@ -195,6 +199,11 @@ def DgsConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "roi_file", "--roi-file"):
         configure.roi_file = hlr_utils.determine_files(options.roi_file,
                                                        one_file=True)
+
+    # Set a time-independent background subtraction constant
+    if hlr_utils.cli_provide_override(configure, "tib_const", "--tib-const"):
+        configure.tib_const = hlr_utils.DrParameterFromString(\
+            options.tib_const, True)
 
     # Set the initial energy
     if hlr_utils.cli_provide_override(configure, "initial_energy",
