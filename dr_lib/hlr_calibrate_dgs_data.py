@@ -236,16 +236,15 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
     else:
         dp_som3 = dp_som2
 
+    if conf.dump_ctof_comb:
+        dp_som3_1 = dr_lib.sum_all_spectra(dp_som3)
+        hlr_utils.write_file(conf.output, "text/Spec", dp_som3_1,
+                             output_ext="ctof",
+                             data_ext=conf.ext_replacement,    
+                             path_replacement=conf.path_replacement,
+                             verbose=conf.verbose,
+                             message="combined calibrated TOF information")
         
-    dp_som3_1 = dr_lib.sum_all_spectra(dp_som3)
-    hlr_utils.write_file(conf.output, "text/Spec", dp_som3_1,
-                         output_ext="ctof",
-                         data_ext=conf.ext_replacement,    
-                         path_replacement=conf.path_replacement,
-                         verbose=conf.verbose,
-                         message="combined calibrated TOF information")
-    
-    del dp_som3_1
-
+        del dp_som3_1
     
     return dp_som3
