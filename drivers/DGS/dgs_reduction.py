@@ -73,6 +73,7 @@ def run(config, tim=None):
         b_som1 = dr_lib.calibrate_dgs_data(config.bcan, config, dc_som,
                                            dataset_type="black_can",
                                            inst_geom_dst=inst_geom_dst,
+                                           tib_const=config.tib_const,
                                            timer=tim)
     else:
         b_som1 = None
@@ -82,6 +83,7 @@ def run(config, tim=None):
         e_som1 = dr_lib.calibrate_dgs_data(config.ecan, config, dc_som,
                                            dataset_type="empty_can",
                                            inst_geom_dst=inst_geom_dst,
+                                           tib_const=config.tib_const,
                                            timer=tim)
     else:
         e_som1 = None
@@ -91,6 +93,7 @@ def run(config, tim=None):
         n_som1 = dr_lib.calibrate_dgs_data(config.norm, config, dc_som,
                                            dataset_type="normalization",
                                            inst_geom_dst=inst_geom_dst,
+                                           tib_const=config.tib_const,
                                            timer=tim)
     else:
         n_som1 = None
@@ -98,6 +101,7 @@ def run(config, tim=None):
     # Perform Steps 3-6 on sample data
     d_som1 = dr_lib.calibrate_dgs_data(config.data, config, dc_som,
                                        inst_geom_dst=inst_geom_dst,
+                                       tib_const=config.tib_const,
                                        timer=tim)
 
     # Perform Steps 7-16 on sample data
