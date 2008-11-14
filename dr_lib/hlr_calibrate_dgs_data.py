@@ -46,6 +46,10 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
     @keyword inst_geom_dst: File object that contains instrument geometry
                             information.
     @type inst_geom_dst: C{DST.GeomDST}
+
+    @keyword tib_const: A time-independent background constant to subtract
+                        from every pixel.
+    @type tib_const: L{hlr_utils.DrParameter}
     
     @keyword dataset_type: The practical name of the dataset being processed.
                            The default value is I{data}.
@@ -63,6 +67,11 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
     import hlr_utils
 
     # Check keywords
+    try:
+        tib_const = kwargs["tib_const"]
+    except KeyError:
+        tib_const = None
+    
     try:
         dataset_type = kwargs["dataset_type"]
     except KeyError:
@@ -212,7 +221,31 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
         if t is not None:
             t.getTime(msg="After subtracting %s by scaled dark current" \
                       % dataset_type)
+    elif tib_const is not None and dkcur1 is None:
+        if conf.verbose:
+            print "Subtracting TIB constant from %s" % dataset_type
+
+        if t is not None:
+            t.getTime(False)
+  
+        dp_som3 = common_lib.sub_ncerr(dp_som2, tib_const.toValErrTuple())
+
+        if t is not None:
+            t.getTime(msg="After subtracting TIB constant from %s" \
+                      % dataset_type)
     else:
         dp_som3 = dp_som2
+
+        
+    dp_som3_1 = dr_lib.sum_all_spectra(dp_som3)
+    hlr_utils.write_file(conf.output, "text/Spec", dp_som3_1,
+                         output_ext="ctof",
+                         data_ext=conf.ext_replacement,    
+                         path_replacement=conf.path_replacement,
+                         verbose=conf.verbose,
+                         message="combined calibrated TOF information")
+    
+    del dp_som3_1
+
     
     return dp_som3
