@@ -154,6 +154,12 @@ class DgsOptions(hlr_options.InstOptions):
                         +"the z-component of the momentum transfer in "\
                         +"1/Angstroms.")        
 
+        self.add_option("", "--dump-ctof-comb", action="store_true",
+                        dest="dump_ctof_comb",
+                        help="Flag to dump the calibrated TOF information "\
+                        +"for all pixels combined. Creates a *.ctof file.")
+        self.set_defaults(dump_ctof_comb=False)
+
         self.add_option("", "--dump-wave-comb", action="store_true",
                         dest="dump_wave_comb",
                         help="Flag to dump the wavelength information for all"\
@@ -297,6 +303,11 @@ def DgsConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "lambda_bins",
                                       "--lambda-bins"):
         configure.lambda_bins = hlr_utils.AxisFromString(options.lambda_bins)
+
+    # Set the ability to dump the combined calibrated TOF information
+    if hlr_utils.cli_provide_override(configure, "dump_ctof_comb",
+                                      "--dump-ctof-comb"):
+        configure.dump_ctof_comb = options.dump_ctof_comb
 
     # Set the ability to dump the combined final wavelength information
     if hlr_utils.cli_provide_override(configure, "dump_wave_comb",
