@@ -208,6 +208,8 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
     else:
         dkcur1 = dkcur
 
+    del dkcur
+
     # Step 6: Subtract scaled dark current from data set
     if dkcur1 is not None:
         if conf.verbose:
@@ -235,6 +237,8 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
                       % dataset_type)
     else:
         dp_som3 = dp_som2
+
+    del dp_som2, dkcur1
 
     if conf.dump_ctof_comb:
         dp_som3_1 = dr_lib.sum_all_spectra(dp_som3)
