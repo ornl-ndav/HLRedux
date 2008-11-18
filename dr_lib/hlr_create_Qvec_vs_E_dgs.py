@@ -47,6 +47,8 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
     import common_lib
     import hlr_utils
 
+    import os
+    
     # Check keywords
     try:
         t = kwargs["timer"]
@@ -87,7 +89,9 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
         E_f[1].__delslice__(0, index)
         E_f[0].reverse()
         E_f[1].reverse()
-    
+
+    len_E = len(E_f[0]) - 1
+
     # Now we can get the final wavevector
     l_f = axis_manip.energy_to_wavelength(E_f[0], E_f[1])
     k_f = axis_manip.wavelength_to_scalar_k(l_f[0], l_f[1])
@@ -104,6 +108,15 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
     if t is not None:
         t.getTime(msg="After reading in corner geometry information ")
 
+    CNT = {}
+    V1 = {}
+    V2 = {}
+    V3 = {}
+    V4 = {}
+
+    if t is not None:
+        t.getTime(False)
+
     # Iterate though the data
     len_som = hlr_utils.get_length(som)
     for i in xrange(len_som):
@@ -112,18 +125,12 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
         yval = hlr_utils.get_value(som, i, "SOM", "y")
         yerr2 = hlr_utils.get_err2(som, i, "SOM", "y")
 
+        CNT[str(map_so.id)] = yval
+
         polar = hlr_utils.get_parameter("polar", map_so, inst)
         azi = hlr_utils.get_parameter("azimuthal", map_so, inst)
 
         cangles = corner_angles[str(map_so.id)]
-
-        (Qx, Qx_err2,
-         Qy, Qy_err2,
-         Qz, Qz_err2) = axis_manip.init_scatt_wavevector_to_Q(k_i[0], k_i[1],
-                                                              k_f[0], k_f[1],
-                                                              azi[0], azi[1],
-                                                              polar[0],
-                                                              polar[1])
 
         (Qx1, Qx1_err2,
          Qy1, Qy1_err2,
@@ -133,6 +140,11 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
                                                        0.0,
                                                        cangles.getPolar(0),
                                                        0.0)
+        V1[str(map_so.id)] = {}
+        V1[str(map_so.id)]["x"] = Qx1
+        V1[str(map_so.id)]["y"] = Qy1
+        V1[str(map_so.id)]["z"] = Qz1
+        
 
         (Qx2, Qx2_err2,
          Qy2, Qy2_err2,
@@ -143,6 +155,11 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
                                                        cangles.getPolar(1),
                                                        0.0)
 
+        V2[str(map_so.id)] = {}
+        V2[str(map_so.id)]["x"] = Qx2
+        V2[str(map_so.id)]["y"] = Qy2
+        V2[str(map_so.id)]["z"] = Qz2
+        
         (Qx3, Qx3_err2,
          Qy3, Qy3_err2,
          Qz3, Qz3_err2) = axis_manip.init_scatt_wavevector_to_Q(k_i[0], k_i[1],
@@ -151,6 +168,10 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
                                                        0.0,
                                                        cangles.getPolar(2),
                                                        0.0)
+        V3[str(map_so.id)] = {}
+        V3[str(map_so.id)]["x"] = Qx3
+        V3[str(map_so.id)]["y"] = Qy3
+        V3[str(map_so.id)]["z"] = Qz3
         
         (Qx4, Qx4_err2,
          Qy4, Qy4_err2,
@@ -160,3 +181,37 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
                                                        0.0,
                                                        cangles.getPolar(3),
                                                        0.0)
+
+        V4[str(map_so.id)] = {}
+        V4[str(map_so.id)]["x"] = Qx4
+        V4[str(map_so.id)]["y"] = Qy4
+        V4[str(map_so.id)]["z"] = Qz4
+
+        del Qx1_err2, Qy1_err2, Qz1_err2, Qx2_err2, Qy2_err2, Qz2_err2
+        del Qx3_err2, Qy3_err2, Qz3_err2, Qx4_err2, Qy4_err2, Qz4_err2
+
+    if t is not None:
+        t.getTime(msg="After calculating verticies ")
+
+    # Form the messages
+    if t is not None:
+        t.getTime(False)
+        
+    for k in xrange(len_E):
+        for id in CNT:
+            __get_coords(V1, id, k)
+            __get_coords(V2, id, k)
+            __get_coords(V3, id, k)
+            __get_coords(V4, id, k)
+            __get_coords(V1, id, k+1)
+            __get_coords(V2, id, k+1)
+            __get_coords(V3, id, k+1)
+            __get_coords(V4, id, k+1)
+
+    if t is not None:
+        t.getTime(msg="After creating messages ")
+            
+def __get_coords(coords, id, index):
+    x = coords[id]["x"][index]
+    y = coords[id]["y"][index]
+    z = coords[id]["z"][index]
