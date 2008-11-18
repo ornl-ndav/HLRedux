@@ -131,7 +131,7 @@ def run(config, tim=None):
     else:
         n_som2 = n_som1
         
-    del n_som1
+    del n_som1, b_som1, e_som1
 
     # Step 17: Integrate normalization spectra
     if n_som2 is not None:
