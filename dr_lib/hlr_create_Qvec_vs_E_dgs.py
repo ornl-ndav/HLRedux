@@ -196,22 +196,32 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
     # Form the messages
     if t is not None:
         t.getTime(False)
-        
+
+    import socket
+    dsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    dsocket.connect(('arcs2.sns.gov', 45632))
+    
     for k in xrange(len_E):
         for id in CNT:
-            __get_coords(V1, id, k)
-            __get_coords(V2, id, k)
-            __get_coords(V3, id, k)
-            __get_coords(V4, id, k)
-            __get_coords(V1, id, k+1)
-            __get_coords(V2, id, k+1)
-            __get_coords(V3, id, k+1)
-            __get_coords(V4, id, k+1)
+            result = []
+            result.append(str(k))
+            result.append(str(CNT[id][k]))
+            __get_coords(V1, id, k, result)
+            __get_coords(V2, id, k, result)
+            __get_coords(V3, id, k, result)
+            __get_coords(V4, id, k, result)
+            __get_coords(V1, id, k+1, result)
+            __get_coords(V2, id, k+1, result)
+            __get_coords(V3, id, k+1, result)
+            __get_coords(V4, id, k+1, result)
+            result.append('\n')
+
+            dsocket.send(" ".join(result))
 
     if t is not None:
         t.getTime(msg="After creating messages ")
             
-def __get_coords(coords, id, index):
-    x = coords[id]["x"][index]
-    y = coords[id]["y"][index]
-    z = coords[id]["z"][index]
+def __get_coords(coords, id, index, output):
+    output.append(str(coords[id]["x"][index]))
+    output.append(str(coords[id]["y"][index]))
+    output.append(str(coords[id]["z"][index]))
