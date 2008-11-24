@@ -244,6 +244,7 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
         dp_som3_1 = dr_lib.sum_all_spectra(dp_som3)
         hlr_utils.write_file(conf.output, "text/Spec", dp_som3_1,
                              output_ext="ctof",
+                             extra_tag=dataset_type,
                              data_ext=conf.ext_replacement,    
                              path_replacement=conf.path_replacement,
                              verbose=conf.verbose,
