@@ -202,6 +202,7 @@ def process_dgs_data(obj, conf, bcan, ecan, tcoeff, **kwargs):
                                      rebin_axis=conf.lambda_bins.toNessiList())
         hlr_utils.write_file(conf.output, "text/Spec", obj3_1,
                              output_ext="fwv",
+                             extra_tag=dataset_type,
                              data_ext=conf.ext_replacement,    
                              path_replacement=conf.path_replacement,
                              verbose=conf.verbose,
