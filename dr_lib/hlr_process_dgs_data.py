@@ -60,6 +60,7 @@ def process_dgs_data(obj, conf, bcan, ecan, tcoeff, **kwargs):
     @return: Object that has undergone all requested processing steps
     @rtype: C{SOM.SOM}
     """
+    import array_manip
     import common_lib
     import dr_lib
     import hlr_utils
@@ -84,7 +85,7 @@ def process_dgs_data(obj, conf, bcan, ecan, tcoeff, **kwargs):
         if t is not None:
             t.getTime(False)
             
-        bccoeff = common_lib.sub_ncerr((1.0, 0.0), tcoeff)
+        bccoeff = array_manip.sub_ncerr(1.0, 0.0, tcoeff[0], tcoeff[1])
         bcan1 = common_lib.mult_ncerr(bcan, bccoeff)
 
         if t is not None:
