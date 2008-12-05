@@ -118,7 +118,7 @@ class DgsOptions(hlr_options.InstOptions):
 
         self.add_option("", "--norm-int-range", dest="norm_int_range",
                         type="float", nargs=2, help="Set the minimum and "\
-                        +"maximum values in wavelength [Angstroms] for the "\
+                        +"maximum values in energy transfer [meV] for the "\
                         +"integration of the vanadium (norm) dataset.")
 
         self.add_option("", "--corner-geom", dest="corner_geom",
