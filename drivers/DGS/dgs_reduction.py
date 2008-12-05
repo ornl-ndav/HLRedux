@@ -115,7 +115,7 @@ def run(config, tim=None):
                                      timer=tim)
 
     del d_som1
-    
+
     # Perform Steps 7-16 on normalization data
     if n_som1 is not None:
         if config.norm_trans_coeff is None:
@@ -141,18 +141,33 @@ def run(config, tim=None):
         if tim is not None:
             tim.getTime(False)
 
-        if conf.norm_int_range is None:
+        if config.norm_int_range is None:
             start_val = float("inf")
             end_val = float("inf")
         else:
-            start_val = conf.norm_int_range[0]
-            end_val = conf.norm_int_range[1]
+            start_val = common_lib.energy_to_wavelength(\
+                (config.norm_int_range[1], 0.0))[0]
+            end_val = common_lib.energy_to_wavelength(\
+                (config.norm_int_range[0], 0.0))[0]
             
         norm_int = dr_lib.integrate_spectra(n_som2, start=start_val,
                                             end=end_val, width=True)
 
         if tim is not None:
             tim.getTime(msg="After integrating normalization spectra ")
+
+        if config.dump_norm:
+            file_comment = "Normalization Integration range: %0.3fA, %0.3fA" \
+                           % (start_val, end_val)
+            
+            hlr_utils.write_file(config.output, "text/num-info", norm_int,
+                                 output_ext="norm",
+                                 data_ext=config.ext_replacement,
+                                 path_replacement=config.path_replacement,
+                                 verbose=config.verbose,
+                                 message="normalization values",
+                                 comments=[file_comment],
+                                 tag="Integral", units="counts")   
     else:
         norm_int = n_som2
         
