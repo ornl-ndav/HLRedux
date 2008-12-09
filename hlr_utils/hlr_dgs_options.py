@@ -170,7 +170,15 @@ class DgsOptions(hlr_options.InstOptions):
                         dest="dump_et_comb",
                         help="Flag to dump the energy transfer information "\
                         +"for all pixels combined. Creates a *.et file.")
-        self.set_defaults(dump_et_comb=False)        
+        self.set_defaults(dump_et_comb=False)
+
+        self.add_option("-s", "--socket", action="store_true",
+                        dest="socket")
+        self.set_defaults(socket=False)
+
+        self.add_option("-t", "--file", action="store_true",
+                        dest="file")
+        self.set_defaults(file=False)
 
 def DgsConfiguration(parser, configure, options, args):
     """
@@ -318,3 +326,9 @@ def DgsConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "dump_et_comb",
                                       "--dump-et-comb"):
         configure.dump_et_comb = options.dump_et_comb        
+
+    if hlr_utils.cli_provide_override(configure, "socket", "--socket", "s"):
+        configure.socket = options.socket
+
+    if hlr_utils.cli_provide_override(configure, "file", "--file", "t"):
+        configure.file = options.file        
