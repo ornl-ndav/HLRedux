@@ -109,6 +109,7 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
         t.getTime(msg="After reading in corner geometry information ")
 
     CNT = {}
+    ERR2 = {}
     V1 = {}
     V2 = {}
     V3 = {}
@@ -126,6 +127,7 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
         yerr2 = hlr_utils.get_err2(som, i, "SOM", "y")
 
         CNT[str(map_so.id)] = yval
+        ERR2[str(map_so.id)] = yerr2
 
         polar = hlr_utils.get_parameter("polar", map_so, inst)
         azi = hlr_utils.get_parameter("azimuthal", map_so, inst)
@@ -197,15 +199,24 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
     if t is not None:
         t.getTime(False)
 
+    """
     import socket
     dsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     dsocket.connect(('arcs2.sns.gov', 45632))
-    
+
+    topdir = str(som.attr_list["data-run_number"].getValue())+"-3"
+    try:
+        os.mkdir(topdir)
+    except OSError:
+        pass
+    """
     for k in xrange(len_E):
+        #ofile = open(os.path.join(topdir, "bmesh%04d.in" % k), "w")
         for id in CNT:
             result = []
             result.append(str(k))
             result.append(str(CNT[id][k]))
+            result.append(str(ERR2[id][k]))
             __get_coords(V1, id, k, result)
             __get_coords(V2, id, k, result)
             __get_coords(V3, id, k, result)
@@ -215,8 +226,9 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
             __get_coords(V3, id, k+1, result)
             __get_coords(V4, id, k+1, result)
             result.append('\n')
-
-            dsocket.send(" ".join(result))
+            #print >> ofile, " ".join(result)
+            #dsocket.send(" ".join(result))
+        #ofile.close()
 
     if t is not None:
         t.getTime(msg="After creating messages ")
