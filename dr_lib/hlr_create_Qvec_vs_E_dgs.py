@@ -41,6 +41,16 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
     @keyword corner_geom: The filename that contains the corner geometry
                           information.
     @type corner_geom: C{string}
+
+    @keyword use_socket: A flag that turns on writing the information to a
+                         socket.
+    @type use_socket: C{boolean}
+
+    @keyword use_file: A flag that turns on writing the information to a file.
+    @type use_file: C{boolean}
+
+    @keyword output: The output filename and or directory.
+    @type output: C{string}
     """
     import array_manip
     import axis_manip
@@ -59,6 +69,21 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
         corner_geom = kwargs["corner_geom"]
     except KeyError:
         corner_geom = ""
+
+    try:
+        use_socket = kwargs["use_socket"]
+    except KeyError:
+        use_socket = False
+
+    try:
+        use_file = kwargs["use_file"]
+    except KeyError:
+        use_file = False
+
+    try:
+        output = kwargs["output"]
+    except KeyError:
+        output = None
 
     # Convert initial energy to initial wavevector
     l_i = common_lib.energy_to_wavelength(E_i)
@@ -199,19 +224,43 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
     if t is not None:
         t.getTime(False)
 
-    """
-    import socket
-    dsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    dsocket.connect(('arcs2.sns.gov', 45632))
+    if use_socket:
+        import socket
+        dsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        dsocket.connect(('arcs2.sns.gov', 45632))
 
-    topdir = str(som.attr_list["data-run_number"].getValue())+"-3"
-    try:
-        os.mkdir(topdir)
-    except OSError:
-        pass
-    """
+    if use_file:
+        if output is not None:
+            outdir = os.path.dirname(output)
+            if outdir != '':
+                if outdir.rfind('.') != -1:
+                    outdir = ""
+        else:
+            outdir = ""
+
+        topdir = os.path.join(outdir, 
+                              str(som.attr_list["data-run_number"].getValue()\
+                                  + "-mesh"))
+        try:
+            os.mkdir(topdir)
+        except OSError:
+            pass
+
+        outtag = os.path.basename(output)
+        if outtag.rfind('.') == -1:
+            outtag = ""
+        else:
+            outtag = outtag.split('.')[0]
+
+        if outtag != "":
+            filehead = outtag + "_bmesh"
+        else:
+            filehead = "bmesh"
+
     for k in xrange(len_E):
-        #ofile = open(os.path.join(topdir, "bmesh%04d.in" % k), "w")
+        if use_file:
+            ofile = open(os.path.join(topdir, "%s%04d.in" % (filehead, k)),
+                         "w")
         for id in CNT:
             result = []
             result.append(str(k))
@@ -225,10 +274,15 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
             __get_coords(V2, id, k+1, result)
             __get_coords(V3, id, k+1, result)
             __get_coords(V4, id, k+1, result)
-            result.append('\n')
-            #print >> ofile, " ".join(result)
-            #dsocket.send(" ".join(result))
-        #ofile.close()
+            if use_socket:
+                result.append('\n')
+                dsocket.send(" ".join(result))
+
+            if use_file:
+                print >> ofile, " ".join(result)
+
+        if use_file:
+            ofile.close()
 
     if t is not None:
         t.getTime(msg="After creating messages ")
