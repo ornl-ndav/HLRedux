@@ -20,32 +20,20 @@
 # its use would not infringe privately owned rights.
 #
 
-"""
-The functions and objects in this module provide support functionality for
-handling various data reduction requests.
-"""
+# $Id$
 
-from hlr_1D_units import *
-from hlr_2D_helper import *
-from hlr_amr_options import AmrOptions, AmrConfiguration
-from hlr_axis_object import *
-from hlr_binner_helper import *
-from hlr_bisect_helper import bisect_helper
-from hlr_config import Configure, ConfigFromXml
-from hlr_dgs_options import DgsOptions, DgsConfiguration
-from hlr_drparameter import *
-from hlr_fix_index import *
-from hlr_geom_helper import *
-from hlr_igs_options import IgsOptions, IgsConfiguration
-from hlr_math_compatible import *
-from hlr_nxpath import *
-from hlr_options import *
-from hlr_ref_options import RefOptions, RefConfiguration
-from hlr_sas_options import SansOptions, SansConfiguration
-from hlr_data_helper import *
-from hlr_driver_helper import *
+def create_binner_string(config):
+    """
+    This function takes a L{hlr_utils.Configuration} object, removes the
+    elements from it that are not fundamental to a given run of the data
+    reduction and create an MD5 sum ID from that configuration.
 
-from HLR_version import version as __version__
+    @param config: The current data reduction configuration
+    @type config: L{hlr_utils.Configuration}
 
-#version
-__id__ = "$Id$"
+
+    @return: A unique string based off an MD5 sum of the configuration
+    @rtype: C{string}
+    """
+
+    return ""
