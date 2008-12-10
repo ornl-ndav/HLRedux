@@ -50,16 +50,27 @@ def create_binner_string(config):
     del cconf.__dict__["dsmon_path"]
     del cconf.__dict__["so_axis"]
     del cconf.__dict__["data_paths"]
+    del cconf.__dict__["output"]
     if "file" in cconf.__dict__:
         del cconf.__dict__["file"]
     if "socket" in cconf.__dict__:
         del cconf.__dict__["socket"]
+    if "dump_tof_comb" in cconf.__dict__:
+        del cconf.__dict__["dump_tof_comb"]        
     if "dump_wave_comb" in cconf.__dict__:
         del cconf.__dict__["dump_wave_comb"]
     if "dump_et_comb" in cconf.__dict__:
-        del cconf.__dict__["dump_et_comb"]        
+        del cconf.__dict__["dump_et_comb"]
 
-    output = str(cconf)
-    print "B:", str
+    # Get the keys, sort them and create the string. This should make a more
+    # stable MD5 sum.
+    
+    ckeys = cconf.__dict__.keys()
+    ckeys.sort()
 
+    result = []
+    for ckey in ckeys:
+        result.append("%s:%s" % (ckey, str(cconf.__dict__[ckey])))
+
+    output = " ".join(result)
     return md5.new(output).hexdigest()
