@@ -32,8 +32,34 @@ def create_binner_string(config):
     @type config: L{hlr_utils.Configuration}
 
 
-    @return: A unique string based off an MD5 sum of the configuration
+    @return: A unique string based off an MD5 sum of the amended configuration
     @rtype: C{string}
     """
+    import copy
+    import md5
 
-    return ""
+    cconf = copy.deepcopy(config)
+
+    # Remove certain aspects of configuration that do not constitute needing
+    # a brand new 3D mesh.
+
+    del cconf.__dict__["lambda_bins"]
+    del cconf.__dict__["verbose"]
+    del cconf.__dict__["path_replacement"]
+    del cconf.__dict__["ext_replacement"]
+    del cconf.__dict__["dsmon_path"]
+    del cconf.__dict__["so_axis"]
+    del cconf.__dict__["data_paths"]
+    if "file" in cconf.__dict__:
+        del cconf.__dict__["file"]
+    if "socket" in cconf.__dict__:
+        del cconf.__dict__["socket"]
+    if "dump_wave_comb" in cconf.__dict__:
+        del cconf.__dict__["dump_wave_comb"]
+    if "dump_et_comb" in cconf.__dict__:
+        del cconf.__dict__["dump_et_comb"]        
+
+    output = str(cconf)
+    print "B:", str
+
+    return md5.new(output).hexdigest()
