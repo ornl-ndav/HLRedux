@@ -22,7 +22,7 @@
 
 # $Id$
 
-def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
+def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
     """
     This function starts with the energy transfer axis from DGS reduction and
     turns this into a 4D spectra with Qx, Qy, Qz and Et axes.
@@ -32,6 +32,9 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
 
     @param E_i: The initial energy for the given data.
     @type E_i: C{tuple}
+
+    @param conf: Object that contains the current setup of the driver.
+    @type conf: L{hlr_utils.Configure}
 
     @param kwargs: A list of keyword arguments that the function accepts:
 
@@ -226,8 +229,10 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
 
     if use_socket:
         import socket
-        dsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        dsocket.connect(('arcs2.sns.gov', 45632))
+        #dsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #dsocket.connect(('arcs2.sns.gov', 45632))
+        jobstr = hlr_utils.create_binner_string(conf)
+        print "A:", jobstr
 
     if use_file:
         if output is not None:
@@ -276,7 +281,7 @@ def create_Qvec_vs_E_dgs(som, E_i, **kwargs):
             __get_coords(V4, id, k+1, result)
             if use_socket:
                 result.append('\n')
-                dsocket.send(" ".join(result))
+                #dsocket.send(" ".join(result))
 
             if use_file:
                 print >> ofile, " ".join(result)
