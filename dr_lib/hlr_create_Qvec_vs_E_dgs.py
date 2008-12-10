@@ -229,10 +229,10 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
 
     if use_socket:
         import socket
-        #dsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        #dsocket.connect(('arcs2.sns.gov', 45632))
-        jobstr = hlr_utils.create_binner_string(conf)
-        print "A:", jobstr
+        dsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        dsocket.connect(('arcs2.sns.gov', 45632))
+        jobstr = 'MR' + hlr_utils.create_binner_string(conf) + 'JH\n'
+        dsocket.send(jobstr)
 
     if use_file:
         if output is not None:
@@ -281,7 +281,7 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
             __get_coords(V4, id, k+1, result)
             if use_socket:
                 result.append('\n')
-                #dsocket.send(" ".join(result))
+                dsocket.send(" ".join(result))
 
             if use_file:
                 print >> ofile, " ".join(result)
