@@ -112,9 +112,43 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
         t.setOldTime(oldtime)
         t.getTime(msg="After reading %s " % dataset_type)
 
-    dp_som1 = dr_lib.fix_bin_contents(dp_som0)
+    dp_somA = dr_lib.fix_bin_contents(dp_som0)
 
     del dp_som0
+
+    if conf.verbose:
+        print "Cutting spectrum at minimum TOF"
+        
+    if t is not None:
+        t.getTime(False)
+
+    # Calculate minimum TOF for physical neutrons
+    if conf.initial_energy is not None:
+        initial_wavelength = common_lib.energy_to_wavelength(\
+            conf.initial_energy.toValErrTuple())
+        initial_velocity = common_lib.wavelength_to_velocity(\
+            initial_wavelength)
+    else:
+        # This should actually calculate it, but don't have a way right now
+        pass
+
+    if conf.time_zero_offset is not None:
+        time_zero_offset = conf.time_zero_offset.toValErrTuple()
+    else:
+        # This should actually calculate it, but don't have a way right now
+        time_zero_offset = (0.0, 0.0)
+
+    ss_length = dp_somA.attr_list.instrument.get_primary()
+        
+    tof_min = (ss_length[0] / initial_velocity[0]) + time_zero_offset[0]
+
+    # Cut all spectra a the minimum TOF
+    dp_som1 = dr_lib.cut_spectra(dp_somA, tof_min, None)
+
+    if t is not None:
+        t.getTime(msg="After cutting spectrum at minimum TOF ")
+
+    del dp_somA
 
     if dm_som0 is not None:
         dm_som1 = dr_lib.fix_bin_contents(dm_som0)
