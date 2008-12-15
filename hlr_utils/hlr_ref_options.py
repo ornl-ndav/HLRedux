@@ -78,6 +78,10 @@ class RefOptions(hlr_options.InstOptions):
                         metavar="FILENAME",
                         help="Specify the normalization instrument geometry "\
                         +"file")        
+
+        self.add_option("", "--norm-data-paths", dest="norm_data_paths",
+                        help="Specify the comma separated list of detector "\
+                        +"data paths and signals for normalization files.")
         
         self.add_option("", "--angle-offset", dest="angle_offset",
                         help="Specify the global offset for the polar angle: "\
@@ -220,6 +224,15 @@ def RefConfiguration(parser, configure, options, args):
         configure.norm_inst_geom = hlr_utils.determine_files(\
             options.norm_inst_geom,
             one_file=True)        
+
+    # Set the normalization data paths
+    if hlr_utils.cli_provide_override(configure, "norm_data_paths",
+                                      "--norm-data-paths"):
+        try:
+            configure.norm_data_paths = hlr_utils.NxPath(\
+                options.norm_data_paths)
+        except AttributeError:
+            configure.norm_data_paths = options.norm_data_paths
 
     # Get the data path for the sample data ROI file
     if hlr_utils.cli_provide_override(configure, "data_roi_file",
