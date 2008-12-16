@@ -24,12 +24,12 @@
 
 def create_binner_string(config):
     """
-    This function takes a L{hlr_utils.Configuration} object, removes the
+    This function takes a L{hlr_utils.Configure} object, removes the
     elements from it that are not fundamental to a given run of the data
     reduction and create an MD5 sum ID from that configuration.
 
     @param config: The current data reduction configuration
-    @type config: L{hlr_utils.Configuration}
+    @type config: L{hlr_utils.Configure}
 
 
     @return: A unique string based off an MD5 sum of the amended configuration
