@@ -83,8 +83,13 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
     if conf.verbose:
         print "Reading %s file" % dataset_type
 
+    if conf.norm_data_paths is not None and dataset_type == "norm":
+        data_path = conf.norm_data_paths.toPath()
+    else:
+        data_path = conf.data_paths.toPath()
+
     d_som1 = dr_lib.add_files(datalist,
-                              Data_Paths=conf.data_paths.toPath(),
+                              Data_Paths=data_path,
                               SO_Axis=so_axis,
                               dataset_type=dataset_type,
                               Signal_ROI=roi_file,
