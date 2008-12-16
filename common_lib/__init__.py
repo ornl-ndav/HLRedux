@@ -41,18 +41,15 @@ from hlr_rebin_axis_2D import *
 from hlr_reverse_array_cp import *
 from hlr_sub_ncerr import *
 from hlr_sumw_ncerr import *
-from hlr_tof_to_final_velocity_dgs import *
 from hlr_tof_to_initial_wavelength_igs import *
 from hlr_tof_to_initial_wavelength_igs_lin_time_zero import *
 from hlr_tof_to_scalar_Q import *
 from hlr_tof_to_wavelength import *
 from hlr_tof_to_wavelength_lin_time_zero import *
-from hlr_velocity_to_wavelength import *
 from hlr_wavelength_to_d_spacing import *
 from hlr_wavelength_to_energy import *
 from hlr_wavelength_to_scalar_k import *
 from hlr_wavelength_to_scalar_Q import *
-from hlr_wavelength_to_velocity import *
 from hlr_weighted_average import *
 
 from HLR_version import version as __version__

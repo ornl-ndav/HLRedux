@@ -107,8 +107,13 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
     if conf.verbose:
         print "Reading %s file" % dataset_type
 
+    if conf.norm_data_paths is not None and dataset_type == "norm":
+        data_path = conf.norm_data_paths.toPath()
+    else:
+        data_path = conf.data_paths.toPath()
+
     (d_som1, b_som1) = dr_lib.add_files_bg(datalist,
-                                           Data_Paths=conf.data_paths.toPath(),
+                                           Data_Paths=data_path,
                                            SO_Axis=so_axis,
                                            dataset_type=dataset_type,
                                            Signal_ROI=signal_roi_file,
@@ -231,7 +236,7 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
                              message="subtracted TOF information")
 
 
-    dtot_int = dr_lib.integrate_axis_py(dtot, avg=True)
+    dtot_int = dr_lib.integrate_axis(dtot, avg=True)
     param_key = dataset_type+"-dt_over_t"
     d_som4.attr_list[param_key] = dtot_int[0]
 

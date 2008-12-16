@@ -99,8 +99,8 @@ def dimensionless_mon(obj, min_ext, max_ext, **kwargs):
         max_index = utils.bisect_helper(x_axis, max_ext[0])
 
         # Integrate axis using bin width multiplication
-        (asum, asum_err2) = dr_lib.integrate_axis_py(map_so, start=min_index,
-                                                     end=max_index, width=True)
+        (asum, asum_err2) = dr_lib.integrate_axis(map_so, start=min_index,
+                                                  end=max_index, width=True)
 
         # Get the number of bins in the integration range
         num_bins = max_index - min_index + 1
