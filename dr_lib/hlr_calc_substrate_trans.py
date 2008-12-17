@@ -57,6 +57,8 @@ def calc_substrate_trans(obj, subtrans_coeff, substrate_thick):
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
     if res_descr == "SOM":
         result.setYLabel("Transmission")
+
+    axis = 0
         
     # iterate through the values
     import array_manip
@@ -73,7 +75,7 @@ def calc_substrate_trans(obj, subtrans_coeff, substrate_thick):
         
         map_so = hlr_utils.get_map_so(obj, None, i)
 
-        (pl, pl_err2) = hlr_utils.get_parameter("pathlength", map_so, inst)
+        (pl, pl_err2) = hlr_utils.get_parameter("total", map_so, inst)
 
         value = axis_manip.tof_to_wavelength(val, err2, pl, pl_err2)
 
