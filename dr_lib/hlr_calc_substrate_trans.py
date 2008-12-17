@@ -40,5 +40,68 @@ def calc_substrate_trans(obj, subtrans_coeff, substrate_thick):
     @param substrate_thick: The thickness of the substrate.
     @type substrate_thick: C{float}
     """
+    # import the helper functions
+    import hlr_utils
 
-    return None
+    # set up for working through data
+    (result, res_descr) = hlr_utils.empty_result(obj)
+    o_descr = hlr_utils.get_descr(obj)
+    
+    if o_descr == "SOM":
+        try:
+            obj.attr_list.instrument.get_primary()
+            inst = obj.attr_list.instrument
+        except RuntimeError:
+            raise RuntimeError("A detector was not provided")
+
+    result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
+    if res_descr == "SOM":
+        result.setYLabel("Transmission")
+        
+    # iterate through the values
+    import array_manip
+    import axis_manip
+    import nessi_list
+    import utils
+
+    import math
+    
+    len_obj = hlr_utils.get_length(obj)
+    for i in xrange(len_obj):
+        val = hlr_utils.get_value(obj, i, o_descr, "x", axis)
+        err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
+        
+        map_so = hlr_utils.get_map_so(obj, None, i)
+
+        (pl, pl_err2) = hlr_utils.get_parameter("pathlength", map_so, inst)
+
+        value = axis_manip.tof_to_wavelength(val, err2, pl, pl_err2)
+
+        value1 = utils.calc_bin_centers(value[0])
+        del value
+
+        # Convert Angstroms to centimeters
+        value2 = array_manip.mult_ncerr(value1[0], value1[1],
+                                        subtrans_coeff[1]*1.0e-8, 0.0)
+        del value1
+
+        # Calculate the exponential
+        value3 = array_manip.add_ncerr(value2[0], value2[1],
+                                       subtrans_coeff[0], 0.0)
+        del value2
+
+        value4 = array_manip.mult_ncerr(value3[0], value3[1],
+                                        -1.0*substrate_thick, 0.0)
+        del value3
+
+        # Calculate transmission
+        trans = nessi_list.NessiList()
+        len_trans = len(value4[0])
+        for j in xrange(len_trans):
+            trans.append(math.exp(value4[0][j]))
+
+        trans_err2 = nessi_list.NessiList(len(trans))
+
+        hlr_utils.result_insert(result, res_descr, (trans, trans_err2), map_so)
+
+    return result
