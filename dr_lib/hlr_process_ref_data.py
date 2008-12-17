@@ -298,11 +298,11 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
         if conf.dump_ecell_rtof:
             hlr_utils.write_file(conf.output, "text/Spec", e_som3,
                              output_ext="ertof",
-                             extra_tag="empty_cell",
+                             extra_tag=dataset_type,
                              verbose=conf.verbose,
                              data_ext=conf.ext_replacement,
                              path_replacement=conf.path_replacement,
-                             message="TOF information")
+                             message="empty cell TOF information")
 
         # Subtract scaled empty cell from sample data
         d_som5 = dr_lib.subtract_bkg_from_data(d_som4, e_som3,
