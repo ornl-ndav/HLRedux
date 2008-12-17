@@ -231,16 +231,18 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
         if conf.verbose:
             print "Reading %s file" % "empty_cell"
 
-        (e_som1, eb_som1) = dr_lib.add_files_bg(conf.ecell,
-                                                Data_Paths=data_path,
-                                                SO_Axis=so_axis,
-                                                dataset_type="empty_cell",
-                                                Signal_ROI=signal_roi_file,
-                                                Bkg_ROI=bkg_roi_file,
-                                                Verbose=conf.verbose,
-                                                Timer=t)
+        e_som1 = dr_lib.add_files(conf.ecell,
+                                  Data_Paths=data_path,
+                                  SO_Axis=so_axis,
+                                  dataset_type="empty_cell",
+                                  Signal_ROI=signal_roi_file,
+                                  Verbose=conf.verbose,
+                                  Timer=t)
 
-        del eb_som1
+        e_som2 = dr_lib.sum_all_spectra(e_som1, y_sort=y_sort, stripe=True,
+                                        pixel_fix=127)
+
+        del e_som1
         
         if t is not None:
             t.getTime(msg="After reading %s " % "empty_cell")
@@ -251,7 +253,7 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
         if t is not None:
             t.getTime(False)
             
-        T = dr_lib.calc_substrate_trans(e_som1, conf.subtrans_coeff,
+        T = dr_lib.calc_substrate_trans(e_som2, conf.subtrans_coeff,
                                         conf.substrate_thick)
 
         if t is not None:
@@ -259,7 +261,7 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
 
         # Get proton charges:
         pc_sample = d_som4.attr_list[dataset_type+"-proton_charge"].getValue()
-        pc_ecell = e_som1.attr_list["empty_cell-proton_charge"].getValue()
+        pc_ecell = e_som2.attr_list["empty_cell-proton_charge"].getValue()
 
         pc_ratio = pc_sample / pc_ecell
 
@@ -286,15 +288,15 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
         if t is not None:
             t.getTime(False)
 
-        e_som2 = common_lib.mult_ncerr(e_som1, T1)
+        e_som3 = common_lib.mult_ncerr(e_som2, T1)
 
         if t is not None:
             t.getTime(msg="After scaling empty cell by scaled transmission")
             
-        del e_som1, T1
+        del e_som2, T1
 
         if conf.dump_ecell_rtof:
-            hlr_utils.write_file(conf.output, "text/Spec", e_som2,
+            hlr_utils.write_file(conf.output, "text/Spec", e_som3,
                              output_ext="ertof",
                              extra_tag="empty_cell",
                              verbose=conf.verbose,
@@ -303,16 +305,20 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
                              message="TOF information")
 
         # Subtract scaled empty cell from sample data
-        d_som4 = dr_lib.subtract_bkg_from_data(d_som3, e_som2,
+        d_som5 = dr_lib.subtract_bkg_from_data(d_som4, e_som3,
                                                verbose=conf.verbose,
                                                timer=t,
                                                dataset1=dataset_type,
                                                dataset2="empty_cell")
         
-        del d_som3, e_som2
+        del e_som3
+    else:
+        d_som5 = d_som4
+
+    del d_som4
 
     if not no_bkg and conf.dump_sub:
-        hlr_utils.write_file(conf.output, "text/Spec", d_som4,
+        hlr_utils.write_file(conf.output, "text/Spec", d_som5,
                              output_ext="sub",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
@@ -323,9 +329,9 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
 
     dtot_int = dr_lib.integrate_axis(dtot, avg=True)
     param_key = dataset_type+"-dt_over_t"
-    d_som4.attr_list[param_key] = dtot_int[0]
+    d_som5.attr_list[param_key] = dtot_int[0]
 
     if conf.store_dtot:
-        d_som4.attr_list["extra_som"] = dtot
+        d_som5.attr_list["extra_som"] = dtot
 
-    return d_som4
+    return d_som5
