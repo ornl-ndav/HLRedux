@@ -298,6 +298,7 @@ if __name__ == "__main__":
                       +"transmission coefficients.")
 
     parser.add_option("", "--substrate-thick", dest="substrate_thick",
+                      type="float",
                       help="Provide the substrate thickness in cm.")
 
     parser.add_option("", "--dump-ecell-rtof", action="store_true",
@@ -344,7 +345,7 @@ if __name__ == "__main__":
                                       "--dump-ecell-rtof"): 
         configure.dump_ecell_rtof = options.dump_ecell_rtof
 
-    if configure.dump_all:
+    if options.dump_all:
         configure.dump_ecell_rtof = True
 
     # Setup the timing object
