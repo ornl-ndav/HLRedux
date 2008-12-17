@@ -226,6 +226,95 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
 
     del d_som3
 
+    # If empty cell subtraction is requested, get data set
+    if conf.ecell is not None and dataset_type != "norm":
+        if conf.verbose:
+            print "Reading %s file" % "empty_cell"
+
+        (e_som1, eb_som1) = dr_lib.add_files_bg(conf.ecell,
+                                                Data_Paths=data_path,
+                                                SO_Axis=so_axis,
+                                                dataset_type="empty_cell",
+                                                Signal_ROI=signal_roi_file,
+                                                Bkg_ROI=bkg_roi_file,
+                                                Verbose=conf.verbose,
+                                                Timer=t)
+
+        del eb_som1
+        
+        if t is not None:
+            t.getTime(msg="After reading %s " % "empty_cell")
+
+        if conf.verbose:
+            print "Calculating substrate transmission"
+
+        if t is not None:
+            t.getTime(False)
+            
+        T = dr_lib.calc_substrate_trans(e_som1, conf.subtrans_coeff,
+                                        conf.substrate_thick)
+
+        if t is not None:
+            t.getTime(msg="After calculating substrate transmission")
+
+        # Get proton charges:
+        pc_sample = d_som4.attr_list[dataset_type+"proton_charge"].getValue()
+        pc_ecell = e_som1.attr_list["empty_cell-proton_charge"].getValue()
+
+        pc_ratio = pc_sample / pc_ecell
+
+        # Scale transmission by proton charge ratio
+        if conf.verbose:
+            print "Scaling transmission by proton charge ratio"
+        
+        if t is not None:
+            t.getTime(False)
+
+        T1 = common_lib.mult_ncerr(T, (pc_ratio, 0.0))
+
+        if t is not None:
+            t.getTime(msg="After scaling transmission by proton charge ratio")
+
+        del T
+
+        # Scale empty cell by scaled transmission
+        if conf.verbose:
+            print "Scaling empty cell by scaled transmission"
+        
+        if t is not None:
+            t.getTime(False)
+
+        e_som2 = common_lib.mult_ncerr(e_som1, T1)
+
+        if t is not None:
+            t.getTime(msg="After scaling empty cell by scaled transmission")
+            
+        del e_som1, T1
+
+        if conf.dump_ecell_rtof:
+            hlr_utils.write_file(conf.output, "text/Spec", e_som2,
+                             output_ext="ertof",
+                             extra_tag="empty_cell",
+                             verbose=conf.verbose,
+                             data_ext=conf.ext_replacement,
+                             path_replacement=conf.path_replacement,
+                             message="TOF information")
+
+        # Subtract scaled empty cell from sample data
+        if conf.verbose:
+            print "Subtracting scaled empty cell from sample data"
+
+        if t is not None:
+            t.getTime(False)
+
+        d_som4 = common_lib.sub_ncerr(d_som3, e_som2)
+
+        if t is not None:
+            t.getTime(msg="After subtracting scaled empty cell from sample "\
+                      +"data")
+            
+        del d_som3, e_som2
+
     if not no_bkg and conf.dump_sub:
         hlr_utils.write_file(conf.output, "text/Spec", d_som4,
                              output_ext="sub",
