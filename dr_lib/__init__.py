@@ -32,6 +32,7 @@ from hlr_bss_E_vs_Q_helpers import calc_BSS_coeffs, calc_BSS_EQ_verticies, calc_
 from hlr_calc_deltat_over_t import *
 from hlr_calc_delta_theta_over_theta import *
 from hlr_calc_solid_angle import *
+from hlr_calc_substrate_trans import *
 from hlr_calculate_ref_background import *
 from hlr_create_axis_from_data import *
 from hlr_create_E_vs_Q_igs import create_E_vs_Q_igs
