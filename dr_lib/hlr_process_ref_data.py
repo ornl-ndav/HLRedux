@@ -258,10 +258,12 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
             t.getTime(msg="After calculating substrate transmission")
 
         # Get proton charges:
-        pc_sample = d_som4.attr_list[dataset_type+"proton_charge"].getValue()
+        pc_sample = d_som4.attr_list[dataset_type+"-proton_charge"].getValue()
         pc_ecell = e_som1.attr_list["empty_cell-proton_charge"].getValue()
 
         pc_ratio = pc_sample / pc_ecell
+
+        import common_lib
 
         # Scale transmission by proton charge ratio
         if conf.verbose:
@@ -301,18 +303,12 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
                              message="TOF information")
 
         # Subtract scaled empty cell from sample data
-        if conf.verbose:
-            print "Subtracting scaled empty cell from sample data"
-
-        if t is not None:
-            t.getTime(False)
-
-        d_som4 = common_lib.sub_ncerr(d_som3, e_som2)
-
-        if t is not None:
-            t.getTime(msg="After subtracting scaled empty cell from sample "\
-                      +"data")
-            
+        d_som4 = dr_lib.subtract_bkg_from_data(d_som3, e_som2,
+                                               verbose=conf.verbose,
+                                               timer=t,
+                                               dataset1=dataset_type,
+                                               dataset2="empty_cell")
+        
         del d_som3, e_som2
 
     if not no_bkg and conf.dump_sub:
