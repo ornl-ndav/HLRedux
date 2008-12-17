@@ -297,7 +297,7 @@ if __name__ == "__main__":
                       nargs=2, type="float", help="Provide the substrate "\
                       +"transmission coefficients.")
 
-    parser.add_option("", "--substrate_thick", dest="substrate_thick",
+    parser.add_option("", "--substrate-thick", dest="substrate_thick",
                       help="Provide the substrate thickness in cm.")
 
     parser.add_option("", "--dump-ecell-rtof", action="store_true",
