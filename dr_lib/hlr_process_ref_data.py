@@ -317,7 +317,7 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
 
     del d_som4
 
-    if not no_bkg and conf.dump_sub:
+    if (not no_bkg or conf.ecell is not None) and conf.dump_sub:
         hlr_utils.write_file(conf.output, "text/Spec", d_som5,
                              output_ext="sub",
                              extra_tag=dataset_type,
