@@ -297,9 +297,9 @@ if __name__ == "__main__":
                       nargs=2, type="float", help="Provide the substrate "\
                       +"transmission coefficients.")
 
-    parser.add_option("", "--substrate-thick", dest="substrate_thick",
+    parser.add_option("", "--substrate-diam", dest="substrate_diam",
                       type="float",
-                      help="Provide the substrate thickness in cm.")
+                      help="Provide the substrate diameter in cm.")
 
     parser.add_option("", "--dump-ecell-rtof", action="store_true",
                       dest="dump_ecell_rtof",
@@ -335,10 +335,10 @@ if __name__ == "__main__":
                                       "--subtrans-coeff"):
         configure.subtrans_coeff = options.subtrans_coeff
 
-    # Setup the substrate thickness parameter
-    if hlr_utils.cli_provide_override(configure, "substrate_thick",
-                                      "--substrate-thick"):
-        configure.substrate_thick = options.substrate_thick
+    # Setup the substrate diameter parameter
+    if hlr_utils.cli_provide_override(configure, "substrate_diam",
+                                      "--substrate-diam"):
+        configure.substrate_diam = options.substrate_diam
 
     # Set the ability to dump the empty cell R(TOF) information
     if hlr_utils.cli_provide_override(configure, "dump_ecell_rtof",

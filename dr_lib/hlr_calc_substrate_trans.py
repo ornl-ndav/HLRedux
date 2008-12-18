@@ -22,12 +22,12 @@
 
 # $Id$
 
-def calc_substrate_trans(obj, subtrans_coeff, substrate_thick):
+def calc_substrate_trans(obj, subtrans_coeff, substrate_diam):
     """
     This function calculates substrate transmission via the following formula:
     T = exp[-(A + B * wavelength) * t] where A is a constant with units of
     cm^-1, B is a constant with units of cm^-2 and t is the substrate
-    thickness in units of cm.
+    diameter in units of cm.
 
     @param obj: The data object that contains the TOF axes to calculate the
                 transmission from.
@@ -37,8 +37,8 @@ def calc_substrate_trans(obj, subtrans_coeff, substrate_thick):
            calculation.
     @type subtrans_coeff: C{tuple} of two C{float}s
 
-    @param substrate_thick: The thickness of the substrate.
-    @type substrate_thick: C{float}
+    @param substrate_diam: The diameter of the substrate.
+    @type substrate_diam: C{float}
     """
     # import the helper functions
     import hlr_utils
@@ -93,7 +93,7 @@ def calc_substrate_trans(obj, subtrans_coeff, substrate_thick):
         del value2
 
         value4 = array_manip.mult_ncerr(value3[0], value3[1],
-                                        -1.0*substrate_thick, 0.0)
+                                        -1.0*substrate_diam, 0.0)
         del value3
 
         # Calculate transmission

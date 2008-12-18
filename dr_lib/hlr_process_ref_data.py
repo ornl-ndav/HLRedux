@@ -254,7 +254,7 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
             t.getTime(False)
             
         T = dr_lib.calc_substrate_trans(e_som2, conf.subtrans_coeff,
-                                        conf.substrate_thick)
+                                        conf.substrate_diam)
 
         if t is not None:
             t.getTime(msg="After calculating substrate transmission")
