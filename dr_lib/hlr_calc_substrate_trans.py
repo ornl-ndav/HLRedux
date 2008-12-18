@@ -25,8 +25,8 @@
 def calc_substrate_trans(obj, subtrans_coeff, substrate_diam, **kwargs):
     """
     This function calculates substrate transmission via the following formula:
-    T = exp[-(A + B * wavelength) * t] where A is a constant with units of
-    cm^-1, B is a constant with units of cm^-2 and t is the substrate
+    T = exp[-(A + B * wavelength) * d] where A is a constant with units of
+    cm^-1, B is a constant with units of cm^-2 and d is the substrate
     diameter in units of cm.
 
     @param obj: The data object that contains the TOF axes to calculate the
