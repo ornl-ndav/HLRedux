@@ -22,7 +22,7 @@
 
 # $Id$
 
-def calc_substrate_trans(obj, subtrans_coeff, substrate_diam):
+def calc_substrate_trans(obj, subtrans_coeff, substrate_diam, **kwargs):
     """
     This function calculates substrate transmission via the following formula:
     T = exp[-(A + B * wavelength) * t] where A is a constant with units of
@@ -31,7 +31,7 @@ def calc_substrate_trans(obj, subtrans_coeff, substrate_diam):
 
     @param obj: The data object that contains the TOF axes to calculate the
                 transmission from.
-    @type obj: C{SOM.SOM}
+    @type obj: C{SOM.SOM} or C{SOM.SO}
 
     @param subtrans_coeff: The two coefficients for substrate transmission
            calculation.
@@ -39,6 +39,30 @@ def calc_substrate_trans(obj, subtrans_coeff, substrate_diam):
 
     @param substrate_diam: The diameter of the substrate.
     @type substrate_diam: C{float}
+
+    @param kwargs: A list of keyword arguments that the function accepts:
+
+    @keyword pathlength: The pathlength and its associated error^2
+    @type pathlength: C{tuple} or C{list} of C{tuple}s
+
+    @keyword units: The expected units for this function. The default for this
+                    function is I{microsecond}.
+    @type units: C{string}
+
+
+    @return: The calculate transmission for the given substrate parameters
+    @rtype: C{SOM.SOM} or C{SOM.SO}
+
+    
+    @raise TypeError: The object used for calculation is not a C{SOM} or a
+                      C{SO}
+
+    @raise RuntimeError: The C{SOM} x-axis units are not I{microsecond}
+    
+    @raise RuntimeError: A C{SOM} does not contain an instrument and no
+                         pathlength was provided
+                         
+    @raise RuntimeError: No C{SOM} is provided and no pathlength given
     """
     # import the helper functions
     import hlr_utils
@@ -46,20 +70,47 @@ def calc_substrate_trans(obj, subtrans_coeff, substrate_diam):
     # set up for working through data
     (result, res_descr) = hlr_utils.empty_result(obj)
     o_descr = hlr_utils.get_descr(obj)
-    
+
+    if o_descr == "number" or o_descr == "list":
+        raise TypeError("Do not know how to handle given type: %s" % o_descr)
+    else:
+        pass
+
+    # Setup keyword arguments
+    try:
+        pathlength = kwargs["pathlength"]
+    except KeyError:
+        pathlength = None
+
+    try:
+        units = kwargs["units"]
+    except KeyError:
+        units = "microsecond"
+
+    # Primary axis for transformation. If a SO is passed, the function, will
+    # assume the axis for transformation is at the 0 position
     if o_descr == "SOM":
-        try:
-            obj.attr_list.instrument.get_primary()
-            inst = obj.attr_list.instrument
-        except RuntimeError:
-            raise RuntimeError("A detector was not provided")
+        axis = hlr_utils.one_d_units(obj, units)
+    else:
+        axis = 0
+
+    if pathlength is not None:
+        p_descr = hlr_utils.get_descr(pathlength)
+    else:
+        if o_descr == "SOM":
+            try:
+                obj.attr_list.instrument.get_primary()
+                inst = obj.attr_list.instrument
+            except RuntimeError:
+                raise RuntimeError("A detector was not provided")
+        else:
+            raise RuntimeError("If no SOM is provided, then pathlength "\
+                               +"information must be provided")            
 
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
     if res_descr == "SOM":
         result.setYLabel("Transmission")
 
-    axis = 0
-        
     # iterate through the values
     import array_manip
     import axis_manip
@@ -75,7 +126,11 @@ def calc_substrate_trans(obj, subtrans_coeff, substrate_diam):
         
         map_so = hlr_utils.get_map_so(obj, None, i)
 
-        (pl, pl_err2) = hlr_utils.get_parameter("total", map_so, inst)
+        if pathlength is None:
+            (pl, pl_err2) = hlr_utils.get_parameter("total", map_so, inst)
+        else:
+            pl = hlr_utils.get_value(pathlength, i, p_descr)
+            pl_err2 = hlr_utils.get_err2(pathlength, i, p_descr)        
 
         value = axis_manip.tof_to_wavelength(val, err2, pl, pl_err2)
 
