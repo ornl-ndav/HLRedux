@@ -114,7 +114,10 @@ def ConfigFromXml(doc, configure):
                     sval = nval.split(',')
                     setter = []
                     for val in sval:
-                        setter.append(int(val))
+                        try:
+                            setter.append(int(val))
+                        except ValueError:
+                            setter.append(float(val))
 
                     setter = tuple(setter)
                     
