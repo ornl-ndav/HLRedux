@@ -132,6 +132,18 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
         t.getTime(False)
         
     corner_angles = hlr_utils.get_corner_geometry(corner_geom)
+    if use_file:
+        import SOM
+        fixed_grid = {}
+        for key in corner_angles:
+            so_id = SOM.NeXusId.fromString(key).toTuple()
+            pathlength = inst.get_secondary(so_id)[0]
+            points = []
+            for j in range(4):
+                points.extend(__calc_xyz(pathlength,
+                                         corner_angles[key].getPolar(j),
+                                         corner_angles[key].getAzimuthal(j)))
+            fixed_grid[key] = points
 
     if t is not None:
         t.getTime(msg="After reading in corner geometry information ")
@@ -259,13 +271,17 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
 
         if outtag != "":
             filehead = outtag + "_bmesh"
+            filehead1 = outtag + "_fgrid"
         else:
             filehead = "bmesh"
+            filehead1 = "fgrid"
 
     for k in xrange(len_E):
         if use_file:
             ofile = open(os.path.join(topdir, "%s%04d.in" % (filehead, k)),
                          "w")
+            ofile1 = open(os.path.join(topdir, "%s%04d.in" % (filehead1, k)),
+                          "w")
         for id in CNT:
             result = []
             result.append(str(k))
@@ -285,9 +301,16 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
 
             if use_file:
                 print >> ofile, " ".join(result)
+                result1 = []
+                result1.append(str(k))
+                result1.append(str(CNT[id][k]))
+                result1.append(str(ERR2[id][k]))
+                result1.extend([str(x) for x in fixed_grid[id]])
+                print >> ofile1, " ".join(result1)
 
         if use_file:
             ofile.close()
+            ofile1.close()
 
     if t is not None:
         t.getTime(msg="After creating messages ")
@@ -296,3 +319,10 @@ def __get_coords(coords, id, index, output):
     output.append(str(coords[id]["x"][index]))
     output.append(str(coords[id]["y"][index]))
     output.append(str(coords[id]["z"][index]))
+
+def __calc_xyz(r, theta, phi):
+    import math
+    x = r * math.sin(theta) * math.sin(phi)
+    y = r * math.sin(theta) * math.cos(phi)
+    z = r * math.cos(theta)
+    return (x, y, z)
