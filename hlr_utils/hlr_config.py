@@ -118,7 +118,7 @@ def ConfigFromXml(doc, configure):
                             setter.append(int(val))
                         except ValueError:
                             setter.append(float(val))
-                            
+
                     setter = tuple(setter)
                     
                 elif attr == "hlr_utils.hlr_axis_object.Axis":

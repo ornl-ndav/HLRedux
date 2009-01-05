@@ -290,6 +290,23 @@ if __name__ == "__main__":
     parser.set_defaults(data_paths="/entry/bank1,1")
 
     # Setup REF specific options
+    parser.add_option("", "--ecell", dest="ecell",
+                       help="Specify the empty sample cell file")
+
+    parser.add_option("", "--subtrans-coeff", dest="subtrans_coeff",
+                      nargs=2, type="float", help="Provide the substrate "\
+                      +"transmission coefficients.")
+
+    parser.add_option("", "--substrate-diam", dest="substrate_diam",
+                      type="float",
+                      help="Provide the substrate diameter in cm.")
+
+    parser.add_option("", "--dump-ecell-rtof", action="store_true",
+                      dest="dump_ecell_rtof",
+                      help="Dump the empty cell spectra after all scaling. "\
+                      +"Creates a *.ertof file.")
+    parser.set_defaults(dump_ecell_rtof=False)
+    
     parser.add_option("", "--timing", action="store_true", dest="timing",
                       help="Flag to turn on timing of code")
     parser.set_defaults(timing=False)
@@ -301,6 +318,35 @@ if __name__ == "__main__":
 
     # Call the configuration setter for RefRedOptions
     hlr_utils.RefConfiguration(parser, configure, options, args)
+
+    # Setup the empty cell file list
+    if hlr_utils.cli_provide_override(configure, "ecell", "--ecell"):
+        configure.ecell = hlr_utils.determine_files(options.ecell,
+                                                    configure.inst,
+                                                    configure.facility)
+
+    # If empty cell subtraction is desired, turn off standard background
+    # subtraction
+    if configure.ecell is not None:
+        configure.no_bkg = True
+        
+    # Setup the substrate transmission coefficients
+    if hlr_utils.cli_provide_override(configure, "subtrans_coeff",
+                                      "--subtrans-coeff"):
+        configure.subtrans_coeff = options.subtrans_coeff
+
+    # Setup the substrate diameter parameter
+    if hlr_utils.cli_provide_override(configure, "substrate_diam",
+                                      "--substrate-diam"):
+        configure.substrate_diam = options.substrate_diam
+
+    # Set the ability to dump the empty cell R(TOF) information
+    if hlr_utils.cli_provide_override(configure, "dump_ecell_rtof",
+                                      "--dump-ecell-rtof"): 
+        configure.dump_ecell_rtof = options.dump_ecell_rtof
+
+    if options.dump_all:
+        configure.dump_ecell_rtof = True
 
     # Setup the timing object
     if options.timing:
