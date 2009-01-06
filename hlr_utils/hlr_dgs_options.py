@@ -129,6 +129,7 @@ class DgsOptions(hlr_options.InstOptions):
                         dest="lambda_ratio", help="Flag that turns on the "\
                         +"lambda ratio scaling (lambda_i/lambda_f) during "\
                         +"energy transfer conversion.")
+        self.set_defaults(lambda_ratio=False)
 
         self.add_option("", "--lambda-bins", dest="lambda_bins",
                         help="Specify the minimum and maximum wavelength "\
