@@ -249,9 +249,15 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
         linestr = str(num_lines) + '\n'
         dsocket.send(linestr)
         gridstr='FV'
-        if conf.qx_bins is not None and conf.qy_bins is not None and \
-           conf.qz_bins is not None:
-            pass
+        if conf.Qx_bins is not None and conf.Qy_bins is not None and \
+               conf.Qz_bins is not None:
+            axis_info = []
+            axis_info.extend([str(x) for x in conf.Qx_bins.toNessiList()])
+            axis_info.append(';')
+            axis_info.extend([str(y) for y in conf.Qy_bins.toNessiList()])
+            axis_info.append(';')
+            axis_info.extend([str(z) for z in conf.Qz_bins.toNessiList()])
+            gridstr += " ".join(axis_info)
         else:
             # No final axis information, do nothing
             pass
