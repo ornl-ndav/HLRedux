@@ -74,3 +74,23 @@ def create_binner_string(config):
 
     output = " ".join(result)
     return md5.new(output).hexdigest()
+
+def make_binner_connection(conn_info):
+    """
+    This function takes a file containing the host (or IP address) and port
+    number of a rebinner server instance. From this it will create and make
+    the socket connection between the DR instance and the rebinner server.
+
+    @param conn_info: The host (or IP address) and port number
+    @type conn_info: C{file}
+
+
+    @return: A socket connection
+    @rtype: C{socket}
+    """
+    import socket
+    isocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    # Get the connection information
+
+    return isocket
