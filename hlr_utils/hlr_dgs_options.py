@@ -177,6 +177,10 @@ class DgsOptions(hlr_options.InstOptions):
                         dest="socket")
         self.set_defaults(socket=False)
 
+        self.add_option("", "--sconn-info", dest="sconn_info",
+                        help="Provide the filename that contains the "\
+                        +"connection information for the rebinning server.")
+
         self.add_option("-t", "--file", action="store_true",
                         dest="file")
         self.set_defaults(file=False)
@@ -330,6 +334,11 @@ def DgsConfiguration(parser, configure, options, args):
 
     if hlr_utils.cli_provide_override(configure, "socket", "--socket", "s"):
         configure.socket = options.socket
+
+    # Set the file containing the socket connection information
+    if hlr_utils.cli_provide_override(configure, "sconn_info", "--sconn-info"):
+        configure.sconn_info = hlr_utils.determine_files(options.sconn_info,
+                                                         one_file=True)
 
     if hlr_utils.cli_provide_override(configure, "file", "--file", "t"):
         configure.file = options.file        
