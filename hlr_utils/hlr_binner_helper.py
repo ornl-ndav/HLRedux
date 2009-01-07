@@ -77,12 +77,14 @@ def create_binner_string(config):
 
 def make_binner_connection(conn_info):
     """
-    This function takes a filename that contains the host (or IP address) and
-    port number of a rebinner server instance. From this it will create and
+    This function takes a filename that contains the host name (or IP address)
+    and port number of a rebinner server instance. From this it will create and
     make the socket connection between the DR instance and the rebinner server.
+    The file consists of a single line with the host name (or IP address) and
+    port number separated by a space.
 
-    @param conn_info: Filename containing the host (or IP address) and port
-                      number information.
+    @param conn_info: Filename containing the host name (or IP address) and
+                      port number information.
     @type conn_info: C{string}
 
 
@@ -94,8 +96,11 @@ def make_binner_connection(conn_info):
 
     # Get the connection information
 
-    cfile = open(conn_file, 'r')
-
+    cfile = open(conn_info, 'r')
+    for line in cfile:
+        hostname, portnum = line.split(' ')[:2]
     cfile.close()
+
+    isocket.connect((hostname, int(portnum)))
 
     return isocket
