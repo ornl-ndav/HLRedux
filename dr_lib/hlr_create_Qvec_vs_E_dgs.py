@@ -240,9 +240,7 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
         t.getTime(False)
 
     if use_socket:
-        import socket
-        dsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        dsocket.connect(('arcs2.sns.gov', 45632))
+        dsocket = hlr_utils.make_binner_connection(conf.sconn_info)
         jobstr = 'MR' + hlr_utils.create_binner_string(conf) + 'JH\n'
         dsocket.send(jobstr)
         num_lines = len(CNT) * len_E
