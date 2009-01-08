@@ -121,10 +121,6 @@ class DgsOptions(hlr_options.InstOptions):
                         +"maximum values in energy transfer [meV] for the "\
                         +"integration of the vanadium (norm) dataset.")
 
-        self.add_option("", "--corner-geom", dest="corner_geom",
-                        help="Specify the file containing the corner "\
-                        +"geometry information.")
-
         self.add_option("", "--lambda-ratio", action="store_true",
                         dest="lambda_ratio", help="Flag that turns on the "\
                         +"lambda ratio scaling (lambda_i/lambda_f) during "\
@@ -135,25 +131,6 @@ class DgsOptions(hlr_options.InstOptions):
                         help="Specify the minimum and maximum wavelength "\
                         +"values and the wavelength bin width in Angstroms")
         self.set_defaults(lambda_bins="0.0,10.0,0.1")
-
-        self.add_option("", "--energy-bins", dest="E_bins",
-                        help="Specify the minimum and maximum energy values "\
-                        +"and the energy bin width in meV")
-
-        self.add_option("", "--qx-bins", dest="Qx_bins",
-                        help="Specify the minimum, maximum and bin width of "\
-                        +"the x-component of the momentum transfer in "\
-                        +"1/Angstroms.")
-
-        self.add_option("", "--qy-bins", dest="Qy_bins",
-                        help="Specify the minimum, maximum and bin width of "\
-                        +"the y-component of the momentum transfer in "\
-                        +"1/Angstroms.")
-
-        self.add_option("", "--qz-bins", dest="Qz_bins",
-                        help="Specify the minimum, maximum and bin width of "\
-                        +"the z-component of the momentum transfer in "\
-                        +"1/Angstroms.")        
 
         self.add_option("", "--dump-ctof-comb", action="store_true",
                         dest="dump_ctof_comb",
@@ -284,39 +261,11 @@ def DgsConfiguration(parser, configure, options, args):
                                       "--norm-int-range"):
         configure.norm_int_range = options.norm_int_range
 
-    # Set the corner geometry information file
-    if hlr_utils.cli_provide_override(configure, "corner_geom",
-                                      "--corner-geom"):
-        configure.corner_geom = options.corner_geom
-
-    if configure.corner_geom is None:
-        parser.error("You must provide a corner geometry file via the "\
-                     +"corner-geom option!")
-
     # Set the lambda ratio flag
     if hlr_utils.cli_provide_override(configure, "lambda_ratio",
                                       "--lambda-ratio"):
         configure.lambda_ratio = options.lambda_ratio
 
-    # Set the energy transfer bins
-    if hlr_utils.cli_provide_override(configure, "E_bins", "--energy-bins"):
-        configure.E_bins = hlr_utils.AxisFromString(options.E_bins)
-
-    if configure.E_bins is None:
-        parser.error("You must provide energy transfer binning via the "\
-                     +"energy-bins option")        
-
-    # Set the x-component of the momentum transfer bins
-    if hlr_utils.cli_provide_override(configure, "Qx_bins", "--qx-bins"):
-        configure.Qx_bins = hlr_utils.AxisFromString(options.Qx_bins)
-
-    # Set the y-component of the momentum transfer bins
-    if hlr_utils.cli_provide_override(configure, "Qy_bins", "--qy-bins"):
-        configure.Qy_bins = hlr_utils.AxisFromString(options.Qy_bins)
-
-    # Set the z-component of the momentum transfer bins
-    if hlr_utils.cli_provide_override(configure, "Qz_bins", "--qz-bins"):
-        configure.Qz_bins = hlr_utils.AxisFromString(options.Qz_bins)        
         
     # Set the wavelength bins
     if hlr_utils.cli_provide_override(configure, "lambda_bins",
