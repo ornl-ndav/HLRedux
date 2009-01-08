@@ -55,6 +55,7 @@ instrument_scripts = {
     'null_int_test2'
     ],
     "DGS" : [
+    'dgs_norm',
     'dgs_reduction'
     ],
     "GEN" : [

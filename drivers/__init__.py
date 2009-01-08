@@ -21,6 +21,7 @@
 #
 
 # DGS drivers
+from DGS import dgs_norm
 from DGS import dgs_reduction
 
 # GEN drivers
