@@ -283,9 +283,10 @@ if __name__ == "__main__":
     description.append("Geometry Spectrometer class of instruments.")
     
     # Set up the options available
-    parser = hlr_utils.DgsOptions("usage: %prog [options] <datafile>", None,
-                                  None, hlr_utils.program_version(), 'error',
-                                  " ".join(description))
+    parser = hlr_utils.DgsRedOptions("usage: %prog [options] <datafile>", None,
+                                     None, hlr_utils.program_version(),
+                                     'error',
+                                     " ".join(description))
 
     # Set defaults for options
     parser.set_defaults(usmon_path="/entry/monitor1,1")
@@ -301,8 +302,8 @@ if __name__ == "__main__":
     # Set up the configuration
     configure = hlr_utils.Configure()
 
-    # Call the configuration setter for DgsOptions
-    hlr_utils.DgsConfiguration(parser, configure, options, args)
+    # Call the configuration setter for DgsRedOptions
+    hlr_utils.DgsRedConfiguration(parser, configure, options, args)
 
     # Set default for upstream monitor for CNCS
     if configure.inst == "CNCS":
