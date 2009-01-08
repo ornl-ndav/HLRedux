@@ -342,6 +342,7 @@ def DgsConfiguration(parser, configure, options, args):
                                       "--dump-et-comb"):
         configure.dump_et_comb = options.dump_et_comb        
 
+    # Set the ability to run the rebinner over a socket
     if hlr_utils.cli_provide_override(configure, "socket", "--socket", "s"):
         configure.socket = options.socket
 
@@ -350,5 +351,6 @@ def DgsConfiguration(parser, configure, options, args):
         configure.sconn_info = hlr_utils.determine_files(options.sconn_info,
                                                          one_file=True)
 
+    # Set the ability to write out mesh files
     if hlr_utils.cli_provide_override(configure, "file", "--file", "t"):
         configure.file = options.file        
