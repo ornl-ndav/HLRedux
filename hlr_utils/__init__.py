@@ -33,6 +33,7 @@ from hlr_binner_helper import *
 from hlr_bisect_helper import bisect_helper
 from hlr_config import Configure, ConfigFromXml
 from hlr_dgs_options import DgsOptions, DgsConfiguration
+from hlr_dgsred_options import DgsRedOptions, DgsRedConfiguration
 from hlr_drparameter import *
 from hlr_fix_index import *
 from hlr_geom_helper import *
