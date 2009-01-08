@@ -44,8 +44,6 @@ def create_det_eff(obj):
     # import the helper functions
     import hlr_utils
 
-    import nessi_list
-
     # set up for working through data
     (result, res_descr) = hlr_utils.empty_result(obj)
     o_descr = hlr_utils.get_descr(obj)
@@ -63,6 +61,7 @@ def create_det_eff(obj):
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
 
     # iterate through the values
+    import phys_corr
     import utils
 
     import math
@@ -74,14 +73,9 @@ def create_det_eff(obj):
         axis = hlr_utils.get_value(obj, i, o_descr, "x", 0)
 
         axis_bc = utils.calc_bin_centers(axis)
-        eff_err2 = nessi_list.NessiList(len(axis_bc[0]))
 
-        eff = nessi_list.NessiList()
-        constant = 1.0
-        exp_const = 0.0
-        for bc in axis_bc[0]:
-            eff.append(constant * math.exp(-1.0 * exp_const * bc))
-
+        (eff, eff_err2) = phys_corr.exp_detector_eff(axis_bc[0], 1.0, 0.0, 1.0)
+        
         hlr_utils.result_insert(result, res_descr, (eff, eff_err2), map_so)
     
     return result
