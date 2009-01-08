@@ -144,12 +144,11 @@ def run(config, tim=None):
                              message="normalization values",
                              comments=[file_comment],
                              tag="Integral", units="counts")   
-    del n_som3
 
     # Write out RMD file
-    d_som5.attr_list["config"] = config
+    n_som3.attr_list["config"] = config
 
-    hlr_utils.write_file(config.output, "text/rmd", d_som5,
+    hlr_utils.write_file(config.output, "text/rmd", n_som3,
                          output_ext="rmd",
                          data_ext=config.ext_replacement,         
                          path_replacement=config.path_replacement,
