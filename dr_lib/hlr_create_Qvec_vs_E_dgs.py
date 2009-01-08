@@ -137,13 +137,17 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
         fixed_grid = {}
         for key in corner_angles:
             so_id = SOM.NeXusId.fromString(key).toTuple()
-            pathlength = inst.get_secondary(so_id)[0]
-            points = []
-            for j in range(4):
-                points.extend(__calc_xyz(pathlength,
-                                         corner_angles[key].getPolar(j),
-                                         corner_angles[key].getAzimuthal(j)))
-            fixed_grid[key] = points
+            try:
+                pathlength = inst.get_secondary(so_id)[0]
+                points = []
+                for j in range(4):
+                    points.extend(__calc_xyz(pathlength,
+                                          corner_angles[key].getPolar(j),
+                                          corner_angles[key].getAzimuthal(j)))
+                fixed_grid[key] = points
+            except KeyError:
+                # Pixel ID is not in instrument geometry
+                pass
 
     if t is not None:
         t.getTime(msg="After reading in corner geometry information ")
