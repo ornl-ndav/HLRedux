@@ -89,176 +89,62 @@ def run(config, tim=None):
         e_som1 = None
 
     # Perform Steps 3-6 on normalization data
-    if config.norm is not None:
-        n_som1 = dr_lib.calibrate_dgs_data(config.norm, config, dc_som,
-                                           dataset_type="normalization",
-                                           inst_geom_dst=inst_geom_dst,
-                                           tib_const=config.tib_const,
-                                           timer=tim)
-    else:
-        n_som1 = None
-
-    # Perform Steps 3-6 on sample data
-    d_som1 = dr_lib.calibrate_dgs_data(config.data, config, dc_som,
+    n_som1 = dr_lib.calibrate_dgs_data(config.data, config, dc_som,
+                                       dataset_type="normalization",
                                        inst_geom_dst=inst_geom_dst,
                                        tib_const=config.tib_const,
                                        timer=tim)
 
-    # Perform Steps 7-16 on sample data
-    if config.data_trans_coeff is None:
-        data_trans_coeff = None
-    else:
-        data_trans_coeff = config.data_trans_coeff.toValErrTuple()
-    
-    d_som2 = dr_lib.process_dgs_data(d_som1, config, b_som1, e_som1,
-                                     data_trans_coeff,
-                                     timer=tim)
-
-    del d_som1
-
     # Perform Steps 7-16 on normalization data
-    if n_som1 is not None:
-        if config.norm_trans_coeff is None:
-            norm_trans_coeff = None
-        else:
-            norm_trans_coeff = config.norm_trans_coeff.toValErrTuple()
-
-        
-        n_som2 = dr_lib.process_dgs_data(n_som1, config, b_som1, e_som1,
-                                         norm_trans_coeff,
-                                         dataset_type="normalization",
-                                         timer=tim)
+    if config.norm_trans_coeff is None:
+        norm_trans_coeff = None
     else:
-        n_som2 = n_som1
+        norm_trans_coeff = config.norm_trans_coeff.toValErrTuple()
+
+    n_som2 = dr_lib.process_dgs_data(n_som1, config, b_som1, e_som1,
+                                     norm_trans_coeff,
+                                     dataset_type="normalization",
+                                     timer=tim)
         
     del n_som1, b_som1, e_som1
 
     # Step 17: Integrate normalization spectra
-    if n_som2 is not None:
-        if config.verbose:
-            print "Integrating normalization spectra"
+    if config.verbose:
+        print "Integrating normalization spectra"
 
-        if tim is not None:
-            tim.getTime(False)
+    if tim is not None:
+        tim.getTime(False)
 
-        if config.norm_int_range is None:
-            start_val = float("inf")
-            end_val = float("inf")
-        else:
-            start_val = common_lib.energy_to_wavelength(\
+    if config.norm_int_range is None:
+        start_val = float("inf")
+        end_val = float("inf")
+    else:
+        start_val = common_lib.energy_to_wavelength(\
                 (config.norm_int_range[1], 0.0))[0]
-            end_val = common_lib.energy_to_wavelength(\
+        end_val = common_lib.energy_to_wavelength(\
                 (config.norm_int_range[0], 0.0))[0]
-            
-        norm_int = dr_lib.integrate_spectra(n_som2, start=start_val,
-                                            end=end_val, width=True)
-
-        if tim is not None:
-            tim.getTime(msg="After integrating normalization spectra ")
-
-        if config.dump_norm:
-            file_comment = "Normalization Integration range: %0.3fA, %0.3fA" \
-                           % (start_val, end_val)
-            
-            hlr_utils.write_file(config.output, "text/num-info", norm_int,
-                                 output_ext="norm",
-                                 data_ext=config.ext_replacement,
-                                 path_replacement=config.path_replacement,
-                                 verbose=config.verbose,
-                                 message="normalization values",
-                                 comments=[file_comment],
-                                 tag="Integral", units="counts")   
-    else:
-        norm_int = n_som2
         
+    n_som3 = dr_lib.integrate_spectra(n_som2, start=start_val,
+                                        end=end_val, width=True)
+
     del n_som2
-
-    # Step 18: Normalize sample data by integrated values
-    if norm_int is not None:
-        if config.verbose:
-            print "Normalizing data by normalization data"
-
-        if tim is not None:
-            tim.getTime(False)
-
-        d_som3 = common_lib.div_ncerr(d_som2, norm_int)            
-
-        if tim is not None:
-            tim.getTime(msg="After normalizing data ")
-    else:
-        d_som3 = d_som2
-
-    del d_som2, norm_int
-
-    # Step 19: Calculate the initial energy
-    if config.initial_energy is not None:
-        d_som3.attr_list["Initial_Energy"] = config.initial_energy
-
-    # Steps 20-21: Calculate the energy transfer
-    if config.verbose:
-        print "Calculating energy transfer"
-
-    if tim is not None:
-        tim.getTime(False)
-
-    #import profile
-    #profiler = profile.Profile()
-    #d_som4 = profiler.runcall(dr_lib.energy_transfer, d_som3, "DGS",
-    #                          "Initial_Energy", lojac=True,
-    #                          scale=config.lambda_ratio)
-    #profiler.dump_stats("et_profile.dat")
-    d_som4 = dr_lib.energy_transfer(d_som3, "DGS", "Initial_Energy",
-                                    lojac=True, scale=config.lambda_ratio)
     
-
     if tim is not None:
-        tim.getTime(msg="After calculating energy transfer ")
+        tim.getTime(msg="After integrating normalization spectra ")
 
-    del d_som3
-
-    # Rebin energy transfer spectra
-    if config.verbose:
-        print "Rebinning to final energy transfer axis"
-
-    if tim is not None:
-        tim.getTime(False)
+    if config.dump_norm:
+        file_comment = "Normalization Integration range: %0.3fA, %0.3fA" \
+                       % (start_val, end_val)
         
-    d_som5 = common_lib.rebin_axis_1D(d_som4, config.E_bins.toNessiList())
-
-    if tim is not None:
-        tim.getTime(msg="After rebinning energy transfer ")
-
-    del d_som4
-
-    if config.dump_et_comb:
-        d_som5_1 = dr_lib.sum_all_spectra(d_som5)
-        hlr_utils.write_file(config.output, "text/Spec", d_som5_1,
-                             output_ext="et",
-                             data_ext=config.ext_replacement,    
+        hlr_utils.write_file(config.output, "text/num-info", n_som3,
+                             output_ext="norm",
+                             data_ext=config.ext_replacement,
                              path_replacement=config.path_replacement,
                              verbose=config.verbose,
-                             message="combined energy transfer information")
-
-        del d_som5_1
-
-    if config.socket or config.file:
-        # Create Qvec vs E spectrum
-        if config.verbose:
-            print "Creating S(Qvec, E)"
-
-        if tim is not None:
-            tim.getTime(False)
-        
-        dr_lib.create_Qvec_vs_E_dgs(d_som5,
-                                    config.initial_energy.toValErrTuple(),
-                                    config, corner_geom=config.corner_geom,
-                                    use_socket=config.socket,
-                                    use_file=config.file,
-                                    output=config.output,
-                                    timer=tim)
-        
-        if tim is not None:
-            tim.getTime(msg="After calculating final spectrum ")    
+                             message="normalization values",
+                             comments=[file_comment],
+                             tag="Integral", units="counts")   
+    del n_som3
 
     # Write out RMD file
     d_som5.attr_list["config"] = config
@@ -279,8 +165,11 @@ if __name__ == "__main__":
 
     # Make description for driver
     description = []
-    description.append("This driver runs the data reduction for the Direct")
+    description.append("This driver runs the reduction steps on")
+    description.append("normalization data for the Direct")
     description.append("Geometry Spectrometer class of instruments.")
+    description.append("The result of running the driver will be a list of")
+    description.append("pixel IDs that are below a given threshold.")
     
     # Set up the options available
     parser = hlr_utils.DgsOptions("usage: %prog [options] <datafile>", None,
