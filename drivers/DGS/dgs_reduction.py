@@ -200,9 +200,16 @@ def run(config, tim=None):
 
     if tim is not None:
         tim.getTime(False)
-    
+
+    #import profile
+    #profiler = profile.Profile()
+    #d_som4 = profiler.runcall(dr_lib.energy_transfer, d_som3, "DGS",
+    #                          "Initial_Energy", lojac=True,
+    #                          scale=config.lambda_ratio)
+    #profiler.dump_stats("et_profile.dat")
     d_som4 = dr_lib.energy_transfer(d_som3, "DGS", "Initial_Energy",
                                     lojac=True, scale=config.lambda_ratio)
+    
 
     if tim is not None:
         tim.getTime(msg="After calculating energy transfer ")
@@ -234,21 +241,24 @@ def run(config, tim=None):
 
         del d_som5_1
 
-    # Create Qvec vs E spectrum
-    if config.verbose:
-        print "Creating S(Qvec, E)"
+    if config.socket or config.file:
+        # Create Qvec vs E spectrum
+        if config.verbose:
+            print "Creating S(Qvec, E)"
 
-    if tim is not None:
-        tim.getTime(False)
+        if tim is not None:
+            tim.getTime(False)
         
-    dr_lib.create_Qvec_vs_E_dgs(d_som5, config.initial_energy.toValErrTuple(),
-                                config, corner_geom=config.corner_geom,
-                                use_socket=config.socket, use_file=config.file,
-                                output=config.output,
-                                timer=tim)
-
-    if tim is not None:
-        tim.getTime(msg="After calculating final spectrum ")    
+        dr_lib.create_Qvec_vs_E_dgs(d_som5,
+                                    config.initial_energy.toValErrTuple(),
+                                    config, corner_geom=config.corner_geom,
+                                    use_socket=config.socket,
+                                    use_file=config.file,
+                                    output=config.output,
+                                    timer=tim)
+        
+        if tim is not None:
+            tim.getTime(msg="After calculating final spectrum ")    
 
     # Write out RMD file
     d_som5.attr_list["config"] = config
