@@ -23,10 +23,10 @@
 # $Id$
 
 from optparse import Option
-import hlr_options
+import hlr_dgs_options
 import hlr_utils
 
-class DgsRedOptions(hlr_options.DgsOptions):
+class DgsRedOptions(hlr_dgs_options.DgsOptions):
     """
     This class provides options for the DGS class of instruments for use in
     reducing neutron scattering data with the data reduction drivers.
@@ -65,6 +65,10 @@ class DgsRedOptions(hlr_options.DgsOptions):
                                         Option, version, conflict_handler,
                                         description)
 
+        self.add_option("", "--corner-geom", dest="corner_geom",
+                        help="Specify the file containing the corner "\
+                        +"geometry information.")
+
 def DgsRedConfiguration(parser, configure, options, args):
     """
     This function sets the incoming C{Configure} object with all the options
@@ -85,3 +89,13 @@ def DgsRedConfiguration(parser, configure, options, args):
 
     # Call the configuration setter for DgsOptions
     hlr_options.DgsConfiguration(parser, configure, options, args)
+
+    # Set the corner geometry information file
+    if hlr_utils.cli_provide_override(configure, "corner_geom",
+                                      "--corner-geom"):
+        configure.corner_geom = options.corner_geom
+
+    if configure.corner_geom is None:
+        parser.error("You must provide a corner geometry file via the "\
+                     +"corner-geom option!")
+
