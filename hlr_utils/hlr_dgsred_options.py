@@ -88,7 +88,7 @@ def DgsRedConfiguration(parser, configure, options, args):
     """
 
     # Call the configuration setter for DgsOptions
-    hlr_options.DgsConfiguration(parser, configure, options, args)
+    hlr_dgs_options.DgsConfiguration(parser, configure, options, args)
 
     # Set the corner geometry information file
     if hlr_utils.cli_provide_override(configure, "corner_geom",
