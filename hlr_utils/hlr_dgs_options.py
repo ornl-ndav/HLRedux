@@ -173,6 +173,12 @@ class DgsOptions(hlr_options.InstOptions):
                         +"for all pixels combined. Creates a *.et file.")
         self.set_defaults(dump_et_comb=False)
 
+        self.add_option("", "--dump-norm", action="store_true",
+                        dest="dump_norm", help="Flag to dump the wavelength "\
+                        +"information after vanadium normalization for all"\
+                        +"pixels. Creates a *.norm file.")
+        self.set_defaults(dump_norm=False)
+
         self.add_option("-s", "--socket", action="store_true",
                         dest="socket")
         self.set_defaults(socket=False)
@@ -326,6 +332,10 @@ def DgsConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "dump_wave_comb",
                                       "--dump-wave-comb"):
         configure.dump_wave_comb = options.dump_wave_comb
+
+    # Set the ability to dump the normalization information
+    if hlr_utils.cli_provide_override(configure, "dump_norm", "--dump-norm"):
+        configure.dump_norm = options.dump_norm
 
     # Set the ability to dump the combined energy transfer information
     if hlr_utils.cli_provide_override(configure, "dump_et_comb",
