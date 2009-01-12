@@ -218,6 +218,10 @@ if __name__ == "__main__":
     if configure.inst == "CNCS":
         configure.usmon_path = hlr_utils.NxPath("/entry/monitor3,1")
 
+    # Set the threshold value
+    if hlr_utils.cli_provide_override(configure, "threshold", "--threshold"):
+        configure.threshold = options.threshold
+
     # Set timer object if timing option is used
     if options.timing:
         import sns_timing
