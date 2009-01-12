@@ -68,6 +68,12 @@ class DgsRedOptions(hlr_dgs_options.DgsOptions):
         self.add_option("", "--corner-geom", dest="corner_geom",
                         help="Specify the file containing the corner "\
                         +"geometry information.")
+
+        self.add_option("", "--lambda-ratio", action="store_true",
+                        dest="lambda_ratio", help="Flag that turns on the "\
+                        +"lambda ratio scaling (lambda_i/lambda_f) during "\
+                        +"energy transfer conversion.")
+        self.set_defaults(lambda_ratio=False)
         
         self.add_option("", "--energy-bins", dest="E_bins",
                         help="Specify the minimum and maximum energy values "\
@@ -86,7 +92,25 @@ class DgsRedOptions(hlr_dgs_options.DgsOptions):
         self.add_option("", "--qz-bins", dest="Qz_bins",
                         help="Specify the minimum, maximum and bin width of "\
                         +"the z-component of the momentum transfer in "\
-                        +"1/Angstroms.")                
+                        +"1/Angstroms.")
+
+        self.add_option("-s", "--socket", action="store_true",
+                        dest="socket")
+        self.set_defaults(socket=False)
+
+        self.add_option("", "--sconn-info", dest="sconn_info",
+                        help="Provide the filename that contains the "\
+                        +"connection information for the rebinning server.")
+
+        self.add_option("-t", "--file", action="store_true",
+                        dest="file")
+        self.set_defaults(file=False)
+
+        self.add_option("", "--dump-et-comb", action="store_true",
+                        dest="dump_et_comb",
+                        help="Flag to dump the energy transfer information "\
+                        +"for all pixels combined. Creates a *.et file.")
+        self.set_defaults(dump_et_comb=False)
 
 def DgsRedConfiguration(parser, configure, options, args):
     """
@@ -118,6 +142,11 @@ def DgsRedConfiguration(parser, configure, options, args):
         parser.error("You must provide a corner geometry file via the "\
                      +"corner-geom option!")
 
+    # Set the lambda ratio flag
+    if hlr_utils.cli_provide_override(configure, "lambda_ratio",
+                                      "--lambda-ratio"):
+        configure.lambda_ratio = options.lambda_ratio
+
     # Set the energy transfer bins
     if hlr_utils.cli_provide_override(configure, "E_bins", "--energy-bins"):
         configure.E_bins = hlr_utils.AxisFromString(options.E_bins)
@@ -137,3 +166,21 @@ def DgsRedConfiguration(parser, configure, options, args):
     # Set the z-component of the momentum transfer bins
     if hlr_utils.cli_provide_override(configure, "Qz_bins", "--qz-bins"):
         configure.Qz_bins = hlr_utils.AxisFromString(options.Qz_bins)        
+
+    # Set the ability to run the rebinner over a socket
+    if hlr_utils.cli_provide_override(configure, "socket", "--socket", "s"):
+        configure.socket = options.socket
+
+    # Set the file containing the socket connection information
+    if hlr_utils.cli_provide_override(configure, "sconn_info", "--sconn-info"):
+        configure.sconn_info = hlr_utils.determine_files(options.sconn_info,
+                                                         one_file=True)
+
+    # Set the ability to write out mesh files
+    if hlr_utils.cli_provide_override(configure, "file", "--file", "t"):
+        configure.file = options.file        
+
+    # Set the ability to dump the combined energy transfer information
+    if hlr_utils.cli_provide_override(configure, "dump_et_comb",
+                                      "--dump-et-comb"):
+        configure.dump_et_comb = options.dump_et_comb        
