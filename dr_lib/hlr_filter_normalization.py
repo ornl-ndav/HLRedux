@@ -36,4 +36,12 @@ def filter_normalization(obj, threshold):
 
     
     """
-    pass
+    import hlr_utils
+
+    o_descr = hlr_utils.get_descr(obj)
+    
+    len_obj = hlr_utils.get_length(obj)
+    for i in xrange(len_obj):
+        norm = hlr_utils.get_value(obj, i, o_descr)
+        if norm < threshold:
+            map_so = hlr_utils.get_map_so(obj, None, i)
