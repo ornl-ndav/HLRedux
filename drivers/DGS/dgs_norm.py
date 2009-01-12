@@ -190,11 +190,6 @@ if __name__ == "__main__":
     # Remove unneeded options
     parser.remove_option("--norm")
     parser.remove_option("--data-trans-coeff")
-    parser.remove_option("--lambda-ratio")
-    parser.remove_option("-s")
-    parser.remove_option("-t")
-    parser.remove_option("--sconn-info")
-    parser.remove_option("--dump-et-comb")
 
     # Set defaults for options
     parser.set_defaults(usmon_path="/entry/monitor1,1")
