@@ -61,9 +61,9 @@ class DgsRedOptions(hlr_dgs_options.DgsOptions):
         @param kwargs: A list of keyword arguments that the function accepts:
         """
         # parent constructor
-        hlr_options.DgsOptions.__init__(self, usage, option_list,
-                                        Option, version, conflict_handler,
-                                        description)
+        hlr_dgs_options.DgsOptions.__init__(self, usage, option_list,
+                                            Option, version, conflict_handler,
+                                            description)
 
         self.add_option("", "--corner-geom", dest="corner_geom",
                         help="Specify the file containing the corner "\
