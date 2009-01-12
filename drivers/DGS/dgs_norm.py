@@ -145,6 +145,18 @@ def run(config, tim=None):
                              comments=[file_comment],
                              tag="Integral", units="counts")   
 
+    if tim is not None:
+        tim.getTime(False)
+
+    if config.verbose:
+        print "Making mask file"
+
+    # Make mask file from threshold
+    dr_lib.filter_normalization(n_som3, config.threshold, config)
+
+    if tim is not None:
+        tim.getTime(msg="After making mask file ")
+
     # Write out RMD file
     n_som3.attr_list["config"] = config
 
@@ -188,7 +200,13 @@ if __name__ == "__main__":
     parser.set_defaults(usmon_path="/entry/monitor1,1")
     parser.set_defaults(dsmon_path="/entry/monitor2,1")
 
-    # Add dgs_reduction specific options
+    # Add dgs_norm specific options
+    parser.add_option("", "--threshold", type="float", dest="threshold",
+                      help="Set the cutoff value for the normalization that "\
+                      +"below which a pixel will be masked out. The default "\
+                      +"is 0.0.")
+    parser.set_defaults(threshold=0.0)
+    
     parser.add_option("", "--timing", action="store_true", dest="timing",
                       help="Flag to turn on timing of code")
     parser.set_defaults(timing=False)
