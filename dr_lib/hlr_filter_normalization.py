@@ -55,7 +55,7 @@ def filter_normalization(obj, threshold, config=None):
         # Make mask file name from configuration information
         outfile = hlr_utils.ext_replace(config.output, config.ext_replacement,
                                         "dat")
-        outfile = hlr_utils.add_tag(outfile, "ROI")
+        outfile = hlr_utils.add_tag(outfile, "mask")
 
     ofile = open(outfile, "w")
 
