@@ -60,11 +60,12 @@ def filter_normalization(obj, threshold, config=None):
     ofile = open(outfile, "w")
 
     import SOM
+    import utils
     
     len_obj = hlr_utils.get_length(obj)
     for i in xrange(len_obj):
         norm = hlr_utils.get_value(obj, i, o_descr)
-        if norm < threshold:
+        if utils.compare(norm, threshold) <= 0:
             map_so = hlr_utils.get_map_so(obj, None, i)
             pix_id = SOM.NeXusId.fromString(str(map_so.id)).toJoinedStr()
 
