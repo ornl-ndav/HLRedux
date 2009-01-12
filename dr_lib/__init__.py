@@ -51,6 +51,7 @@ from hlr_dimensionless_mon import *
 from hlr_E_vs_Q_helpers import *
 from hlr_energy_transfer import *
 from hlr_feff_correct_mon import *
+from hlr_filter_normalization import *
 from hlr_filter_ref_data import *
 from hlr_find_nz_extent import *
 from hlr_fix_bin_contents import *
