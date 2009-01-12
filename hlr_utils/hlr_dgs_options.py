@@ -121,12 +121,6 @@ class DgsOptions(hlr_options.InstOptions):
                         +"maximum values in energy transfer [meV] for the "\
                         +"integration of the vanadium (norm) dataset.")
 
-        self.add_option("", "--lambda-ratio", action="store_true",
-                        dest="lambda_ratio", help="Flag that turns on the "\
-                        +"lambda ratio scaling (lambda_i/lambda_f) during "\
-                        +"energy transfer conversion.")
-        self.set_defaults(lambda_ratio=False)
-
         self.add_option("", "--lambda-bins", dest="lambda_bins",
                         help="Specify the minimum and maximum wavelength "\
                         +"values and the wavelength bin width in Angstroms")
@@ -144,29 +138,12 @@ class DgsOptions(hlr_options.InstOptions):
                         +" pixels combined. Creates a *.fwv file.")
         self.set_defaults(dump_wave_comb=False)
 
-        self.add_option("", "--dump-et-comb", action="store_true",
-                        dest="dump_et_comb",
-                        help="Flag to dump the energy transfer information "\
-                        +"for all pixels combined. Creates a *.et file.")
-        self.set_defaults(dump_et_comb=False)
-
         self.add_option("", "--dump-norm", action="store_true",
                         dest="dump_norm", help="Flag to dump the wavelength "\
                         +"information after vanadium normalization for all"\
                         +"pixels. Creates a *.norm file.")
         self.set_defaults(dump_norm=False)
 
-        self.add_option("-s", "--socket", action="store_true",
-                        dest="socket")
-        self.set_defaults(socket=False)
-
-        self.add_option("", "--sconn-info", dest="sconn_info",
-                        help="Provide the filename that contains the "\
-                        +"connection information for the rebinning server.")
-
-        self.add_option("-t", "--file", action="store_true",
-                        dest="file")
-        self.set_defaults(file=False)
 
 def DgsConfiguration(parser, configure, options, args):
     """
@@ -261,12 +238,6 @@ def DgsConfiguration(parser, configure, options, args):
                                       "--norm-int-range"):
         configure.norm_int_range = options.norm_int_range
 
-    # Set the lambda ratio flag
-    if hlr_utils.cli_provide_override(configure, "lambda_ratio",
-                                      "--lambda-ratio"):
-        configure.lambda_ratio = options.lambda_ratio
-
-        
     # Set the wavelength bins
     if hlr_utils.cli_provide_override(configure, "lambda_bins",
                                       "--lambda-bins"):
@@ -286,20 +257,3 @@ def DgsConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "dump_norm", "--dump-norm"):
         configure.dump_norm = options.dump_norm
 
-    # Set the ability to dump the combined energy transfer information
-    if hlr_utils.cli_provide_override(configure, "dump_et_comb",
-                                      "--dump-et-comb"):
-        configure.dump_et_comb = options.dump_et_comb        
-
-    # Set the ability to run the rebinner over a socket
-    if hlr_utils.cli_provide_override(configure, "socket", "--socket", "s"):
-        configure.socket = options.socket
-
-    # Set the file containing the socket connection information
-    if hlr_utils.cli_provide_override(configure, "sconn_info", "--sconn-info"):
-        configure.sconn_info = hlr_utils.determine_files(options.sconn_info,
-                                                         one_file=True)
-
-    # Set the ability to write out mesh files
-    if hlr_utils.cli_provide_override(configure, "file", "--file", "t"):
-        configure.file = options.file        
