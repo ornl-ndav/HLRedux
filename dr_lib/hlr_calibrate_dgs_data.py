@@ -105,6 +105,7 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
                                              Mon_Paths=mon_paths,
                                              SO_Axis=conf.so_axis,
                                              Signal_ROI=conf.roi_file,
+                                             Signal_MASK=conf.mask_file,
                                              dataset_type=dataset_type,
                                              Verbose=conf.verbose, Timer=t)
 
