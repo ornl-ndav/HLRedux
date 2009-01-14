@@ -65,6 +65,10 @@ class DgsRedOptions(hlr_dgs_options.DgsOptions):
                                             Option, version, conflict_handler,
                                             description)
 
+        self.add_option("", "--mask-file", dest="mask_file",
+                        help="Specify a file that contains a list of pixel "\
+                        +"ids to be excluded from the data")
+
         self.add_option("", "--corner-geom", dest="corner_geom",
                         help="Specify the file containing the corner "\
                         +"geometry information.")
@@ -132,6 +136,11 @@ def DgsRedConfiguration(parser, configure, options, args):
 
     # Call the configuration setter for DgsOptions
     hlr_dgs_options.DgsConfiguration(parser, configure, options, args)
+
+    # Set the mask file
+    if hlr_utils.cli_provide_override(configure, "mask_file", "--mask-file"):
+        configure.mask_file = hlr_utils.determine_files(options.mask_file,
+                                                        one_file=True)
 
     # Set the corner geometry information file
     if hlr_utils.cli_provide_override(configure, "corner_geom",
