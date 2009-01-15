@@ -250,7 +250,7 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
         num_lines = len(CNT) * len_E
         linestr = str(num_lines) + '\n'
         dsocket.send(linestr)
-        gridstr='FV'
+        gridstr='FV '
         if conf.Qx_bins is not None and conf.Qy_bins is not None and \
                conf.Qz_bins is not None:
             axis_info = []
@@ -293,7 +293,7 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
         else:
             # No final axis information, do nothing
             pass
-        gridstr += 'FV\n'
+        gridstr += ' FV\n'
         
     if use_file:
         if output is not None:
