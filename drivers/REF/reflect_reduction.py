@@ -301,6 +301,11 @@ if __name__ == "__main__":
                       type="float",
                       help="Provide the substrate diameter in cm.")
 
+    parser.add_option("", "--scale-ecell", dest="scale_ecell", type="float",
+                      help="Provide the scaling factor for the empty cell "\
+                      +"subtraction.")
+    parser.set_defaults(scale_ecell=1.0)
+
     parser.add_option("", "--dump-ecell-rtof", action="store_true",
                       dest="dump_ecell_rtof",
                       help="Dump the empty cell spectra after all scaling. "\
@@ -339,6 +344,11 @@ if __name__ == "__main__":
     if hlr_utils.cli_provide_override(configure, "substrate_diam",
                                       "--substrate-diam"):
         configure.substrate_diam = options.substrate_diam
+
+    # Setup the empty cell scaling parameter
+    if hlr_utils.cli_provide_override(configure, "scale_ecell",
+                                      "--scale_ecell"):
+        configure.scale_ecell = options.scale_ecell        
 
     # Set the ability to dump the empty cell R(TOF) information
     if hlr_utils.cli_provide_override(configure, "dump_ecell_rtof",
