@@ -254,11 +254,41 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
         if conf.Qx_bins is not None and conf.Qy_bins is not None and \
                conf.Qz_bins is not None:
             axis_info = []
-            axis_info.extend([str(x) for x in conf.Qx_bins.toNessiList()])
-            axis_info.append(';')
-            axis_info.extend([str(y) for y in conf.Qy_bins.toNessiList()])
-            axis_info.append(';')
-            axis_info.extend([str(z) for z in conf.Qz_bins.toNessiList()])
+            axis_info.append(conf.Qx_bins.getMinimum())
+            axis_info.append(conf.Qy_bins.getMinimum())
+            axis_info.append(conf.Qz_bins.getMinimum())
+            
+            axis_info.append(conf.Qx_bins.getMaximum())
+            axis_info.append(conf.Qy_bins.getMinimum())
+            axis_info.append(conf.Qz_bins.getMinimum())
+
+            axis_info.append(conf.Qx_bins.getMaximum())
+            axis_info.append(conf.Qy_bins.getMaximum())
+            axis_info.append(conf.Qz_bins.getMinimum())
+
+            axis_info.append(conf.Qx_bins.getMinimum())
+            axis_info.append(conf.Qy_bins.getMaximum())
+            axis_info.append(conf.Qz_bins.getMinimum())
+
+            axis_info.append(conf.Qx_bins.getMinimum())
+            axis_info.append(conf.Qy_bins.getMinimum())
+            axis_info.append(conf.Qz_bins.getMaximum())
+
+            axis_info.append(conf.Qx_bins.getMaximum())
+            axis_info.append(conf.Qy_bins.getMinimum())
+            axis_info.append(conf.Qz_bins.getMaximum())
+
+            axis_info.append(conf.Qx_bins.getMaximum())
+            axis_info.append(conf.Qy_bins.getMaximum())
+            axis_info.append(conf.Qz_bins.getMaximum())
+
+            axis_info.append(conf.Qx_bins.getMinimum())
+            axis_info.append(conf.Qy_bins.getMaximum())
+            axis_info.append(conf.Qz_bins.getMaximum())
+
+            axis_info.append(len(conf.Qx_bins.toNessiList()) - 1)
+            axis_info.append(len(conf.Qy_bins.toNessiList()) - 1)
+            axis_info.append(len(conf.Qz_bins.toNessiList()) - 1)
             gridstr += " ".join(axis_info)
         else:
             # No final axis information, do nothing
