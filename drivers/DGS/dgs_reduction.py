@@ -252,7 +252,6 @@ def run(config, tim=None):
         dr_lib.create_Qvec_vs_E_dgs(d_som5,
                                     config.initial_energy.toValErrTuple(),
                                     config, corner_geom=config.corner_geom,
-                                    use_socket=config.socket,
                                     use_file=config.file,
                                     output=config.output,
                                     timer=tim)
