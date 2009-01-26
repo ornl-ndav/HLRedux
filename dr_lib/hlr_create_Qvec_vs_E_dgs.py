@@ -309,12 +309,14 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
         filehead = outtag + "_bmesh"
         if make_fixed:
             filehead1 = outtag + "_fgrid"
+        filehead2 = outtag + "_conf"
     else:
         filehead = "bmesh"
         if make_fixed:    
             filehead1 = "fgrid"
+        filehead2 = "conf"
 
-    hfile = open(os.path.join(topdir, "conf.in"), "w")
+    hfile = open(os.path.join(topdir, "%s.in" % filehead2), "w")
     print >> hfile, jobstr
     print >> hfile, linestr
     print >> hfile, gridstr
