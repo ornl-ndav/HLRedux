@@ -159,10 +159,12 @@ def BasicConfiguration(parser, configure, options, args):
         configure.data = hlr_utils.determine_files(options.data,
                                                    configure.inst,
                                                    configure.facility,
+                                                   configure.proposal,
                                                    stop_on_none=True)
     elif len(args) > 0:
         configure.data = hlr_utils.determine_files(args, configure.inst,
                                                    configure.facility,
+                                                   configure.proposal,
                                                    stop_on_none=True)
     elif configure.data:
         # We have data from the config file, so everything is OK.
