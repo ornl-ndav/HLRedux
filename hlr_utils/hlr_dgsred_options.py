@@ -98,10 +98,10 @@ class DgsRedOptions(hlr_dgs_options.DgsOptions):
                         +"the z-component of the momentum transfer in "\
                         +"1/Angstroms.")
 
-        self.add_option("-t", "--file", action="store_true",
-                        dest="file", help="Dump the Q vector information to "\
+        self.add_option("-x", "--fixed", action="store_true",
+                        dest="fixed", help="Dump the Q vector information to "\
                         +"a fixed grid.")
-        self.set_defaults(file=False)
+        self.set_defaults(fixed=False)
 
         self.add_option("", "--dump-et-comb", action="store_true",
                         dest="dump_et_comb",
@@ -178,9 +178,9 @@ def DgsRedConfiguration(parser, configure, options, args):
         configure.sconn_info = hlr_utils.determine_files(options.sconn_info,
                                                          one_file=True)
 
-    # Set the ability to write out mesh files
-    if hlr_utils.cli_provide_override(configure, "file", "--file", "t"):
-        configure.file = options.file        
+    # Set the ability to write out fixed grid mesh files
+    if hlr_utils.cli_provide_override(configure, "fixed", "--fixed", "x"):
+        configure.fixed = options.fixed        
 
     # Set the ability to dump the combined energy transfer information
     if hlr_utils.cli_provide_override(configure, "dump_et_comb",
