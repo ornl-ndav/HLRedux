@@ -98,14 +98,6 @@ class DgsRedOptions(hlr_dgs_options.DgsOptions):
                         +"the z-component of the momentum transfer in "\
                         +"1/Angstroms.")
 
-        self.add_option("-s", "--socket", action="store_true",
-                        dest="socket")
-        self.set_defaults(socket=False)
-
-        self.add_option("", "--sconn-info", dest="sconn_info",
-                        help="Provide the filename that contains the "\
-                        +"connection information for the rebinning server.")
-
         self.add_option("-t", "--file", action="store_true",
                         dest="file")
         self.set_defaults(file=False)
