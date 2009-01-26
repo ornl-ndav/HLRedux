@@ -45,8 +45,9 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
                           information.
     @type corner_geom: C{string}
 
-    @keyword use_file: A flag that turns on writing the information to a file.
-    @type use_file: C{boolean}
+    @keyword make_fixed: A flag that turns on writing the fixed grid mesh
+                         information to a file.
+    @type make_fixed: C{boolean}
 
     @keyword output: The output filename and or directory.
     @type output: C{string}
@@ -70,9 +71,9 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
         corner_geom = ""
 
     try:
-        use_file = kwargs["use_file"]
+        make_fixed = kwargs["make_fixed"]
     except KeyError:
-        use_file = False
+        make_fixed = False
 
     try:
         output = kwargs["output"]
@@ -123,7 +124,7 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
         t.getTime(False)
         
     corner_angles = hlr_utils.get_corner_geometry(corner_geom)
-    if use_file:
+    if make_fixed:
         import SOM
         fixed_grid = {}
         for key in corner_angles:
@@ -282,46 +283,46 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
         pass
     gridstr += ' FV'
         
-    if use_file:
-        if output is not None:
-            outdir = os.path.dirname(output)
-            if outdir != '':
-                if outdir.rfind('.') != -1:
-                    outdir = ""
-        else:
-            outdir = ""
+    if output is not None:
+        outdir = os.path.dirname(output)
+        if outdir != '':
+            if outdir.rfind('.') != -1:
+                outdir = ""
+    else:
+        outdir = ""
 
-        topdir = os.path.join(outdir, 
-                              str(som.attr_list["data-run_number"].getValue()\
-                                  + "-mesh"))
-        try:
-            os.mkdir(topdir)
-        except OSError:
-            pass
+    topdir = os.path.join(outdir, 
+                          str(som.attr_list["data-run_number"].getValue()\
+                              + "-mesh"))
+    try:
+        os.mkdir(topdir)
+    except OSError:
+        pass
 
-        outtag = os.path.basename(output)
-        if outtag.rfind('.') == -1:
-            outtag = ""
-        else:
-            outtag = outtag.split('.')[0]
+    outtag = os.path.basename(output)
+    if outtag.rfind('.') == -1:
+        outtag = ""
+    else:
+        outtag = outtag.split('.')[0]
 
-        if outtag != "":
-            filehead = outtag + "_bmesh"
+    if outtag != "":
+        filehead = outtag + "_bmesh"
+        if make_fixed:
             filehead1 = outtag + "_fgrid"
-        else:
-            filehead = "bmesh"
+    else:
+        filehead = "bmesh"
+        if make_fixed:    
             filehead1 = "fgrid"
 
-        hfile = open(os.path.join(topdir, "conf.in"), "w")
-        print >> hfile, jobstr
-        print >> hfile, linestr
-        print >> hfile, gridstr
-        hfile.close()
+    hfile = open(os.path.join(topdir, "conf.in"), "w")
+    print >> hfile, jobstr
+    print >> hfile, linestr
+    print >> hfile, gridstr
+    hfile.close()
 
     for k in xrange(len_E):
-        if use_file:
-            ofile = open(os.path.join(topdir, "%s%04d.in" % (filehead, k)),
-                         "w")
+        ofile = open(os.path.join(topdir, "%s%04d.in" % (filehead, k)), "w")
+        if make_fixed:
             ofile1 = open(os.path.join(topdir, "%s%04d.in" % (filehead1, k)),
                           "w")
         for id in CNT:
@@ -338,7 +339,7 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
             __get_coords(V3, id, k+1, result)
             __get_coords(V4, id, k+1, result)
 
-            if use_file:
+            if make_fixed:
                 print >> ofile, " ".join(result)
                 result1 = []
                 result1.append(str(k))
@@ -347,8 +348,8 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
                 result1.extend([str(x) for x in fixed_grid[id]])
                 print >> ofile1, " ".join(result1)
 
-        if use_file:
-            ofile.close()
+        ofile.close()
+        if make_fixed:
             ofile1.close()
 
     if t is not None:
