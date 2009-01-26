@@ -98,6 +98,12 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
     else:
         mon_paths = conf.usmon_path.toPath()
 
+    # Check for mask file since normalization drive doesn't understand option
+    try:
+        mask_file = conf.mask_file
+    except AttributeError:
+        mask_file = None
+
     if t is not None:
         oldtime = t.getOldTime()
 
@@ -105,7 +111,7 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
                                              Mon_Paths=mon_paths,
                                              SO_Axis=conf.so_axis,
                                              Signal_ROI=conf.roi_file,
-                                             Signal_MASK=conf.mask_file,
+                                             Signal_MASK=mask_file,
                                              dataset_type=dataset_type,
                                              Verbose=conf.verbose, Timer=t)
 
