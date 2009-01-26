@@ -169,15 +169,6 @@ def DgsRedConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "Qz_bins", "--qz-bins"):
         configure.Qz_bins = hlr_utils.AxisFromString(options.Qz_bins)        
 
-    # Set the ability to run the rebinner over a socket
-    if hlr_utils.cli_provide_override(configure, "socket", "--socket", "s"):
-        configure.socket = options.socket
-
-    # Set the file containing the socket connection information
-    if hlr_utils.cli_provide_override(configure, "sconn_info", "--sconn-info"):
-        configure.sconn_info = hlr_utils.determine_files(options.sconn_info,
-                                                         one_file=True)
-
     # Set the ability to write out fixed grid mesh files
     if hlr_utils.cli_provide_override(configure, "fixed", "--fixed", "x"):
         configure.fixed = options.fixed        
