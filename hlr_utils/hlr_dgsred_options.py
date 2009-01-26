@@ -99,7 +99,8 @@ class DgsRedOptions(hlr_dgs_options.DgsOptions):
                         +"1/Angstroms.")
 
         self.add_option("-t", "--file", action="store_true",
-                        dest="file")
+                        dest="file", help="Dump the Q vector information to "\
+                        +"a fixed grid.")
         self.set_defaults(file=False)
 
         self.add_option("", "--dump-et-comb", action="store_true",
