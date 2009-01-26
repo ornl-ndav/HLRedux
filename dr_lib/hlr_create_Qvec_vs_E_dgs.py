@@ -45,10 +45,6 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
                           information.
     @type corner_geom: C{string}
 
-    @keyword use_socket: A flag that turns on writing the information to a
-                         socket.
-    @type use_socket: C{boolean}
-
     @keyword use_file: A flag that turns on writing the information to a file.
     @type use_file: C{boolean}
 
@@ -72,11 +68,6 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
         corner_geom = kwargs["corner_geom"]
     except KeyError:
         corner_geom = ""
-
-    try:
-        use_socket = kwargs["use_socket"]
-    except KeyError:
-        use_socket = False
 
     try:
         use_file = kwargs["use_file"]
@@ -243,57 +234,53 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
     if t is not None:
         t.getTime(False)
 
-    if use_socket:
-        dsocket = hlr_utils.make_binner_connection(conf.sconn_info)
-        jobstr = 'MR' + hlr_utils.create_binner_string(conf) + 'JH\n'
-        dsocket.send(jobstr)
-        num_lines = len(CNT) * len_E
-        linestr = str(num_lines) + '\n'
-        dsocket.send(linestr)
-        gridstr='FV '
-        if conf.Qx_bins is not None and conf.Qy_bins is not None and \
-               conf.Qz_bins is not None:
-            axis_info = []
-            axis_info.append(str(conf.Qx_bins.getMinimum()))
-            axis_info.append(str(conf.Qy_bins.getMinimum()))
-            axis_info.append(str(conf.Qz_bins.getMinimum()))
-            
-            axis_info.append(str(conf.Qx_bins.getMaximum()))
-            axis_info.append(str(conf.Qy_bins.getMinimum()))
-            axis_info.append(str(conf.Qz_bins.getMinimum()))
-
-            axis_info.append(str(conf.Qx_bins.getMaximum()))
-            axis_info.append(str(conf.Qy_bins.getMaximum()))
-            axis_info.append(str(conf.Qz_bins.getMinimum()))
-
-            axis_info.append(str(conf.Qx_bins.getMinimum()))
-            axis_info.append(str(conf.Qy_bins.getMaximum()))
-            axis_info.append(str(conf.Qz_bins.getMinimum()))
-
-            axis_info.append(str(conf.Qx_bins.getMinimum()))
-            axis_info.append(str(conf.Qy_bins.getMinimum()))
-            axis_info.append(str(conf.Qz_bins.getMaximum()))
-
-            axis_info.append(str(conf.Qx_bins.getMaximum()))
-            axis_info.append(str(conf.Qy_bins.getMinimum()))
-            axis_info.append(str(conf.Qz_bins.getMaximum()))
-
-            axis_info.append(str(conf.Qx_bins.getMaximum()))
-            axis_info.append(str(conf.Qy_bins.getMaximum()))
-            axis_info.append(str(conf.Qz_bins.getMaximum()))
-
-            axis_info.append(str(conf.Qx_bins.getMinimum()))
-            axis_info.append(str(conf.Qy_bins.getMaximum()))
-            axis_info.append(str(conf.Qz_bins.getMaximum()))
-
-            axis_info.append(str(len(conf.Qx_bins.toNessiList()) - 1))
-            axis_info.append(str(len(conf.Qy_bins.toNessiList()) - 1))
-            axis_info.append(str(len(conf.Qz_bins.toNessiList()) - 1))
-            gridstr += " ".join(axis_info)
-        else:
-            # No final axis information, do nothing
-            pass
-        gridstr += ' FV\n'
+    jobstr = 'MR' + hlr_utils.create_binner_string(conf) + 'JH'
+    num_lines = len(CNT) * len_E
+    linestr = str(num_lines)
+    gridstr='FV '
+    if conf.Qx_bins is not None and conf.Qy_bins is not None and \
+           conf.Qz_bins is not None:
+        axis_info = []
+        axis_info.append(str(conf.Qx_bins.getMinimum()))
+        axis_info.append(str(conf.Qy_bins.getMinimum()))
+        axis_info.append(str(conf.Qz_bins.getMinimum()))
+        
+        axis_info.append(str(conf.Qx_bins.getMaximum()))
+        axis_info.append(str(conf.Qy_bins.getMinimum()))
+        axis_info.append(str(conf.Qz_bins.getMinimum()))
+        
+        axis_info.append(str(conf.Qx_bins.getMaximum()))
+        axis_info.append(str(conf.Qy_bins.getMaximum()))
+        axis_info.append(str(conf.Qz_bins.getMinimum()))
+        
+        axis_info.append(str(conf.Qx_bins.getMinimum()))
+        axis_info.append(str(conf.Qy_bins.getMaximum()))
+        axis_info.append(str(conf.Qz_bins.getMinimum()))
+        
+        axis_info.append(str(conf.Qx_bins.getMinimum()))
+        axis_info.append(str(conf.Qy_bins.getMinimum()))
+        axis_info.append(str(conf.Qz_bins.getMaximum()))
+        
+        axis_info.append(str(conf.Qx_bins.getMaximum()))
+        axis_info.append(str(conf.Qy_bins.getMinimum()))
+        axis_info.append(str(conf.Qz_bins.getMaximum()))
+        
+        axis_info.append(str(conf.Qx_bins.getMaximum()))
+        axis_info.append(str(conf.Qy_bins.getMaximum()))
+        axis_info.append(str(conf.Qz_bins.getMaximum()))
+        
+        axis_info.append(str(conf.Qx_bins.getMinimum()))
+        axis_info.append(str(conf.Qy_bins.getMaximum()))
+        axis_info.append(str(conf.Qz_bins.getMaximum()))
+        
+        axis_info.append(str(len(conf.Qx_bins.toNessiList()) - 1))
+        axis_info.append(str(len(conf.Qy_bins.toNessiList()) - 1))
+        axis_info.append(str(len(conf.Qz_bins.toNessiList()) - 1))
+        gridstr += " ".join(axis_info)
+    else:
+        # No final axis information, do nothing
+        pass
+    gridstr += ' FV'
         
     if use_file:
         if output is not None:
@@ -325,6 +312,12 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
             filehead = "bmesh"
             filehead1 = "fgrid"
 
+        hfile = open(os.path.join(topdir, "conf.in"), "w")
+        print >> hfile, jobstr
+        print >> hfile, linestr
+        print >> hfile, gridstr
+        hfile.close()
+
     for k in xrange(len_E):
         if use_file:
             ofile = open(os.path.join(topdir, "%s%04d.in" % (filehead, k)),
@@ -344,9 +337,6 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
             __get_coords(V2, id, k+1, result)
             __get_coords(V3, id, k+1, result)
             __get_coords(V4, id, k+1, result)
-            if use_socket:
-                result.append('\n')
-                dsocket.send(" ".join(result))
 
             if use_file:
                 print >> ofile, " ".join(result)
