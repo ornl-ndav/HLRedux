@@ -91,6 +91,11 @@ class BasicOptions(optparse.OptionParser):
         # specify the facility
         self.add_option("-f", "--facility", dest="facility",
                         help="Specify the short name for the facility.")
+
+        # specift the desired proposal
+        self.add_option("-p", "--proposal", dest="proposal",
+                        help="Specify the proposal for the requested data "\
+                        +"if a run number is being provided.")
         
         # specifying data sets
         self.add_option("", "--data", help="Specify the data file")
@@ -145,6 +150,10 @@ def BasicConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "facility", "--facility"):
         configure.facility = options.facility        
 
+    # Define proposal as stuff below depends on it.
+    if hlr_utils.cli_provide_override(configure, "proposal", "--proposal"):
+        configure.proposal = options.proposal
+        
     # Get the datafile name and check it
     if options.data is not None:
         configure.data = hlr_utils.determine_files(options.data,
