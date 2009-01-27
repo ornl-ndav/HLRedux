@@ -341,8 +341,10 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
             __get_coords(V3, id, k+1, result)
             __get_coords(V4, id, k+1, result)
 
+
+            print >> ofile, " ".join(result)
+
             if make_fixed:
-                print >> ofile, " ".join(result)
                 result1 = []
                 result1.append(str(k))
                 result1.append(str(CNT[id][k]))
