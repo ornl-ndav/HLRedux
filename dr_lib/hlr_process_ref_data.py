@@ -263,7 +263,7 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
         pc_sample = d_som4.attr_list[dataset_type+"-proton_charge"].getValue()
         pc_ecell = e_som2.attr_list["empty_cell-proton_charge"].getValue()
 
-        pc_ratio = config.scale_ecell * (pc_sample / pc_ecell)
+        pc_ratio = conf.scale_ecell * (pc_sample / pc_ecell)
 
         import common_lib
 
