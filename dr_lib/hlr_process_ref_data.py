@@ -226,8 +226,99 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
 
     del d_som3
 
-    if not no_bkg and conf.dump_sub:
-        hlr_utils.write_file(conf.output, "text/Spec", d_som4,
+    # If empty cell subtraction is requested, get data set
+    if conf.ecell is not None and dataset_type != "norm":
+        if conf.verbose:
+            print "Reading %s file" % "empty_cell"
+
+        e_som1 = dr_lib.add_files(conf.ecell,
+                                  Data_Paths=data_path,
+                                  SO_Axis=so_axis,
+                                  dataset_type="empty_cell",
+                                  Signal_ROI=signal_roi_file,
+                                  Verbose=conf.verbose,
+                                  Timer=t)
+
+        e_som2 = dr_lib.sum_all_spectra(e_som1, y_sort=y_sort, stripe=True,
+                                        pixel_fix=127)
+
+        del e_som1
+        
+        if t is not None:
+            t.getTime(msg="After reading %s " % "empty_cell")
+
+        if conf.verbose:
+            print "Calculating substrate transmission"
+
+        if t is not None:
+            t.getTime(False)
+            
+        T = dr_lib.calc_substrate_trans(e_som2, conf.subtrans_coeff,
+                                        conf.substrate_diam)
+
+        if t is not None:
+            t.getTime(msg="After calculating substrate transmission")
+
+        # Get proton charges:
+        pc_sample = d_som4.attr_list[dataset_type+"-proton_charge"].getValue()
+        pc_ecell = e_som2.attr_list["empty_cell-proton_charge"].getValue()
+
+        pc_ratio = conf.scale_ecell * (pc_sample / pc_ecell)
+
+        import common_lib
+
+        # Scale transmission by proton charge ratio
+        if conf.verbose:
+            print "Scaling transmission by proton charge ratio"
+        
+        if t is not None:
+            t.getTime(False)
+
+        T1 = common_lib.mult_ncerr(T, (pc_ratio, 0.0))
+
+        if t is not None:
+            t.getTime(msg="After scaling transmission by proton charge ratio")
+
+        del T
+
+        # Scale empty cell by scaled transmission
+        if conf.verbose:
+            print "Scaling empty cell by scaled transmission"
+        
+        if t is not None:
+            t.getTime(False)
+
+        e_som3 = common_lib.mult_ncerr(e_som2, T1)
+
+        if t is not None:
+            t.getTime(msg="After scaling empty cell by scaled transmission")
+            
+        del e_som2, T1
+
+        if conf.dump_ecell_rtof:
+            hlr_utils.write_file(conf.output, "text/Spec", e_som3,
+                             output_ext="ertof",
+                             extra_tag=dataset_type,
+                             verbose=conf.verbose,
+                             data_ext=conf.ext_replacement,
+                             path_replacement=conf.path_replacement,
+                             message="empty cell TOF information")
+
+        # Subtract scaled empty cell from sample data
+        d_som5 = dr_lib.subtract_bkg_from_data(d_som4, e_som3,
+                                               verbose=conf.verbose,
+                                               timer=t,
+                                               dataset1=dataset_type,
+                                               dataset2="empty_cell")
+        
+        del e_som3
+    else:
+        d_som5 = d_som4
+
+    del d_som4
+
+    if (not no_bkg or conf.ecell is not None) and conf.dump_sub:
+        hlr_utils.write_file(conf.output, "text/Spec", d_som5,
                              output_ext="sub",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
@@ -236,11 +327,11 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
                              message="subtracted TOF information")
 
 
-    dtot_int = dr_lib.integrate_axis_py(dtot, avg=True)
+    dtot_int = dr_lib.integrate_axis(dtot, avg=True)
     param_key = dataset_type+"-dt_over_t"
-    d_som4.attr_list[param_key] = dtot_int[0]
+    d_som5.attr_list[param_key] = dtot_int[0]
 
     if conf.store_dtot:
-        d_som4.attr_list["extra_som"] = dtot
+        d_som5.attr_list["extra_som"] = dtot
 
-    return d_som4
+    return d_som5
