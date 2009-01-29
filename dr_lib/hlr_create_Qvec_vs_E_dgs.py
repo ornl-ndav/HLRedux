@@ -275,7 +275,6 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
     hfile = open(os.path.join(topdir, "%s.in" % filehead2), "w")
     print >> hfile, jobstr
     print >> hfile, linestr
-    print >> hfile, gridstr
     hfile.close()
 
     for k in xrange(len_E):
