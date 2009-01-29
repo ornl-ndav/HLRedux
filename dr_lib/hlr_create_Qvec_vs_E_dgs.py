@@ -238,51 +238,7 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
     jobstr = 'MR' + hlr_utils.create_binner_string(conf) + 'JH'
     num_lines = len(CNT) * len_E
     linestr = str(num_lines)
-    gridstr='FV '
-    if conf.Qx_bins is not None and conf.Qy_bins is not None and \
-           conf.Qz_bins is not None:
-        axis_info = []
-        axis_info.append(str(conf.Qx_bins.getMinimum()))
-        axis_info.append(str(conf.Qy_bins.getMinimum()))
-        axis_info.append(str(conf.Qz_bins.getMinimum()))
-        
-        axis_info.append(str(conf.Qx_bins.getMaximum()))
-        axis_info.append(str(conf.Qy_bins.getMinimum()))
-        axis_info.append(str(conf.Qz_bins.getMinimum()))
-        
-        axis_info.append(str(conf.Qx_bins.getMaximum()))
-        axis_info.append(str(conf.Qy_bins.getMaximum()))
-        axis_info.append(str(conf.Qz_bins.getMinimum()))
-        
-        axis_info.append(str(conf.Qx_bins.getMinimum()))
-        axis_info.append(str(conf.Qy_bins.getMaximum()))
-        axis_info.append(str(conf.Qz_bins.getMinimum()))
-        
-        axis_info.append(str(conf.Qx_bins.getMinimum()))
-        axis_info.append(str(conf.Qy_bins.getMinimum()))
-        axis_info.append(str(conf.Qz_bins.getMaximum()))
-        
-        axis_info.append(str(conf.Qx_bins.getMaximum()))
-        axis_info.append(str(conf.Qy_bins.getMinimum()))
-        axis_info.append(str(conf.Qz_bins.getMaximum()))
-        
-        axis_info.append(str(conf.Qx_bins.getMaximum()))
-        axis_info.append(str(conf.Qy_bins.getMaximum()))
-        axis_info.append(str(conf.Qz_bins.getMaximum()))
-        
-        axis_info.append(str(conf.Qx_bins.getMinimum()))
-        axis_info.append(str(conf.Qy_bins.getMaximum()))
-        axis_info.append(str(conf.Qz_bins.getMaximum()))
-        
-        axis_info.append(str(len(conf.Qx_bins.toNessiList()) - 1))
-        axis_info.append(str(len(conf.Qy_bins.toNessiList()) - 1))
-        axis_info.append(str(len(conf.Qz_bins.toNessiList()) - 1))
-        gridstr += " ".join(axis_info)
-    else:
-        # No final axis information, do nothing
-        pass
-    gridstr += ' FV'
-        
+
     if output is not None:
         outdir = os.path.dirname(output)
         if outdir != '':
