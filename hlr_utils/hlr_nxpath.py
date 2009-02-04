@@ -37,6 +37,11 @@ class NxPath(object):
         @param infostr: Comma-separated values for I{NeXus} paths and signals.
         @type infostr: C{string}
         """
+        if infostr is None:
+            self.__length = 0
+            self.__data_paths = None
+            return
+
         self.__data_paths = []
         
         if infostr[0].isdigit():
