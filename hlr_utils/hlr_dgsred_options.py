@@ -83,6 +83,11 @@ class DgsRedOptions(hlr_dgs_options.DgsOptions):
                         help="Specify the minimum and maximum energy values "\
                         +"and the energy bin width in meV")
 
+        self.add_option("", "--mom-trans-bins", dest="Q_bins",
+                        help="Specify the minimum and maximum momentum "\
+                        +"transfer values and the momentum transfer bin "\
+                        +"width in Angstroms^-1")
+
         self.add_option("-x", "--fixed", action="store_true",
                         dest="fixed", help="Dump the Q vector information to "\
                         +"a fixed grid.")
@@ -141,6 +146,10 @@ def DgsRedConfiguration(parser, configure, options, args):
     if configure.E_bins is None:
         parser.error("You must provide energy transfer binning via the "\
                      +"energy-bins option")        
+
+    # Set the momentum transfer bins
+    if hlr_utils.cli_provide_override(configure, "Q_bins", "--mom-trans-bins"):
+        configure.Q_bins = hlr_utils.AxisFromString(options.Q_bins)
 
     # Set the ability to write out fixed grid mesh files
     if hlr_utils.cli_provide_override(configure, "fixed", "--fixed", "x"):
