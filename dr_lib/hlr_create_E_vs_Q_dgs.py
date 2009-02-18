@@ -42,6 +42,9 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
                           information.
     @type corner_geom: C{string}
 
+    @keyword configure: This is the object containing the driver configuration.
+    @type configure: C{Configure}
+
     @keyword timer: Timing object so the function can perform timing estimates.
     @type timer: C{sns_timer.DiffTime}    
     """
@@ -49,17 +52,34 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
     import axis_manip
     import common_lib
     import hlr_utils
+    import nessi_list
+    import SOM
 
     # Check keywords
-    try:
-        t = kwargs["timer"]
-    except KeyError:
-        t = None
+    t = kwargs.get("timer")
+
+    # Check for the corner geometry file
+    corner_geom = kwargs.get("corner_geom", "")
+
+    # Check for configure keyword
+    configure = kwargs.get("configure")
+
+    # Setup output object
+    so_dim = SOM.SO(dim)
+
+    so_dim.axis[0].val = Q_final
+    so_dim.axis[1].val = som[0].axis[0].val # E_t
     
-    try:
-        corner_geom = kwargs["corner_geom"]
-    except KeyError:
-        corner_geom = ""
+    # Calculate total 2D array size
+    N_tot = len(so_dim.axis[0].val) * len(so_dim.axis[1].val)
+
+    # Create y and var_y lists from total 2D size
+    so_dim.y = nessi_list.NessiList(N_tot)
+    so_dim.var_y = nessi_list.NessiList(N_tot)
+
+    # Create area sum and errors for the area sum lists from total 2D size
+    area_sum = nessi_list.NessiList(N_tot)
+    area_sum_err2 = nessi_list.NessiList(N_tot)
 
     # Convert initial energy to initial wavevector
     l_i = common_lib.energy_to_wavelength(E_i)
@@ -108,4 +128,60 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
                                                                      k_f[1],
                                                            cangles.getPolar(0),
                                                                      0.0)
+        
+        (Q2, Q2_err2) = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0],
+                                                                     k_i[1],
+                                                                     k_f[0],
+                                                                     k_f[1],
+                                                           cangles.getPolar(1),
+                                                                     0.0)
+
+        (Q3, Q3_err2) = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0],
+                                                                     k_i[1],
+                                                                     k_f[0],
+                                                                     k_f[1],
+                                                           cangles.getPolar(2),
+                                                                     0.0)
+
+        (Q4, Q4_err2) = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0],
+                                                                     k_i[1],
+                                                                     k_f[0],
+                                                                     k_f[1],
+                                                           cangles.getPolar(3),
+                                                                     0.0)
+        try:
+            (y_2d, y_2d_err2,
+             area_new) = axis_manip.rebin_2D_quad_to_rectlin(Q_1, E_t_1,
+                                                           Q_2, E_t_2,
+                                                           Q_3, E_t_3,
+                                                           Q_4, E_t_4,
+                                                           counts,
+                                                           counts_err2,
+                                                           so_dim.axis[0].val,
+                                                           so_dim.axis[1].val)
+        except IndexError, e:
+            # Get the offending index from the error message
+            index = int(str(e).split()[1].split('index')[-1].strip('[]'))
+            print "Id:", map_so.id
+            print "Index:", index
+            print "Verticies: %f, %f, %f, %f, %f, %f, %f, %f" % (Q_1[index],
+                                                                 E_t_1[index],
+                                                                 Q_2[index],
+                                                                 E_t_2[index],
+                                                                 Q_3[index],
+                                                                 E_t_3[index],
+                                                                 Q_4[index],
+                                                                 E_t_4[index])
+            raise IndexError(str(e))
+
+        # Add in together with previous results
+        (so_dim.y, so_dim.var_y) = array_manip.add_ncerr(so_dim.y,
+                                                         so_dim.var_y,
+                                                         y_2d, y_2d_err2)
+        
+        (area_sum, area_sum_err2) = array_manip.add_ncerr(area_sum,
+                                                          area_sum_err2,
+                                                          area_new,
+                                                          area_sum_err2)
+
     return None
