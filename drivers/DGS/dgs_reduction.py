@@ -241,6 +241,23 @@ def run(config, tim=None):
 
         del d_som5_1
 
+    if config.Q_bins is not None:
+        if config.verbose:
+            print "Creating S(Q, E)"
+
+        if tim is not None:
+            tim.getTime(False)
+
+        d_som5_2 = dr_lib.create_Qvec_vs_E_dgs(d_som5,
+                                            d_som5.attr_list["Initial_Energy"],
+                                               config.Q_bins.toNessiList(),
+                                               corner_geom=config.corner_geom,
+                                               timer=tim)
+
+                                               
+        if tim is not None:
+            tim.getTime(msg="After calculating S(Q,E) spectrum ")    
+
     # Create Qvec vs E spectrum
     if config.verbose:
         print "Creating S(Qvec, E)"
