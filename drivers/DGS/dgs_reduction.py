@@ -253,6 +253,7 @@ def run(config, tim=None):
                                             config.Q_bins.toNessiList(),
                                             corner_geom=config.corner_geom,
                                             split=config.split,
+                                            configure=config,
                                             timer=tim)
 
         # Writing 2D DAVE file
