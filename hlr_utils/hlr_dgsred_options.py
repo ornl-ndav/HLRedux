@@ -99,6 +99,11 @@ class DgsRedOptions(hlr_dgs_options.DgsOptions):
                         +"for all pixels combined. Creates a *.et file.")
         self.set_defaults(dump_et_comb=False)
 
+        self.add_option("", "--split", action="store_true", dest="split",
+                        help="Special flag for running driver in split mode. "\
+                        +"Only necessary for parallel computing environment.")
+        self.set_defaults(split=False)        
+
 def DgsRedConfiguration(parser, configure, options, args):
     """
     This function sets the incoming C{Configure} object with all the options
@@ -159,3 +164,6 @@ def DgsRedConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "dump_et_comb",
                                       "--dump-et-comb"):
         configure.dump_et_comb = options.dump_et_comb        
+
+    if hlr_utils.cli_provide_override(configure, "split", "--split"):
+        configure.split = options.split
