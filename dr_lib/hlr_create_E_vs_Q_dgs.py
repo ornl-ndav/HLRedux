@@ -42,11 +42,37 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
                           information.
     @type corner_geom: C{string}
 
+    @keyword so_id: The identifier represents a number, string, tuple or other
+                    object that describes the resulting C{SO}
+    @type so_id: C{int}, C{string}, C{tuple}, C{pixel ID}
+    
+    @keyword y_label: The y axis label
+    @type y_label: C{string}
+    
+    @keyword y_units: The y axis units
+    @type y_units: C{string}
+    
+    @keyword x_labels: This is a list of names that sets the individual x axis
+    labels
+    @type x_labels: C{list} of C{string}s
+    
+    @keyword x_units: This is a list of names that sets the individual x axis
+    units
+    @type x_units: C{list} of C{string}s
+
+    @keyword split: This flag causes the counts and the fractional area to
+                    be written out into separate files.
+    @type split: C{boolean}
+
     @keyword configure: This is the object containing the driver configuration.
     @type configure: C{Configure}
 
     @keyword timer: Timing object so the function can perform timing estimates.
-    @type timer: C{sns_timer.DiffTime}    
+    @type timer: C{sns_timer.DiffTime}
+
+
+    @return: Object containing a 2D C{SO} with E and Q axes
+    @rtype: C{SOM.SOM}    
     """
     import array_manip
     import axis_manip
@@ -55,14 +81,11 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
     import nessi_list
     import SOM
 
-    # Check keywords
+    # Check for keywords
     t = kwargs.get("timer")
-
-    # Check for the corner geometry file
     corner_geom = kwargs.get("corner_geom", "")
-
-    # Check for configure keyword
     configure = kwargs.get("configure")
+    split = kwargs.get("split", False)
 
     # Setup output object
     so_dim = SOM.SO(dim)
@@ -122,39 +145,46 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
 
         cangles = corner_angles[str(map_so.id)]
 
-        (Q1, Q1_err2) = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0],
-                                                                     k_i[1],
-                                                                     k_f[0],
-                                                                     k_f[1],
-                                                           cangles.getPolar(0),
-                                                                     0.0)
+        avg_theta1 = (cangles.getPolar(0) + cangles.getPolar(1)) / 2.0
+        avg_theta2 = (cangles.getPolar(2) + cangles.getPolar(3)) / 2.0
+
+        (Q1,
+         Q1_err2) = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0][:-1],
+                                                                 k_i[1][:-1],
+                                                                 k_f[0],
+                                                                 k_f[1],
+                                                                 avg_theta1,
+                                                                 0.0)
         
-        (Q2, Q2_err2) = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0],
-                                                                     k_i[1],
-                                                                     k_f[0],
-                                                                     k_f[1],
-                                                           cangles.getPolar(1),
-                                                                     0.0)
+        (Q2,
+         Q2_err2) = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0][:-1],
+                                                                 k_i[1][:-1],
+                                                                 k_f[0],
+                                                                 k_f[1],
+                                                                 avg_theta2,
+                                                                 0.0)
 
-        (Q3, Q3_err2) = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0],
-                                                                     k_i[1],
-                                                                     k_f[0],
-                                                                     k_f[1],
-                                                           cangles.getPolar(2),
-                                                                     0.0)
+        (Q3,
+         Q3_err2) = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0][1:],
+                                                                 k_i[1][1:],
+                                                                 k_f[0],
+                                                                 k_f[1],
+                                                                 avg_theta1,
+                                                                 0.0)
 
-        (Q4, Q4_err2) = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0],
-                                                                     k_i[1],
-                                                                     k_f[0],
-                                                                     k_f[1],
-                                                           cangles.getPolar(3),
-                                                                     0.0)
+        (Q4,
+         Q4_err2) = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0][1:],
+                                                                 k_i[1][1:],
+                                                                 k_f[0],
+                                                                 k_f[1],
+                                                                 avg_theta2,
+                                                                 0.0)
         try:
             (y_2d, y_2d_err2,
-             area_new) = axis_manip.rebin_2D_quad_to_rectlin(Q_1, E_t_1,
-                                                           Q_2, E_t_2,
-                                                           Q_3, E_t_3,
-                                                           Q_4, E_t_4,
+             area_new) = axis_manip.rebin_2D_quad_to_rectlin(Q_1, E_t[:-1],
+                                                           Q_2, E_t[:-1],
+                                                           Q_3, E_t[1:],
+                                                           Q_4, E_t[1:],
                                                            counts,
                                                            counts_err2,
                                                            so_dim.axis[0].val,
@@ -184,4 +214,76 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
                                                           area_new,
                                                           area_sum_err2)
 
-    return None
+    # Check for so_id keyword argument
+    so_dim.id = kwargs.get("so_id", 0)
+
+    comb_som = SOM.SOM()
+    comb_som.copyAttributes(som)
+
+    comb_som = __set_som_attributes(comb_som, inst_name, **kwargs)
+
+    if split:
+        comb_som.append(so_dim)
+        
+        # Write out summed counts into file
+        hlr_utils.write_file(configure.output, "text/Dave2d", comb_som,
+                             output_ext="cnt",
+                             verbose=configure.verbose,
+                             data_ext=configure.ext_replacement,         
+                             path_replacement=configure.path_replacement,
+                             message="summed counts")
+
+        # Replace counts data with fractional area. The axes remain the same
+        comb_som[0].y = area_sum
+        comb_som[0].var_y = area_sum_err2
+
+        # Write out summed counts into file
+        hlr_utils.write_file(configure.output, "text/Dave2d", comb_som,
+                             output_ext="fra",
+                             verbose=configure.verbose,
+                             data_ext=configure.ext_replacement,         
+                             path_replacement=configure.path_replacement,
+                             message="fractional area")        
+
+    else:
+        # Divide summed fractional counts by the sum of the fractional areas
+        (so_dim.y, so_dim.var_y) = array_manip.div_ncerr(so_dim.y,
+                                                         so_dim.var_y,
+                                                         area_sum,
+                                                         area_sum_err2)
+
+
+        comb_som.append(so_dim)
+
+    del so_dim
+        
+    return comb_som
+
+def __set_som_attributes(tsom, inst_name, **kwargs):
+    """
+    This is a helper function that sets attributes for the final S(Q,E)
+    C{SOM.SOM}.
+
+    @param tsom: The input object for attribute setting
+    @type tsom: C{SOM.SOM}
+
+    @param inst_name: The short name for an instrument
+    @type inst_name: C{string}
+
+    @param kwargs: These are keywords that are specified by the main function.
+    
+
+    @return: The C{SOM.SOM} with attributes set
+    @rtype: C{SOM.SOM}
+    """
+    # Check for y_label keyword argument
+    tsom.setYLabel(kwargs.get("y_label", "Counts"))
+    # Check for y_units keyword argument
+    tsom.setYUnits(kwargs.get("y_units", "Counts / meV A^-1"))
+    # Check for x_labels keyword argument
+    tsom.setAllAxisLabels(kwargs.get("x_labels",
+                                     ["Momentum transfer", "Energy transfer"]))
+    # Check for x_units keyword argument
+    tsom.setAllAxisUnits(kwargs.get("x_units", ["A^-1", "meV"]))
+    
+    return tsom
