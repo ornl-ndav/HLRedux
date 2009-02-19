@@ -88,13 +88,13 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
     split = kwargs.get("split", False)
 
     # Setup output object
-    so_dim = SOM.SO(dim)
+    so_dim = SOM.SO(2)
 
     so_dim.axis[0].val = Q_final
     so_dim.axis[1].val = som[0].axis[0].val # E_t
     
     # Calculate total 2D array size
-    N_tot = len(so_dim.axis[0].val) * len(so_dim.axis[1].val)
+    N_tot = (len(so_dim.axis[0].val) - 1) * (len(so_dim.axis[1].val) - 1)
 
     # Create y and var_y lists from total 2D size
     so_dim.y = nessi_list.NessiList(N_tot)
@@ -148,45 +148,44 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
         avg_theta1 = (cangles.getPolar(0) + cangles.getPolar(1)) / 2.0
         avg_theta2 = (cangles.getPolar(2) + cangles.getPolar(3)) / 2.0
 
-        (Q1,
-         Q1_err2) = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0][:-1],
-                                                                 k_i[1][:-1],
-                                                                 k_f[0],
-                                                                 k_f[1],
-                                                                 avg_theta1,
-                                                                 0.0)
         
-        (Q2,
-         Q2_err2) = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0][:-1],
-                                                                 k_i[1][:-1],
-                                                                 k_f[0],
-                                                                 k_f[1],
+        (Q1,
+         Q1_err2) = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0],
+                                                                 k_i[1],
+                                                                 k_f[0][:-1],
+                                                                 k_f[1][:-1],
                                                                  avg_theta2,
                                                                  0.0)
-
+        (Q2,
+         Q2_err2) = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0],
+                                                                 k_i[1],
+                                                                 k_f[0][:-1],
+                                                                 k_f[1][:-1],
+                                                                 avg_theta1,
+                                                                 0.0)
         (Q3,
-         Q3_err2) = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0][1:],
-                                                                 k_i[1][1:],
-                                                                 k_f[0],
-                                                                 k_f[1],
+         Q3_err2) = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0],
+                                                                 k_i[1],
+                                                                 k_f[0][1:],
+                                                                 k_f[1][1:],
                                                                  avg_theta1,
                                                                  0.0)
 
         (Q4,
-         Q4_err2) = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0][1:],
-                                                                 k_i[1][1:],
-                                                                 k_f[0],
-                                                                 k_f[1],
+         Q4_err2) = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0],
+                                                                 k_i[1],
+                                                                 k_f[0][1:],
+                                                                 k_f[1][1:],
                                                                  avg_theta2,
                                                                  0.0)
         try:
             (y_2d, y_2d_err2,
-             area_new) = axis_manip.rebin_2D_quad_to_rectlin(Q_1, E_t[:-1],
-                                                           Q_2, E_t[:-1],
-                                                           Q_3, E_t[1:],
-                                                           Q_4, E_t[1:],
-                                                           counts,
-                                                           counts_err2,
+             area_new) = axis_manip.rebin_2D_quad_to_rectlin(Q1, E_t[:-1],
+                                                           Q2, E_t[:-1],
+                                                           Q3, E_t[1:],
+                                                           Q4, E_t[1:],
+                                                           yval,
+                                                           yerr2,
                                                            so_dim.axis[0].val,
                                                            so_dim.axis[1].val)
         except IndexError, e:
@@ -194,14 +193,14 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
             index = int(str(e).split()[1].split('index')[-1].strip('[]'))
             print "Id:", map_so.id
             print "Index:", index
-            print "Verticies: %f, %f, %f, %f, %f, %f, %f, %f" % (Q_1[index],
-                                                                 E_t_1[index],
-                                                                 Q_2[index],
-                                                                 E_t_2[index],
-                                                                 Q_3[index],
-                                                                 E_t_3[index],
-                                                                 Q_4[index],
-                                                                 E_t_4[index])
+            print "Verticies: %f, %f, %f, %f, %f, %f, %f, %f" % (Q1[index],
+                                                              E_t[:-1][index],
+                                                                 Q2[index],
+                                                              E_t[:-1][index],
+                                                                 Q3[index],
+                                                              E_t[1:][index],
+                                                                 Q4[index],
+                                                              E_t[1:][index])
             raise IndexError(str(e))
 
         # Add in together with previous results
@@ -215,12 +214,12 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
                                                           area_sum_err2)
 
     # Check for so_id keyword argument
-    so_dim.id = kwargs.get("so_id", 0)
+    so_dim.id = kwargs.get("so_id", som[0].id)
 
     comb_som = SOM.SOM()
     comb_som.copyAttributes(som)
 
-    comb_som = __set_som_attributes(comb_som, inst_name, **kwargs)
+    comb_som = __set_som_attributes(comb_som, inst_name="", **kwargs)
 
     if split:
         comb_som.append(so_dim)
