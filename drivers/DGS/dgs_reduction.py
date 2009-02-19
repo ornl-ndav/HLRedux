@@ -248,12 +248,21 @@ def run(config, tim=None):
         if tim is not None:
             tim.getTime(False)
 
-        d_som5_2 = dr_lib.create_Qvec_vs_E_dgs(d_som5,
-                                            d_som5.attr_list["Initial_Energy"],
-                                               config.Q_bins.toNessiList(),
-                                               corner_geom=config.corner_geom,
-                                               timer=tim)
+        d_som5_2 = dr_lib.create_E_vs_Q_dgs(d_som5,
+                                         config.initial_energy.toValErrTuple(),
+                                            config.Q_bins.toNessiList(),
+                                            corner_geom=config.corner_geom,
+                                            split=config.split,
+                                            timer=tim)
 
+        # Writing 2D DAVE file
+        if not config.split:
+            hlr_utils.write_file(config.output, "text/Dave2d", d_som5_2,
+                                 output_ext="sqe",
+                                 data_ext=config.ext_replacement,    
+                                 path_replacement=config.path_replacement,
+                                 verbose=config.verbose,
+                                 message="S(Q,E)")
                                                
         if tim is not None:
             tim.getTime(msg="After calculating S(Q,E) spectrum ")    
