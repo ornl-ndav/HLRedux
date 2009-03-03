@@ -241,32 +241,33 @@ def run(config, tim=None):
 
         del d_som5_1
 
-    if config.Q_bins is not None:
-        if config.verbose:
-            print "Creating S(Q, E)"
+    if config.verbose:
+        print "Creating S(Q, E)"
 
-        if tim is not None:
-            tim.getTime(False)
+    if tim is not None:
+        tim.getTime(False)
+        
+    d_som5_2 = dr_lib.create_E_vs_Q_dgs(d_som5,
+                                        config.initial_energy.toValErrTuple(),
+                                        config.Q_bins.toNessiList(),
+                                        corner_geom=config.corner_geom,
+                                        split=config.split,
+                                        configure=config,
+                                        timer=tim)
 
-        d_som5_2 = dr_lib.create_E_vs_Q_dgs(d_som5,
-                                         config.initial_energy.toValErrTuple(),
-                                            config.Q_bins.toNessiList(),
-                                            corner_geom=config.corner_geom,
-                                            split=config.split,
-                                            configure=config,
-                                            timer=tim)
-
-        # Writing 2D DAVE file
-        if not config.split:
-            hlr_utils.write_file(config.output, "text/Dave2d", d_som5_2,
-                                 output_ext="sqe",
-                                 data_ext=config.ext_replacement,    
-                                 path_replacement=config.path_replacement,
-                                 verbose=config.verbose,
-                                 message="S(Q,E)")
+    # Writing 2D DAVE file
+    if not config.split:
+        hlr_utils.write_file(config.output, "text/Dave2d", d_som5_2,
+                             output_ext="sqe",
+                             data_ext=config.ext_replacement,    
+                             path_replacement=config.path_replacement,
+                             verbose=config.verbose,
+                             message="S(Q,E)")
                                                
-        if tim is not None:
-            tim.getTime(msg="After calculating S(Q,E) spectrum ")    
+    if tim is not None:
+        tim.getTime(msg="After calculating S(Q,E) spectrum ")    
+
+    del d_som5_2
 
     # Create Qvec vs E spectrum
     if config.verbose:
