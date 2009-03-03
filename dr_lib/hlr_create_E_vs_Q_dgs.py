@@ -38,9 +38,9 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
 
     @param kwargs: A list of keyword arguments that the function accepts:
 
-    @keyword corner_geom: The filename that contains the corner geometry
-                          information.
-    @type corner_geom: C{string}
+    @keyword corner_angles: The object that contains the corner geometry
+                            information.
+    @type corner_angles: C{dict}
 
     @keyword so_id: The identifier represents a number, string, tuple or other
                     object that describes the resulting C{SO}
@@ -83,7 +83,7 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
 
     # Check for keywords
     t = kwargs.get("timer")
-    corner_geom = kwargs.get("corner_geom", "")
+    corner_angles = kwargs["corner_angles"]
     configure = kwargs.get("configure")
     split = kwargs.get("split", False)
 
@@ -125,15 +125,6 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
 
     # Grab the instrument from the som
     inst = som.attr_list.instrument
-
-    # Get the corner geoemetry information
-    if t is not None:
-        t.getTime(False)
-        
-    corner_angles = hlr_utils.get_corner_geometry(corner_geom)
-
-    if t is not None:
-        t.getTime(msg="After reading in corner geometry information ")
 
     # Iterate though the data
     len_som = hlr_utils.get_length(som)

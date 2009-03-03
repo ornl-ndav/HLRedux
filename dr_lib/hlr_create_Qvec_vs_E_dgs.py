@@ -41,9 +41,9 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
     @keyword timer: Timing object so the function can perform timing estimates.
     @type timer: C{sns_timer.DiffTime}
 
-    @keyword corner_geom: The filename that contains the corner geometry
-                          information.
-    @type corner_geom: C{string}
+    @keyword corner_angles: The object that contains the corner geometry
+                            information.
+    @type corner_angles: C{dict}
 
     @keyword make_fixed: A flag that turns on writing the fixed grid mesh
                          information to a file.
@@ -65,10 +65,7 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
     except KeyError:
         t = None
 
-    try:
-        corner_geom = kwargs["corner_geom"]
-    except KeyError:
-        corner_geom = ""
+    corner_angles = kwargs["corner_angles"]
 
     try:
         make_fixed = kwargs["make_fixed"]
@@ -119,11 +116,6 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
     # Grab the instrument from the som
     inst = som.attr_list.instrument
 
-    # Get the corner geoemetry information
-    if t is not None:
-        t.getTime(False)
-        
-    corner_angles = hlr_utils.get_corner_geometry(corner_geom)
     if make_fixed:
         import SOM
         fixed_grid = {}
@@ -140,9 +132,6 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
             except KeyError:
                 # Pixel ID is not in instrument geometry
                 pass
-
-    if t is not None:
-        t.getTime(msg="After reading in corner geometry information ")
 
     CNT = {}
     ERR2 = {}
