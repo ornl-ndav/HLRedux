@@ -269,22 +269,23 @@ def run(config, tim=None):
 
     del d_som5_2
 
-    # Create Qvec vs E spectrum
-    if config.verbose:
-        print "Creating S(Qvec, E)"
+    if config.qmesh:
+        # Create Qvec vs E spectrum
+        if config.verbose:
+            print "Creating S(Qvec, E)"
 
-    if tim is not None:
-        tim.getTime(False)
+        if tim is not None:
+            tim.getTime(False)
         
-    dr_lib.create_Qvec_vs_E_dgs(d_som5,
-                                config.initial_energy.toValErrTuple(),
-                                config, corner_geom=config.corner_geom,
-                                make_fixed=config.fixed,
-                                output=config.output,
-                                timer=tim)
+        dr_lib.create_Qvec_vs_E_dgs(d_som5,
+                                    config.initial_energy.toValErrTuple(),
+                                    config, corner_geom=config.corner_geom,
+                                    make_fixed=config.fixed,
+                                    output=config.output,
+                                    timer=tim)
         
-    if tim is not None:
-        tim.getTime(msg="After calculating final spectrum ")    
+        if tim is not None:
+            tim.getTime(msg="After calculating final spectrum ")    
 
     # Write out RMD file
     d_som5.attr_list["config"] = config
