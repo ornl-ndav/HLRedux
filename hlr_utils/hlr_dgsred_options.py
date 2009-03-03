@@ -91,6 +91,7 @@ class DgsRedOptions(hlr_dgs_options.DgsOptions):
         self.add_option("-m", "--qmesh", dest="qmesh", action="store_true",
                         help="Create the Q vector meshes for each energy "\
                         +"slice.")
+        self.set_defaults(qmesh=False)
 
         self.add_option("-x", "--fixed", action="store_true",
                         dest="fixed", help="Dump the Q vector information to "\
