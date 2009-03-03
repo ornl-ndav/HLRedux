@@ -330,10 +330,6 @@ if __name__ == "__main__":
     # Call the configuration setter for DgsRedOptions
     hlr_utils.DgsRedConfiguration(parser, configure, options, args)
 
-    # Set default for upstream monitor for CNCS
-    if configure.inst == "CNCS":
-        configure.usmon_path = hlr_utils.NxPath("/entry/monitor3,1")
-
     # Set timer object if timing option is used
     if options.timing:
         import sns_timing

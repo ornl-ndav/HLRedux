@@ -214,10 +214,6 @@ if __name__ == "__main__":
     # Call the configuration setter for DgsOptions
     hlr_utils.DgsConfiguration(parser, configure, options, args)
 
-    # Set default for upstream monitor for CNCS
-    if configure.inst == "CNCS":
-        configure.usmon_path = hlr_utils.NxPath("/entry/monitor3,1")
-
     # Set the threshold value
     if hlr_utils.cli_provide_override(configure, "threshold", "--threshold"):
         configure.threshold = options.threshold
