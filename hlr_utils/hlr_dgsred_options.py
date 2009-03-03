@@ -88,6 +88,10 @@ class DgsRedOptions(hlr_dgs_options.DgsOptions):
                         +"transfer values and the momentum transfer bin "\
                         +"width in Angstroms^-1")
 
+        self.add_option("-m", "--qmesh", dest="qmesh", action="store_true",
+                        help="Create the Q vector meshes for each energy "\
+                        +"slice.")
+
         self.add_option("-x", "--fixed", action="store_true",
                         dest="fixed", help="Dump the Q vector information to "\
                         +"a fixed grid.")
@@ -159,6 +163,10 @@ def DgsRedConfiguration(parser, configure, options, args):
     if configure.Q_bins is None:
         parser.error("You must provide momentum transfer binning via the "\
                      +"mom-trans-bins option")
+
+    # Set the ability to create the Q vector meshes for each energy slice
+    if hlr_utils.cli_provide_override(configure, "qmesh", "--qmesh", "m"):
+        configure.qmesh = options.qmesh
         
     # Set the ability to write out fixed grid mesh files
     if hlr_utils.cli_provide_override(configure, "fixed", "--fixed", "x"):
