@@ -156,6 +156,10 @@ def DgsRedConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "Q_bins", "--mom-trans-bins"):
         configure.Q_bins = hlr_utils.AxisFromString(options.Q_bins)
 
+    if configure.Q_bins is None:
+        parser.error("You must provide momentum transfer binning via the "\
+                     +"mom-trans-bins option")
+        
     # Set the ability to write out fixed grid mesh files
     if hlr_utils.cli_provide_override(configure, "fixed", "--fixed", "x"):
         configure.fixed = options.fixed        
