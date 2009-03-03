@@ -241,6 +241,18 @@ def run(config, tim=None):
 
         del d_som5_1
 
+    # Get the corner geometry information
+    if config.verbose:
+        print "Reading in corner geometry information"
+        
+    if t is not None:
+        t.getTime(False)
+        
+    corner_angles = hlr_utils.get_corner_geometry(corner_geom)
+
+    if t is not None:
+        t.getTime(msg="After reading in corner geometry information ")
+
     if config.verbose:
         print "Creating S(Q, E)"
 
@@ -250,7 +262,7 @@ def run(config, tim=None):
     d_som5_2 = dr_lib.create_E_vs_Q_dgs(d_som5,
                                         config.initial_energy.toValErrTuple(),
                                         config.Q_bins.toNessiList(),
-                                        corner_geom=config.corner_geom,
+                                        corner_geom=corner_angles,
                                         split=config.split,
                                         configure=config,
                                         timer=tim)
@@ -279,7 +291,7 @@ def run(config, tim=None):
         
         dr_lib.create_Qvec_vs_E_dgs(d_som5,
                                     config.initial_energy.toValErrTuple(),
-                                    config, corner_geom=config.corner_geom,
+                                    config, corner_geom=corner_angles,
                                     make_fixed=config.fixed,
                                     output=config.output,
                                     timer=tim)
