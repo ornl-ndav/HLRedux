@@ -152,7 +152,8 @@ def run(config, tim=None):
         print "Making mask file"
 
     # Make mask file from threshold
-    dr_lib.filter_normalization(n_som3, config.threshold, config)
+    dr_lib.filter_normalization(n_som3, config.lo_threshold,
+                                config.hi_threshold, config)
 
     if tim is not None:
         tim.getTime(msg="After making mask file ")
@@ -196,11 +197,17 @@ if __name__ == "__main__":
     parser.set_defaults(dsmon_path="/entry/monitor2,1")
 
     # Add dgs_norm specific options
-    parser.add_option("", "--threshold", type="float", dest="threshold",
+    parser.add_option("", "--hi-threshold", type="float", dest="hi_threshold",
+                      help="Set the cutoff value for the normalization that "\
+                      +"above which a pixel will be masked out. The default "\
+                      +"is infinity.")
+    parser.set_defaults(hi_threshold=float('inf'))
+
+    parser.add_option("", "--lo-threshold", type="float", dest="lo_threshold",
                       help="Set the cutoff value for the normalization that "\
                       +"below which a pixel will be masked out. The default "\
                       +"is 0.0.")
-    parser.set_defaults(threshold=0.0)
+    parser.set_defaults(lo_threshold=0.0)    
     
     parser.add_option("", "--timing", action="store_true", dest="timing",
                       help="Flag to turn on timing of code")
@@ -214,10 +221,16 @@ if __name__ == "__main__":
     # Call the configuration setter for DgsOptions
     hlr_utils.DgsConfiguration(parser, configure, options, args)
 
-    # Set the threshold value
-    if hlr_utils.cli_provide_override(configure, "threshold", "--threshold"):
-        configure.threshold = options.threshold
-
+    # Set the high threshold value
+    if hlr_utils.cli_provide_override(configure, "hi_threshold",
+                                      "--hi-threshold"):
+        configure.hi_threshold = options.hi_threshold
+        
+    # Set the low threshold value
+    if hlr_utils.cli_provide_override(configure, "lo_threshold",
+                                      "--lo-threshold"):
+        configure.lo_threshold = options.lo_threshold
+        
     # Set timer object if timing option is used
     if options.timing:
         import sns_timing
