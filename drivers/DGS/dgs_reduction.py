@@ -64,7 +64,16 @@ def run(config, tim=None):
     config.so_axis = "time_of_flight"
 
     if type(config.mask_file) == type([]):
+        if config.verbose:
+            print "Creating combined mask file"
+
+        if tim is not None:
+            tim.getTime(False)
+        
         config.mask_file = hlr_utils.merge_roi_files(config.mask_file)
+
+        if tim is not None:
+            tim.getTime(msg="After creating combined mask file")
 
     # Steps 1-3: Produce a scaled summed dark current dataset
     dc_som = dr_lib.scaled_summed_data(config.dkcur, config,
