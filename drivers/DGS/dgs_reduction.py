@@ -248,13 +248,13 @@ def run(config, tim=None):
     if config.verbose:
         print "Reading in corner geometry information"
         
-    if t is not None:
-        t.getTime(False)
+    if tim is not None:
+        tim.getTime(False)
         
     corner_angles = hlr_utils.get_corner_geometry(corner_geom)
 
-    if t is not None:
-        t.getTime(msg="After reading in corner geometry information ")
+    if tim is not None:
+        tim.getTime(msg="After reading in corner geometry information ")
 
     if config.verbose:
         print "Creating S(Q, E)"
