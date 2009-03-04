@@ -39,6 +39,7 @@ from hlr_fix_index import *
 from hlr_geom_helper import *
 from hlr_igs_options import IgsOptions, IgsConfiguration
 from hlr_math_compatible import *
+from hlr_merge_roi_files import *
 from hlr_nxpath import *
 from hlr_options import *
 from hlr_ref_options import RefOptions, RefConfiguration
