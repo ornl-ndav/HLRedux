@@ -20,10 +20,6 @@
 # its use would not infringe privately owned rights.
 #
 
-# DGS drivers
-from DGS import dgs_norm
-from DGS import dgs_reduction
-
 # GEN drivers
 from GEN import agg_dr_files
 from GEN import mask_generator

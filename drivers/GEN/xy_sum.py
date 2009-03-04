@@ -67,8 +67,8 @@ def run(config):
         end_val = config.end        
             
     # Use start and end keywords to make slices (see online docs)
-    d_som2 = dr_lib.integrate_spectra_py(d_som1, start=start_val, end=end_val,
-                                         bin_index=config.bin)
+    d_som2 = dr_lib.integrate_spectra(d_som1, start=start_val, end=end_val,
+                                      bin_index=config.bin)
 
     del d_som1
 

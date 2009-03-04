@@ -87,6 +87,11 @@ class AmrOptions(hlr_igs_options.IgsOptions):
                         help="Specify the constant with which to scale the "\
                         +"final data.")
 
+        self.add_option("", "--scale-sqe", dest="scale_sqe",
+                        action="store_true", help="Scale the S(Q,E) "\
+                        +"distribution by the total solid angle distribution.")
+        self.set_defaults(scale_sqe=False)
+        
         self.add_option("", "--ldb-const", dest="ldb_const", help="Specify "\
                         +"the constant with which to scale the "\
                         +"lambda-dependent background.")
@@ -128,6 +133,12 @@ class AmrOptions(hlr_igs_options.IgsOptions):
                         help="Flag to dump the initial energy information for"\
                         +" all pixels. Creates a *.ixl file.")
         self.set_defaults(dump_ei=False)
+
+        self.add_option("", "--dump-pix-contrib", action="store_true",
+                        dest="dump_pix_contrib",
+                        help="Flag to dump the pixel contribution spectrum. "\
+                        +"Creates a *.pcs file.")
+        self.set_defaults(dump_pix_contrib=False)
 
         self.add_option("", "--split", action="store_true", dest="split",
                         help="Special flag for running driver in split mode. "\
@@ -201,6 +212,11 @@ def AmrConfiguration(parser, configure, options, args):
         except TypeError:
             configure.rescale_final = options.rescale_final
 
+    # Set the scaling of the S(Q,E) distribution by the solid angle
+    # distribution
+    if hlr_utils.cli_provide_override(configure, "scale_sqe", "--scale-sqe"):
+        configure.scale_sqe = options.scale_sqe
+
     # Set the lambda-dependent background constant for data
     if hlr_utils.cli_provide_override(configure, "ldb_const", "--ldb-const"):
         configure.ldb_const = hlr_utils.DrParameterFromString(\
@@ -242,6 +258,11 @@ def AmrConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "dump_initial_energy",
                                       "--dump-initial-energy"):    
         configure.dump_initial_energy = options.dump_initial_energy
+
+    # Set the ability to dump the pixel contribution information
+    if hlr_utils.cli_provide_override(configure, "dump_pix_contrib",
+                                      "--dump-pix-contrib"):
+        configure.dump_pix_contrib = options.dump_pix_contrib
 
     if hlr_utils.cli_provide_override(configure, "dump_all", "--dump-all"):
         if options.dump_all:

@@ -42,9 +42,9 @@ from HLR_version import version as __version__
 PACKAGE = "HLRedux"
 VERSION = __version__
 
-package_list = ['', 'common_lib', 'dr_lib', 'drivers', 'drivers.DGS',
-                'drivers.GEN', 'drivers.IGS', 'drivers.REF', 'drivers.SAS',
-                'drplot', 'hlr_utils', 'hlr_test']
+package_list = ['', 'common_lib', 'dr_lib', 'drivers', 'drivers.GEN',
+                'drivers.IGS', 'drivers.REF', 'drivers.SAS', 'drplot',
+                'hlr_utils', 'hlr_test']
 
 instrument_scripts = {
     "ASG" : [
@@ -55,8 +55,6 @@ instrument_scripts = {
     'null_int_test2'
     ],
     "DGS" : [
-    'dgs_norm',
-    'dgs_reduction'
     ],
     "GEN" : [
     'agg_dr_files',
