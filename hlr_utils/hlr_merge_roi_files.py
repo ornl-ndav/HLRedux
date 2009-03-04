@@ -34,5 +34,24 @@ def merge_roi_files(filelist):
     @return: The filename of the combined ROI
     @rtype: C{string}
     """
+    import hlr_utils
+    # Get first set of pixel IDs
+    rfile = open(filelist[0], 'r')
+    roi_set = set([id.strip() for id in rfile])
+    rfile.close()
 
-    return filelist[0]
+    # Merge each of the other sets of pixel IDs
+    for filename in filelist[1:]:
+        rfile = open(filename, 'r')
+        for id in rfile:
+            roi_set.add(id.strip())
+        rfile.close()
+
+    # Create new ROI file from combined information
+    ofilename = hlr_utils.add_tag(filelist[0], "comb")
+    ofile = open(ofilename, 'w')
+    for id in roi_set:
+        print >> ofile, id
+    ofile.close()
+    
+    return ofilename
