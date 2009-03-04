@@ -132,8 +132,7 @@ def DgsRedConfiguration(parser, configure, options, args):
 
     # Set the mask file
     if hlr_utils.cli_provide_override(configure, "mask_file", "--mask-file"):
-        configure.mask_file = hlr_utils.determine_files(options.mask_file,
-                                                        one_file=True)
+        configure.mask_file = hlr_utils.determine_files(options.mask_file)
 
     # Set the corner geometry information file
     if hlr_utils.cli_provide_override(configure, "corner_geom",
