@@ -22,7 +22,7 @@
 
 # $Id$
 
-def filter_normalization(obj, threshold, config=None):
+def filter_normalization(obj, lothreshold, hithreshold, config=None):
     """
     This function takes an object with normalization integration information
     and a threshold and creates a mask file containing the pixel IDs that do
@@ -31,8 +31,11 @@ def filter_normalization(obj, threshold, config=None):
     @param obj: The object containing the normalization information
     @type obj: C{SOM.SOM}
 
-    @param threshold: The upper bound for masked pixels
-    @type threshold: C{float}
+    @param lothreshold: The value below which a pixel will be masked.
+    @type lothreshold: C{float}
+
+    @param hithreshold: The value above which a pixel will be masked.
+    @type hithreshold: C{float}    
 
     @param config: The object holding the DR configuration
     @type config: L{hlr_utils.Configure}
@@ -65,7 +68,8 @@ def filter_normalization(obj, threshold, config=None):
     len_obj = hlr_utils.get_length(obj)
     for i in xrange(len_obj):
         norm = hlr_utils.get_value(obj, i, o_descr)
-        if utils.compare(norm, threshold) <= 0:
+        if utils.compare(norm, lothreshold) <= 0 or \
+               utils.compare(norm, hithreshold) >= 0:
             map_so = hlr_utils.get_map_so(obj, None, i)
             pix_id = SOM.NeXusId.fromString(str(map_so.id)).toJoinedStr()
 
