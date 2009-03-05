@@ -77,9 +77,11 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
     import array_manip
     import axis_manip
     import common_lib
+    import dr_lib
     import hlr_utils
     import nessi_list
     import SOM
+    import utils
 
     # Check for keywords
     t = kwargs.get("timer")
@@ -92,7 +94,7 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
 
     so_dim.axis[0].val = Q_final
     so_dim.axis[1].val = som[0].axis[0].val # E_t
-    
+
     # Calculate total 2D array size
     N_tot = (len(so_dim.axis[0].val) - 1) * (len(so_dim.axis[1].val) - 1)
 
@@ -117,6 +119,9 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
         import nessi_list
         E_t_err2 = nessi_list.NessiList(len(E_t))        
 
+    # Get the bin width arrays from E_t
+    (E_t_bw, E_t_bw_err2) = utils.calc_bin_widths(E_t)
+
     E_f = array_manip.sub_ncerr(E_i[0], E_i[1], E_t, E_t_err2)
     
     # Now we can get the final wavevector
@@ -138,7 +143,6 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
 
         avg_theta1 = (cangles.getPolar(0) + cangles.getPolar(1)) / 2.0
         avg_theta2 = (cangles.getPolar(2) + cangles.getPolar(3)) / 2.0
-
         
         (Q1,
          Q1_err2) = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0],
@@ -169,14 +173,26 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
                                                                  k_f[1][1:],
                                                                  avg_theta2,
                                                                  0.0)
+        # Calculate the area of the E,Q polygons
+        (A, A_err2) = dr_lib.calc_EQ_Jacobian_dgs(E_t[:-1], Q1, E_t[:-1], Q2,
+                                                  E_t[1:], Q3, E_t[1:], Q4)
+
+        # Apply the Jacobian: C/dE_t * dE_t / A(EQ) = C/A(EQ)
+        (jac_ratio, jac_ratio_err2) = array_manip.div_ncerr(E_t_bw,
+                                                            E_t_bw_err2,
+                                                            A, A_err2)
+        (counts, counts_err2) = array_manip.mult_ncerr(yval, yerr2,
+                                                       jac_ratio,
+                                                       jac_ratio_err2)
+        
         try:
             (y_2d, y_2d_err2,
              area_new) = axis_manip.rebin_2D_quad_to_rectlin(Q1, E_t[:-1],
                                                            Q2, E_t[:-1],
                                                            Q3, E_t[1:],
                                                            Q4, E_t[1:],
-                                                           yval,
-                                                           yerr2,
+                                                           counts,
+                                                           counts_err2,
                                                            so_dim.axis[0].val,
                                                            so_dim.axis[1].val)
         except IndexError, e:
