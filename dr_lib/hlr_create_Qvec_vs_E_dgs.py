@@ -310,7 +310,7 @@ def __get_coords(coords, id, index, output):
 
 def __calc_xyz(r, theta, phi):
     import math
-    x = r * math.sin(theta) * math.sin(phi)
-    y = r * math.sin(theta) * math.cos(phi)
+    x = r * math.sin(theta) * math.cos(phi)
+    y = r * math.sin(theta) * math.sin(phi)
     z = r * math.cos(theta)
     return (x, y, z)
