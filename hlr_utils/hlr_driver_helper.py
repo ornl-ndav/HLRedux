@@ -629,7 +629,7 @@ def determine_files(inputlist, inst=None, facility=None, proposal=None,
             filelist.remove(infile)
         else:
             filelist[counter] = fix_filename(infile)
-        counter += 1
+            counter += 1
     del tmplist
 
     filelist_size = len(filelist)
