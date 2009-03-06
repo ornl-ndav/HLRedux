@@ -154,8 +154,14 @@ def add_files_dm(filelist, **kwargs):
 
             if verbose:
                 print "# Signal SO:", len(d_som1)
-                print "# TOF:", len(d_som1[0])
-                print "# TOF Axis:", len(d_som1[0].axis[0].val)
+                try:
+                    print "# TOF:", len(d_som1[0])
+                    print "# TOF Axis:", len(d_som1[0].axis[0].val)
+                except IndexError:
+                    # No data is present so say so again
+                    print "information is unavailable since no data "\
+                          +"present. Exiting."
+                    sys.exit(0)
 
             if timer is not None:
                 timer.getTime(msg="After reading data")
