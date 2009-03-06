@@ -76,6 +76,9 @@ def process_dgs_data(obj, conf, bcan, ecan, tcoeff, **kwargs):
     except KeyError:
         t = None
 
+    if conf.verbose:
+        print "Processing %s information" % dataset_type
+
     # Step 7: Create black can background contribution
     if bcan is not None:
         if conf.verbose:
