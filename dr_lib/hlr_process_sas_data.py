@@ -233,7 +233,7 @@ def process_sas_data(datalist, conf, **kwargs):
         dtm_som1.attr_list["Time_zero_offset_mon"] = \
                                      conf.time_zero_offset_mon.toValErrTuple()
 
-    # Step 2: Convert TOF to wavelength for data and monitor
+    # Step 1: Convert TOF to wavelength for data and monitor
     if conf.verbose:
         print "Converting TOF to wavelength"
 
@@ -305,7 +305,7 @@ def process_sas_data(datalist, conf, **kwargs):
                              path_replacement=conf.path_replacement,
                              message="beam monitor wavelength information")
 
-    # Step 3: Subtract wavelength dependent background if necessary
+    # Step 2: Subtract wavelength dependent background if necessary
     if conf.verbose and bkg_subtract is not None:
         print "Subtracting wavelength dependent background"
         
@@ -322,7 +322,7 @@ def process_sas_data(datalist, conf, **kwargs):
 
     del dp_som3
 
-    # Step 4: Efficiency correct beam monitor
+    # Step 3: Efficiency correct beam monitor
     if conf.verbose and conf.mon_effc:
         print "Efficiency correct beam monitor data"
 
@@ -350,7 +350,7 @@ def process_sas_data(datalist, conf, **kwargs):
 
     del dbm_som2
 
-    # Step 5: Efficiency correct transmission monitor    
+    # Step 4: Efficiency correct transmission monitor    
     if dtm_som2 is not None:
         if conf.verbose and conf.mon_effc:
             print "Efficiency correct transmission monitor data"
@@ -368,9 +368,9 @@ def process_sas_data(datalist, conf, **kwargs):
     if t is not None and conf.mon_effc and dtm_som2 is not None:
         t.getTime(msg="After efficiency correcting beam monitor ")
 
-    # Step 6: Efficiency correct detector pixels
+    # Step 5: Efficiency correct detector pixels
 
-    # Step 7: Rebin beam monitor axis onto detector pixel axis
+    # Step 6: Rebin beam monitor axis onto detector pixel axis
     if conf.verbose:
         print "Rebin beam monitor axis to detector pixel axis"
 
@@ -394,7 +394,7 @@ def process_sas_data(datalist, conf, **kwargs):
                              message="beam monitor wavelength information "\
                              +"(rebinned)")
 
-    # Step 8: Normalize data by beam monitor
+    # Step 7: Normalize data by beam monitor
     if conf.verbose:
         print "Normalizing data by beam monitor"
 
@@ -465,7 +465,7 @@ def process_sas_data(datalist, conf, **kwargs):
 
         del dp_som5_1
 
-    # Step 9: Rebin transmission monitor axis onto detector pixel axis
+    # Step 8: Rebin transmission monitor axis onto detector pixel axis
     if trans_data is not None:
         print "Reading in transmission monitor data from file"
 
@@ -489,7 +489,7 @@ def process_sas_data(datalist, conf, **kwargs):
 
     del dtm_som3
 
-    # Step 10: Normalize data by transmission monitor    
+    # Step 9: Normalize data by transmission monitor    
     if conf.verbose and dtm_som4 is not None:
         print "Normalizing data by transmission monitor"
 
@@ -506,7 +506,7 @@ def process_sas_data(datalist, conf, **kwargs):
 
     del dp_som5
 
-    # Step 11: Convert wavelength to Q for data
+    # Step 10: Convert wavelength to Q for data
     if conf.verbose:
         print "Converting data from wavelength to scalar Q"
     
