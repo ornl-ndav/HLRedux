@@ -541,8 +541,7 @@ def create_pixel_id(thing):
 
     return (mylist[0], (int(mylist[1]), int(mylist[2])))
 
-def determine_files(inputlist, inst=None, facility=None, proposal=None,
-                    **kwargs):
+def determine_files(inputlist, inst=None, facility=None, **kwargs):
     """
     This function takes either a list of comma-separated file names or a list
     of runs in the syntax of findnexus. If the input list begins with /, ~, $,
@@ -559,9 +558,6 @@ def determine_files(inputlist, inst=None, facility=None, proposal=None,
 
     @param facility: The name of the facility for file lookup
     @type facility: C{string}
-
-    @param proposal: The name of the prposal for the desired data
-    @type proposal: C{string}
     
     @param kwargs: A list of keyword arguments that the function accepts:
     
@@ -600,7 +596,7 @@ def determine_files(inputlist, inst=None, facility=None, proposal=None,
         if __check_for_path(inputlist):
             filelist = inputlist.split(',')
         elif __check_for_digit(inputlist):
-            filelist = __run_findnexus(inputlist, inst, facility, proposal)
+            filelist = __run_findnexus(inputlist, inst, facility)
         else:
             raise RuntimeError("Do not know how to interpret %s" % inputlist)
     except AttributeError:
@@ -609,8 +605,7 @@ def determine_files(inputlist, inst=None, facility=None, proposal=None,
         elif __check_for_digit(inputlist[0]):
             filelist = []
             for number in inputlist:
-                filelist.extend(__run_findnexus(number, inst, facility,
-                                                proposal))
+                filelist.extend(__run_findnexus(number, inst, facility))
         else:
             raise RuntimeError("Do not know how to interpret %s" % inputlist)
 
@@ -629,7 +624,7 @@ def determine_files(inputlist, inst=None, facility=None, proposal=None,
             filelist.remove(infile)
         else:
             filelist[counter] = fix_filename(infile)
-            counter += 1
+        counter += 1
     del tmplist
 
     filelist_size = len(filelist)
@@ -681,15 +676,13 @@ def __run_cmd(cmd, lines=True):
     else:
         return streams[1].read()
         
-def __run_findnexus(nums, inst, facility, proposal):
+def __run_findnexus(nums, inst, facility):
     """
     This function runs the findnexus command and returns the discovered files.
     """
     cmd = "findnexus -s -i %s" % inst
     if facility is not None:
         cmd += " -f %s" % facility
-    if proposal is not None:
-        cmd += " -p %s" % proposal
     cmd += " %s" % nums
         
     filestring = __clean_str(__run_cmd(cmd, False))

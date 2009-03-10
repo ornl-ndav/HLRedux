@@ -200,6 +200,10 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
     # Create area sum and errors for the area sum lists from total 2D size
     area_sum = nessi_list.NessiList(N_tot)
     area_sum_err2 = nessi_list.NessiList(N_tot)
+
+    # Create area sum and errors for the area sum lists from total 2D size
+    bin_count = nessi_list.NessiList(N_tot)
+    bin_count_err2 = nessi_list.NessiList(N_tot)
     
     inst = som.attr_list.instrument
     lambda_final = som.attr_list["Wavelength_final"]
@@ -379,7 +383,8 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
 
         try:
             (y_2d, y_2d_err2,
-             area_new) = axis_manip.rebin_2D_quad_to_rectlin(Q_1, E_t_1,
+             area_new,
+             bin_count_new) = axis_manip.rebin_2D_quad_to_rectlin(Q_1, E_t_1,
                                                            Q_2, E_t_2,
                                                            Q_3, E_t_3,
                                                            Q_4, E_t_4,
@@ -412,6 +417,22 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
                                                           area_new,
                                                           area_sum_err2)
 
+        if configure.dump_pix_contrib or configure.scale_sqe:
+            if inst_name == "BSS":
+                dOmega = dr_lib.calc_BSS_solid_angle(map_so, inst)
+                (bin_count_new,
+                 bin_count_err2) = array_manip.mult_ncerr(bin_count_new,
+                                                          bin_count_err2,
+                                                          dOmega, 0.0)
+                
+                (bin_count,
+                 bin_count_err2) = array_manip.add_ncerr(bin_count,
+                                                         bin_count_err2,
+                                                         bin_count_new,
+                                                         bin_count_err2)
+        else:
+            del bin_count_new
+                
     # Check for so_id keyword argument
     try:
         so_dim.id = kwargs["so_id"]
@@ -421,7 +442,29 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
     comb_som = SOM.SOM()
     comb_som.copyAttributes(som)
 
+    if configure.scale_sqe:
+        kwargs["scaled_sqe"] = True
+
     comb_som = __set_som_attributes(comb_som, inst_name, **kwargs)
+
+    if configure.dump_pix_contrib:
+        som1 = SOM.SOM()
+        som1.copyAttributes(comb_som)
+        som1.append(SOM.SO(2, so_dim.id))
+        som1[0].y = bin_count
+        som1[0].var_y = bin_count_err2
+        som1[0].axis[0].val = so_dim.axis[0].val
+        som1[0].axis[1].val = so_dim.axis[1].val
+
+        # Write out pixel contribution into file
+        hlr_utils.write_file(configure.output, "text/Dave2d", som1,
+                             output_ext="pcs",
+                             verbose=configure.verbose,
+                             data_ext=configure.ext_replacement,         
+                             path_replacement=configure.path_replacement,
+                             message="pixel contribution")
+
+        del som1
 
     if split:
         comb_som.append(so_dim)
@@ -452,7 +495,12 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
                                                          so_dim.var_y,
                                                          area_sum,
                                                          area_sum_err2)
-
+        
+        if configure.scale_sqe:
+            (so_dim.y, so_dim.var_y) = array_manip.div_ncerr(so_dim.y,
+                                                             so_dim.var_y,
+                                                             bin_count,
+                                                             bin_count_err2)
 
         comb_som.append(so_dim)
 
@@ -477,6 +525,8 @@ def __set_som_attributes(tsom, inst_name, **kwargs):
     @return: The C{SOM.SOM} with attributes set
     @rtype: C{SOM.SOM}
     """
+    scaled_sqe = kwargs.get("scaled_sqe", False)
+    
     # Check for y_label keyword argument
     try:
         tsom.setYLabel(kwargs["y_label"])
@@ -488,7 +538,10 @@ def __set_som_attributes(tsom, inst_name, **kwargs):
         tsom.setYUnits(kwargs["y_units"])
     except KeyError:
         if inst_name == "BSS":
-            tsom.setYUnits("Counts / ueV A^-1")
+            if scaled_sqe:
+                tsom.setYUnits("Counts / ueV A^-1 ster")
+            else:
+                tsom.setYUnits("Counts / ueV A^-1")
         else:
             tsom.setYUnits("Counts / meV A^-1")
 
