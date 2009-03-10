@@ -130,17 +130,12 @@ def process_sas_data(datalist, conf, **kwargs):
     if t is not None:
         t.getTime(msg="After reading %s " % dataset_type)
 
-    dp_som0 = dr_lib.fix_bin_contents(dp_som)
+    dp_som1 = dr_lib.fix_bin_contents(dp_som)
 
     del dp_som
 
     if conf.inst_geom is not None:
-        i_geom_dst.setGeometry(conf.data_paths.toPath(), dp_som0)
-
-    # Step 1: Apply SAS correction factor to data
-    dp_som1 = dr_lib.apply_sas_correct(dp_som0)
-
-    del dp_som0
+        i_geom_dst.setGeometry(conf.data_paths.toPath(), dp_som1)
 
     if conf.dump_tof_r:
         dp_som1_1 = dr_lib.create_param_vs_Y(dp_som1, "radius", "param_array",
@@ -524,5 +519,8 @@ def process_sas_data(datalist, conf, **kwargs):
         t.getTime(msg="After converting wavelength to scalar Q ")
         
     del dp_som6
+
+    # Step 11: Apply SAS correction factor to data
+    dp_som8 = dr_lib.apply_sas_correct(dp_som7)
  
-    return dp_som7
+    return dp_som8
