@@ -497,6 +497,12 @@ def process_sas_data(datalist, conf, **kwargs):
         t.getTime(False)
 
     if dtm_som4 is not None:
+        # The transmission spectra does not have the same y information by
+        # convention as sample data. Therefore, we'll fake it by setting the
+        # y information from the sample data into the transmission
+        if trans_data is not None:
+            dtm_som4.setYLabel(dp_som5.getYLabel())
+            dtm_som4.setYUnits(dp_som5.getYUnits())
         dp_som6 = common_lib.div_ncerr(dp_som5, dtm_som4)
     else:
         dp_som6 = dp_som5
