@@ -274,6 +274,8 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
         for id in CNT:
             result = []
             result.append(str(k))
+            result.append(str(E_t[k]))
+            result.append(str(E_t[k+1]))
             result.append(str(CNT[id][k]))
             result.append(str(ERR2[id][k]))
             __get_coords(V1, id, k, result)
@@ -291,6 +293,8 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
             if make_fixed:
                 result1 = []
                 result1.append(str(k))
+                result1.append(str(E_t[k]))
+                result1.append(str(E_t[k+1]))
                 result1.append(str(CNT[id][k]))
                 result1.append(str(ERR2[id][k]))
                 result1.extend([str(x) for x in fixed_grid[id]])
