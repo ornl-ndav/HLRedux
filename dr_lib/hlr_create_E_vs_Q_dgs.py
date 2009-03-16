@@ -187,7 +187,8 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
         
         try:
             (y_2d, y_2d_err2,
-             area_new) = axis_manip.rebin_2D_quad_to_rectlin(Q1, E_t[:-1],
+             area_new,
+             bin_count) = axis_manip.rebin_2D_quad_to_rectlin(Q1, E_t[:-1],
                                                            Q2, E_t[:-1],
                                                            Q3, E_t[1:],
                                                            Q4, E_t[1:],
@@ -195,6 +196,9 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
                                                            counts_err2,
                                                            so_dim.axis[0].val,
                                                            so_dim.axis[1].val)
+            
+            del bin_count
+            
         except IndexError, e:
             # Get the offending index from the error message
             index = int(str(e).split()[1].split('index')[-1].strip('[]'))
