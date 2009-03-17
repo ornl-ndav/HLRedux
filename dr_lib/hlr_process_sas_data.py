@@ -322,8 +322,13 @@ def process_sas_data(datalist, conf, **kwargs):
     if bkg_subtract is not None:
         if t is not None:
             t.getTime(False)
+
+        duration = dp_som4["%s-duration" % dataset_type]
+        scale = duration.getValue() - acc_down_time[0]
             
-        dp_som4 = dr_lib.subtract_axis_dep_bkg(dp_som3, bkg_subtract)
+        dp_som4 = dr_lib.subtract_axis_dep_bkg(dp_som3, bkg_subtract,
+                                               old_scale=bkg_scale,
+                                               new_scale=scale)
 
         if t is not None:
             t.getTime(msg="After subtracting wavelength dependent background ")
