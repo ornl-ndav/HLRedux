@@ -92,28 +92,10 @@ def run(config, tim=None):
     if inst_geom_dst is not None:
         inst_geom_dst.setGeometry(config.data_paths.toPath(), dp_som0)
 
-    if config.verbose:
-        print "Reading in beam monitor data from %s file" % dataset_type
-
-    # The [0] is to get the data SOM and ignore the None background SOM
-    dbm_som0 = dr_lib.add_files(config.data,
-                                Data_Paths=config.bmon_path.toPath(),
-                                SO_Axis=config.so_axis,
-                                dataset_type=dataset_type,
-                                Verbose=config.verbose,
-                                Timer=tim)
-    
-    if tim is not None:
-        tim.getTime(msg="After reading beam monitor data ")
-
     # Note: time_zero_offset_det MUST be a tuple
     if config.time_zero_offset_det is not None:
         dp_som0.attr_list["Time_zero_offset_det"] = \
                                    config.time_zero_offset_det.toValErrTuple()
-    # Note: time_zero_offset_mon MUST be a tuple
-    if config.time_zero_offset_mon is not None:
-        dbm_som0.attr_list["Time_zero_offset_mon"] = \
-                                   config.time_zero_offset_mon.toValErrTuple()
 
     # Step 2: Convert TOF to wavelength for data and monitor
     if config.verbose:
