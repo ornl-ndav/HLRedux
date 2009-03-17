@@ -65,6 +65,8 @@ def run(config, tim=None):
     d_som1 = dr_lib.process_sas_data(config.data, config, timer=tim,
                                      inst_geom_dst=inst_geom_dst,
                                      bkg_subtract=config.bkg_coeff,
+                     acc_down_time=config.data_acc_down_time.toValueErrTuple(),
+                                     bkg_scale=config.bkg_scale,
                                      trans_data=config.data_trans)
 
     # Perform Steps 1-11 on buffer/solvent only data
@@ -73,6 +75,8 @@ def run(config, tim=None):
                                          inst_geom_dst=inst_geom_dst,
                                          dataset_type="solvent",
                                          bkg_subtract=config.bkg_coeff,
+                     acc_down_time=config.solv_acc_down_time.toValueErrTuple(),
+                                         bkg_scale=config.bkg_scale,
                                          trans_data=config.solv_trans)
     else:
         s_som1 = None
@@ -92,6 +96,8 @@ def run(config, tim=None):
                                          inst_geom_dst=inst_geom_dst,
                                          dataset_type="empty_can",
                                          bkg_subtract=config.bkg_coeff,
+                     acc_down_time=config.ecan_acc_down_time.toValueErrTuple(),
+                                         bkg_scale=config.bkg_scale,
                                          trans_data=config.ecan_trans)
     else:
         e_som1 = None
@@ -110,7 +116,9 @@ def run(config, tim=None):
         o_som1 = dr_lib.process_sas_data(config.open, config, timer=tim,
                                          inst_geom_dst=inst_geom_dst,
                                          dataset_type="open_beam",
-                                         bkg_subtract=config.bkg_coeff)
+                                         bkg_subtract=config.bkg_coeff,
+                     acc_down_time=config.open_acc_down_time.toValueErrTuple(),
+                                         bkg_scale=config.bkg_scale)
     else:
         o_som1 = None
         
