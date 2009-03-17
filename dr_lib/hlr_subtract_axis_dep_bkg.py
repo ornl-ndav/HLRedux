@@ -85,7 +85,7 @@ def subtract_axis_dep_bkg(obj, coeffs, **kwargs):
     obj_len = hlr_utils.get_length(obj)
 
     import utils
-    
+
     # iterate through the values
     for i in xrange(obj_len):
         axis   = hlr_utils.get_value(obj, i, o_descr, "x", 0)
@@ -93,10 +93,15 @@ def subtract_axis_dep_bkg(obj, coeffs, **kwargs):
         err2   = hlr_utils.get_err2 (obj, i, o_descr, "y")
         map_so = hlr_utils.get_map_so(obj, None, i)
 
+        len_val = len(val)
+        new_scale_p = new_scale / len_val
+        ratio = old_scale / new_scale_p
+
         axis_centers = utils.calc_bin_centers(axis)
 
         for j in xrange(len(val)):
-            val[j] -= __eval_poly(axis_centers[0][j], coeffs, poly_len)
+            val[j] -= (ratio * __eval_poly(axis_centers[0][j], coeffs,
+                                           poly_len))
 
         value = (val, err2)
 
