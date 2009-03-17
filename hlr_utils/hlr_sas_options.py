@@ -151,29 +151,29 @@ class SansOptions(hlr_utils.InstOptions):
                         +"should be lowest to highest: c0 + c1 * x + "\
                         +"c2 * x**2 + ...")
 
-        self.add_option("", "--data--acc-down-time",
+        self.add_option("", "--data-acc-down-time",
                         dest="data_acc_down_time",
                         help="Specify the accelerator downtime (seconds) "\
                         +"for the sample data run.")
         
-        self.add_option("", "--solv--acc-down-time",
+        self.add_option("", "--solv-acc-down-time",
                         dest="solv_acc_down_time",
                         help="Specify the accelerator downtime (seconds) "\
                         +"for the solvent only run.")
         
-        self.add_option("", "--ecan--acc-down-time",
+        self.add_option("", "--ecan-acc-down-time",
                         dest="ecan_acc_down_time",
                         help="Specify the accelerator downtime (seconds) "\
                         +"for the empty can run.")
         
-        self.add_option("", "--open--acc-down-time",
+        self.add_option("", "--open-acc-down-time",
                         dest="open_acc_down_time",
                         help="Specify the accelerator downtime (seconds) "\
                         +"for the open beam run.")        
 
         self.add_option("", "--bkg-scale", dest="bkg_scale", help="Specify "\
                         +"the scale factor that was used in the production "\
-                        +"of the background fit parameters."
+                        +"of the background fit parameters.")
         
         self.add_option("", "--rescale-final", dest="rescale_final",
                         help="Specify the constant with which to scale "\
@@ -375,6 +375,37 @@ def SansConfiguration(parser, configure, options, args):
             configure.bkg_coeff = options.bkg_coeff.split(',')
         except AttributeError:
             configure.bkg_coeff = options.bkg_coeff
+
+    # Set the accelerator down time for sample data
+    if hlr_utils.cli_provide_override(configure, "data_acc_down_time",
+                                      "--data-acc-down-time"):
+        configure.data_acc_down_time = hlr_utils.DrParameterFromString(\
+            options.data_acc_down_time, True)
+
+    # Set the accelerator down time for sample data
+    if hlr_utils.cli_provide_override(configure, "solv_acc_down_time",
+                                      "--solv-acc-down-time"):
+        configure.solv_acc_down_time = hlr_utils.DrParameterFromString(\
+            options.solv_acc_down_time, True)
+
+    # Set the accelerator down time for sample ecan
+    if hlr_utils.cli_provide_override(configure, "ecan_acc_down_time",
+                                      "--ecan-acc-down-time"):
+        configure.ecan_acc_down_time = hlr_utils.DrParameterFromString(\
+            options.ecan_acc_down_time, True)
+
+    # Set the accelerator down time for sample data
+    if hlr_utils.cli_provide_override(configure, "open_acc_down_time",
+                                      "--open-acc-down-time"):
+        configure.open_acc_down_time = hlr_utils.DrParameterFromString(\
+            options.open_acc_down_time, True)        
+
+    # Set the axis dependent background scaling constant
+    if hlr_utils.cli_provide_override(configure, "bkg_scale", "--bkg-scale"):
+        try:
+            configure.bkg_scale = float(options.bkg_scale)
+        except TypeError:
+            configure.bkg_scale = options.bkg_scale
 
     # Set the final data rescaling constant
     if hlr_utils.cli_provide_override(configure, "rescale_final",
