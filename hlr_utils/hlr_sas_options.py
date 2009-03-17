@@ -155,21 +155,25 @@ class SansOptions(hlr_utils.InstOptions):
                         dest="data_acc_down_time",
                         help="Specify the accelerator downtime (seconds) "\
                         +"for the sample data run.")
+        self.set_defaults(data_acc_down_time="0.0,0.0,seconds")        
         
         self.add_option("", "--solv-acc-down-time",
                         dest="solv_acc_down_time",
                         help="Specify the accelerator downtime (seconds) "\
                         +"for the solvent only run.")
+        self.set_defaults(solv_acc_down_time="0.0,0.0,seconds")        
         
         self.add_option("", "--ecan-acc-down-time",
                         dest="ecan_acc_down_time",
                         help="Specify the accelerator downtime (seconds) "\
                         +"for the empty can run.")
+        self.set_defaults(ecan_acc_down_time="0.0,0.0,seconds")        
         
         self.add_option("", "--open-acc-down-time",
                         dest="open_acc_down_time",
                         help="Specify the accelerator downtime (seconds) "\
-                        +"for the open beam run.")        
+                        +"for the open beam run.")
+        self.set_defaults(open_acc_down_time="0.0,0.0,seconds")        
 
         self.add_option("", "--bkg-scale", dest="bkg_scale", help="Specify "\
                         +"the scale factor that was used in the production "\
