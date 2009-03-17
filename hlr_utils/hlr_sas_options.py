@@ -151,6 +151,30 @@ class SansOptions(hlr_utils.InstOptions):
                         +"should be lowest to highest: c0 + c1 * x + "\
                         +"c2 * x**2 + ...")
 
+        self.add_option("", "--data--acc-down-time",
+                        dest="data_acc_down_time",
+                        help="Specify the accelerator downtime (seconds) "\
+                        +"for the sample data run.")
+        
+        self.add_option("", "--solv--acc-down-time",
+                        dest="solv_acc_down_time",
+                        help="Specify the accelerator downtime (seconds) "\
+                        +"for the solvent only run.")
+        
+        self.add_option("", "--ecan--acc-down-time",
+                        dest="ecan_acc_down_time",
+                        help="Specify the accelerator downtime (seconds) "\
+                        +"for the empty can run.")
+        
+        self.add_option("", "--open--acc-down-time",
+                        dest="open_acc_down_time",
+                        help="Specify the accelerator downtime (seconds) "\
+                        +"for the open beam run.")        
+
+        self.add_option("", "--bkg-scale", dest="bkg_scale", help="Specify "\
+                        +"the scale factor that was used in the production "\
+                        +"of the background fit parameters."
+        
         self.add_option("", "--rescale-final", dest="rescale_final",
                         help="Specify the constant with which to scale "\
                         +"(multiply) the final data.")
