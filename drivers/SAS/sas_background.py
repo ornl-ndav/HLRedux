@@ -194,6 +194,7 @@ def run(config, tim=None):
         tim.getTime(False)
         
     dp_som5 = common_lib.div_ncerr(dp_som4, (final_scale, 0))
+    dp_som5.attr_list["%s-Scaling" % dataset_type] = final_scale
 
     if tim is not None:
         tim.getTime(msg="After creating background spectrum ")
