@@ -297,7 +297,10 @@ if __name__ == "__main__":
 
     # Remove unnecessary options
     parser.remove_option("--data-trans")
+    parser.remove_option("--bmon-path")
     parser.remove_option("--tmon-path")
+    parser.remove_option("--r-bins")
+    parser.remove_option("--theta-bins")
     parser.remove_option("--ecan")
     parser.remove_option("--ecan-trans")
     parser.remove_option("--solv")
@@ -315,6 +318,13 @@ if __name__ == "__main__":
     parser.remove_option("--dump-bmon-rebin")
     parser.remove_option("--dump-wave-bmnorm")
     parser.remove_option("--dump-frac-rebin")
+    parser.remove_option("--dump-tof-r")
+    parser.remove_option("--dump-wave-r")
+    parser.remove_option("--dump-Q-r")
+    parser.remove_option("--dump-tof-theta")
+    parser.remove_option("--dump-wave-theta")
+    parser.remove_option("--dump-Q-theta")
+    parser.remove_option("--dump-2d")
     parser.remove_option("--dump-all")
 
     # Add sas_background specific options
