@@ -91,11 +91,6 @@ class BasicOptions(optparse.OptionParser):
         # specify the facility
         self.add_option("-f", "--facility", dest="facility",
                         help="Specify the short name for the facility.")
-
-        # specift the desired proposal
-        self.add_option("-p", "--proposal", dest="proposal",
-                        help="Specify the proposal for the requested data "\
-                        +"if a run number is being provided.")
         
         # specifying data sets
         self.add_option("", "--data", help="Specify the data file")
@@ -150,21 +145,15 @@ def BasicConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "facility", "--facility"):
         configure.facility = options.facility        
 
-    # Define proposal as stuff below depends on it.
-    if hlr_utils.cli_provide_override(configure, "proposal", "--proposal"):
-        configure.proposal = options.proposal
-        
     # Get the datafile name and check it
     if options.data is not None:
         configure.data = hlr_utils.determine_files(options.data,
                                                    configure.inst,
                                                    configure.facility,
-                                                   configure.proposal,
                                                    stop_on_none=True)
     elif len(args) > 0:
         configure.data = hlr_utils.determine_files(args, configure.inst,
                                                    configure.facility,
-                                                   configure.proposal,
                                                    stop_on_none=True)
     elif configure.data:
         # We have data from the config file, so everything is OK.
@@ -309,17 +298,7 @@ class InstOptions(BasicOptions):
                             help="Specify the open beam file")
 
             self.add_option("", "--dkcur",
-                            help="Specify the dark current file")
-
-        elif instrument == "DGS":
-            self.add_option("", "--ecan",
-                            help="Specify the empty sample container file")
-
-            self.add_option("", "--bcan",
-                            help="Specify the black sample container file")
-
-            self.add_option("", "--dkcur",
-                            help="Specify the dark current file")
+                            help="Specify the dark current file")            
 
         else:
             pass
@@ -370,77 +349,47 @@ def InstConfiguration(parser, configure, options, args, **kwargs):
     if hlr_utils.cli_provide_override(configure, "norm", "--norm"):
         configure.norm = hlr_utils.determine_files(options.norm,
                                                    configure.inst,
-                                                   configure.facility,
-                                                   configure.proposal)
+                                                   configure.facility)
 
     if instrument == "IGS":
         # Set the empty can file list
         if hlr_utils.cli_provide_override(configure, "ecan", "--ecan"):
             configure.ecan = hlr_utils.determine_files(options.ecan,
                                                        configure.inst,
-                                                       configure.facility,
-                                                       configure.proposal)
+                                                       configure.facility)
         # Set the background file list
         if hlr_utils.cli_provide_override(configure, "back", "--back"):
             configure.back = hlr_utils.determine_files(options.back,
                                                        configure.inst,
-                                                       configure.facility,
-                                                       configure.proposal)
+                                                       configure.facility)
 
         # Set the direct scattering background file list
         if hlr_utils.cli_provide_override(configure, "dsback", "--dsback"):
             configure.dsback = hlr_utils.determine_files(options.dsback,
                                                          configure.inst,
-                                                         configure.facility,
-                                                         configure.proposal)
+                                                         configure.facility)
     elif instrument == "SAS":
         # Set the empty can file list
         if hlr_utils.cli_provide_override(configure, "ecan", "--ecan"):
             configure.ecan = hlr_utils.determine_files(options.ecan,
                                                        configure.inst,
-                                                       configure.facility,
-                                                       configure.proposal)
+                                                       configure.facility)
         # Set the empty can file list
         if hlr_utils.cli_provide_override(configure, "solv", "--solv"):
             configure.solv = hlr_utils.determine_files(options.solv,
                                                        configure.inst,
-                                                       configure.facility,
-                                                       configure.proposal)
+                                                       configure.facility)
         # Set the empty can file list
         if hlr_utils.cli_provide_override(configure, "open", "--open"):
             configure.open = hlr_utils.determine_files(options.open,
                                                        configure.inst,
-                                                       configure.facility,
-                                                       configure.proposal)
+                                                       configure.facility)
 
         # Set the empty can file list
         if hlr_utils.cli_provide_override(configure, "dkcur", "--dkcur"):
             configure.dkcur = hlr_utils.determine_files(options.dkcur,
                                                         configure.inst,
-                                                        configure.facility,
-                                                        configure.proposal)
-
-    elif instrument == "DGS":
-        # Set the empty can file list
-        if hlr_utils.cli_provide_override(configure, "ecan", "--ecan"):
-            configure.ecan = hlr_utils.determine_files(options.ecan,
-                                                       configure.inst,
-                                                       configure.facility,
-                                                       configure.proposal)
-
-        # Set the black can file list
-        if hlr_utils.cli_provide_override(configure, "bcan", "--bcan"):
-            configure.bcan = hlr_utils.determine_files(options.bcan,
-                                                       configure.inst,
-                                                       configure.facility,
-                                                       configure.proposal)
-        
-        # Set the empty can file list
-        if hlr_utils.cli_provide_override(configure, "dkcur", "--dkcur"):
-            configure.dkcur = hlr_utils.determine_files(options.dkcur,
-                                                        configure.inst,
-                                                        configure.facility,
-                                                        configure.proposal)
+                                                        configure.facility)
             
     else:
         pass

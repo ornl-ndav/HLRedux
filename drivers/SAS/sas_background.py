@@ -92,41 +92,17 @@ def run(config, tim=None):
     if inst_geom_dst is not None:
         inst_geom_dst.setGeometry(config.data_paths.toPath(), dp_som0)
 
-    if config.verbose:
-        print "Reading in beam monitor data from %s file" % dataset_type
-
-    # The [0] is to get the data SOM and ignore the None background SOM
-    dbm_som0 = dr_lib.add_files(config.data,
-                                Data_Paths=config.bmon_path.toPath(),
-                                SO_Axis=config.so_axis,
-                                dataset_type=dataset_type,
-                                Verbose=config.verbose,
-                                Timer=tim)
-    
-    if tim is not None:
-        tim.getTime(msg="After reading beam monitor data ")
-
     # Note: time_zero_offset_det MUST be a tuple
     if config.time_zero_offset_det is not None:
         dp_som0.attr_list["Time_zero_offset_det"] = \
                                    config.time_zero_offset_det.toValErrTuple()
-    # Note: time_zero_offset_mon MUST be a tuple
-    if config.time_zero_offset_mon is not None:
-        dbm_som0.attr_list["Time_zero_offset_mon"] = \
-                                   config.time_zero_offset_mon.toValErrTuple()
 
-    # Step 2: Convert TOF to wavelength for data and monitor
+    # Step 2: Convert TOF to wavelength for data
     if config.verbose:
         print "Converting TOF to wavelength"
 
     if tim is not None:
         tim.getTime(False)
-
-    # Convert beam monitor
-    dbm_som1 = common_lib.tof_to_wavelength_lin_time_zero(
-        dbm_som0,
-        units="microsecond",
-        time_zero_offset=config.time_zero_offset_mon.toValErrTuple())
 
     # Convert detector pixels
     dp_som1 = common_lib.tof_to_wavelength_lin_time_zero(
@@ -138,7 +114,7 @@ def run(config, tim=None):
     if tim is not None:
         tim.getTime(msg="After converting TOF to wavelength ")
 
-    del dp_som0, dbm_som0
+    del dp_som0
 
     if config.verbose:
         print "Cutting spectra"
@@ -149,13 +125,10 @@ def run(config, tim=None):
     dp_som2 = dr_lib.cut_spectra(dp_som1, config.lambda_low_cut,
                                  config.lambda_high_cut)
 
-    dbm_som2 = dr_lib.cut_spectra(dbm_som1, config.lambda_low_cut,
-                                  config.lambda_high_cut)
-
     if tim is not None:
         tim.getTime(msg="After cutting spectra ")
 
-    del dp_som1, dbm_som1
+    del dp_som1
 
     rebin_axis = config.lambda_bins.toNessiList()
 
@@ -189,18 +162,6 @@ def run(config, tim=None):
         
     del dp_som3
 
-    # Get monitor integral
-    if config.verbose:
-        print "Integrating monitor"
-
-    if tim is not None:
-        tim.getTime(False)
-        
-    mon_rate0 = dr_lib.integrate_spectra(dbm_som2, width=True, total=True)
-
-    if tim is not None:
-        tim.getTime(msg="After integrating monitor ")
-        
     # Calculate the accelerator on time
     if config.verbose:
         print "Calculating accelerator on time"
@@ -209,34 +170,20 @@ def run(config, tim=None):
                                         config.acc_down_time.getValue(), 0.0,
                                         "seconds")
 
-    # Calculate the monitor rate
-    if config.verbose:
-        print "Calculating the monitor rate"
-
-    if tim is not None:
-        tim.getTime(False)
-        
-    mon_rate1 = common_lib.div_ncerr(mon_rate0, acc_on_time.toValErrTuple())
-
-    if tim is not None:
-        tim.getTime(msg="After calculating the monitor rate ")
-        
-    del mon_rate0
-
     # Get the number of data bins
     num_wave_bins = len(rebin_axis) - 1
 
-    # Calculate the scaled monitor rate
+    # Calculate the scaled accelerator uptime
     if config.verbose:
-        print "Calculating the scaled monitor rate"
+        print "Calculating the scaled accelerator uptime"
 
     if tim is not None:
         tim.getTime(False)
         
-    final_scale = common_lib.div_ncerr(mon_rate1, (num_wave_bins, 0.0))
-
+    final_scale = acc_on_time.toValErrTuple()[0] / num_wave_bins
+    
     if tim is not None:
-        tim.getTime(msg="After calculating the scaled monitor rate ")
+        tim.getTime(msg="After calculating the scaled accelerator uptime ")
         
     # Create the final background spectrum
     if config.verbose:
@@ -245,7 +192,8 @@ def run(config, tim=None):
     if tim is not None:
         tim.getTime(False)
         
-    dp_som5 = common_lib.div_ncerr(dp_som4, final_scale)
+    dp_som5 = common_lib.div_ncerr(dp_som4, (final_scale, 0))
+    dp_som5.attr_list["%s-Scaling" % dataset_type] = final_scale
 
     if tim is not None:
         tim.getTime(msg="After creating background spectrum ")
@@ -297,7 +245,11 @@ if __name__ == "__main__":
 
     # Remove unnecessary options
     parser.remove_option("--data-trans")
+    parser.remove_option("--bmon-path")
     parser.remove_option("--tmon-path")
+    parser.remove_option("--r-bins")
+    parser.remove_option("--theta-bins")
+    parser.remove_option("--time-zero-offset-mon")
     parser.remove_option("--ecan")
     parser.remove_option("--ecan-trans")
     parser.remove_option("--solv")
@@ -315,6 +267,13 @@ if __name__ == "__main__":
     parser.remove_option("--dump-bmon-rebin")
     parser.remove_option("--dump-wave-bmnorm")
     parser.remove_option("--dump-frac-rebin")
+    parser.remove_option("--dump-tof-r")
+    parser.remove_option("--dump-wave-r")
+    parser.remove_option("--dump-Q-r")
+    parser.remove_option("--dump-tof-theta")
+    parser.remove_option("--dump-wave-theta")
+    parser.remove_option("--dump-Q-theta")
+    parser.remove_option("--dump-2d")
     parser.remove_option("--dump-all")
 
     # Add sas_background specific options
