@@ -182,7 +182,6 @@ def run(config, tim=None):
         
     final_scale = acc_on_time.toValErrTuple()[0] / num_wave_bins
     
-    print "A:", acc_on_time, num_wave_bins, final_scale
     if tim is not None:
         tim.getTime(msg="After calculating the scaled accelerator uptime ")
         
