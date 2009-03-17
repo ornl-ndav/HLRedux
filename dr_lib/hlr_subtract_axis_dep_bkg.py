@@ -22,7 +22,7 @@
 
 # $Id$
 
-def subtract_axis_dep_bkg(obj, coeffs):
+def subtract_axis_dep_bkg(obj, coeffs, **kwargs):
     """
     This function takes spectrum object(s) and a set of coefficients and
     subtracts an axis dependent background based on a polynomial. The order
@@ -34,6 +34,16 @@ def subtract_axis_dep_bkg(obj, coeffs):
     @param coeffs: The set of coefficients for the polynomial representation
                    of the background to be subtracted.
     @type coeffs: C{list} of C{floats}
+
+    @param kwargs: A list of keyword arguments that the function accepts:
+
+    @keyword old_scale: The scale factor used to obtain the coefficients used
+                        in this function.
+    @typ old_scale: C{float}
+
+    @keyword new_scale: The scale factor for the current data set from which
+                        the axis dependent background will be subtracted from.
+    @type new_scale: C{float}
 
 
     @return: Object with the axis dependent background subtracted
@@ -49,6 +59,10 @@ def subtract_axis_dep_bkg(obj, coeffs):
     poly_len = len(coeffs)    
     if poly_len == 0:
         return obj
+
+    # Check for keywords
+    old_scale = kwargs.get("old_scale", 1.0)
+    new_scale = kwargs.get("new_scale", 1.0)
 
     # Reverse coefficients for __eval_poly function
     coeffs.reverse()
