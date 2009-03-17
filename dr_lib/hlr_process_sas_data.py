@@ -65,6 +65,13 @@ def process_sas_data(datalist, conf, **kwargs):
                              normalizing to the beam monitor.
     @type get_background: C{boolean}
 
+    @keyword acc_down_time: The information for the accelerator downtime.
+    @type acc_down_time: C{tuple}
+
+    @keyword bkg_scale: The scaling used for the axis dependent background
+                        parameters.
+    @type bkg_scale: C{float}
+
     @keyword timer: Timing object so the function can perform timing estimates.
     @type timer: C{sns_timer.DiffTime}
 
@@ -111,6 +118,9 @@ def process_sas_data(datalist, conf, **kwargs):
         get_background = kwargs["get_background"]
     except KeyError:
         get_background = False
+
+    acc_down_time = kwargs.get("acc_down_time")
+    bkg_scale = kwargs.get("bkg_scale")
 
     # Add so_axis to Configure object
     conf.so_axis = "time_of_flight"
