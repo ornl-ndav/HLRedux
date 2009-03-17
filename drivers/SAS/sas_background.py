@@ -283,6 +283,7 @@ if __name__ == "__main__":
     parser.remove_option("--tmon-path")
     parser.remove_option("--r-bins")
     parser.remove_option("--theta-bins")
+    parser.remove_option("--time-zero-offset-mon")
     parser.remove_option("--ecan")
     parser.remove_option("--ecan-trans")
     parser.remove_option("--solv")
