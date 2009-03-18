@@ -148,20 +148,6 @@ def run(config, tim=None):
 
     data_run_time = dp_som3.attr_list["background-duration"]
 
-    # Divide the data by the duration
-    if config.verbose:
-        print "Scaling data by the counting duration"
-        
-    if tim is not None:
-        tim.getTime(False)
-        
-    dp_som4 = common_lib.div_ncerr(dp_som3, (data_run_time.getValue(), 0.0))
-
-    if tim is not None:
-        tim.getTime(msg="After scaling data by the counting duration ")
-        
-    del dp_som3
-
     # Calculate the accelerator on time
     if config.verbose:
         print "Calculating accelerator on time"
@@ -192,16 +178,16 @@ def run(config, tim=None):
     if tim is not None:
         tim.getTime(False)
         
-    dp_som5 = common_lib.div_ncerr(dp_som4, (final_scale, 0))
-    dp_som5.attr_list["%s-Scaling" % dataset_type] = final_scale
+    dp_som4 = common_lib.div_ncerr(dp_som3, (final_scale, 0))
+    dp_som4.attr_list["%s-Scaling" % dataset_type] = final_scale
 
     if tim is not None:
         tim.getTime(msg="After creating background spectrum ")
         
-    del dp_som4
+    del dp_som3
 
     # Write out the background spectrum
-    hlr_utils.write_file(config.output, "text/Spec", dp_som5,
+    hlr_utils.write_file(config.output, "text/Spec", dp_som4,
                          verbose=config.verbose,
                          output_ext="bkg",
                          data_ext=config.ext_replacement,
@@ -209,9 +195,9 @@ def run(config, tim=None):
                          replace_ext=True,
                          message="background spectrum")
 
-    dp_som5.attr_list["config"] = config
+    dp_som4.attr_list["config"] = config
 
-    hlr_utils.write_file(config.output, "text/rmd", dp_som5,
+    hlr_utils.write_file(config.output, "text/rmd", dp_som4,
                          output_ext="rmd",
                          data_ext=config.ext_replacement,         
                          path_replacement=config.path_replacement,
