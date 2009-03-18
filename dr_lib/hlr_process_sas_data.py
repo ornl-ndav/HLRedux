@@ -65,6 +65,13 @@ def process_sas_data(datalist, conf, **kwargs):
                              normalizing to the beam monitor.
     @type get_background: C{boolean}
 
+    @keyword acc_down_time: The information for the accelerator downtime.
+    @type acc_down_time: C{tuple}
+
+    @keyword bkg_scale: The scaling used for the axis dependent background
+                        parameters.
+    @type bkg_scale: C{float}
+
     @keyword timer: Timing object so the function can perform timing estimates.
     @type timer: C{sns_timer.DiffTime}
 
@@ -111,6 +118,9 @@ def process_sas_data(datalist, conf, **kwargs):
         get_background = kwargs["get_background"]
     except KeyError:
         get_background = False
+
+    acc_down_time = kwargs.get("acc_down_time")
+    bkg_scale = kwargs.get("bkg_scale")
 
     # Add so_axis to Configure object
     conf.so_axis = "time_of_flight"
@@ -312,8 +322,13 @@ def process_sas_data(datalist, conf, **kwargs):
     if bkg_subtract is not None:
         if t is not None:
             t.getTime(False)
+
+        duration = dp_som3.attr_list["%s-duration" % dataset_type]
+        scale = duration.getValue() - acc_down_time[0]
             
-        dp_som4 = dr_lib.subtract_axis_dep_bkg(dp_som3, bkg_subtract)
+        dp_som4 = dr_lib.subtract_axis_dep_bkg(dp_som3, bkg_subtract,
+                                               old_scale=bkg_scale,
+                                               new_scale=scale)
 
         if t is not None:
             t.getTime(msg="After subtracting wavelength dependent background ")
