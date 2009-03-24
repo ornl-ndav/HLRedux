@@ -91,7 +91,7 @@ class DgsRedOptions(hlr_dgs_options.DgsOptions):
         self.add_option("", "--make-spe", dest="make_spe", action="store_true",
                         help="Create SPE and PHX files and skip creation of "\
                         +"S(Q,E) distribution.")
-        self.set_defaults(make_spe-False)
+        self.set_defaults(make_spe=False)
 
         self.add_option("-m", "--qmesh", dest="qmesh", action="store_true",
                         help="Create the Q vector meshes for each energy "\
