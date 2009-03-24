@@ -272,7 +272,7 @@ def run(config, tim=None):
         tim.getTime(msg="After reading in corner geometry information ")
 
     if config.make_spe:
-        d_som5.attr_list["corner_angles"] = corner_angles
+        d_som5.attr_list["corner_geom"] = corner_angles
 
         hlr_utils.write_file(config.output, "text/PHX", d_som5,
                              output_ext="phx",
