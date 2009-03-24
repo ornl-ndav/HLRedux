@@ -271,6 +271,23 @@ def run(config, tim=None):
     if tim is not None:
         tim.getTime(msg="After reading in corner geometry information ")
 
+    if config.make_spe:
+        d_som5.attr_list["corner_angles"] = corner_angles
+
+        hlr_utils.write_file(config.output, "text/PHX", d_som5,
+                             output_ext="phx",
+                             data_ext=config.ext_replacement,    
+                             path_replacement=config.path_replacement,
+                             verbose=config.verbose,
+                             message="PHX information")
+
+        hlr_utils.write_file(config.output, "text/SPE", d_som5,
+                             output_ext="spe",
+                             data_ext=config.ext_replacement,    
+                             path_replacement=config.path_replacement,
+                             verbose=config.verbose,
+                             message="SPE information")
+
     if config.verbose:
         print "Creating S(Q, E)"
 
