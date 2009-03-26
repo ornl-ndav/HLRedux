@@ -219,16 +219,9 @@ def run(config, tim=None):
     if tim is not None:
         tim.getTime(False)
 
-    #import profile
-    #profiler = profile.Profile()
-    #d_som4 = profiler.runcall(dr_lib.energy_transfer, d_som3, "DGS",
-    #                          "Initial_Energy", lojac=True,
-    #                          scale=config.lambda_ratio)
-    #profiler.dump_stats("et_profile.dat")
     d_som4 = dr_lib.energy_transfer(d_som3, "DGS", "Initial_Energy",
                                     lojac=True, scale=config.lambda_ratio)
     
-
     if tim is not None:
         tim.getTime(msg="After calculating energy transfer ")
 
