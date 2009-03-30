@@ -174,11 +174,11 @@ def DgsRedConfiguration(parser, configure, options, args):
         configure.make_spe = options.make_spe
 
     # Set the ability to create the Q vector meshes for each energy slice
-    if hlr_utils.cli_provide_override(configure, "qmesh", "--qmesh", "m"):
+    if hlr_utils.cli_provide_override(configure, "qmesh", "--qmesh", "-m"):
         configure.qmesh = options.qmesh
         
     # Set the ability to write out fixed grid mesh files
-    if hlr_utils.cli_provide_override(configure, "fixed", "--fixed", "x"):
+    if hlr_utils.cli_provide_override(configure, "fixed", "--fixed", "-x"):
         configure.fixed = options.fixed        
 
     # Set the ability to dump the combined energy transfer information
