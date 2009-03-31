@@ -64,8 +64,6 @@ def create_det_eff(obj):
     import phys_corr
     import utils
 
-    import math
-    
     # Get object length
     len_obj = hlr_utils.get_length(obj)
     for i in xrange(len_obj):
