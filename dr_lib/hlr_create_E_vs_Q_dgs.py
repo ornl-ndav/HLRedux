@@ -123,9 +123,8 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
     l_f = axis_manip.energy_to_wavelength(E_f[0], E_f[1])
     k_f = axis_manip.wavelength_to_scalar_k(l_f[0], l_f[1])
 
-    # Output position for Q and Q_err2
+    # Output position for Q
     X = 0
-    VX = 1
 
     # Iterate though the data
     len_som = hlr_utils.get_length(som)
@@ -168,8 +167,6 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
                                                           avg_theta2,
                                                           0.0)
 
-        del Q1[VX], Q2[VX], Q3[VX], Q4[VX]
-        
         # Calculate the area of the E,Q polygons
         (A, A_err2) = dr_lib.calc_EQ_Jacobian_dgs(E_t[:-1], Q1[X],
                                                   E_t[:-1], Q2[X],
