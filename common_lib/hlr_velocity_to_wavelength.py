@@ -73,11 +73,6 @@ def velocity_to_wavelength(obj, **kwargs):
         units = "meters/microseconds"
 
     try:
-        offset = kwargs["offset"]
-    except KeyError:
-        offset = None
-
-    try:
         lojac = kwargs["lojac"]
     except KeyError:
         lojac = hlr_utils.check_lojac(obj)
@@ -99,7 +94,6 @@ def velocity_to_wavelength(obj, **kwargs):
         pass
 
     # iterate through the values
-    import array_manip
     import axis_manip
     if lojac:
         import utils
