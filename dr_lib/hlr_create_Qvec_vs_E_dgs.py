@@ -139,13 +139,10 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
     V2 = {}
     V3 = {}
     V4 = {}
-    # Output positions for Qx, Qy, Qz coordinates and errors
+    # Output positions for Qx, Qy, Qz coordinates
     X = 0
-    VX = 1
     Y = 2
-    VY = 3
     Z = 4
-    VZ = 5
 
     if t is not None:
         t.getTime(False)
@@ -209,9 +206,6 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
         V4[str(map_so.id)]["x"] = Q4[X]
         V4[str(map_so.id)]["y"] = Q4[Y]
         V4[str(map_so.id)]["z"] = Q4[Z]
-
-        del Q1[VX], Q1[VY], Q1[VZ], Q2[VX], Q2[VY], Q2[VZ]
-        del Q3[VX], Q3[VY], Q3[VZ], Q4[VX], Q4[VY], Q4[VZ]
 
     if t is not None:
         t.getTime(msg="After calculating verticies ")
