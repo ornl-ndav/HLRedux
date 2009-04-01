@@ -45,7 +45,7 @@ def process_dgs_data(obj, conf, bcan, ecan, tcoeff, **kwargs):
 
     @param tcoeff: The transmission coefficient appropriate to the given data
                    set.
-    @type: C{tuple}
+    @type tcoeff: C{tuple}
     
     @param kwargs: A list of keyword arguments that the function accepts:
 

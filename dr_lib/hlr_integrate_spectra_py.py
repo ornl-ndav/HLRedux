@@ -228,8 +228,8 @@ if __name__ == "__main__":
     print "* ", som1[0]
     print "* ", som1[1]
 
-    print "********** integrate_spectra"
-    print "som            :", integrate_spectra(som1)
-    print "som (1.5, 3.5) :", integrate_spectra(som1, start=1.5, end=3.5)
-    print "som (0.5, 2.75):", integrate_spectra(som1, start=0.5, end=2.75)
-    print "som (total)     :", integrate_spectra(som1, total=True)
+    print "********** integrate_spectra_py"
+    print "som            :", integrate_spectra_py(som1)
+    print "som (1.5, 3.5) :", integrate_spectra_py(som1, start=1.5, end=3.5)
+    print "som (0.5, 2.75):", integrate_spectra_py(som1, start=0.5, end=2.75)
+    print "som (total)     :", integrate_spectra_py(som1, total=True)

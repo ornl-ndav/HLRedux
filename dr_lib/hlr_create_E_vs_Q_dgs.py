@@ -67,9 +67,6 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
     @keyword configure: This is the object containing the driver configuration.
     @type configure: C{Configure}
 
-    @keyword timer: Timing object so the function can perform timing estimates.
-    @type timer: C{sns_timer.DiffTime}
-
 
     @return: Object containing a 2D C{SO} with E and Q axes
     @rtype: C{SOM.SOM}    
@@ -84,7 +81,6 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
     import utils
 
     # Check for keywords
-    t = kwargs.get("timer")
     corner_angles = kwargs["corner_angles"]
     configure = kwargs.get("configure")
     split = kwargs.get("split", False)
@@ -116,7 +112,6 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
     if som[0].axis[0].var is not None:
         E_t_err2 = som[0].axis[0].var
     else:
-        import nessi_list
         E_t_err2 = nessi_list.NessiList(len(E_t))        
 
     # Get the bin width arrays from E_t
@@ -128,8 +123,8 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
     l_f = axis_manip.energy_to_wavelength(E_f[0], E_f[1])
     k_f = axis_manip.wavelength_to_scalar_k(l_f[0], l_f[1])
 
-    # Grab the instrument from the som
-    inst = som.attr_list.instrument
+    # Output position for Q
+    X = 0
 
     # Iterate though the data
     len_som = hlr_utils.get_length(som)
@@ -144,38 +139,39 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
         avg_theta1 = (cangles.getPolar(0) + cangles.getPolar(1)) / 2.0
         avg_theta2 = (cangles.getPolar(2) + cangles.getPolar(3)) / 2.0
         
-        (Q1,
-         Q1_err2) = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0],
-                                                                 k_i[1],
-                                                                 k_f[0][:-1],
-                                                                 k_f[1][:-1],
-                                                                 avg_theta2,
-                                                                 0.0)
-        (Q2,
-         Q2_err2) = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0],
-                                                                 k_i[1],
-                                                                 k_f[0][:-1],
-                                                                 k_f[1][:-1],
-                                                                 avg_theta1,
-                                                                 0.0)
-        (Q3,
-         Q3_err2) = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0],
-                                                                 k_i[1],
-                                                                 k_f[0][1:],
-                                                                 k_f[1][1:],
-                                                                 avg_theta1,
-                                                                 0.0)
+        Q1 = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0],
+                                                          k_i[1],
+                                                          k_f[0][:-1],
+                                                          k_f[1][:-1],
+                                                          avg_theta2,
+                                                          0.0)
+        
+        Q2 = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0],
+                                                          k_i[1],
+                                                          k_f[0][:-1],
+                                                          k_f[1][:-1],
+                                                          avg_theta1,
+                                                          0.0)
+        
+        Q3 = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0],
+                                                          k_i[1],
+                                                          k_f[0][1:],
+                                                          k_f[1][1:],
+                                                          avg_theta1,
+                                                          0.0)
 
-        (Q4,
-         Q4_err2) = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0],
-                                                                 k_i[1],
-                                                                 k_f[0][1:],
-                                                                 k_f[1][1:],
-                                                                 avg_theta2,
-                                                                 0.0)
+        Q4 = axis_manip.init_scatt_wavevector_to_scalar_Q(k_i[0],
+                                                          k_i[1],
+                                                          k_f[0][1:],
+                                                          k_f[1][1:],
+                                                          avg_theta2,
+                                                          0.0)
+
         # Calculate the area of the E,Q polygons
-        (A, A_err2) = dr_lib.calc_EQ_Jacobian_dgs(E_t[:-1], Q1, E_t[:-1], Q2,
-                                                  E_t[1:], Q3, E_t[1:], Q4)
+        (A, A_err2) = dr_lib.calc_EQ_Jacobian_dgs(E_t[:-1], Q1[X],
+                                                  E_t[:-1], Q2[X],
+                                                  E_t[1:], Q3[X],
+                                                  E_t[1:], Q4[X])
 
         # Apply the Jacobian: C/dE_t * dE_t / A(EQ) = C/A(EQ)
         (jac_ratio, jac_ratio_err2) = array_manip.div_ncerr(E_t_bw,
@@ -188,10 +184,10 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
         try:
             (y_2d, y_2d_err2,
              area_new,
-             bin_count) = axis_manip.rebin_2D_quad_to_rectlin(Q1, E_t[:-1],
-                                                           Q2, E_t[:-1],
-                                                           Q3, E_t[1:],
-                                                           Q4, E_t[1:],
+             bin_count) = axis_manip.rebin_2D_quad_to_rectlin(Q1[X], E_t[:-1],
+                                                           Q2[X], E_t[:-1],
+                                                           Q3[X], E_t[1:],
+                                                           Q4[X], E_t[1:],
                                                            counts,
                                                            counts_err2,
                                                            so_dim.axis[0].val,
@@ -204,13 +200,13 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
             index = int(str(e).split()[1].split('index')[-1].strip('[]'))
             print "Id:", map_so.id
             print "Index:", index
-            print "Verticies: %f, %f, %f, %f, %f, %f, %f, %f" % (Q1[index],
+            print "Verticies: %f, %f, %f, %f, %f, %f, %f, %f" % (Q1[X][index],
                                                               E_t[:-1][index],
-                                                                 Q2[index],
+                                                                 Q2[X][index],
                                                               E_t[:-1][index],
-                                                                 Q3[index],
+                                                                 Q3[X][index],
                                                               E_t[1:][index],
-                                                                 Q4[index],
+                                                                 Q4[X][index],
                                                               E_t[1:][index])
             raise IndexError(str(e))
 
@@ -230,7 +226,7 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
     comb_som = SOM.SOM()
     comb_som.copyAttributes(som)
 
-    comb_som = __set_som_attributes(comb_som, inst_name="", **kwargs)
+    comb_som = __set_som_attributes(comb_som, **kwargs)
 
     if split:
         comb_som.append(so_dim)
@@ -269,16 +265,13 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
         
     return comb_som
 
-def __set_som_attributes(tsom, inst_name, **kwargs):
+def __set_som_attributes(tsom, **kwargs):
     """
     This is a helper function that sets attributes for the final S(Q,E)
     C{SOM.SOM}.
 
     @param tsom: The input object for attribute setting
     @type tsom: C{SOM.SOM}
-
-    @param inst_name: The short name for an instrument
-    @type inst_name: C{string}
 
     @param kwargs: These are keywords that are specified by the main function.
     

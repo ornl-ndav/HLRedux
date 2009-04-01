@@ -91,7 +91,6 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
     if conf.verbose:
         print "Reading %s file" % dataset_type
 
-    dst_type = "application/x-NeXus"
     data_paths = conf.data_paths.toPath()
     if conf.no_mon_norm:
         mon_paths = None
