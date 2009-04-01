@@ -274,6 +274,40 @@ def calc_BSS_solid_angle(map_so, inst):
     return math.fabs(sin_pol * dtd * dh *
                      (dpol_dtd * dazi_dh - dpol_dh * dazi_dtd))
 
+def calc_BSS_delta_azi(map_so, inst):
+    """
+    This function calculates the delta azimuthal quantity for a given BSS
+    detector pixel. The formula is:
+
+    delta azi = dtd * dazi_dtd + dh * dazi_dh
+
+    @param map_so: The object containing the pixel ID
+    @type map_so: C{SOM.SO}
+
+    @param inst: The object containing the instrument geometry
+    @type inst: C{SOM.Instrument} or C{SOM.CompositeInstrument}
+
+
+    @return: The delta azimuthal for the given pixel
+    @rtype: C{float}
+    """
+    # Get the detector pixel height
+    dh_tuple = hlr_utils.get_parameter("dh", map_so, inst)
+    dh = dh_tuple[0]
+
+    # Get the detector pixel angular width
+    dtd_tuple = hlr_utils.get_parameter("dtd", map_so, inst)
+    dtd = dtd_tuple[0]
+
+    # Get partial derivatives
+    dazi_dh_tuple = hlr_utils.get_parameter("dazi_dh", map_so, inst)
+    dazi_dh = dazi_dh_tuple[0]
+
+    dazi_dtd_tuple = hlr_utils.get_parameter("dazi_dtd", map_so, inst)
+    dazi_dtd = dazi_dtd_tuple[0]
+
+    return (dtd * dazi_dtd) + (dh * dazi_dh)
+
 def __calc_x1(*args):
     """
     This function calculates the x1 coeffiecient to the S(Q,E) Jacobian
