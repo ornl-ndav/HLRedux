@@ -306,7 +306,9 @@ def calc_BSS_delta_azi(map_so, inst):
     dazi_dtd_tuple = hlr_utils.get_parameter("dazi_dtd", map_so, inst)
     dazi_dtd = dazi_dtd_tuple[0]
 
-    return (dtd * dazi_dtd) + (dh * dazi_dh)
+    import math
+
+    return math.fabs((dtd * dazi_dtd) + (dh * dazi_dh))
 
 def __calc_x1(*args):
     """
