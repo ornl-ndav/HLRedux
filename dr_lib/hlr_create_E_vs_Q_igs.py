@@ -420,14 +420,10 @@ def create_E_vs_Q_igs(som, *args, **kwargs):
         if configure.dump_pix_contrib or configure.scale_sqe:
             if inst_name == "BSS":
                 dOmega = dr_lib.calc_BSS_solid_angle(map_so, inst)
-                dazi = dr_lib.calc_BSS_delta_azi(map_so, inst)
-
-                sconst = dOmega * dazi
-                
                 (bin_count_new,
                  bin_count_err2) = array_manip.mult_ncerr(bin_count_new,
                                                           bin_count_err2,
-                                                          sconst, 0.0)
+                                                          dOmega, 0.0)
                 
                 (bin_count,
                  bin_count_err2) = array_manip.add_ncerr(bin_count,
