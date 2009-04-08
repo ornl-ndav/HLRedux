@@ -38,8 +38,12 @@ def feff_correct_mon(obj, **kwargs):
     @type units: C{string}
 
     @keyword eff_const: Use this provided effieciency constant. The default is
-    .
-    @type eff_const: C{float}
+                        (0.00000085 / 1.8) Angstroms^-1.
+    @type eff_const: L{hlr_utils.DrParameter}
+
+    @keyword inst_name: The short name of an instrument.
+    @type inst_name: C{string}
+    
     
     @return: Efficiency corrected monitor spectra
     @rtype: C{SOM.SOM} or C{SOM.SO}
@@ -68,6 +72,8 @@ def feff_correct_mon(obj, **kwargs):
         eff_const = hlr_utils.DrParameter((0.00000085 / 1.8), 0.0,
                                           "Angstroms^-1") # A^-1
 
+    inst_name = kwargs.get("inst_name")
+
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
     if o_descr == "SOM":
@@ -80,19 +86,27 @@ def feff_correct_mon(obj, **kwargs):
     # iterate through the values
     import array_manip
     import nessi_list
+    import dr_lib
     
     for i in xrange(hlr_utils.get_length(obj)):
         val = hlr_utils.get_value(obj, i, o_descr, "x", axis)
         map_so = hlr_utils.get_map_so(obj, None, i)
 
-        eff = nessi_list.NessiList()
+        if inst_name is None:
+            eff = nessi_list.NessiList()
+        
+            for j in xrange(len(val)-1):
+                bin_center = (val[j+1] + val[j]) / 2.0
+                eff.append(eff_const.getValue() * bin_center)
 
-        for j in xrange(len(val)-1):
-            bin_center = (val[j+1] + val[j]) / 2.0
-            eff.append(eff_const.getValue() * bin_center)
-
-        eff_err2 = nessi_list.NessiList(len(eff))
-
+            eff_err2 = nessi_list.NessiList(len(eff))
+        else:
+            if inst_name == "SANS":
+                (eff, eff_err2) = dr_lib.subexp_eff(eff_const, val)
+            else:
+                raise RuntimeError("Do not know how to handle %s instrument" \
+                                   % inst_name)
+                
         y_val = hlr_utils.get_value(obj, i, o_descr, "y")
         y_err2 = hlr_utils.get_err2(obj, i, o_descr, "y")
 
