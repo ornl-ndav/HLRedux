@@ -345,7 +345,7 @@ def process_sas_data(datalist, conf, **kwargs):
         t.getTime(False)
 
     if conf.mon_effc:
-        dbm_som3 = dr_lib.feff_correct_mon(dbm_som2,
+        dbm_som3 = dr_lib.feff_correct_mon(dbm_som2, inst_name=conf.inst,
                                            eff_const=conf.mon_eff_const)
     else:
         dbm_som3 = dbm_som2
@@ -384,6 +384,34 @@ def process_sas_data(datalist, conf, **kwargs):
         t.getTime(msg="After efficiency correcting beam monitor ")
 
     # Step 5: Efficiency correct detector pixels
+    if conf.det_effc:
+        if conf.verbose:
+            print "Calculating detector efficiency"
+
+        if t is not None:
+            t.getTime(False)
+
+        det_eff = dr_lib.create_det_eff(dp_som4, inst_name=conf.inst,
+                                        eff_const=conf.det_eff_const)
+
+        if t is not None:
+            t.getTime(msg="After calculating detector efficiency")
+
+        if conf.verbose:
+            print "Applying detector efficiency"
+
+        if t is not None:
+            t.getTime(False)
+
+        dp_som5 = common_lib.div_ncerr(dp_som4, det_eff)
+
+        if t is not None:
+            t.getTime(msg="After spplying detector efficiency")
+
+    else:
+        dp_som5 = dp_som4
+
+    del dp_som4
 
     # Step 6: Rebin beam monitor axis onto detector pixel axis
     if conf.verbose:
@@ -392,7 +420,7 @@ def process_sas_data(datalist, conf, **kwargs):
     if t is not None:
         t.getTime(False)
 
-    dbm_som4 = dr_lib.rebin_monitor(dbm_som3, dp_som4, rtype="frac")
+    dbm_som4 = dr_lib.rebin_monitor(dbm_som3, dp_som5, rtype="frac")
 
     if t is not None:
         t.getTime(msg="After rebinning beam monitor ")
@@ -416,34 +444,34 @@ def process_sas_data(datalist, conf, **kwargs):
     if t is not None:
         t.getTime(False)
 
-    dp_som5 = common_lib.div_ncerr(dp_som4, dbm_som4)
+    dp_som6 = common_lib.div_ncerr(dp_som5, dbm_som4)
 
     if t is not None:
         t.getTime(msg="After normalizing data by beam monitor ")
 
-    del dp_som4
+    del dp_som5
 
     if transmission:
-        return dp_som5
+        return dp_som6
 
     if conf.dump_wave_bmnorm:
-        dp_som5_1 = dr_lib.sum_by_rebin_frac(dp_som5,
+        dp_som6_1 = dr_lib.sum_by_rebin_frac(dp_som6,
                                              conf.lambda_bins.toNessiList())
 
         write_message = "combined pixel wavelength information"
         write_message += " (beam monitor normalized)"
         
-        hlr_utils.write_file(conf.output, "text/Spec", dp_som5_1,
+        hlr_utils.write_file(conf.output, "text/Spec", dp_som6_1,
                              output_ext="pbml",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
                              data_ext=conf.ext_replacement,
                              path_replacement=conf.path_replacement,
                              message=write_message)
-        del dp_som5_1
+        del dp_som6_1
 
     if conf.dump_wave_r:
-        dp_som5_1 = dr_lib.create_param_vs_Y(dp_som5, "radius", "param_array",
+        dp_som6_1 = dr_lib.create_param_vs_Y(dp_som6, "radius", "param_array",
                                    conf.r_bins.toNessiList(),
                                    rebin_axis=conf.lambda_bins.toNessiList(),
                                    y_label="counts",
@@ -451,7 +479,7 @@ def process_sas_data(datalist, conf, **kwargs):
                                    x_labels=["Radius", "Wavelength"], 
                                    x_units=["m", "Angstrom"])
 
-        hlr_utils.write_file(conf.output, "text/Dave2d", dp_som5_1,
+        hlr_utils.write_file(conf.output, "text/Dave2d", dp_som6_1,
                              output_ext="lvr",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
@@ -459,10 +487,10 @@ def process_sas_data(datalist, conf, **kwargs):
                              path_replacement=conf.path_replacement,
                              message="wavelength vs radius information")
 
-        del dp_som5_1
+        del dp_som6_1
 
     if conf.dump_wave_theta:
-        dp_som5_1 = dr_lib.create_param_vs_Y(dp_som5, "polar", "param_array",
+        dp_som6_1 = dr_lib.create_param_vs_Y(dp_som6, "polar", "param_array",
                                    conf.theta_bins.toNessiList(),
                                    rebin_axis=conf.lambda_bins.toNessiList(),
                                    y_label="counts",
@@ -470,7 +498,7 @@ def process_sas_data(datalist, conf, **kwargs):
                                    x_labels=["Polar Angle", "Wavelength"], 
                                    x_units=["rads", "Angstrom"])
 
-        hlr_utils.write_file(conf.output, "text/Dave2d", dp_som5_1,
+        hlr_utils.write_file(conf.output, "text/Dave2d", dp_som6_1,
                              output_ext="lvt",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
@@ -478,7 +506,7 @@ def process_sas_data(datalist, conf, **kwargs):
                              path_replacement=conf.path_replacement,
                              message="wavelength vs polar angle information") 
 
-        del dp_som5_1
+        del dp_som6_1
 
     # Step 8: Rebin transmission monitor axis onto detector pixel axis
     if trans_data is not None:
@@ -497,7 +525,7 @@ def process_sas_data(datalist, conf, **kwargs):
     if t is not None:
         t.getTime(False)
 
-    dtm_som4 = dr_lib.rebin_monitor(dtm_som3, dp_som5, rtype="frac")
+    dtm_som4 = dr_lib.rebin_monitor(dtm_som3, dp_som6, rtype="frac")
 
     if t is not None and dtm_som3 is not None:
         t.getTime(msg="After rebinning transmission monitor ")
@@ -517,16 +545,16 @@ def process_sas_data(datalist, conf, **kwargs):
         # tranmission monitor. Therefore, we'll fake it by setting the
         # y information from the sample data into the transmission
         if trans_data is not None:
-            dtm_som4.setYLabel(dp_som5.getYLabel())
-            dtm_som4.setYUnits(dp_som5.getYUnits())
-        dp_som6 = common_lib.div_ncerr(dp_som5, dtm_som4)
+            dtm_som4.setYLabel(dp_som6.getYLabel())
+            dtm_som4.setYUnits(dp_som6.getYUnits())
+        dp_som7 = common_lib.div_ncerr(dp_som6, dtm_som4)
     else:
-        dp_som6 = dp_som5
+        dp_som7 = dp_som6
 
     if t is not None and dtm_som4 is not None:
         t.getTime(msg="After normalizing data by transmission monitor ")
 
-    del dp_som5
+    del dp_som6
 
     # Step 10: Convert wavelength to Q for data
     if conf.verbose:
@@ -535,12 +563,12 @@ def process_sas_data(datalist, conf, **kwargs):
     if t is not None:
         t.getTime(False)
 
-    dp_som7 = common_lib.wavelength_to_scalar_Q(dp_som6)
+    dp_som8 = common_lib.wavelength_to_scalar_Q(dp_som7)
 
     if t is not None:
         t.getTime(msg="After converting wavelength to scalar Q ")
         
-    del dp_som6
+    del dp_som7
 
     # Step 11: Apply SAS correction factor to data
     if conf.verbose:
@@ -549,9 +577,9 @@ def process_sas_data(datalist, conf, **kwargs):
     if t is not None:
         t.getTime(False)
 
-    dp_som8 = dr_lib.apply_sas_correct(dp_som7)
+    dp_som9 = dr_lib.apply_sas_correct(dp_som8)
 
     if t is not None:
         t.getTime(msg="After applying geometrical correction ")
  
-    return dp_som8
+    return dp_som9
