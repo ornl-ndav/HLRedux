@@ -272,6 +272,15 @@ if __name__ == "__main__":
     parser.set_defaults(tmon_path="/entry/monitor2,1")
     
     # Add sas_reduction specific options
+    parser.add_option("", "--det-effc", action="store_true", dest="det_effc",
+                      help="Flag for turning on the detector efficiency "\
+                      +"correction.")
+    parser.set_defaults(det_effc=False)
+
+    parser.add_option("", "--det-eff-const", dest="det_eff_const",
+                      help="Specify the detector efficiency constant "\
+                      +"(1/Angstroms)")
+    
     parser.add_option("", "--timing", action="store_true", dest="timing",
                       help="Flag to turn on timing of code")
     parser.set_defaults(timing=False)
@@ -283,6 +292,16 @@ if __name__ == "__main__":
 
     # Call the configuration setter for SansOptions
     hlr_utils.SansConfiguration(parser, configure, options, args)
+
+    # Set det_effc flag
+    if hlr_utils.cli_provide_override(configure, "det_effc", "--det-effc"):
+        configure.det_effc = options.det_effc
+
+    # Set the detector efficiency constant
+    if hlr_utils.cli_provide_override(configure, "det_eff_const",
+                                      "--det-eff-const"):
+        configure.det_eff_const = hlr_utils.DrParameterFromString(\
+            options.det_eff_const, True)    
 
     # Set timer object if timing option is used
     if options.timing:
