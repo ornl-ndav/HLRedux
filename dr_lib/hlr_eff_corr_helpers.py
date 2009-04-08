@@ -22,36 +22,25 @@
 
 # $Id$
 
-def merge_roi_files(filelist):
+def subexp_eff(attenc, axis):
     """
-    This function takes a set of ROI files and combines them into a new ROI
-    file.
+    This function calculates an efficiency from a subtracted exponential of the
+    form: 1 - exp(-|k| * x).
 
-    @param filelist: The set of ROI file names.
-    @type filelist: C{list}
+    @param attenc: The attentuation constant k in the exponential.
+    @type attenc: L{hlr_utils.DrParameter}
+
+    @param axis: The axis from which to calculate the efficiency
+    @type axis: C{nessi_list.NessiList}
 
 
-    @return: The filename of the combined ROI
-    @rtype: C{string}
+    @return: The calculated efficiency
+    @rtype: C{nessi_list.NessiList}
     """
-    import hlr_utils
-    # Get first set of pixel IDs
-    rfile = open(filelist[0], 'r')
-    roi_set = set([rid.strip() for rid in rfile])
-    rfile.close()
-
-    # Merge each of the other sets of pixel IDs
-    for filename in filelist[1:]:
-        rfile = open(filename, 'r')
-        for rid in rfile:
-            roi_set.add(rid.strip())
-        rfile.close()
-
-    # Create new ROI file from combined information
-    ofilename = hlr_utils.add_tag(filelist[0], "comb")
-    ofile = open(ofilename, 'w')
-    for rid in roi_set:
-        print >> ofile, rid
-    ofile.close()
+    import array_manip
+    import phys_corr
+    import utils
     
-    return ofilename
+    axis_bc = utils.calc_bin_centers(axis)
+    temp = phys_corr.exp_detector_eff(axis_bc[0], 1.0, 0.0, attenc.getValue())
+    return array_manip.sub_ncerr(1.0, 0.0, temp[0], temp[1])

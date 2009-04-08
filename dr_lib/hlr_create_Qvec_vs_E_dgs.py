@@ -139,6 +139,10 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
     V2 = {}
     V3 = {}
     V4 = {}
+    # Output positions for Qx, Qy, Qz coordinates
+    X = 0
+    Y = 2
+    Z = 4
 
     if t is not None:
         t.getTime(False)
@@ -154,68 +158,54 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
         CNT[str(map_so.id)] = yval
         ERR2[str(map_so.id)] = yerr2
 
-        polar = hlr_utils.get_parameter("polar", map_so, inst)
-        azi = hlr_utils.get_parameter("azimuthal", map_so, inst)
-
         cangles = corner_angles[str(map_so.id)]
 
-        (Qx1, Qx1_err2,
-         Qy1, Qy1_err2,
-         Qz1, Qz1_err2) = axis_manip.init_scatt_wavevector_to_Q(k_i[0], k_i[1],
-                                                       k_f[0], k_f[1],
-                                                       cangles.getAzimuthal(0),
-                                                       0.0,
-                                                       cangles.getPolar(0),
-                                                       0.0)
+        Q1 = axis_manip.init_scatt_wavevector_to_Q(k_i[0], k_i[1],
+                                                   k_f[0], k_f[1],
+                                                   cangles.getAzimuthal(0),
+                                                   0.0,
+                                                   cangles.getPolar(0),
+                                                   0.0)
         V1[str(map_so.id)] = {}
-        V1[str(map_so.id)]["x"] = Qx1
-        V1[str(map_so.id)]["y"] = Qy1
-        V1[str(map_so.id)]["z"] = Qz1
+        V1[str(map_so.id)]["x"] = Q1[X]
+        V1[str(map_so.id)]["y"] = Q1[Y]
+        V1[str(map_so.id)]["z"] = Q1[Z]
         
 
-        (Qx2, Qx2_err2,
-         Qy2, Qy2_err2,
-         Qz2, Qz2_err2) = axis_manip.init_scatt_wavevector_to_Q(k_i[0], k_i[1],
-                                                       k_f[0], k_f[1],
-                                                       cangles.getAzimuthal(1),
-                                                       0.0,
-                                                       cangles.getPolar(1),
-                                                       0.0)
+        Q2 = axis_manip.init_scatt_wavevector_to_Q(k_i[0], k_i[1],
+                                                   k_f[0], k_f[1],
+                                                   cangles.getAzimuthal(1),
+                                                   0.0,
+                                                   cangles.getPolar(1),
+                                                   0.0)
 
         V2[str(map_so.id)] = {}
-        V2[str(map_so.id)]["x"] = Qx2
-        V2[str(map_so.id)]["y"] = Qy2
-        V2[str(map_so.id)]["z"] = Qz2
+        V2[str(map_so.id)]["x"] = Q2[X]
+        V2[str(map_so.id)]["y"] = Q2[Y]
+        V2[str(map_so.id)]["z"] = Q2[Z]
         
-        (Qx3, Qx3_err2,
-         Qy3, Qy3_err2,
-         Qz3, Qz3_err2) = axis_manip.init_scatt_wavevector_to_Q(k_i[0], k_i[1],
-                                                       k_f[0], k_f[1],
-                                                       cangles.getAzimuthal(2),
-                                                       0.0,
-                                                       cangles.getPolar(2),
-                                                       0.0)
+        Q3 = axis_manip.init_scatt_wavevector_to_Q(k_i[0], k_i[1],
+                                                   k_f[0], k_f[1],
+                                                   cangles.getAzimuthal(2),
+                                                   0.0,
+                                                   cangles.getPolar(2),
+                                                   0.0)
         V3[str(map_so.id)] = {}
-        V3[str(map_so.id)]["x"] = Qx3
-        V3[str(map_so.id)]["y"] = Qy3
-        V3[str(map_so.id)]["z"] = Qz3
+        V3[str(map_so.id)]["x"] = Q3[X]
+        V3[str(map_so.id)]["y"] = Q3[Y]
+        V3[str(map_so.id)]["z"] = Q3[Z]
         
-        (Qx4, Qx4_err2,
-         Qy4, Qy4_err2,
-         Qz4, Qz4_err2) = axis_manip.init_scatt_wavevector_to_Q(k_i[0], k_i[1],
-                                                       k_f[0], k_f[1],
-                                                       cangles.getAzimuthal(3),
-                                                       0.0,
-                                                       cangles.getPolar(3),
-                                                       0.0)
+        Q4 = axis_manip.init_scatt_wavevector_to_Q(k_i[0], k_i[1],
+                                                   k_f[0], k_f[1],
+                                                   cangles.getAzimuthal(3),
+                                                   0.0,
+                                                   cangles.getPolar(3),
+                                                   0.0)
 
         V4[str(map_so.id)] = {}
-        V4[str(map_so.id)]["x"] = Qx4
-        V4[str(map_so.id)]["y"] = Qy4
-        V4[str(map_so.id)]["z"] = Qz4
-
-        del Qx1_err2, Qy1_err2, Qz1_err2, Qx2_err2, Qy2_err2, Qz2_err2
-        del Qx3_err2, Qy3_err2, Qz3_err2, Qx4_err2, Qy4_err2, Qz4_err2
+        V4[str(map_so.id)]["x"] = Q4[X]
+        V4[str(map_so.id)]["y"] = Q4[Y]
+        V4[str(map_so.id)]["z"] = Q4[Z]
 
     if t is not None:
         t.getTime(msg="After calculating verticies ")
@@ -271,21 +261,21 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
         if make_fixed:
             ofile1 = open(os.path.join(topdir, "%s%04d.in" % (filehead1, k)),
                           "w")
-        for id in CNT:
+        for pid in CNT:
             result = []
             result.append(str(k))
             result.append(str(E_t[k]))
             result.append(str(E_t[k+1]))
-            result.append(str(CNT[id][k]))
-            result.append(str(ERR2[id][k]))
-            __get_coords(V1, id, k, result)
-            __get_coords(V2, id, k, result)
-            __get_coords(V3, id, k, result)
-            __get_coords(V4, id, k, result)
-            __get_coords(V1, id, k+1, result)
-            __get_coords(V2, id, k+1, result)
-            __get_coords(V3, id, k+1, result)
-            __get_coords(V4, id, k+1, result)
+            result.append(str(CNT[pid][k]))
+            result.append(str(ERR2[pid][k]))
+            __get_coords(V1, pid, k, result)
+            __get_coords(V2, pid, k, result)
+            __get_coords(V3, pid, k, result)
+            __get_coords(V4, pid, k, result)
+            __get_coords(V1, pid, k+1, result)
+            __get_coords(V2, pid, k+1, result)
+            __get_coords(V3, pid, k+1, result)
+            __get_coords(V4, pid, k+1, result)
 
 
             print >> ofile, " ".join(result)
@@ -295,9 +285,9 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
                 result1.append(str(k))
                 result1.append(str(E_t[k]))
                 result1.append(str(E_t[k+1]))
-                result1.append(str(CNT[id][k]))
-                result1.append(str(ERR2[id][k]))
-                result1.extend([str(x) for x in fixed_grid[id]])
+                result1.append(str(CNT[pid][k]))
+                result1.append(str(ERR2[pid][k]))
+                result1.extend([str(x) for x in fixed_grid[pid]])
                 print >> ofile1, " ".join(result1)
 
         ofile.close()
@@ -307,10 +297,10 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
     if t is not None:
         t.getTime(msg="After creating messages ")
             
-def __get_coords(coords, id, index, output):
-    output.append(str(coords[id]["x"][index]))
-    output.append(str(coords[id]["y"][index]))
-    output.append(str(coords[id]["z"][index]))
+def __get_coords(coords, pid, index, output):
+    output.append(str(coords[pid]["x"][index]))
+    output.append(str(coords[pid]["y"][index]))
+    output.append(str(coords[pid]["z"][index]))
 
 def __calc_xyz(r, theta, phi):
     import math

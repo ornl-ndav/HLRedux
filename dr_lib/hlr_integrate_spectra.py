@@ -86,12 +86,6 @@ def integrate_spectra(obj, **kwargs):
     o_descr = hlr_utils.get_descr(obj)
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
 
-    # Create temporary object to access axis
-    if o_descr == "SOM":
-        aobj = obj[0]
-    elif o_descr == "SO":
-        aobj = obj
-
     # Check for axis_pos keyword argument
     try:
         axis_pos = kwargs["axis_pos"]

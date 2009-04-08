@@ -197,16 +197,16 @@ if __name__ == "__main__":
     print "********** SOM2"
     print "* ", som2[0]
 
-    print "********** integrate_axis"
-    print "* som        :", integrate_axis(som1)
-    print "* som        :", integrate_axis(som2)
-    print "* som (avg)  :", integrate_axis(som2, avg=True)
-    print "* som [2,4]  :", integrate_axis(som2, start=2, end=4)
-    print "* som  (x)   :", integrate_axis(som2, axis="x")
-    print "* som (width):", integrate_axis(som1, width=True)
-    print "* so         :", integrate_axis(som1[0])
-    print "* so  [0,3]  :", integrate_axis(som1[0], start=0, end=3)
-    print "* so (width) :", integrate_axis(som1[0], width=True)
+    print "********** integrate_axis_py"
+    print "* som        :", integrate_axis_py(som1)
+    print "* som        :", integrate_axis_py(som2)
+    print "* som (avg)  :", integrate_axis_py(som2, avg=True)
+    print "* som [2,4]  :", integrate_axis_py(som2, start=2, end=4)
+    print "* som  (x)   :", integrate_axis_py(som2, axis_py="x")
+    print "* som (width):", integrate_axis_py(som1, width=True)
+    print "* so         :", integrate_axis_py(som1[0])
+    print "* so  [0,3]  :", integrate_axis_py(som1[0], start=0, end=3)
+    print "* so (width) :", integrate_axis_py(som1[0], width=True)
     print
     
     # Test the NaNs
@@ -215,5 +215,5 @@ if __name__ == "__main__":
     print "********** SOM2"
     print "* ", som2[0]
     
-    print "* som        :", integrate_axis(som2)
-    print "* som (width) :", integrate_axis(som2, width=True)
+    print "* som         :", integrate_axis_py(som2)
+    print "* som (width) :", integrate_axis_py(som2, width=True)
