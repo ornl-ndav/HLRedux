@@ -50,6 +50,7 @@ from hlr_determine_time_indep_bkg import *
 from hlr_determine_ref_background import *
 from hlr_dimensionless_mon import *
 from hlr_E_vs_Q_helpers import *
+from hlr_eff_corr_helpers import *
 from hlr_energy_transfer import *
 from hlr_feff_correct_mon import *
 from hlr_filter_normalization import *
