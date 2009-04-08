@@ -22,7 +22,7 @@
 
 # $Id$
 
-def create_det_eff(obj):
+def create_det_eff(obj, **kwargs):
     """
     This function creates detector efficiency spectra based on the wavelength
     spectra from the given object. The efficiency spectra are created based on
@@ -32,6 +32,14 @@ def create_det_eff(obj):
     @param obj: Object containing spectra that will create the detector
                 efficiency spectra.
     @type obj: C{SOM.SOM} or C{SOM.SO}
+    
+    @param kwargs: A list of keyword arguments that the function accepts:
+
+    @keyword inst_name: The short name of an instrument.
+    @type inst_name: C{string}
+    
+    @keyword eff_const: Use this provided effieciency constant.
+    @type eff_const: L{hlr_utils.DrParameter}
 
 
     @return: Object containing the detector efficiency spectra
@@ -43,6 +51,10 @@ def create_det_eff(obj):
     """
     # import the helper functions
     import hlr_utils
+
+    # Check keywords
+    inst_name = kwargs.get("inst_name")
+    eff_const = kwargs.get("eff_const")
 
     # set up for working through data
     (result, res_descr) = hlr_utils.empty_result(obj)
@@ -61,6 +73,7 @@ def create_det_eff(obj):
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
 
     # iterate through the values
+    import dr_lib
     import phys_corr
     import utils
 
@@ -70,9 +83,16 @@ def create_det_eff(obj):
         map_so = hlr_utils.get_map_so(obj, None, i)
         axis = hlr_utils.get_value(obj, i, o_descr, "x", 0)
 
-        axis_bc = utils.calc_bin_centers(axis)
-
-        (eff, eff_err2) = phys_corr.exp_detector_eff(axis_bc[0], 1.0, 0.0, 1.0)
+        if inst_name is None:
+            axis_bc = utils.calc_bin_centers(axis)
+            (eff, eff_err2) = phys_corr.exp_detector_eff(axis_bc[0], 1.0,
+                                                         0.0, 1.0)
+        else:
+            if inst_name == "SANS":
+                (eff, eff_err2) = dr_lib.subexp_eff(eff_const, axis)
+            else:
+                raise RuntimeError("Do not know how to handle %s instrument" \
+                                   % inst_name)
         
         hlr_utils.result_insert(result, res_descr, (eff, eff_err2), map_so)
     
@@ -80,6 +100,7 @@ def create_det_eff(obj):
 
 if __name__ == "__main__":
     import hlr_test
+    import hlr_utils
 
     som1 = hlr_test.generate_som("histogram", 1, 1)
     som1.setAllAxisUnits(["Angstroms"])
@@ -89,3 +110,6 @@ if __name__ == "__main__":
 
     print "********** create_det_eff"
     print "* som: ", create_det_eff(som1)
+    print "* som: ", create_det_eff(som1, inst_name="SANS",
+                                    eff_const=hlr_utils.DrParameter(0.2477,
+                                                                    0.0))
