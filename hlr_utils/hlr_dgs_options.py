@@ -78,6 +78,14 @@ class DgsOptions(hlr_options.InstOptions):
                         help="Specify a file that contains a list of pixel "\
                         +"ids to be read from the data")
 
+        self.add_option("", "--tof-cut-min", dest="tof_cut_min",
+                        help="Set the minimum TOF channel for spectrum "\
+                        +"cutting")
+
+        self.add_option("", "--tof-cut-max", dest="tof_cut_max",
+                        help="Set the maximum TOF channel for spectrum "\
+                        +"cutting")        
+
         self.add_option("", "--tib-const", dest="tib_const",
                         help="Specify the value and err^2 for a "\
                         +"time-independent background subtraction constant.")
@@ -178,6 +186,16 @@ def DgsConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "roi_file", "--roi-file"):
         configure.roi_file = hlr_utils.determine_files(options.roi_file,
                                                        one_file=True)
+
+    # Set the minimum TOF channel for spectrum cutting
+    if hlr_utils.cli_provide_override(configure, "tof_cut_min",
+                                      "--tof-cut-min"):
+        configure.tof_cut_min = options.tof_cut_min
+
+    # Set the maximum TOF channel for spectrum cutting
+    if hlr_utils.cli_provide_override(configure, "tof_cut_max",
+                                      "--tof-cut-max"):
+        configure.tof_cut_max = options.tof_cut_max        
 
     # Set a time-independent background subtraction constant
     if hlr_utils.cli_provide_override(configure, "tib_const", "--tib-const"):
