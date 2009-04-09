@@ -118,11 +118,16 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
         t.setOldTime(oldtime)
         t.getTime(msg="After reading %s " % dataset_type)
 
-    dp_somA = dr_lib.fix_bin_contents(dp_som0)
+    # Cut the spectra if necessary
+    dp_somA = dr_lib.cut_spectra(dp_som0, conf.tof_cut_min, conf.tof_cut_max)
 
     del dp_som0
 
-    if dp_somA.attr_list.instrument.get_name() != "CNCS":
+    dp_somB = dr_lib.fix_bin_contents(dp_somA)
+
+    del dp_somA
+
+    if dp_somB.attr_list.instrument.get_name() != "CNCS":
 
         if conf.verbose:
             print "Cutting spectrum at minimum TOF"
@@ -146,19 +151,19 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
             # This should actually calculate it, but don't have a way right now
             time_zero_offset = (0.0, 0.0)
 
-        ss_length = dp_somA.attr_list.instrument.get_primary()
+        ss_length = dp_somB.attr_list.instrument.get_primary()
         
         tof_min = (ss_length[0] / initial_velocity[0]) + time_zero_offset[0]
 
         # Cut all spectra a the minimum TOF
-        dp_som1 = dr_lib.cut_spectra(dp_somA, tof_min, None)
+        dp_som1 = dr_lib.cut_spectra(dp_somB, tof_min, None)
 
         if t is not None:
             t.getTime(msg="After cutting spectrum at minimum TOF ")
     else:
-        dp_som1 = dp_somA
+        dp_som1 = dp_somB
 
-    del dp_somA
+    del dp_somB
 
     if dm_som0 is not None:
         dm_som1 = dr_lib.fix_bin_contents(dm_som0)
