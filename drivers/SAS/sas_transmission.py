@@ -194,6 +194,10 @@ if __name__ == "__main__":
     if configure.lambda_bins is None:
         parser.error("Please specify the final wavelength axis!")
 
+    # Turn off detector efficiency
+    configure.det_effc = False
+    configure.det_eff_const = None
+
     # Set timer object if timing option is used
     if options.timing:
         import sns_timing

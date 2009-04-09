@@ -81,7 +81,6 @@ def add_files_dm(filelist, **kwargs):
 
     import common_lib
     import DST
-    import hlr_utils
     
     # Parse keywords
     try:
@@ -142,7 +141,7 @@ def add_files_dm(filelist, **kwargs):
             sys.exit(-1)
 
         if timer is not None:
-                timer.getTime(msg="After parsing file")
+            timer.getTime(msg="After parsing file")
 
         if verbose:
             print "Reading data file %d" % counter

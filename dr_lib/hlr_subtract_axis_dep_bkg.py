@@ -39,7 +39,7 @@ def subtract_axis_dep_bkg(obj, coeffs, **kwargs):
 
     @keyword old_scale: The scale factor used to obtain the coefficients used
                         in this function.
-    @typ old_scale: C{float}
+    @type old_scale: C{float}
 
     @keyword new_scale: The scale factor for the current data set from which
                         the axis dependent background will be subtracted from.

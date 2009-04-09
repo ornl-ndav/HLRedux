@@ -227,7 +227,7 @@ def run(config, tim=None):
 
     del d_som3
 
-    # Rebin energy transfer spectra
+    # Step 22: Rebin energy transfer spectra
     if config.verbose:
         print "Rebinning to final energy transfer axis"
 
@@ -281,6 +281,7 @@ def run(config, tim=None):
                              verbose=config.verbose,
                              message="SPE information")
 
+    # Steps 23-34: Create S(Q, E) distribution
     if config.verbose:
         print "Creating S(Q, E)"
 
@@ -310,7 +311,7 @@ def run(config, tim=None):
     del d_som5_2
 
     if config.qmesh:
-        # Create Qvec vs E spectrum
+        # Steps 23-27,35-36: Create S(Qvec, E) distribution
         if config.verbose:
             print "Creating S(Qvec, E)"
 
