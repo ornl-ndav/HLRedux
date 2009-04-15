@@ -22,6 +22,8 @@
 
 # $Id$
 
+import hlr_utils
+
 def create_det_eff(obj, **kwargs):
     """
     This function creates detector efficiency spectra based on the wavelength
@@ -49,9 +51,6 @@ def create_det_eff(obj, **kwargs):
     @raise TypeError: Incoming object is not a C{SOM} or a C{SO}
     @raise RuntimeError: The C{SOM} x-axis units are not I{Angstroms}
     """
-    # import the helper functions
-    import hlr_utils
-
     # Check keywords
     inst_name = kwargs.get("inst_name")
     eff_const = kwargs.get("eff_const")
@@ -100,7 +99,6 @@ def create_det_eff(obj, **kwargs):
 
 if __name__ == "__main__":
     import hlr_test
-    import hlr_utils
 
     som1 = hlr_test.generate_som("histogram", 1, 1)
     som1.setAllAxisUnits(["Angstroms"])
