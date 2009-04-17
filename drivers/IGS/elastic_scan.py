@@ -147,7 +147,6 @@ if __name__ == "__main__":
     # Remove unneeded options
     parser.remove_option("--inst")
     parser.remove_option("--facility")
-    parser.remove_option("--config")
 
     (options, args) = parser.parse_args()
 
