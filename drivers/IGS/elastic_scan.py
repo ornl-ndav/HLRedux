@@ -104,6 +104,16 @@ def run(config):
                          path_replacement=config.path_replacement,
                          message="combined file")
 
+    result.attr_list["config"] = config
+
+    hlr_utils.write_file(config.output, "text/rmd", result,
+                         output_ext="rmd",
+                         data_ext=config.ext_replacement,
+                         path_replacement=config.path_replacement,
+                         verbose=config.verbose,
+                         message="metadata")
+
+
 if __name__ == "__main__":
     import dr_lib
     import hlr_utils
