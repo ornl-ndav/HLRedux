@@ -162,10 +162,14 @@ if __name__ == "__main__":
                      +"flag.")
 
     # Set the integration range option
-    configure.int_range = options.int_range
+    if options.int_range is not None:
+        configure.int_range = options.int_range
 
     # Set the temperature list
-    configure.temps = [float(T) for T in options.temps.split(',')]
+    try:
+        configure.temps = [float(T) for T in options.temps.split(',')]
+    except AttributeError:
+        configure.temps = [float(T) for T in configure.temps]
 
     # run the program
     run(configure)
