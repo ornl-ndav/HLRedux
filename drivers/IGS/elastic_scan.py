@@ -63,7 +63,7 @@ def run(config):
         for i in xrange(len_Q):
             int_so.y = som[0].y[i*len_E:(i+1)*len_E]
             int_so.var_y = som[0].var_y[i*len_E:(i+1)*len_E]
-            value = dr_lib.integrate_axis(int_so, start=lo_val, end=hi_val)
+            value = dr_lib.integrate_axis_py(int_so, start=lo_val, end=hi_val)
             scan.append(value[0])
             scan_err2.append(value[1])
 
