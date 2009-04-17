@@ -134,7 +134,7 @@ if __name__ == "__main__":
                       nargs=2, help="Specify the energy integration range in "\
                       +"ueV.")
 
-    parser.add_option("", "--temps=", dest="temps",
+    parser.add_option("", "--temps", dest="temps",
                       help="Specify the temperatures (in K) for the "\
                       +"corresponding list of data files in a "\
                       +"comma-delimited list. NOTE: No checks "\
