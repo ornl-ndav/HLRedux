@@ -1,11 +1,15 @@
 #!/usr/bin/env python
 
-def run(config):
+def run(config, tim=None):
     """
     This method is where the processing is done.
 
     @param config: Object containing the driver configuration information.
     @type config: L{hlr_utils.Configure}
+
+    @param tim: (OPTIONAL) Object that will allow the method to perform
+                           timing evaluations.
+    @type tim: C{sns_time.DiffTime}
     """
     if config.data is None:
         raise RuntimeError("Need to pass a data filename to the driver "\
@@ -20,6 +24,10 @@ def run(config):
     import SOM
     
     import bisect
+
+    if tim is not None:
+        tim.getTime(False)
+        old_time = tim.getOldTime()
 
     is_init = False
     Q_axis = None
@@ -113,6 +121,9 @@ def run(config):
                          verbose=config.verbose,
                          message="metadata")
 
+    if tim is not None:
+        tim.setOldTime(old_time)
+        tim.getTime(msg="Total Running Time")
 
 if __name__ == "__main__":
     import dr_lib
@@ -140,6 +151,10 @@ if __name__ == "__main__":
                       +"comma-delimited list. NOTE: No checks "\
                       +"can be made, so you must make sure the order is "\
                       +"correct.")
+
+    parser.add_option("", "--timing", action="store_true", dest="timing",
+                      help="Flag to turn on timing of code")
+    parser.set_defaults(timing=False)
 
     # Change help slightly for data option
     parser.get_option("--data").help = "Specify the DAVE 2D ASCII files."
@@ -171,5 +186,12 @@ if __name__ == "__main__":
     except AttributeError:
         configure.temps = [float(T) for T in configure.temps]
 
+    # Set timer object if timing option is used
+    if options.timing:
+        import sns_timing
+        timer = sns_timing.DiffTime()
+    else:
+        timer = None
+
     # run the program
-    run(configure)
+    run(configure, timer)
