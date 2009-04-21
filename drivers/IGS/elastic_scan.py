@@ -172,10 +172,16 @@ if __name__ == "__main__":
     hlr_utils.BasicConfiguration(parser, configure, options, args)
 
     # MUST OVERRIDE THE DEFAULT OUTPUT FILE NAME
-    if options.output is None:
+    if options.output is None and options.config is None:
         parser.error("Must specify an output file via the -o or --output "\
                      +"flag.")
 
+    try:
+        if '\n' in configure.path_replacement:
+            configure.path_replacement = ""
+    except TypeError:
+        pass
+    
     # Set the integration range option
     if options.int_range is not None:
         configure.int_range = options.int_range
