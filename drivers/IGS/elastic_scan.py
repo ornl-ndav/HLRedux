@@ -1,11 +1,15 @@
 #!/usr/bin/env python
 
-def run(config):
+def run(config, tim=None):
     """
     This method is where the processing is done.
 
     @param config: Object containing the driver configuration information.
     @type config: L{hlr_utils.Configure}
+
+    @param tim: (OPTIONAL) Object that will allow the method to perform
+                           timing evaluations.
+    @type tim: C{sns_time.DiffTime}
     """
     if config.data is None:
         raise RuntimeError("Need to pass a data filename to the driver "\
@@ -20,6 +24,10 @@ def run(config):
     import SOM
     
     import bisect
+
+    if tim is not None:
+        tim.getTime(False)
+        old_time = tim.getOldTime()
 
     is_init = False
     Q_axis = None
@@ -63,7 +71,7 @@ def run(config):
         for i in xrange(len_Q):
             int_so.y = som[0].y[i*len_E:(i+1)*len_E]
             int_so.var_y = som[0].var_y[i*len_E:(i+1)*len_E]
-            value = dr_lib.integrate_axis(int_so, start=lo_val, end=hi_val)
+            value = dr_lib.integrate_axis_py(int_so, start=lo_val, end=hi_val)
             scan.append(value[0])
             scan_err2.append(value[1])
 
@@ -104,6 +112,19 @@ def run(config):
                          path_replacement=config.path_replacement,
                          message="combined file")
 
+    result.attr_list["config"] = config
+
+    hlr_utils.write_file(config.output, "text/rmd", result,
+                         output_ext="rmd",
+                         data_ext=config.ext_replacement,
+                         path_replacement=config.path_replacement,
+                         verbose=config.verbose,
+                         message="metadata")
+
+    if tim is not None:
+        tim.setOldTime(old_time)
+        tim.getTime(msg="Total Running Time")
+
 if __name__ == "__main__":
     import dr_lib
     import hlr_utils
@@ -124,12 +145,16 @@ if __name__ == "__main__":
                       nargs=2, help="Specify the energy integration range in "\
                       +"ueV.")
 
-    parser.add_option("", "--temps=", dest="temps",
+    parser.add_option("", "--temps", dest="temps",
                       help="Specify the temperatures (in K) for the "\
                       +"corresponding list of data files in a "\
                       +"comma-delimited list. NOTE: No checks "\
                       +"can be made, so you must make sure the order is "\
                       +"correct.")
+
+    parser.add_option("", "--timing", action="store_true", dest="timing",
+                      help="Flag to turn on timing of code")
+    parser.set_defaults(timing=False)
 
     # Change help slightly for data option
     parser.get_option("--data").help = "Specify the DAVE 2D ASCII files."
@@ -137,7 +162,6 @@ if __name__ == "__main__":
     # Remove unneeded options
     parser.remove_option("--inst")
     parser.remove_option("--facility")
-    parser.remove_option("--config")
 
     (options, args) = parser.parse_args()
 
@@ -148,15 +172,32 @@ if __name__ == "__main__":
     hlr_utils.BasicConfiguration(parser, configure, options, args)
 
     # MUST OVERRIDE THE DEFAULT OUTPUT FILE NAME
-    if options.output is None:
+    if options.output is None and options.config is None:
         parser.error("Must specify an output file via the -o or --output "\
                      +"flag.")
 
+    try:
+        if '\n' in configure.path_replacement:
+            configure.path_replacement = ""
+    except TypeError:
+        pass
+    
     # Set the integration range option
-    configure.int_range = options.int_range
+    if options.int_range is not None:
+        configure.int_range = options.int_range
 
     # Set the temperature list
-    configure.temps = [float(T) for T in options.temps.split(',')]
+    try:
+        configure.temps = [float(T) for T in options.temps.split(',')]
+    except AttributeError:
+        configure.temps = [float(T) for T in configure.temps]
+
+    # Set timer object if timing option is used
+    if options.timing:
+        import sns_timing
+        timer = sns_timing.DiffTime()
+    else:
+        timer = None
 
     # run the program
-    run(configure)
+    run(configure, timer)

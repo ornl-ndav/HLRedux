@@ -203,6 +203,8 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
         dm_som2 = dm_som1
 
     del dm_som1
+
+    tib_norm_const = None
     
     # Step 4: Divide data set by summed monitor spectrum
     if dm_som2 is not None:
@@ -214,6 +216,8 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
 
         dp_som2 = common_lib.div_ncerr(dp_som1, dm_som2, length_one_som=True)
 
+        tib_norm_const = dm_som2[0].y
+
         if t is not None:
             t.getTime(msg="After normalizing %s by monitor sum" % dataset_type)
 
@@ -223,6 +227,7 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
 
         pc_tag = dataset_type+"-proton_charge"
         pc = dp_som1.attr_list[pc_tag]
+        tib_norm_const = pc.getValue()
 
         if t is not None:
             t.getTime(False)
@@ -276,10 +281,29 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
         if conf.verbose:
             print "Subtracting TIB constant from %s" % dataset_type
 
+        # Normalize the TIB constant by dividing by the current normalization
+        # the duration (if necessary) and the conversion from seconds to
+        # microseconds
+        tib_c = tib_const.toValErrTuple()
+
+        conv_sec_to_usec = 1.0e-6
+
+        if tib_norm_const is None:
+            tib_norm_const = 1
+            duration = 1
+        else:
+            duration_tag = dataset_type+"-duration"
+            duration = dp_som2.attr_list[duration_tag].getValue()
+
+        norm_const = (duration * conv_sec_to_usec) / tib_norm_const
+
+        tib_val = tib_c[0] * norm_const
+        tib_err2 = tib_c[1] * (norm_const * norm_const)
+
         if t is not None:
             t.getTime(False)
   
-        dp_som3 = common_lib.sub_ncerr(dp_som2, tib_const.toValErrTuple())
+        dp_som3 = common_lib.sub_ncerr(dp_som2, (tib_val, tib_err2))
 
         if t is not None:
             t.getTime(msg="After subtracting TIB constant from %s" \
