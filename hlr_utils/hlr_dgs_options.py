@@ -88,7 +88,8 @@ class DgsOptions(hlr_options.InstOptions):
 
         self.add_option("", "--tib-const", dest="tib_const",
                         help="Specify the value and err^2 for a "\
-                        +"time-independent background subtraction constant.")
+                        +"time-independent background subtraction constant. "\
+                        +"The constant's units should be counts per second.")
 
         self.add_option("", "--initial-energy", dest="initial_energy",
                         help="Specify the initial energy, err^2 for the "\
