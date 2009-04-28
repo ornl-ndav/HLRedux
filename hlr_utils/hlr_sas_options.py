@@ -108,9 +108,15 @@ class SansOptions(hlr_utils.InstOptions):
                         +"correction.")
         self.set_defaults(det_effc=False)
         
-        self.add_option("", "--det-eff-const", dest="det_eff_const",
-                        help="Specify the detector efficiency constant "\
-                        +"(1/Angstroms)")
+        self.add_option("", "--det-eff-scale-const",
+                        dest="det_eff_sclae_const",
+                        help="Specify the detector efficiency scaling "\
+                        +"constant (unitless)")
+
+        self.add_option("", "--det-eff-atten-const",
+                        dest="det_eff_atten_const",
+                        help="Specify the detector efficiency attenuation "\
+                        +"constant (1/Angstroms)")        
     
         self.add_option("", "--roi-file", dest="roi_file",
                         help="Specify a file that contains a list of pixel "\
@@ -336,11 +342,17 @@ def SansConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "det_effc", "--det-effc"):
         configure.det_effc = options.det_effc
 
-    # Set the detector efficiency constant
-    if hlr_utils.cli_provide_override(configure, "det_eff_const",
-                                      "--det-eff-const"):
-        configure.det_eff_const = hlr_utils.DrParameterFromString(\
-            options.det_eff_const, True)    
+    # Set the detector efficiency scaling constant
+    if hlr_utils.cli_provide_override(configure, "det_eff_scale_const",
+                                      "--det-eff-scale-const"):
+        configure.det_eff_scale_const = hlr_utils.DrParameterFromString(\
+            options.det_eff_scale_const, True)
+
+    # Set the detector efficiency attenuation constant
+    if hlr_utils.cli_provide_override(configure, "det_eff_atten_const",
+                                      "--det-eff-atten-const"):
+        configure.det_eff_atten_const = hlr_utils.DrParameterFromString(\
+            options.det_eff_atten_const, True)        
 
     # Set the ROI file
     if hlr_utils.cli_provide_override(configure, "roi_file", "--roi-file"):
