@@ -109,7 +109,7 @@ class SansOptions(hlr_utils.InstOptions):
         self.set_defaults(det_effc=False)
         
         self.add_option("", "--det-eff-scale-const",
-                        dest="det_eff_sclae_const",
+                        dest="det_eff_scale_const",
                         help="Specify the detector efficiency scaling "\
                         +"constant (unitless)")
 
