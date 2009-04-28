@@ -102,7 +102,16 @@ class SansOptions(hlr_utils.InstOptions):
         self.add_option("", "--mon-eff-const", dest="mon_eff_const",
                         help="Specify the monitor efficiency constant "\
                         +"(Angstroms^-1)")
-
+        
+        self.add_option("", "--det-effc", action="store_true", dest="det_effc",
+                        help="Flag for turning on the detector efficiency "\
+                        +"correction.")
+        self.set_defaults(det_effc=False)
+        
+        self.add_option("", "--det-eff-const", dest="det_eff_const",
+                        help="Specify the detector efficiency constant "\
+                        +"(1/Angstroms)")
+    
         self.add_option("", "--roi-file", dest="roi_file",
                         help="Specify a file that contains a list of pixel "\
                         +"ids to be read from the data")
@@ -322,6 +331,16 @@ def SansConfiguration(parser, configure, options, args):
                                       "--mon-eff-const"):
         configure.mon_eff_const = hlr_utils.DrParameterFromString(\
             options.mon_eff_const, True)
+
+    # Set det_effc flag
+    if hlr_utils.cli_provide_override(configure, "det_effc", "--det-effc"):
+        configure.det_effc = options.det_effc
+
+    # Set the detector efficiency constant
+    if hlr_utils.cli_provide_override(configure, "det_eff_const",
+                                      "--det-eff-const"):
+        configure.det_eff_const = hlr_utils.DrParameterFromString(\
+            options.det_eff_const, True)    
 
     # Set the ROI file
     if hlr_utils.cli_provide_override(configure, "roi_file", "--roi-file"):
