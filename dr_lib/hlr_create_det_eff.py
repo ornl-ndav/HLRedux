@@ -40,8 +40,12 @@ def create_det_eff(obj, **kwargs):
     @keyword inst_name: The short name of an instrument.
     @type inst_name: C{string}
     
-    @keyword eff_const: Use this provided effieciency constant.
-    @type eff_const: L{hlr_utils.DrParameter}
+    @keyword eff_scale_const: Use this provided efficiency scaling constant.
+    @type eff_scale_const: L{hlr_utils.DrParameter}
+
+    @keyword eff_atten_const: Use this provided efficiency attenuation
+                              constant.
+    @type eff_atten_const: L{hlr_utils.DrParameter}    
 
 
     @return: Object containing the detector efficiency spectra
@@ -53,7 +57,8 @@ def create_det_eff(obj, **kwargs):
     """
     # Check keywords
     inst_name = kwargs.get("inst_name")
-    eff_const = kwargs.get("eff_const")
+    eff_scale_const = kwargs.get("eff_scale_const")
+    eff_atten_const = kwargs.get("eff_atten_const")
 
     # set up for working through data
     (result, res_descr) = hlr_utils.empty_result(obj)
@@ -88,7 +93,8 @@ def create_det_eff(obj, **kwargs):
                                                          0.0, 1.0)
         else:
             if inst_name == "SANS":
-                (eff, eff_err2) = dr_lib.subexp_eff(eff_const, axis)
+                (eff, eff_err2) = dr_lib.subexp_eff(eff_atten_const, axis,
+                                                    eff_scale_const)
             else:
                 raise RuntimeError("Do not know how to handle %s instrument" \
                                    % inst_name)
