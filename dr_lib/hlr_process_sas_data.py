@@ -392,7 +392,8 @@ def process_sas_data(datalist, conf, **kwargs):
             t.getTime(False)
 
         det_eff = dr_lib.create_det_eff(dp_som4, inst_name=conf.inst,
-                                        eff_const=conf.det_eff_const)
+                                      eff_scale_const=conf.det_eff_scale_const,
+                                      eff_atten_const=conf.det_eff_atten_const)
 
         if t is not None:
             t.getTime(msg="After calculating detector efficiency")

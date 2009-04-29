@@ -22,10 +22,10 @@
 
 # $Id$
 
-def subexp_eff(attenc, axis):
+def subexp_eff(attenc, axis, scalec=None):
     """
     This function calculates an efficiency from a subtracted exponential of the
-    form: 1 - exp(-|k| * x).
+    form: c(1 - exp(-|k| * x)).
 
     @param attenc: The attentuation constant k in the exponential.
     @type attenc: L{hlr_utils.DrParameter}
@@ -33,6 +33,10 @@ def subexp_eff(attenc, axis):
     @param axis: The axis from which to calculate the efficiency
     @type axis: C{nessi_list.NessiList}
 
+    @param scalec: The scaling constant c applied to the subtracted
+                   exponential.
+    @type scalec: L{hlr_utils.DrParameter}
+    
 
     @return: The calculated efficiency
     @rtype: C{nessi_list.NessiList}
@@ -40,7 +44,13 @@ def subexp_eff(attenc, axis):
     import array_manip
     import phys_corr
     import utils
+
+    if scalec is None:
+        import hlr_utils
+        scalec = hlr_utils.DrParameter(1.0, 0.0)
     
     axis_bc = utils.calc_bin_centers(axis)
-    temp = phys_corr.exp_detector_eff(axis_bc[0], 1.0, 0.0, attenc.getValue())
-    return array_manip.sub_ncerr(1.0, 0.0, temp[0], temp[1])
+    temp = phys_corr.exp_detector_eff(axis_bc[0], scalec.getValue(),
+                                      scalec.getError(), attenc.getValue())
+    return array_manip.sub_ncerr(scalec.getValue(), scalec.getError(),
+                                 temp[0], temp[1])
