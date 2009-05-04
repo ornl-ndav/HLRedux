@@ -23,11 +23,12 @@
 # $Id$
 
 """
-This program performs steps 1-3,5-7 outlined in B{Section 2.5.1:
+This program performs steps 1,6-7 outlined in B{Section 2.5.1:
 Pixel-by-Pixel Reduction in One Dimension}
 U{http://neutrons.ornl.gov/asg/projects/SCL/reqspec/DR_Lib_RS.doc} on two
 datasets and divides those processed datasets to produce a transmisson file.
-This is done in the absence of transmission monitors.
+This is done in the absence of transmission monitors. If the transmission
+background is not used, the program runs steps 1,3,5-7 and does not divide. 
 """
 def run(config, tim=None):
     """
@@ -63,21 +64,17 @@ def run(config, tim=None):
     else:
         inst_geom_dst = None
 
-    if config.back is None:
-        only_background = True
-        data_type = "data"
-    else:
-        only_background = False
-        data_type = "transmission"
+    only_background = False
+    data_type = "transmission"
         
-    # Perform Steps 1-3,5-7 on sample data
+    # Perform Steps 1,6-7 or 1,3,5-7 on sample data
     d_som1 = dr_lib.process_sas_data(config.data, config, timer=tim,
                                      inst_geom_dst=inst_geom_dst,
                                      dataset_type=data_type,
                                      transmission=True,
                                      get_background=only_background)
 
-    # Perform Steps 1-3,5-7 on background data
+    # Perform Steps 1,6-7 on background data
     if config.back is not None:
         b_som1 = dr_lib.process_sas_data(config.back, config, timer=tim,
                                          inst_geom_dst=inst_geom_dst,
@@ -164,6 +161,7 @@ if __name__ == "__main__":
     parser.remove_option("--dkcur")
     parser.remove_option("--rescale-final")
     parser.remove_option("--bkg-coeff")
+    parser.remove_option("--bkg-scale")
     parser.remove_option("--mom-trans-bins")
     parser.remove_option("--dump-wave-bmnorm")
     parser.remove_option("--dump-frac-rebin")
@@ -194,9 +192,13 @@ if __name__ == "__main__":
     if configure.lambda_bins is None:
         parser.error("Please specify the final wavelength axis!")
 
-    # Turn off detector efficiency
-    configure.det_effc = False
-    configure.det_eff_const = None
+    # Turn off monitor and detector efficiencies if transmission background is
+    # present
+    if configure.back is not None:
+        if configure.mon_effc:
+            configure.mon_effc = False
+        if configure.det_effc:
+            configure.det_effc = False
 
     # Set timer object if timing option is used
     if options.timing:
@@ -204,6 +206,6 @@ if __name__ == "__main__":
         timer = sns_timing.DiffTime()
     else:
         timer = None
-    
+
     # Run the program
     run(configure, timer)
