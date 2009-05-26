@@ -168,10 +168,9 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
                                                           0.0)
 
         # Calculate the area of the E,Q polygons
-        (A, A_err2) = dr_lib.calc_EQ_Jacobian_dgs(E_t[:-1], Q1[X],
-                                                  E_t[:-1], Q2[X],
-                                                  E_t[1:], Q3[X],
-                                                  E_t[1:], Q4[X])
+        (A, A_err2) = utils.calc_eq_jacobian_dgs(E_t[:-1], E_t[:-1], 
+                                                 E_t[1:], E_t[1:],
+                                                 Q1[X], Q2[X], Q3[X], Q4[X])
 
         # Apply the Jacobian: C/dE_t * dE_t / A(EQ) = C/A(EQ)
         (jac_ratio, jac_ratio_err2) = array_manip.div_ncerr(E_t_bw,
