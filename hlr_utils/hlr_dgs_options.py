@@ -91,6 +91,11 @@ class DgsOptions(hlr_options.InstOptions):
                         +"time-independent background subtraction constant. "\
                         +"The constant's units should be counts per second.")
 
+        self.add_option("", "--tib-range", dest="tib_range", type="int",
+                        nargs=2,
+                        help="TOF range for calculating time-independent "\
+                        +"background.")
+
         self.add_option("", "--initial-energy", dest="initial_energy",
                         help="Specify the initial energy, err^2 for the "\
                         +"reduction in units of meV")
@@ -202,6 +207,14 @@ def DgsConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "tib_const", "--tib-const"):
         configure.tib_const = hlr_utils.DrParameterFromString(\
             options.tib_const, True)
+
+    # Set the TOF range for the time-independent background determination
+    if hlr_utils.cli_provide_override(configure, "tib_range", "--tib-range"):
+        configure.tib_range = options.tib_range
+
+    # Stop is both TIB methods are used
+    if configure.tib_const is not None and configure.tib_range is not None:
+        parser.error("Please use either --tib-const or --tib-range")
 
     # Set the initial energy
     if hlr_utils.cli_provide_override(configure, "initial_energy",
