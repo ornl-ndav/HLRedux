@@ -308,6 +308,32 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
         if t is not None:
             t.getTime(msg="After subtracting TIB constant from %s" \
                       % dataset_type)
+    elif conf.tib_range is not None and dkcur1 is None:
+        if conf.verbose:
+            print "Determining TIB constant from %s" % dataset_type
+
+        if t is not None:
+            t.getTime(False)
+
+        TIB = dr_lib.determine_time_indep_bkg(dp_som2, conf.tib_range)
+
+        if t is not None:
+            t.getTime(msg="After determining TIB constant from %s" \
+                      % dataset_type)
+            
+        if conf.verbose:
+            print "Subtracting TIB constant from %s" % dataset_type
+
+        if t is not None:
+            t.getTime(False)
+
+        dp_som3 = common_lib.sub_ncerr(dp_som2, TIB)
+
+        if t is not None:
+            t.getTime(msg="After subtracting TIB constant from %s" \
+                      % dataset_type)
+
+        del TIB
     else:
         dp_som3 = dp_som2
 
