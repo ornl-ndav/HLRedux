@@ -321,6 +321,22 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
         if t is not None:
             t.getTime(msg="After determining TIB constant from %s" \
                       % dataset_type)
+
+        if conf.dump_tib:
+            file_comment = "TIB TOF Range: [%d, %d]" % (conf.tib_range[0],
+                                                        conf.tib_range[1])
+        
+            hlr_utils.write_file(conf.output, "text/num-info", TIB,
+                                 output_ext="tib",
+                                 extra_tag=dataset_type,
+                                 verbose=conf.verbose,
+                                 data_ext=conf.ext_replacement,
+                                 path_replacement=conf.path_replacement,
+                                 message="time-independent background "\
+                                 +"information",
+                                 tag="Average TIB",
+                                 units="counts/usec",
+                                 comments=[file_comment])
             
         if conf.verbose:
             print "Subtracting TIB constant from %s" % dataset_type
