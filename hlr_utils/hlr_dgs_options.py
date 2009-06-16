@@ -158,6 +158,10 @@ class DgsOptions(hlr_options.InstOptions):
                         +"pixels. Creates a *.norm file.")
         self.set_defaults(dump_norm=False)
 
+        self.add_option("", "--dump-tib", action="store_true",
+                        dest="dump_tib", help="Flag to dump the TIB constant "\
+                        +"for all pixels. Creates a *.tib file.")
+        self.set_defaults(dump_tib=False)        
 
 def DgsConfiguration(parser, configure, options, args):
     """
@@ -289,3 +293,6 @@ def DgsConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "dump_norm", "--dump-norm"):
         configure.dump_norm = options.dump_norm
 
+    # Set the ability to dump the time-independent background information
+    if hlr_utils.cli_provide_override(configure, "dump_tib", "--dump-tib"):
+        configure.dump_tib = options.dump_tib
