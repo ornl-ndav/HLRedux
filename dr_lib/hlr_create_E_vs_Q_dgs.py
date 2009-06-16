@@ -74,7 +74,6 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
     import array_manip
     import axis_manip
     import common_lib
-    import dr_lib
     import hlr_utils
     import nessi_list
     import SOM
