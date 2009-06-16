@@ -315,7 +315,8 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
         if t is not None:
             t.getTime(False)
 
-        TIB = dr_lib.determine_time_indep_bkg(dp_som2, conf.tib_range)
+        TIB = dr_lib.determine_time_indep_bkg(dp_som2, conf.tib_range,
+                                              is_range=True)
 
         if t is not None:
             t.getTime(msg="After determining TIB constant from %s" \
