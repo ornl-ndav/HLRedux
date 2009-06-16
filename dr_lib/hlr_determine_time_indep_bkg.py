@@ -69,13 +69,9 @@ def determine_time_indep_bkg(obj, tof_vals, **kwargs):
         pass
     
     # set up for working through data
-    # This time highest object in the hierarchy is NOT what we need
-    result = []
-    if(hlr_utils.get_length(obj) > 1):
-        res_descr = "list"
-    else:
-        res_descr = "number"
-
+    (result, res_descr) = hlr_utils.empty_result(obj)
+    result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
+    
     if not is_range:
         num_tof_vals = float(len(tof_vals))
         import bisect
@@ -103,11 +99,10 @@ def determine_time_indep_bkg(obj, tof_vals, **kwargs):
         average /= num_tof_vals
         ave_err2 /= num_tof_vals
 
-        hlr_utils.result_insert(result, res_descr, (average, ave_err2), None,
-                                "all")
+        hlr_utils.result_insert(result, res_descr, (average, ave_err2), obj1,
+                                "yonly")
 
-    import copy
-    return copy.deepcopy(result)
+    return result
 
 if __name__ == "__main__":
     import hlr_test
