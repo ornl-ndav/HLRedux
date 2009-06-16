@@ -57,6 +57,9 @@ def determine_time_indep_bkg(obj, tof_vals, **kwargs):
     # import the helper functions
     import hlr_utils
 
+    # Get keyword arguments
+    is_range = kwargs.get("is_range", False)
+
     o_descr = hlr_utils.get_descr(obj)
 
     if o_descr != "SOM" and o_descr != "SO":
@@ -73,21 +76,30 @@ def determine_time_indep_bkg(obj, tof_vals, **kwargs):
     else:
         res_descr = "number"
 
-    num_tof_vals = float(len(tof_vals))
-
-    import bisect
+    if not is_range:
+        num_tof_vals = float(len(tof_vals))
+        import bisect
+    else:
+        num_tof_vals = tof_vals[1] - tof_vals[0]
+        import dr_lib
 
     # iterate through the values
-    for i in xrange(hlr_utils.get_length(obj)):
+    len_obj = hlr_utils.get_length(obj)
+    for i in xrange(len_obj):
         obj1 = hlr_utils.get_value(obj, i, o_descr, "all")
 
-        average = 0.0
-        ave_err2 = 0.0
-        for tof in tof_vals:
-            index = bisect.bisect(obj1.axis[0].val, float(tof)) - 1
-            average += obj1.y[index]
-            ave_err2 += obj1.var_y[index]
-
+        if not is_range:
+            average = 0.0
+            ave_err2 = 0.0
+            for tof in tof_vals:
+                index = bisect.bisect(obj1.axis[0].val, float(tof)) - 1
+                average += obj1.y[index]
+                ave_err2 += obj1.var_y[index]
+        else:
+            (average, ave_err2) = dr_lib.integrate_axis(obj1, width=True,
+                                                        start=tof_vals[0],
+                                                        end=tof_vals[1])
+            
         average /= num_tof_vals
         ave_err2 /= num_tof_vals
 
@@ -110,4 +122,5 @@ if __name__ == "__main__":
 
     print "********** determine_time_indep_bkg"
     print "* ", determine_time_indep_bkg(som1, tof_channels)
+    print "* ", determine_time_indep_bkg(som1, tof_channels, is_range=True)
     
