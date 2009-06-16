@@ -22,7 +22,7 @@
 
 # $Id$
 
-def determine_time_indep_bkg(obj, tof_vals):
+def determine_time_indep_bkg(obj, tof_vals, **kwargs):
     """
     This functions calculates the average counts at four given TOF channels
     for determining the time-independent background. 
@@ -31,12 +31,19 @@ def determine_time_indep_bkg(obj, tof_vals):
     @type obj: C{SOM.SOM} or C{SOM.SO}
     
     @param tof_vals: The four TOF channels from which the average counts will
-    be determined
+                     be determined
     @type tof_vals: C{list}
+
+    @param kwargs: A list of keyword arguments that the function accepts:
+
+    @keyword is_range: A flag that tells the function that tof_vals is a range
+                       from which to determine the time-independent
+                       background. The default is I{False}.
+    @type is_range: C{bool}
 
        
     @return: Object containing the time-independent background and the
-    associated error
+             associated error
     @rtype: C{list} of C{tuple}s
     
 
