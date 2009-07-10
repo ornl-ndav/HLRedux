@@ -234,7 +234,7 @@ def run(config, tim=None):
     if tim is not None:
         tim.getTime(False)
         
-    d_som5 = common_lib.rebin_axis_1D(d_som4, config.E_bins.toNessiList())
+    d_som5 = common_lib.rebin_axis_1D_frac(d_som4, config.E_bins.toNessiList())
 
     if tim is not None:
         tim.getTime(msg="After rebinning energy transfer ")
