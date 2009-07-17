@@ -36,7 +36,7 @@ def create_binner_string(config):
     @rtype: C{string}
     """
     import copy
-    import md5
+    import hashlib
 
     cconf = copy.deepcopy(config)
 
@@ -73,7 +73,7 @@ def create_binner_string(config):
         result.append("%s:%s" % (ckey, str(cconf.__dict__[ckey])))
 
     output = " ".join(result)
-    return md5.new(output).hexdigest()
+    return hashlib.new("md5", output).hexdigest()
 
 def make_binner_connection(conn_info):
     """
