@@ -37,7 +37,7 @@ def run(config):
     @type config: L{hlr_utils.Configure}
     """
     import sys
-    
+
     import DST
 
     try:
@@ -52,12 +52,20 @@ def run(config):
         print "Reading data file"
 
     if config.roi_file is None:
-        d_som1 = data_dst.getSOM(config.data_paths.toPath(), so_axis,
+        d_som0 = data_dst.getSOM(config.data_paths.toPath(), so_axis,
                                  start_id=config.starting_ids,
                                  end_id=config.ending_ids)
     else:
-        d_som1 = data_dst.getSOM(config.data_paths.toPath(), so_axis,
+        d_som0 = data_dst.getSOM(config.data_paths.toPath(), so_axis,
                                  roi_file=config.roi_file)
+
+    if config.width:
+        import dr_lib
+        d_som1 = dr_lib.fix_bin_contents(d_som0)
+    else:
+        d_som1 = d_som0
+
+    del d_som0
 
     if config.dump_pxl:
         hlr_utils.write_file(config.data[0], "text/Spec", d_som1,
@@ -151,6 +159,10 @@ if __name__ == "__main__":
                       +"subtraction. Creates a *.tsp file.")
     parser.set_defaults(dump_sxl=False)    
 
+    parser.add_option("-w", "--width", action="store_true", dest="width",
+                      help="Flag to divide the TOF histogram by the bin width")
+    parser.set_defaults(width=False)
+
     (options, args) = parser.parse_args()
 
     # set up the configuration
@@ -196,6 +208,10 @@ if __name__ == "__main__":
     if hlr_utils.cli_provide_override(configure, "tib_const", "--tib-const"): 
         configure.tib_const = hlr_utils.DrParameterFromString(\
                     options.tib_const, True)
+
+    # Set the width flag
+    if hlr_utils.cli_provide_override(configure, "width", "-w", "--width"):
+        configure.width = options.width
 
     # run the program
     run(configure)
