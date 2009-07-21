@@ -47,6 +47,11 @@ def add_files(filelist, **kwargs):
                          pixel IDs that will be read from the data file and
                          stored as a signal C{SOM}
     @type Signal_ROI: C{string}
+
+    @keyword Signal_MASK: This is the name of a file that contains a list of
+                         pixel IDs that will be read from the data file and
+                         stored as a signal C{SOM}
+    @type Signal_MASK: C{string}    
     
     @keyword dataset_type: The practical name of the dataset being processed.
                            The default value is I{data}.
@@ -70,6 +75,7 @@ def add_files(filelist, **kwargs):
 
     
     @raise SystemExit: If any file cannot be read
+    @raise RuntimeError: If both a ROI and MASK file are specified
     """
     import sys
 
@@ -92,6 +98,11 @@ def add_files(filelist, **kwargs):
         signal_roi = kwargs["Signal_ROI"]
     except KeyError:
         signal_roi = None 
+
+    try:
+        signal_mask = kwargs["Signal_MASK"]
+    except KeyError:
+        signal_mask = None         
 
     try:
         dataset_type = kwargs["dataset_type"]
@@ -117,6 +128,10 @@ def add_files(filelist, **kwargs):
     except KeyError:
         timer = None
 
+    if signal_roi is not None and signal_mask is not None:
+        raise RuntimeError("Cannot specify both ROI and MASK file! Please "\
+                           +"choose!")
+
     counter = 0
 
     for filename in filelist:
@@ -139,11 +154,13 @@ def add_files(filelist, **kwargs):
         if counter == 0:
             if dst_type == "application/x-NeXus":
                 d_som1 = data_dst.getSOM(data_paths, so_axis,
-                                         roi_file=signal_roi)
+                                         roi_file=signal_roi,
+                                         mask_file=signal_mask)
                 d_som1.rekeyNxPars(dataset_type)
             else:
                 if dst_type != "text/Dave2d":
-                    d_som1 = data_dst.getSOM(data_paths, roi_file=signal_roi)
+                    d_som1 = data_dst.getSOM(data_paths, roi_file=signal_roi,
+                                             mask_file=signal_mask)
                 else:
                     d_som1 = data_dst.getSOM(data_paths)
 
@@ -167,12 +184,14 @@ def add_files(filelist, **kwargs):
         else:
             if dst_type == "application/x-NeXus":
                 d_som_t = data_dst.getSOM(data_paths, so_axis,
-                                          roi_file=signal_roi)
+                                          roi_file=signal_roi,
+                                          mask_file=signal_mask)
                 d_som_t.rekeyNxPars(dataset_type)
                 add_nxpars_sig = True
             else:
                 if dst_type != "text/Dave2d":
-                    d_som_t = data_dst.getSOM(data_paths, roi_file=signal_roi)
+                    d_som_t = data_dst.getSOM(data_paths, roi_file=signal_roi,
+                                              mask_file=signal_mask)
                 else:
                     d_som_t = data_dst.getSOM(data_paths)
                 add_nxpars_sig = False
