@@ -311,6 +311,10 @@ if __name__ == "__main__":
     parser.set_defaults(usmon_path="/entry/monitor1,1")
     parser.set_defaults(dsmon_path="/entry/monitor2,1")
 
+    # Remove unneeded options
+    parser.remove_option("--norm-int-range")
+    parser.remove_option("--norm-trans-coeff")
+
     # Add dgs_reduction specific options
     parser.add_option("", "--timing", action="store_true", dest="timing",
                       help="Flag to turn on timing of code")
