@@ -125,26 +125,25 @@ def run(config, tim=None):
                 (config.norm_int_range[0], 0.0))[0]
         
     n_som3 = dr_lib.integrate_spectra(n_som2, start=start_val,
-                                        end=end_val, width=True)
+                                      end=end_val, width=True)
 
     del n_som2
     
     if tim is not None:
         tim.getTime(msg="After integrating normalization spectra ")
 
-    if config.dump_norm:
-        file_comment = "Normalization Integration range: %0.3fA, %0.3fA" \
-                       % (start_val, end_val)
+    file_comment = "Normalization Integration range: %0.3fA, %0.3fA" \
+                   % (start_val, end_val)
         
-        hlr_utils.write_file(config.output, "text/num-info", n_som3,
-                             output_ext="norm",
-                             data_ext=config.ext_replacement,
-                             path_replacement=config.path_replacement,
-                             verbose=config.verbose,
-                             message="normalization values",
-                             comments=[file_comment],
-                             tag="Integral", units="counts")   
-
+    hlr_utils.write_file(config.output, "text/num-info", n_som3,
+                         output_ext="norm",
+                         data_ext=config.ext_replacement,
+                         path_replacement=config.path_replacement,
+                         verbose=config.verbose,
+                         message="normalization values",
+                         comments=[file_comment],
+                         tag="Integral", units="counts")   
+    
     if tim is not None:
         tim.getTime(False)
 
