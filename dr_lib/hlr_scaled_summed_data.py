@@ -75,6 +75,7 @@ def scaled_summed_data(datalist, conf, **kwargs):
 
     dp_som0 = dr_lib.add_files(datalist, Data_Paths=data_paths,
                                SO_Axis=conf.so_axis, Signal_ROI=conf.roi_file,
+                               Signal_MASK=conf.mask_file,
                                dataset_type=dataset_type,
                                dst_type=dst_type,
                                Verbose=conf.verbose, Timer=t)
