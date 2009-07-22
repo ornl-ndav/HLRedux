@@ -106,6 +106,16 @@ def run(config, tim=None):
     else:
         e_som1 = None
 
+    # Perform Steps 3-6 on normalization data
+    if config.norm is not None:
+        n_som1 = dr_lib.calibrate_dgs_data(config.norm, config, dc_som,
+                                           dataset_type="normalization",
+                                           inst_geom_dst=inst_geom_dst,
+                                           tib_const=config.tib_const,
+                                           timer=tim)
+    else:
+        n_som1 = None
+
     # Perform Steps 3-6 on sample data
     d_som1 = dr_lib.calibrate_dgs_data(config.data, config, dc_som,
                                        inst_geom_dst=inst_geom_dst,
@@ -124,26 +134,65 @@ def run(config, tim=None):
 
     del d_som1
 
-    del b_som1, e_som1
+    # Perform Steps 7-16 on normalization data
+    if n_som1 is not None:
+        if config.norm_trans_coeff is None:
+            norm_trans_coeff = None
+        else:
+            norm_trans_coeff = config.norm_trans_coeff.toValErrTuple()
+
+        
+        n_som2 = dr_lib.process_dgs_data(n_som1, config, b_som1, e_som1,
+                                         norm_trans_coeff,
+                                         dataset_type="normalization",
+                                         timer=tim)
+    else:
+        n_som2 = n_som1
+        
+    del n_som1, b_som1, e_som1
+
+    # Step 17: Integrate normalization spectra
+    if n_som2 is not None:
+        if config.verbose:
+            print "Integrating normalization spectra"
+
+        if tim is not None:
+            tim.getTime(False)
+
+        if config.norm_int_range is None:
+            start_val = float("inf")
+            end_val = float("inf")
+        else:
+            start_val = common_lib.energy_to_wavelength(\
+                (config.norm_int_range[1], 0.0))[0]
+            end_val = common_lib.energy_to_wavelength(\
+                (config.norm_int_range[0], 0.0))[0]
+            
+        norm_int = dr_lib.integrate_spectra(n_som2, start=start_val,
+                                            end=end_val, width=True)
+
+        if tim is not None:
+            tim.getTime(msg="After integrating normalization spectra ")
+
+        if config.dump_norm:
+            file_comment = "Normalization Integration range: %0.3fA, %0.3fA" \
+                           % (start_val, end_val)
+            
+            hlr_utils.write_file(config.output, "text/num-info", norm_int,
+                                 output_ext="norm",
+                                 data_ext=config.ext_replacement,
+                                 path_replacement=config.path_replacement,
+                                 verbose=config.verbose,
+                                 message="normalization values",
+                                 comments=[file_comment],
+                                 tag="Integral", units="counts")   
+    else:
+        norm_int = n_som2
+        
+    del n_som2
 
     # Step 18: Normalize sample data by integrated values
-    if config.norm is not None:
-        if config.verbose:
-            print "Reading normalization information"
-
-        norm_int = dr_lib.add_files(config.norm, Signal_ROI=config.roi_file,
-                                    Signal_MASK=config.mask_file,
-                                    dataset_type="normalization",
-                                    dst_type="text/num-info",
-                                    Verbose=config.verbose,
-                                    Timer=tim)
-        
-        # Make the labels and units compatible with a NeXus file based SOM
-        norm_int.setAllAxisLabels(["wavelength"])
-        norm_int.setAllAxisUnits(["Angstroms"])
-        norm_int.setYLabel("Intensity")
-        norm_int.setYUnits("Counts/Angstroms")
-        
+    if norm_int is not None:
         if config.verbose:
             print "Normalizing data by normalization data"
 
@@ -310,10 +359,6 @@ if __name__ == "__main__":
     # Set defaults for options
     parser.set_defaults(usmon_path="/entry/monitor1,1")
     parser.set_defaults(dsmon_path="/entry/monitor2,1")
-
-    # Remove unneeded options
-    parser.remove_option("--norm-int-range")
-    parser.remove_option("--norm-trans-coeff")
 
     # Add dgs_reduction specific options
     parser.add_option("", "--timing", action="store_true", dest="timing",

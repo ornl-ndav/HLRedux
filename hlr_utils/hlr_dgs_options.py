@@ -152,6 +152,12 @@ class DgsOptions(hlr_options.InstOptions):
                         +" pixels combined. Creates a *.fwv file.")
         self.set_defaults(dump_wave_comb=False)
 
+        self.add_option("", "--dump-norm", action="store_true",
+                        dest="dump_norm", help="Flag to dump the wavelength "\
+                        +"information after vanadium normalization for all"\
+                        +"pixels. Creates a *.norm file.")
+        self.set_defaults(dump_norm=False)
+
         self.add_option("", "--dump-tib", action="store_true",
                         dest="dump_tib", help="Flag to dump the TIB constant "\
                         +"for all pixels. Creates a *.tib file.")
@@ -282,6 +288,10 @@ def DgsConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "dump_wave_comb",
                                       "--dump-wave-comb"):
         configure.dump_wave_comb = options.dump_wave_comb
+
+    # Set the ability to dump the normalization information
+    if hlr_utils.cli_provide_override(configure, "dump_norm", "--dump-norm"):
+        configure.dump_norm = options.dump_norm
 
     # Set the ability to dump the time-independent background information
     if hlr_utils.cli_provide_override(configure, "dump_tib", "--dump-tib"):

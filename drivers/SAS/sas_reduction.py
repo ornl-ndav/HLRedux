@@ -235,15 +235,7 @@ def run(config, tim=None):
                          replace_path=False,
                          replace_ext=False,
                          message="combined S(Q) information")
-
-    # Create 1D canSAS file
-    hlr_utils.write_file(config.output, "text/canSAS", d_som8,
-                         verbose=config.verbose,
-                         output_ext="xml",
-                         data_ext=config.ext_replacement,         
-                         path_replacement=config.path_replacement,
-                         message="combined S(Q) information")
-    
+        
     d_som8.attr_list["config"] = config
 
     hlr_utils.write_file(config.output, "text/rmd", d_som8,
