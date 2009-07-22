@@ -165,20 +165,17 @@ def add_files(filelist, **kwargs):
                     d_som1 = data_dst.getSOM(data_paths)
 
             if verbose:
-                print "# Signal SO:", len(d_som1)
-                try:
-                    dsize = len(d_som1[0])
-                except IndexError:
-                    # All data has been filtered
-                    print "Information is unavailable since no data "\
-                          +"present. Exiting."
-                    sys.exit(0)
+                len_data = len(d_som1)
+                print "# Signal SO:", len_data
+                if len_data == 0:
+                    print "All data has been filtered. Program exiting."
+                    sys.exit(0)                
 
                 if dst_type == "application/x-NeXus":
-                    print "# TOF:", dsize
+                    print "# TOF:", len(d_som1[0])
                     print "# TOF Axis:", len(d_som1[0].axis[0].val)
                 elif dst_type != "text/num-info":
-                    print "# Data Size:", dsize
+                    print "# Data Size:", len(d_som1[0])
                     print "# X-Axis:", len(d_som1[0].axis[0].val)
                     try:
                         axis_len = len(d_som1[0].axis[1].val)
