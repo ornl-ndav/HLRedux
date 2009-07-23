@@ -93,6 +93,10 @@ class SansOptions(hlr_utils.InstOptions):
                         +"spectrum. Use this option in the absence of "\
                         +"transmission monitors.")
 
+        self.add_option("", "--beammon-over", dest="beammon_over",
+                        help="Specify a file (vanadium) to override the beam "\
+                        +"monitor with.")
+
         self.add_option("", "--mon-effc", action="store_true",
                         dest="mon_effc",
                         help="Flag for turning on monitor efficiency "\
@@ -328,6 +332,17 @@ def SansConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "ecan_trans", "--ecan-trans"):
         configure.ecan_trans = hlr_utils.determine_files(options.ecan_trans,
                                                          one_file=True)   
+
+    # Set the beam monitor override file
+    if hlr_utils.cli_provide_override(configure, "beammon_over",
+                                      "--beammon-over"):
+        configure.beammon_over = hlr_utils.determine_files(\
+            options.beammon_over,
+            configure.inst,
+            configure.facility,
+            configure.proposal,
+            stop_on_none=True)
+    
     # Set mon_effc flag
     if hlr_utils.cli_provide_override(configure, "mon_effc", "--mon-effc"):
         configure.mon_effc = options.mon_effc
