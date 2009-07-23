@@ -185,19 +185,35 @@ def process_sas_data(datalist, conf, **kwargs):
         
     # Beam monitor
     if not get_background:
-        if conf.verbose:
-            print "Reading in beam monitor data from %s file" % dataset_type
+        if conf.beammon_over is None:
+            if conf.verbose:
+                print "Reading in beam monitor data from %s file" \
+                      % dataset_type
 
-        # The [0] is to get the data SOM and ignore the None background SOM
-        dbm_som0 = dr_lib.add_files(datalist,
-                                    Data_Paths=conf.bmon_path.toPath(),
-                                    SO_Axis=conf.so_axis,
-                                    dataset_type=dataset_type,
-                                    Verbose=conf.verbose,
-                                    Timer=t)
+                # The [0] is to get the data SOM and ignore the None
+                # background SOM
+                dbm_som0 = dr_lib.add_files(datalist,
+                                            Data_Paths=conf.bmon_path.toPath(),
+                                            SO_Axis=conf.so_axis,
+                                            dataset_type=dataset_type,
+                                            Verbose=conf.verbose,
+                                            Timer=t)
             
-        if t is not None:
-            t.getTime(msg="After reading beam monitor data ")
+                if t is not None:
+                    t.getTime(msg="After reading beam monitor data ")
+        else:
+            if conf.verbose:
+                print "Reading in vanadium data"
+
+                dbm_som0 = dr_lib.add_files(datalist,
+                                          Data_Paths=conf.data_paths.toPath(),
+                                            Signal_ROI=conf.roi_file,
+                                            SO_Axis=conf.so_axis,
+                                            dataset_type=dataset_type,
+                                            Verbose=conf.verbose,
+                                            Timer=t)
+                if t is not None:
+                    t.getTime(msg="After reading vanadium data ")
 
         dbm_som1 = dr_lib.fix_bin_contents(dbm_som0)
         
@@ -236,9 +252,13 @@ def process_sas_data(datalist, conf, **kwargs):
         dp_som1.attr_list["Time_zero_offset_det"] = \
                                      conf.time_zero_offset_det.toValErrTuple()
     # Note: time_zero_offset_mon MUST be a tuple
-    if conf.time_zero_offset_mon is not None and not get_background:
+    if conf.time_zero_offset_mon is not None and not get_background and \
+           conf.beammon_over is None:
         dbm_som1.attr_list["Time_zero_offset_mon"] = \
                                      conf.time_zero_offset_mon.toValErrTuple()
+    if conf.beammon_over is not None:
+        dbm_som1.attr_list["Time_zero_offset_det"] = \
+                                     conf.time_zero_offset_det.toValErrTuple()
     if trans_data is None and dtm_som1 is not None:
         dtm_som1.attr_list["Time_zero_offset_mon"] = \
                                      conf.time_zero_offset_mon.toValErrTuple()
@@ -252,10 +272,17 @@ def process_sas_data(datalist, conf, **kwargs):
 
     if not get_background:
         # Convert beam monitor
-        dbm_som2 = common_lib.tof_to_wavelength_lin_time_zero(
-            dbm_som1,
-            units="microsecond",
-            time_zero_offset=conf.time_zero_offset_mon.toValErrTuple())
+        if conf.beammon_over is None:
+            dbm_som2 = common_lib.tof_to_wavelength_lin_time_zero(
+                dbm_som1,
+                units="microsecond",
+                time_zero_offset=conf.time_zero_offset_mon.toValErrTuple())
+        else:
+            dbm_som2 = common_lib.tof_to_wavelength_lin_time_zero(
+                dbm_som1,
+                units="microsecond",
+                time_zero_offset=conf.time_zero_offset_det.toValErrTuple(),
+                inst_param="total")
     else:
         dbm_som2 = None
 
@@ -297,6 +324,10 @@ def process_sas_data(datalist, conf, **kwargs):
         t.getTime(msg="After cutting data spectra ")
 
     del dp_som2
+
+    if conf.beammon_over is not None:
+        dbm_som2 = dr_lib.cut_spectra(dbm_som2, conf.lambda_low_cut,
+                                       conf.lambda_high_cut)
         
     if conf.dump_wave:
         hlr_utils.write_file(conf.output, "text/Spec", dp_som3,
@@ -307,13 +338,27 @@ def process_sas_data(datalist, conf, **kwargs):
                              path_replacement=conf.path_replacement,
                              message="pixel wavelength information")
     if conf.dump_bmon_wave:
-        hlr_utils.write_file(conf.output, "text/Spec", dbm_som2,
-                             output_ext="bmxl",
-                             extra_tag=dataset_type,
-                             verbose=conf.verbose,
-                             data_ext=conf.ext_replacement,
-                             path_replacement=conf.path_replacement,
-                             message="beam monitor wavelength information")
+        if conf.beammon_over is not None:
+            hlr_utils.write_file(conf.output, "text/Spec", dbm_som2,
+                                 output_ext="bmxl",
+                                 extra_tag=dataset_type,
+                                 verbose=conf.verbose,
+                                 data_ext=conf.ext_replacement,
+                                 path_replacement=conf.path_replacement,
+                                 message="beam monitor wavelength information")
+        else:
+            
+            dbm_som2_1 = dr_lib.sum_by_rebin_frac(dbm_som2,
+                                               conf.lambda_bins.toNessiList())
+            hlr_utils.write_file(conf.output, "text/Spec", dbm_som2_1,
+                                 output_ext="bmxl",
+                                 extra_tag=dataset_type,
+                                 verbose=conf.verbose,
+                                 data_ext=conf.ext_replacement,
+                                 path_replacement=conf.path_replacement,
+                                 message="beam monitor override wavelength "\
+                                 +"information")
+            del dbm_som2_1
 
     # Step 2: Subtract wavelength dependent background if necessary
     if conf.verbose and bkg_subtract is not None:
@@ -415,16 +460,19 @@ def process_sas_data(datalist, conf, **kwargs):
     del dp_som4
 
     # Step 6: Rebin beam monitor axis onto detector pixel axis
-    if conf.verbose:
-        print "Rebin beam monitor axis to detector pixel axis"
+    if conf.beammon_over is None:
+        if conf.verbose:
+            print "Rebin beam monitor axis to detector pixel axis"
 
-    if t is not None:
-        t.getTime(False)
+        if t is not None:
+            t.getTime(False)
 
-    dbm_som4 = dr_lib.rebin_monitor(dbm_som3, dp_som5, rtype="frac")
+        dbm_som4 = dr_lib.rebin_monitor(dbm_som3, dp_som5, rtype="frac")
 
-    if t is not None:
-        t.getTime(msg="After rebinning beam monitor ")
+        if t is not None:
+            t.getTime(msg="After rebinning beam monitor ")
+    else:
+        dbm_som4 = dbm_som3
 
     del dbm_som3
 
