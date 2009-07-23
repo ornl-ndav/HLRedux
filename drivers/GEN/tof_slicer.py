@@ -38,6 +38,7 @@ def run(config):
     """
     import sys
 
+    import dr_lib
     import DST
 
     try:
@@ -60,7 +61,6 @@ def run(config):
                                  roi_file=config.roi_file)
 
     if config.width:
-        import dr_lib
         d_som1 = dr_lib.fix_bin_contents(d_som0)
     else:
         d_som1 = d_som0
