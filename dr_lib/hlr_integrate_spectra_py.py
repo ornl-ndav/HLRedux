@@ -176,8 +176,8 @@ def integrate_spectra_py(obj, **kwargs):
             b_end = i_end
 
         try:
-            value = dr_lib.integrate_axis(obj1, start=b_start, end=b_end,
-                                          width=width)
+            value = dr_lib.integrate_axis_py(obj1, start=b_start, end=b_end,
+                                             width=width)
         except IndexError:
             print "Range not found:", obj1.id, b_start, b_end, len(obj1)
             value = (float('nan'), float('nan'))
