@@ -338,7 +338,7 @@ def process_sas_data(datalist, conf, **kwargs):
                              path_replacement=conf.path_replacement,
                              message="pixel wavelength information")
     if conf.dump_bmon_wave:
-        if conf.beammon_over is not None:
+        if conf.beammon_over is None:
             hlr_utils.write_file(conf.output, "text/Spec", dbm_som2,
                                  output_ext="bmxl",
                                  extra_tag=dataset_type,
