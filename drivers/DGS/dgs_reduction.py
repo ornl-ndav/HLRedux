@@ -154,10 +154,12 @@ def run(config, tim=None):
 
         if tim is not None:
             tim.getTime(msg="After normalizing data ")
+
+        del norm_int
     else:
         d_som3 = d_som2
 
-    del d_som2, norm_int
+    del d_som2
 
     # Step 19: Calculate the initial energy
     if config.initial_energy is not None:

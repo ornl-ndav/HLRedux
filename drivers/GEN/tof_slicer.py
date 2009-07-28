@@ -108,7 +108,6 @@ def run(config):
                          message="combined TOF information")
 
 if __name__ == "__main__":
-    import dr_lib
     import hlr_utils
 
     # Make description for driver
