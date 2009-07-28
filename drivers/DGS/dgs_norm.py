@@ -236,6 +236,9 @@ if __name__ == "__main__":
         timer = sns_timing.DiffTime()
     else:
         timer = None
+
+    # Need to add a None for the mask file
+    configure.mask_file = None
     
     # Run the program
     run(configure, timer)
