@@ -71,7 +71,8 @@ def run(config, tim=None):
             if tim is not None:
                 tim.getTime(False)
         
-            config.mask_file = hlr_utils.merge_roi_files(config.mask_file)
+            config.mask_file = hlr_utils.merge_roi_files(config.mask_file,
+                                                         config)
 
             if tim is not None:
                 tim.getTime(msg="After creating combined mask file")
