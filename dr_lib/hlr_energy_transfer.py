@@ -174,12 +174,11 @@ def energy_transfer(obj, itype, axis_const, **kwargs):
         if scale:
             # Scale counts by lambda_f / lambda_i
             if itype == "IGS":
-                (l_d, l_d_err2) = utils.calc_bin_centers(l_i, l_i_err2)
                 (l_n, l_n_err2) = l_f
-            # Scale counts by lambda_i / lambda_f                
+                (l_d, l_d_err2) = utils.calc_bin_centers(l_i, l_i_err2)
             else:
-                (l_d, l_d_err2) = utils.calc_bin_centers(l_f, l_f_err2)
-                (l_n, l_n_err2) = axis_manip.energy_to_wavelength(E_i,
+                (l_n, l_n_err2) = utils.calc_bin_centers(l_f, l_f_err2)
+                (l_d, l_d_err2) = axis_manip.energy_to_wavelength(E_i,
                                                                   E_i_err2)
                 
             ratio = array_manip.div_ncerr(l_n, l_n_err2, l_d, l_d_err2)
