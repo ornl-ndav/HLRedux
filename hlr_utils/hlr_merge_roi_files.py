@@ -22,13 +22,16 @@
 
 # $Id$
 
-def merge_roi_files(filelist):
+def merge_roi_files(filelist, conf):
     """
     This function takes a set of ROI files and combines them into a new ROI
     file.
 
     @param filelist: The set of ROI file names.
     @type filelist: C{list}
+
+    @param conf: The object containing the current configuration.
+    @type conf: L{hlr_utils.Configure}
 
 
     @return: The filename of the combined ROI
@@ -47,8 +50,17 @@ def merge_roi_files(filelist):
             roi_set.add(rid.strip())
         rfile.close()
 
+    # Create output filename
+    import os
+    if conf.path_replacement is None:
+        path_replacement = os.getcwd()
+    else:
+        path_replacement = conf.path_replacement
+
+    ofilename = os.path.join(path_replacement, os.path.basename(filelist[0]))
+    ofilename = hlr_utils.add_tag(ofilename, "comb")
+    
     # Create new ROI file from combined information
-    ofilename = hlr_utils.add_tag(filelist[0], "comb")
     ofile = open(ofilename, 'w')
     for rid in roi_set:
         print >> ofile, rid

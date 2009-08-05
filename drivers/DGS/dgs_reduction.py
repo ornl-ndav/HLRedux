@@ -64,19 +64,25 @@ def run(config, tim=None):
     config.so_axis = "time_of_flight"
 
     try:
-        if len(config.mask_file) > 1:
-            if config.verbose:
-                print "Creating combined mask file"
+        if type(config.mask_file) == type([]):
+            if len(config.mask_file) > 1:
+                if config.verbose:
+                    print "Creating combined mask file"
 
-            if tim is not None:
-                tim.getTime(False)
+                if tim is not None:
+                    tim.getTime(False)
         
-            config.mask_file = hlr_utils.merge_roi_files(config.mask_file)
+                    config.mask_file = hlr_utils.merge_roi_files(\
+                        config.mask_file,
+                        config)
 
-            if tim is not None:
-                tim.getTime(msg="After creating combined mask file")
+                if tim is not None:
+                    tim.getTime(msg="After creating combined mask file")
+            else:
+                config.mask_file = config.mask_file[0]
         else:
-            config.mask_file = config.mask_file[0]
+            # Do nothing since it's already a string
+            pass
     except TypeError:
         # No mask files provided, do nothing
         pass
