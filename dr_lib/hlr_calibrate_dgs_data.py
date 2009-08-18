@@ -116,7 +116,7 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
 
     if t is not None:
         t.setOldTime(oldtime)
-        t.getTime(msg="After reading %s " % dataset_type)
+        t.getTime(msg="After reading %s file" % dataset_type)
 
     # Cut the spectra if necessary
     dp_somA = dr_lib.cut_spectra(dp_som0, conf.tof_cut_min, conf.tof_cut_max)
