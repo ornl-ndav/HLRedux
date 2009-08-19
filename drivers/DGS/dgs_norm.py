@@ -119,10 +119,12 @@ def run(config, tim=None):
         start_val = float("inf")
         end_val = float("inf")
     else:
-        start_val = common_lib.energy_to_wavelength(\
-                (config.norm_int_range[1], 0.0))[0]
-        end_val = common_lib.energy_to_wavelength(\
-                (config.norm_int_range[0], 0.0))[0]
+        # Translate energy transfer to final energy
+        ef_start = config.initial_energy.getValue() - config.norm_int_range[1]
+        ef_end = config.initial_energy.getValue() - config.norm_int_range[0]
+        # Convert final energy to final wavelength
+        start_val = common_lib.energy_to_wavelength((ef_start, 0.0))[0]
+        end_val = common_lib.energy_to_wavelength((ef_end, 0.0))[0]
         
     n_som3 = dr_lib.integrate_spectra(n_som2, start=start_val,
                                       end=end_val, width=True)
