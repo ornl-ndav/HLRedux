@@ -122,9 +122,9 @@ def run(config, tim=None):
         if not config.wb_norm:
             # Translate energy transfer to final energy
             ef_start = config.initial_energy.getValue() - \
-                       config.norm_int_range[1]
+                       config.norm_int_range[0]
             ef_end = config.initial_energy.getValue() - \
-                     config.norm_int_range[0]
+                     config.norm_int_range[1]
             # Convert final energy to final wavelength
             start_val = common_lib.energy_to_wavelength((ef_start, 0.0))[0]
             end_val = common_lib.energy_to_wavelength((ef_end, 0.0))[0]
