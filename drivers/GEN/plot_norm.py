@@ -93,11 +93,11 @@ def run(config):
             
         del d_som
         
-    z = numpy.reshape(grid.toNumPy(), (config.num_pixels, len_x))
-    y = numpy.arange(len_x)
-    x = numpy.arange(config.num_pixels)
+    z = numpy.reshape(grid.toNumPy(), (len_x, config.num_pixels))
+    x = numpy.arange(len_x)
+    y = numpy.arange(config.num_pixels)
     
-    drplot.plot_2D_arr(y, x, z)
+    drplot.plot_2D_arr(x, y, numpy.transpose(z))
     pylab.show()
 
 if __name__ == "__main__":
