@@ -1,0 +1,4 @@
+#!/bin/sh
+
+loc=`python -c "import drivers.GEN; print drivers.GEN.__path__[0]"`
+python $loc/plot_norm.py $@

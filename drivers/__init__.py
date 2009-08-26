@@ -29,6 +29,7 @@ from GEN import agg_dr_files
 from GEN import mask_generator
 from GEN import plot_file
 from GEN import plot_multi
+from GEN import plot_norm
 from GEN import stitch_dave
 from GEN import tof_slicer
 from GEN import two_file_math
