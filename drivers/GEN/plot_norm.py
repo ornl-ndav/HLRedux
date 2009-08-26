@@ -78,10 +78,17 @@ def run(config):
     len_data = config.num_pixels * len_x
 
     grid = nessi_list.NessiList(len_data)
+
+    run_number = -1
+    instrument = ""
     
     for datafile in config.data:
+        instrument = datafile.split('_')[0]
+        
         d_som = dr_lib.add_files([datafile], dst_type=dst_type,
                                  Verbose=config.verbose)
+
+        run_number = d_som.attr_list["normalization-run_number"]
 
         for so in d_som:
             bank_offset = bank_map[so.id[0]]
@@ -92,12 +99,19 @@ def run(config):
             grid[index] = so.y
             
         del d_som
+
+    # if run number is a list, it's separated by /
+    run_number = run_number.split('/')[0]
         
     z = numpy.reshape(grid.toNumPy(), (len_x, config.num_pixels))
     x = numpy.arange(len_x)
     y = numpy.arange(config.num_pixels)
+
+    title = "%s %s" % (instrument, run_number)
     
-    drplot.plot_2D_arr(x, y, numpy.transpose(z))
+    drplot.plot_2D_arr(x, y, numpy.transpose(z), ylabel="Pixel Number",
+                       xlabel="Effective Tube Number", title=title,
+                       logz=config.logz)
     pylab.show()
 
 if __name__ == "__main__":
