@@ -57,8 +57,7 @@ def mult_ncerr(left, right, **kwargs):
 
 
     @return: Object containing the results of the multiplication
-    @rtype: C{SOM.SOM} or C{SOM.SO} 
-
+    @rtype: C{SOM.SOM}, C{SOM.SO} or C{tuple}
 
     @raise IndexError: The two C{SOM}s do not contain the same number of
                        spectra
