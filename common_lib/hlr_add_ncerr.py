@@ -25,7 +25,7 @@
 def add_ncerr(left, right, **kwargs):
     """
     This function adds two objects (C{SOM}, C{SO} or C{tuple(val,val_err2)})
-    and returns the result of the addition in an C{SOM}. 
+    and returns the result of the addition in an C{SOM}, C{SO} or C{tuple}. 
 
     @param left:  Object on the left of the addition sign
     @type left: C{SOM.SOM} or C{SOM.SO} or C{tuple}
