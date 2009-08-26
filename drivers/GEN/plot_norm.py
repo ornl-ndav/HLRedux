@@ -108,10 +108,16 @@ def run(config):
     y = numpy.arange(config.num_pixels)
 
     title = "%s %s" % (instrument, run_number)
+
+    import matplotlib.cm as mcm
+    if config.cmb:
+        colormap = mcm.Blues
+    else:
+        colormap = mcm.hot
     
     drplot.plot_2D_arr(x, y, numpy.transpose(z), ylabel="Pixel Number",
                        xlabel="Effective Tube Number", title=title,
-                       logz=config.logz)
+                       logz=config.logz, colormap=colormap)
     pylab.show()
 
 if __name__ == "__main__":
@@ -144,6 +150,10 @@ if __name__ == "__main__":
     parser.add_option("", "--logz", dest="logz", action="store_true",
                       help="Set the z-axis to logarithmic scale.")
     parser.set_defaults(logz=False)
+
+    parser.add_option("", "--cmb", dest="cmb", action="store_true",
+                      help="Use the Blues colormap")
+    parser.set_defaults(cmb=False)
 
     # Do not need to use the following options
     parser.remove_option("--config")
@@ -179,6 +189,9 @@ if __name__ == "__main__":
 
     # Set the logarithmic z-axis
     configure.logz = options.logz    
+
+    # Set the colormap to Blues
+    configure.cmb = options.cmb
 
     # Run the program
     run(configure)
