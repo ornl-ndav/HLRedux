@@ -116,6 +116,12 @@ def plot_2D_arr(x, y, z, **kwargs):
 
     @keyword title: The title for the plot
     @type title: C{string}
+
+    @keyword xgrid: A flag to turn on grid lines for the x-axis
+    @type xgrid: C{boolean}
+
+    @keyword ygrid: A flag to turn on grid lines for the y-axis
+    @type ygrid: C{boolean}    
     """
     import matplotlib
             
@@ -156,6 +162,9 @@ def plot_2D_arr(x, y, z, **kwargs):
     except KeyError:
         box = False
 
+    xgrid = kwargs.get("xgrid", False)
+    ygrid = kwargs.get("ygrid", False)
+
     if logz and not box:
         mylocator = matplotlib.ticker.LogLocator()
     else:
@@ -173,6 +182,12 @@ def plot_2D_arr(x, y, z, **kwargs):
     pylab.xlabel(xlabel)
     pylab.ylabel(ylabel)
     pylab.title(title)
+
+    if xgrid:
+        pylab.gca().xaxis.grid(True)
+
+    if ygrid:
+        pylab.gca().yaxis.grid(True)        
 
     # Add the color scale
     if not nocb:
