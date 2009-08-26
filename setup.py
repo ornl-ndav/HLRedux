@@ -63,6 +63,7 @@ instrument_scripts = {
     'mask_generator',
     'plot_file',
     'plot_multi',
+    'plot_norm',
     'stitch_dave',
     'tof_slicer',
     'two_file_math',
