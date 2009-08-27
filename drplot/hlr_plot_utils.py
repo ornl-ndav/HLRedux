@@ -109,3 +109,55 @@ def log_for_pcolor(data):
                 data_min = data[i][j]
 
     return matplotlib.colors.LogNorm(vmin=data_min)
+
+def grid_setter(axis="x", which="major", linestyle="-", locator=None,
+                ticklabels=None):
+    """
+    This utility function sets the major properties for grid lines on plots.
+
+    @param axis: This specifies which axis gets gridlines. The defaults is
+                 the x-axis.
+    @type axis: C{string}
+
+    @param which: This specifies the ticks that get grid lines. The default is
+                  to set grid lines on the major ticks.
+    @type which: C{string}
+
+    @param linestyle: This specifies the line style for the grid lines. The
+                      default is solid lines (-).
+    @type linestyle: C{string}
+
+    @param locator: This sets the number of grid lines visible on the plot.
+    @type locator: C{int}
+
+    @param ticklabels: This allows one to set the tick labels for the given
+                       axis.
+    @type ticklabels: C{list} of C{string}s
+
+
+    @raise: RuntimeError if the axis specified is not x, y or z.
+    """
+    import pylab
+    
+    axis_vals = ["x", "y", "z"]
+
+    if axis not in axis_vals:
+        raise RuntimeError("Cannot handle axis %s" % axis)
+
+    if axis == "x":
+        axiso = pylab.gca().xaxis
+    elif axis == "y":
+        axiso = pylab.gca().yaxis
+    elif axis == "z":
+        axiso = pylab.gca().zaxis
+
+    axiso.grid(True, which=which, linestyle=linestyle)
+
+    if locator is not None:
+        import matplotlib.ticker
+        axiso.set_major_locator(matplotlib.ticker.MaxNLocator(locator))
+
+    if ticklabels is not None:
+        axiso.set_ticklabels(ticklabels)
+
+    
