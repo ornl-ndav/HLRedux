@@ -117,9 +117,11 @@ def run(config):
     
     drplot.plot_2D_arr(x, y, numpy.transpose(z), ylabel="Pixel Number",
                        xlabel="Bank Number", title=title,
-                       logz=config.logz, colormap=colormap,
-                       xgrid_major={"on": True, "linestyle": "-",
-                                    "locator": num_banks})
+                       logz=config.logz, colormap=colormap)
+
+    # Set grid lines to dilineate the banks
+    drplot.grid_setter(locator=num_banks,
+                       ticklabels=[str(i+1) for i in range(num_banks+1)])
                        
     pylab.show()
 
