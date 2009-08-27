@@ -116,10 +116,11 @@ def run(config):
         colormap = mcm.hot
     
     drplot.plot_2D_arr(x, y, numpy.transpose(z), ylabel="Pixel Number",
-                       xlabel="Effective Tube Number", title=title,
+                       xlabel="Bank Number", title=title,
                        logz=config.logz, colormap=colormap,
                        xgrid_major={"on": True, "linestyle": "-",
                                     "locator": num_banks})
+                       
     pylab.show()
 
 if __name__ == "__main__":
