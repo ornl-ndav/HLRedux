@@ -117,7 +117,9 @@ def run(config):
     
     drplot.plot_2D_arr(x, y, numpy.transpose(z), ylabel="Pixel Number",
                        xlabel="Effective Tube Number", title=title,
-                       logz=config.logz, colormap=colormap, xgrid=True)
+                       logz=config.logz, colormap=colormap,
+                       xgrid_major={"on": True, "linestyle": "-",
+                                    "locator": num_banks})
     pylab.show()
 
 if __name__ == "__main__":
