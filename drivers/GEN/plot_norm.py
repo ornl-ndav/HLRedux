@@ -126,6 +126,10 @@ def run(config):
     drplot.grid_setter(locator=num_banks,
                        ticklabels=[str(i+1) for i in range(num_banks+1)])
 
+    if config.pixel_grid:
+        # Set some grid lines for the pixels
+        drplot.grid_setter(axis="y", linestyle="-.")
+
     pylab.colorbar(orientation="horizontal", fraction=0.05)
     pylab.show()
 
@@ -164,6 +168,11 @@ if __name__ == "__main__":
                       help="Use the Blues colormap")
     parser.set_defaults(cmb=False)
 
+    parser.add_option("", "--pixel-grid", dest="pixel_grid",
+                      action="store_true", help="Add some grid lines for "\
+                      +"the pixels.")
+    parser.set_defaults(pixel_grid=False)
+
     # Do not need to use the following options
     parser.remove_option("--config")
     parser.remove_option("--data")
@@ -201,6 +210,9 @@ if __name__ == "__main__":
 
     # Set the colormap to Blues
     configure.cmb = options.cmb
+
+    # Set the flag for pixel grid lines
+    configure.pixel_grid = options.pixel_grid    
 
     # Run the program
     run(configure)
