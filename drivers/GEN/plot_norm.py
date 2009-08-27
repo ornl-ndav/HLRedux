@@ -114,15 +114,19 @@ def run(config):
         colormap = mcm.Blues
     else:
         colormap = mcm.hot
+
+    figure = pylab.figure()
+    figure.subplots_adjust(left=0.085, right=0.95)
     
     drplot.plot_2D_arr(x, y, numpy.transpose(z), ylabel="Pixel Number",
                        xlabel="Bank Number", title=title,
-                       logz=config.logz, colormap=colormap)
+                       logz=config.logz, colormap=colormap, nocb=True)
 
     # Set grid lines to dilineate the banks
     drplot.grid_setter(locator=num_banks,
                        ticklabels=[str(i+1) for i in range(num_banks+1)])
-                       
+
+    pylab.colorbar(orientation="horizontal", fraction=0.05)
     pylab.show()
 
 if __name__ == "__main__":
