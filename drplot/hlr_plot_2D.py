@@ -116,23 +116,6 @@ def plot_2D_arr(x, y, z, **kwargs):
 
     @keyword title: The title for the plot
     @type title: C{string}
-
-    @keyword xgrid_major: A flag to turn on grid lines for the major ticks
-                          on the x-axis. The information should be formatted
-                          as: C{\"on\" : C{boolean}, \"linestyle\": C{string},
-                          \"locator\": C{int}}. The locator is for setting the
-                          number of grid lines.
-    @type xgrid_major: C{dict}
-
-    @keyword xgrid_minor: A flag to turn on grid lines for the minor ticks
-                          on the x-axis. The information should be formatted
-                          as: C{\"on\" : C{boolean}, \"linestyle\": C{string},
-                          \"locator\": C{int}}. The locator is for setting the
-                          number of grid lines.
-    @type xgrid_minor: C{dict}    
-
-    @keyword ygrid: A flag to turn on grid lines for the y-axis
-    @type ygrid: C{boolean}    
     """
     import matplotlib
     
@@ -174,12 +157,6 @@ def plot_2D_arr(x, y, z, **kwargs):
     except KeyError:
         box = False
 
-    xgrid_major = kwargs.get("xgrid_major", {"on": False, "linestyle": "-",
-                                             "locator": -1})
-    xgrid_minor = kwargs.get("xgrid_minor", {"on": False, "linestyle": "-.",
-                                             "locator": -1})    
-    ygrid = kwargs.get("ygrid", False)
-
     if logz and not box:
         mylocator = matplotlib.ticker.LogLocator()
     else:
@@ -197,25 +174,6 @@ def plot_2D_arr(x, y, z, **kwargs):
     pylab.xlabel(xlabel)
     pylab.ylabel(ylabel)
     pylab.title(title)
-
-    print "A:", xgrid_major
-
-    if xgrid_major["on"]:
-        pylab.gca().xaxis.grid(xgrid_major["on"],
-                               linestyle=xgrid_major["linestyle"])
-        if xgrid_major["locator"] != -1:
-            pylab.gca().xaxis.set_major_locator(\
-            matplotlib.ticker.MaxNLocator(xgrid_major["locator"]))
-            
-    if xgrid_minor["on"]: 
-        pylab.gca().xaxis.grid(xgrid_minor["on"], which="minor",
-                               linestyle=xgrid_minor["linestyle"])
-        if xgrid_minor["locator"] != -1:
-            pylab.gca().xaxis.set_minor_locator(\
-            matplotlib.ticker.MaxNLocator(xgrid_minor["locator"]))
-
-    if ygrid:
-        pylab.gca().yaxis.grid(True)        
 
     # Add the color scale
     if not nocb:
