@@ -347,7 +347,9 @@ def write_file(filename, dst_type, data, **kwargs):
                         just before the file extension.
     @type extra_tag: C{string}
 
-
+    @keyword getsom_kwargs: This is a collection of keyword arguments that
+                            are to be passed to the writeSOM function call.
+    @type getsom_kwargs: C{dict}
     """
 
     import os
@@ -400,6 +402,8 @@ def write_file(filename, dst_type, data, **kwargs):
     except KeyError:
         arguments = None
 
+    getsom_kwargs = kwargs.get("getsom_kwargs", {})
+
     if replace_path:
         if path_replacement is None:
             path_replacement = os.getcwd()
@@ -423,7 +427,7 @@ def write_file(filename, dst_type, data, **kwargs):
     if verbose:
         print "Writing %s" % message
 
-    output_dst.writeSOM(data)
+    output_dst.writeSOM(data, **getsom_kwargs)
     output_dst.release_resource()
 
 
