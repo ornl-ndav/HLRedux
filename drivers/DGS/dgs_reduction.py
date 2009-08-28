@@ -263,6 +263,15 @@ def run(config, tim=None):
                              path_replacement=config.path_replacement,
                              verbose=config.verbose,
                              message="S(Q,E)")
+
+        hlr_utils.write_file(config.output, "application/x-RedNxs", d_som5_2,
+                             output_ext="nxs",
+                             data_ext=config.ext_replacement,    
+                             path_replacement=config.path_replacement,
+                             verbose=config.verbose,
+                             extra_tag="sqe",
+                             getsom_kwargs={"entry_name": "sqe"},
+                             message="NeXus S(Q,E)")
                                                
     if tim is not None:
         tim.getTime(msg="After calculating S(Q,E) spectrum ")    
