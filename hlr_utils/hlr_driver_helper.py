@@ -421,8 +421,13 @@ def write_file(filename, dst_type, data, **kwargs):
 
     if extra_tag is not None:
         fixed_filename = hlr_utils.add_tag(fixed_filename, extra_tag)
+
+    # Handle difference between NeXus and other files
+    if dst_type != "application/x-RedNxs":
+        resource = open(fixed_filename, "w")
+    else:
+        resource = fixed_filename
         
-    resource = open(fixed_filename, "w")
     output_dst = DST.getInstance(dst_type, resource, arguments, **kwargs)
     if verbose:
         print "Writing %s" % message
