@@ -201,6 +201,9 @@ def process_sas_data(datalist, conf, **kwargs):
             
                 if t is not None:
                     t.getTime(msg="After reading beam monitor data ")
+
+                if conf.inst_geom is not None:
+                    i_geom_dst.setGeometry(conf.bmon_path.toPath(), dbm_som0)
         else:
             if conf.verbose:
                 print "Reading in vanadium data"
@@ -214,6 +217,10 @@ def process_sas_data(datalist, conf, **kwargs):
                                             Timer=t)
                 if t is not None:
                     t.getTime(msg="After reading vanadium data ")
+
+                if conf.inst_geom is not None:
+                    i_geom_dst.setGeometry(conf.data_paths.toPath(), dbm_som0)
+
 
         dbm_som1 = dr_lib.fix_bin_contents(dbm_som0)
         
@@ -236,6 +243,9 @@ def process_sas_data(datalist, conf, **kwargs):
             if t is not None:
                 t.getTime(msg="After reading transmission monitor data ")
 
+                if conf.inst_geom is not None:
+                    i_geom_dst.setGeometry(conf.tmon_path.toPath(), dtm_som0)
+                    
             dtm_som1 = dr_lib.fix_bin_contents(dtm_som0)
                 
             del dtm_som0
