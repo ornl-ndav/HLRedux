@@ -26,10 +26,11 @@ def mult_ncerr(left, right, **kwargs):
     """
     This function multiplies two objects (C{SOM}, C{SO} or
     C{tuple(val,val_err2)}) and returns the result of the multiplication in a
-    C{SOM}, C{SO} or C{tuple}.
+    C{SOM} or C{SO}. The function does not handle the case of
+    C{tuple}*C{tuple}.
 
     @param left: Object on the left of the multiplication sign
-    @type left: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+    @type left: C{SOM.SOM}, C{SOM.SO}
 
     @param right: Object on the right of the multiplication sign
     @type right: C{SOM.SOM}, C{SOM.SO} or C{tuple}
@@ -57,8 +58,11 @@ def mult_ncerr(left, right, **kwargs):
 
 
     @return: Object containing the results of the multiplication
-    @rtype: C{SOM.SOM}, C{SOM.SO} or C{tuple}
+    @rtype: C{SOM.SOM} or C{SOM.SO} 
 
+
+    @raise TypeError: The C{tuple}*C{tuple} case is presented to the function
+    
     @raise IndexError: The two C{SOM}s do not contain the same number of
                        spectra
     @raise RunTimeError: The x-axis units of the C{SOM}s do not match
@@ -100,8 +104,6 @@ def mult_ncerr(left, right, **kwargs):
     (result, res_descr) = hlr_utils.empty_result(left, right)
     (l_descr, r_descr) = hlr_utils.get_descr(left, right)
 
-    is_number = False
-
     # error check information
     if (r_descr == "SOM" and l_descr != "SOM") \
            or (r_descr == "SO" and l_descr == "number"):
@@ -110,7 +112,7 @@ def mult_ncerr(left, right, **kwargs):
     elif r_descr == "SOM" and l_descr == "SOM":
         hlr_utils.math_compatible(left, l_descr, right, r_descr)
     elif l_descr == "number" and r_descr == "number":
-        is_number = True
+        raise RuntimeError("tuple, tuple operation is not supported!")
     else:
         pass
 
@@ -159,10 +161,7 @@ def mult_ncerr(left, right, **kwargs):
         hlr_utils.result_insert(result, res_descr, value, map_so, axis,
                                 axis_pos)
 
-    if is_number:
-        return tuple(result)
-    else:
-        return result
+    return result
 
 if __name__ == "__main__":
     import hlr_test
@@ -178,9 +177,8 @@ if __name__ == "__main__":
     print "* ", som2[1]
 
     print "********** mult_ncerr"
-    print "* so  *scal:", mult_ncerr(som1[0], (1, 1))
-    print "* so  *so  :", mult_ncerr(som1[0], som1[1])
-    print "* som *scal:", mult_ncerr(som1, (1, 1))
-    print "* som *so  :", mult_ncerr(som1, som1[0])
-    print "* som *som :", mult_ncerr(som1, som2)
-    print "* scal*scal:", mult_ncerr((2, 1), (3, 1))
+    print "* so +scal:", mult_ncerr(som1[0], (1, 1))
+    print "* so +so  :", mult_ncerr(som1[0], som1[1])
+    print "* som+scal:", mult_ncerr(som1, (1, 1))
+    print "* som+so  :", mult_ncerr(som1, som1[0])
+    print "* som+som :", mult_ncerr(som1, som2)

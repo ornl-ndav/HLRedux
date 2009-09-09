@@ -118,7 +118,6 @@ def plot_2D_arr(x, y, z, **kwargs):
     @type title: C{string}
     """
     import matplotlib
-    
             
     # Lookup all the keywords
 

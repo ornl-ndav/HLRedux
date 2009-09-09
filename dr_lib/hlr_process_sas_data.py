@@ -201,6 +201,9 @@ def process_sas_data(datalist, conf, **kwargs):
             
                 if t is not None:
                     t.getTime(msg="After reading beam monitor data ")
+
+                if conf.inst_geom is not None:
+                    i_geom_dst.setGeometry(conf.bmon_path.toPath(), dbm_som0)
         else:
             if conf.verbose:
                 print "Reading in vanadium data"
@@ -214,6 +217,10 @@ def process_sas_data(datalist, conf, **kwargs):
                                             Timer=t)
                 if t is not None:
                     t.getTime(msg="After reading vanadium data ")
+
+                if conf.inst_geom is not None:
+                    i_geom_dst.setGeometry(conf.data_paths.toPath(), dbm_som0)
+
 
         dbm_som1 = dr_lib.fix_bin_contents(dbm_som0)
         
@@ -236,6 +243,9 @@ def process_sas_data(datalist, conf, **kwargs):
             if t is not None:
                 t.getTime(msg="After reading transmission monitor data ")
 
+                if conf.inst_geom is not None:
+                    i_geom_dst.setGeometry(conf.tmon_path.toPath(), dtm_som0)
+                    
             dtm_som1 = dr_lib.fix_bin_contents(dtm_som0)
                 
             del dtm_som0
@@ -461,16 +471,19 @@ def process_sas_data(datalist, conf, **kwargs):
 
     # Step 6: Rebin beam monitor axis onto detector pixel axis
     if conf.beammon_over is None:
-        if conf.verbose:
-            print "Rebin beam monitor axis to detector pixel axis"
+        if not conf.no_bmon_norm:
+            if conf.verbose:
+                print "Rebin beam monitor axis to detector pixel axis"
 
-        if t is not None:
-            t.getTime(False)
+            if t is not None:
+                t.getTime(False)
 
-        dbm_som4 = dr_lib.rebin_monitor(dbm_som3, dp_som5, rtype="frac")
+            dbm_som4 = dr_lib.rebin_monitor(dbm_som3, dp_som5, rtype="frac")
 
-        if t is not None:
-            t.getTime(msg="After rebinning beam monitor ")
+            if t is not None:
+                t.getTime(msg="After rebinning beam monitor ")
+        else:
+            dbm_som4 = dbm_som3
     else:
         dbm_som4 = dbm_som3
 
@@ -487,16 +500,19 @@ def process_sas_data(datalist, conf, **kwargs):
                              +"(rebinned)")
 
     # Step 7: Normalize data by beam monitor
-    if conf.verbose:
-        print "Normalizing data by beam monitor"
+    if not conf.no_bmon_norm:
+        if conf.verbose:
+            print "Normalizing data by beam monitor"
 
-    if t is not None:
-        t.getTime(False)
+        if t is not None:
+            t.getTime(False)
 
-    dp_som6 = common_lib.div_ncerr(dp_som5, dbm_som4)
+        dp_som6 = common_lib.div_ncerr(dp_som5, dbm_som4)
 
-    if t is not None:
-        t.getTime(msg="After normalizing data by beam monitor ")
+        if t is not None:
+            t.getTime(msg="After normalizing data by beam monitor ")
+    else:
+        dp_som6 = dp_som5
 
     del dp_som5
 

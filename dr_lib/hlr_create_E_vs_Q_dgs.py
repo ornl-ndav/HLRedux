@@ -226,6 +226,31 @@ def create_E_vs_Q_dgs(som, E_i, Q_final, **kwargs):
 
     comb_som = __set_som_attributes(comb_som, **kwargs)
 
+    if configure.pdos_Q:
+        # Multiply each slice of Q by 1/Q^2 * exp(u^2 * Q^2) where u is
+        # the Debye-Waller constant
+        import math
+        Q_bc = utils.calc_bin_centers(so_dim.axis[0].val)[0]
+        len_E = len(so_dim.axis[1].val) - 1
+
+        try:
+            dw_const = configure.debye_waller.getValue()
+        except AttributeError:
+            # No Debye-Waller constant given, so assume zero
+            dw_const = 0.0
+        
+        dw_const2 = dw_const * dw_const
+        
+        for i, Q in enumerate(Q_bc):
+            Q2 = Q * Q
+            pdos_scale = math.exp(dw_const2 * Q2) / Q2
+            
+            i_low = i * len_E
+            i_high = (i + 1) * len_E
+
+            so_dim.y[i_low:i_high] *= pdos_scale
+            so_dim.var_y[i_low:i_high] *= (pdos_scale * pdos_scale)
+
     if split:
         comb_som.append(so_dim)
         
