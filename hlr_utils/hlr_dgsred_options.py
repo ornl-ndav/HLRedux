@@ -78,6 +78,17 @@ class DgsRedOptions(hlr_dgs_options.DgsOptions):
                         +"lambda ratio scaling (lambda_i/lambda_f) during "\
                         +"energy transfer conversion.")
         self.set_defaults(lambda_ratio=False)
+
+        self.add_option("", "--pdos-Q", action="store_true", dest="pdos_Q",
+                        help="Flag to turn on the application of a scaling "\
+                        +"factor for a phonon density of states "\
+                        +"representation for S(Q,E)")
+        self.set_defaults(pdos_Q=False)
+
+        self.add_option("", "--debye-waller", dest="debye_waller",
+                        help="Enter the Debye-Waller coefficient and "\
+                        +"associa error^2 for the phonon density of states "\
+                        +"representation in units of Angstroms.")
         
         self.add_option("", "--energy-bins", dest="E_bins",
                         help="Specify the minimum and maximum energy values "\
@@ -152,6 +163,18 @@ def DgsRedConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "lambda_ratio",
                                       "--lambda-ratio"):
         configure.lambda_ratio = options.lambda_ratio
+
+    # Set the flag for making the phonon density of states representation
+    if hlr_utils.cli_provide_override(configure, "pdos_Q", "--pdos-Q"):
+        configure.pdos_Q = options.pdos_Q
+
+    # Set the Debye-Waller constant for the phonon DOS representation
+    if hlr_utils.cli_provide_override(configure, "debye_waller",
+                                      "--debye-waller"):
+        configure.debye_waller = hlr_utils.DrParameterFromString(\
+            options.debye_waller)
+    else:
+        configure.debye_waller = options.debye_waller
 
     # Set the energy transfer bins
     if hlr_utils.cli_provide_override(configure, "E_bins", "--energy-bins"):

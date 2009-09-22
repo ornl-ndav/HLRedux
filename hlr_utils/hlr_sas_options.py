@@ -97,6 +97,11 @@ class SansOptions(hlr_utils.InstOptions):
                         help="Specify a file (vanadium) to override the beam "\
                         +"monitor with.")
 
+        self.add_option("", "--no-bmon-norm", dest="no_bmon_norm",
+                        action="store_true", help="Flag to stop the beam "\
+                        +"monitor normalization from being applied.")
+        self.set_defaults(no_bmon_norm=False)
+
         self.add_option("", "--mon-effc", action="store_true",
                         dest="mon_effc",
                         help="Flag for turning on monitor efficiency "\
@@ -342,6 +347,11 @@ def SansConfiguration(parser, configure, options, args):
             configure.facility,
             configure.proposal,
             stop_on_none=True)
+
+    # Set no_bmon_norm flag
+    if hlr_utils.cli_provide_override(configure, "no_bmon_norm",
+                                      "--no-bmon-norm"):
+        configure.no_bmon_norm = options.no_bmon_norm
     
     # Set mon_effc flag
     if hlr_utils.cli_provide_override(configure, "mon_effc", "--mon-effc"):

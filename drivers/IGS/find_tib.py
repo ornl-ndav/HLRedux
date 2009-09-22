@@ -118,11 +118,11 @@ def __calculate_ratio(conf, ctib, t=None):
     if t is not None:
         t.getTime(msg="After running amorphous_reduction_sqe ")
 
-    pos_int = dr_lib.integrate_spectra(som, start=conf.et_pos_range[0],
-                                       end=conf.et_pos_range[1], axis_pos=1)
+    pos_int = dr_lib.integrate_spectra_py(som, start=conf.et_pos_range[0],
+                                          end=conf.et_pos_range[1], axis_pos=1)
 
-    neg_int = dr_lib.integrate_spectra(som, start=conf.et_neg_range[0],
-                                       end=conf.et_neg_range[1], axis_pos=1) 
+    neg_int = dr_lib.integrate_spectra_py(som, start=conf.et_neg_range[0],
+                                          end=conf.et_neg_range[1], axis_pos=1)
 
     if conf.verbose:
         print "Ratio: %e / %e, %f" % (pos_int[0].y, neg_int[0].y,
