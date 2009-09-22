@@ -141,6 +141,9 @@ def run(config, tim):
     del d_som1, n_som1
 
     sin_theta_rads = (math.sin(theta_rads[0]), math.sin(theta_rads[1]))
+    if sin_theta_rads[0] < 0.0:
+        sin_theta_rads = (math.fabs(sin_theta_rads[0]),
+                          math.fabs(sin_theta_rads[1]))
 
     # Step 6: Scale wavelength axis by sin(theta) to make lambda_T
     if config.verbose:
