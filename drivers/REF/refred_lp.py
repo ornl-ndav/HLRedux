@@ -140,6 +140,11 @@ def run(config, tim):
 
     del d_som1, n_som1
 
+    sin_theta_rads = (math.sin(theta_rads[0]), math.sin(theta_rads[1]))
+    if sin_theta_rads[0] < 0.0:
+        sin_theta_rads = (math.fabs(sin_theta_rads[0]),
+                          math.fabs(sin_theta_rads[1]))
+
     # Step 6: Scale wavelength axis by sin(theta) to make lambda_T
     if config.verbose:
         print "Scaling wavelength axis by sin(theta)"
@@ -147,7 +152,7 @@ def run(config, tim):
     if tim is not None:
         tim.getTime(False)
         
-    d_som3 = common_lib.div_ncerr(d_som2, theta_rads, axis="x")
+    d_som3 = common_lib.div_ncerr(d_som2, sin_theta_rads, axis="x")
 
     if tim is not None:
         tim.getTime(msg="After scaling wavelength axis ")
@@ -169,7 +174,7 @@ def run(config, tim):
                                                     pathlength=pathlength)
  
         delta_lambdap = array_manip.div_ncerr(delta_lambda[0], delta_lambda[1],
-                                              math.sin(theta_rads[0]), 0.0)
+                                              sin_theta_rads[0], 0.0)
 
         config.lambdap_bins = dr_lib.create_axis_from_data(d_som3,
                                                        width=delta_lambdap[0])

@@ -119,11 +119,19 @@ def run(config, tim=None):
         start_val = float("inf")
         end_val = float("inf")
     else:
-        start_val = common_lib.energy_to_wavelength(\
-                (config.norm_int_range[1], 0.0))[0]
-        end_val = common_lib.energy_to_wavelength(\
-                (config.norm_int_range[0], 0.0))[0]
-        
+        if not config.wb_norm:
+            # Translate energy transfer to final energy
+            ef_start = config.initial_energy.getValue() - \
+                       config.norm_int_range[0]
+            ef_end = config.initial_energy.getValue() - \
+                     config.norm_int_range[1]
+            # Convert final energy to final wavelength
+            start_val = common_lib.energy_to_wavelength((ef_start, 0.0))[0]
+            end_val = common_lib.energy_to_wavelength((ef_end, 0.0))[0]
+        else:
+            start_val = config.norm_int_range[0]
+            end_val = config.norm_int_range[1]
+            
     n_som3 = dr_lib.integrate_spectra(n_som2, start=start_val,
                                       end=end_val, width=True)
 
@@ -207,6 +215,13 @@ if __name__ == "__main__":
                       +"below which a pixel will be masked out. The default "\
                       +"is 0.0.")
     parser.set_defaults(lo_threshold=0.0)    
+
+    parser.add_option("", "--wb-norm", action="store_true", dest="wb_norm",
+                      help="Flag to override the behavior of the "\
+                      +"norm-int-range option. The values given by the "\
+                      +"option will be used verbatim and are assumed to be"\
+                      +"wavelengths in units of Angstroms.")
+    parser.set_defaults(wb_norm=False)
     
     parser.add_option("", "--timing", action="store_true", dest="timing",
                       help="Flag to turn on timing of code")
@@ -229,6 +244,10 @@ if __name__ == "__main__":
     if hlr_utils.cli_provide_override(configure, "lo_threshold",
                                       "--lo-threshold"):
         configure.lo_threshold = options.lo_threshold
+
+    # Set the white-beam normalization option
+    if hlr_utils.cli_provide_override(configure, "wb_norm", "--wb-norm"):
+        configure.wb_norm = options.wb_norm
         
     # Set timer object if timing option is used
     if options.timing:
