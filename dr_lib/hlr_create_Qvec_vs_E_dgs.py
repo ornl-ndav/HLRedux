@@ -226,9 +226,9 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
     else:
         outdir = ""
 
-    topdir = os.path.join(outdir, 
-                          str(som.attr_list["data-run_number"].getValue()\
-                              + "-mesh"))
+    value = str(som.attr_list["data-run_number"].getValue()).split('/')
+
+    topdir = os.path.join(outdir, value[0].strip() + "-mesh")
     try:
         os.mkdir(topdir)
     except OSError:
