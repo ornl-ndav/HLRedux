@@ -36,8 +36,9 @@ def make_bank_map(dfilelist):
     @type dfilelist: C{list}
 
 
-    @return: A mapping of the banks to offsets for the 2D grid.
-    @rtype: C{dict}
+    @return: A mapping of the banks to offsets for the 2D grid and an offset
+             for the lowset bank.
+    @rtype: C{tuple} of (C{dict}, C{int})
     """
     bmap = {}
 
@@ -50,7 +51,13 @@ def make_bank_map(dfilelist):
         for i in range(min_bank, max_bank+1):
             bmap["bank%d" % i] = i - 1
 
-    return bmap
+    # If lowest bank is not zero, we need to adjust the indicies
+    minval = min(bmap.values())
+    if minval > 0:
+        for key in bmap:
+            bmap[key] -= minval
+
+    return (bmap, minval)
 
 def run(config):
     """
@@ -72,13 +79,12 @@ def run(config):
     if dst_type != "text/num-info":
         raise RuntimeError("Cannot handle DST type: %s" % dst_type)
 
-    bank_map = make_bank_map(config.data)
+    (bank_map, offset) = make_bank_map(config.data)
     num_banks = len(bank_map)
     len_x = config.num_tubes * num_banks
     len_data = config.num_pixels * len_x
 
     grid = nessi_list.NessiList(len_data)
-
     run_number = -1
     instrument = ""
     
@@ -123,8 +129,8 @@ def run(config):
                        logz=config.logz, colormap=colormap, nocb=True)
 
     # Set grid lines to dilineate the banks
-    drplot.grid_setter(locator=num_banks,
-                       ticklabels=[str(i+1) for i in range(num_banks+1)])
+    tl = [str(i+1) for i in range(offset, offset+num_banks+1)]
+    drplot.grid_setter(locator=num_banks, ticklabels=tl)
 
     if config.pixel_grid:
         # Set some grid lines for the pixels
