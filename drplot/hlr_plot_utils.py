@@ -111,7 +111,7 @@ def log_for_pcolor(data):
     return matplotlib.colors.LogNorm(vmin=data_min)
 
 def grid_setter(axis="x", which="major", linestyle="-", locator=None,
-                ticklabels=None):
+                ticklabels=None, rotation=None):
     """
     This utility function sets the major properties for grid lines on plots.
 
@@ -133,6 +133,10 @@ def grid_setter(axis="x", which="major", linestyle="-", locator=None,
     @param ticklabels: This allows one to set the tick labels for the given
                        axis.
     @type ticklabels: C{list} of C{string}s
+
+    @param rotation: This allows for the tick labels to be rotated. The value
+                     can be a number or the words I{vertical} or I{horizontal}.
+    @type rotation: C{string}
 
 
     @raise: RuntimeError if the axis specified is not x, y or z.
@@ -158,6 +162,6 @@ def grid_setter(axis="x", which="major", linestyle="-", locator=None,
         axiso.set_major_locator(matplotlib.ticker.MaxNLocator(locator))
 
     if ticklabels is not None:
-        axiso.set_ticklabels(ticklabels)
+        axiso.set_ticklabels(ticklabels, rotation=rotation)
 
     
