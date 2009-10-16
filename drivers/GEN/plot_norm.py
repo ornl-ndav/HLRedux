@@ -130,7 +130,7 @@ def run(config):
 
     # Set grid lines to dilineate the banks
     tl = [str(i+1) for i in range(offset, offset+num_banks+1)]
-    drplot.grid_setter(locator=num_banks, ticklabels=tl)
+    drplot.grid_setter(locator=num_banks, ticklabels=tl, rotation='vertical')
 
     if config.pixel_grid:
         # Set some grid lines for the pixels
