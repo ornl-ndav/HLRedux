@@ -136,7 +136,8 @@ def run(config):
         # Set some grid lines for the pixels
         drplot.grid_setter(axis="y", linestyle="-.")
 
-    pylab.colorbar(orientation="horizontal", fraction=0.05)
+    pylab.colorbar(orientation="horizontal", fraction=0.05,
+                   format=config.format)
     pylab.show()
 
 if __name__ == "__main__":
@@ -179,6 +180,10 @@ if __name__ == "__main__":
                       +"the pixels.")
     parser.set_defaults(pixel_grid=False)
 
+    parser.add_option("", "--format", dest="format", help="Specify a text "\
+                      +"format for the colorbar values. The default is %.2f")
+    parser.set_defaults(format="%.2f")
+
     # Do not need to use the following options
     parser.remove_option("--config")
     parser.remove_option("--data")
@@ -219,6 +224,9 @@ if __name__ == "__main__":
 
     # Set the flag for pixel grid lines
     configure.pixel_grid = options.pixel_grid    
+
+    # Set the colorbar value formatting string
+    configure.format = options.format
 
     # Run the program
     run(configure)
