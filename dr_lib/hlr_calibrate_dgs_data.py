@@ -54,6 +54,9 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
     @keyword dataset_type: The practical name of the dataset being processed.
                            The default value is I{data}.
     @type dataset_type: C{string}
+
+    @keyword cwp: A list of chopper phase corrections in units of microseconds.
+    @type cwp: C{list} of C{float}s
     
     @keyword timer: Timing object so the function can perform timing estimates.
     @type timer: C{sns_timer.DiffTime}
@@ -87,6 +90,8 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
     except KeyError:
         i_geom_dst = None
 
+    dataset_cwp = kwargs.get("cwp")
+
     # Open the appropriate datafiles
     if conf.verbose:
         print "Reading %s file" % dataset_type
@@ -112,6 +117,7 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
                                              Signal_ROI=conf.roi_file,
                                              Signal_MASK=mask_file,
                                              dataset_type=dataset_type,
+                                             cwp=dataset_cwp,
                                              Verbose=conf.verbose, Timer=t)
 
     if t is not None:
