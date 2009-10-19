@@ -61,6 +61,13 @@ def add_files_dm(filelist, **kwargs):
                            The default value is I{data}.
     @type dataset_type: C{string}
 
+    @keyword dataset_cwp: A set of chopper phase corrections for the dataset.
+                          This will instruct the function to shift the TOF
+                          axes of mulitple datasets and perform rebinning. The
+                          TOF axis for the first dataset is the one that all
+                          other datasets will be rebinned to.
+    @type dataset_cwp: C{list} of C{float}s
+
     @keyword Verbose: This is a flag to turn on print statments. The default is
                       I{False}.
     @type Verbose: C{boolean}
@@ -122,6 +129,8 @@ def add_files_dm(filelist, **kwargs):
         timer = kwargs["Timer"]
     except KeyError:
         timer = None
+
+    dataset_cwp = kwargs.get("dataset_cwp")
 
     if signal_roi is not None and signal_mask is not None:
         raise RuntimeError("Cannot specify both ROI and MASK file! Please "\
