@@ -98,21 +98,21 @@ class DgsOptions(hlr_options.InstOptions):
 
         self.add_option("", "--cwp-data", dest="cwp_data", help="Specify a "\
                         +"comma delimited list of chopper phase corrections "\
-                        +"sample data. The units of the parameters should be "\
-                        +"microseconds and there should be as many values as "\
-                        +"datasets.")
+                        +"for sample data. The units of the parameters "\
+                        +"should be microseconds and there should be as many "\
+                        +"values as datasets.")
 
         self.add_option("", "--cwp-ecan", dest="cwp_ecan", help="Specify a "\
                         +"comma delimited list of chopper phase corrections "\
-                        +"empty can data. The units of the parameters should "\
-                        +"be microseconds and there should be as many values "\
-                        +"as datasets.")
+                        +"for empty can data. The units of the parameters "\
+                        +"should be microseconds and there should be as many "\
+                        +"values as datasets.")
 
         self.add_option("", "--cwp-bcan", dest="cwp_ecan", help="Specify a "\
                         +"comma delimited list of chopper phase corrections "\
-                        +"black can data. The units of the parameters should "\
-                        +"be microseconds and there should be as many values "\
-                        +"as datasets.")       
+                        +"for black can data. The units of the parameters "\
+                        +"should be microseconds and there should be as many "\
+                        +"values as datasets.")       
 
         self.add_option("", "--initial-energy", dest="initial_energy",
                         help="Specify the initial energy, err^2 for the "\
