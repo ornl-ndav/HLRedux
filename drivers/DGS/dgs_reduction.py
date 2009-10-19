@@ -98,6 +98,7 @@ def run(config, tim=None):
                                            dataset_type="black_can",
                                            inst_geom_dst=inst_geom_dst,
                                            tib_const=config.tib_const,
+                                           cwp=config.cwp_data,
                                            timer=tim)
     else:
         b_som1 = None
@@ -108,6 +109,7 @@ def run(config, tim=None):
                                            dataset_type="empty_can",
                                            inst_geom_dst=inst_geom_dst,
                                            tib_const=config.tib_const,
+                                           cwp=config.cwp_ecan,
                                            timer=tim)
     else:
         e_som1 = None
@@ -116,6 +118,7 @@ def run(config, tim=None):
     d_som1 = dr_lib.calibrate_dgs_data(config.data, config, dc_som,
                                        inst_geom_dst=inst_geom_dst,
                                        tib_const=config.tib_const,
+                                       cwp=config.cwp_bcan,
                                        timer=tim)
 
     # Perform Steps 7-16 on sample data
