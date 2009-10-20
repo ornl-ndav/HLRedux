@@ -142,7 +142,15 @@ def add_files_dm(filelist, **kwargs):
     for filename in filelist:
         if verbose:
             print "File:", filename
-            
+            if dataset_cwp is not None:
+                print "TOF Offset:", dataset_cwp[counter]
+
+        if dataset_cwp is not None:
+            cwp = dataset_cwp[counter]
+        else:
+            cwp = None
+
+        print "A:", cwp
         try:
             data_dst = DST.getInstance(dst_type, filename)
         except SystemError:
@@ -157,7 +165,7 @@ def add_files_dm(filelist, **kwargs):
 
         if counter == 0:
             d_som1 = data_dst.getSOM(data_paths, so_axis, roi_file=signal_roi,
-                                     mask_file=signal_mask)
+                                     mask_file=signal_mask, tof_offset=cwp)
             d_som1.rekeyNxPars(dataset_type)
 
             if verbose:
@@ -165,6 +173,7 @@ def add_files_dm(filelist, **kwargs):
                 try:
                     print "# TOF:", len(d_som1[0])
                     print "# TOF Axis:", len(d_som1[0].axis[0].val)
+                    print "# TOF Axis:", d_som1[0].axis[0].val
                 except IndexError:
                     # No data is present so say so again
                     print "information is unavailable since no data "\
@@ -193,7 +202,7 @@ def add_files_dm(filelist, **kwargs):
                 m_som1 = None
         else:
             d_som_t = data_dst.getSOM(data_paths, so_axis, roi_file=signal_roi,
-                                      mask_file=signal_mask)
+                                      mask_file=signal_mask, tof_offset=cwp)
             d_som_t.rekeyNxPars(dataset_type)
             
             if timer is not None:
