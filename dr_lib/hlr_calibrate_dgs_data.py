@@ -117,7 +117,7 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
                                              Signal_ROI=conf.roi_file,
                                              Signal_MASK=mask_file,
                                              dataset_type=dataset_type,
-                                             cwp=dataset_cwp,
+                                             dataset_cwp=dataset_cwp,
                                              Verbose=conf.verbose, Timer=t)
 
     if t is not None:
