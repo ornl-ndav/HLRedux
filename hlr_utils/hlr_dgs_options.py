@@ -240,6 +240,8 @@ def DgsConfiguration(parser, configure, options, args):
             if len(configure.data) != len(configure.cwp_data):
                 parser.error("Need the same number of chopper phase "\
                              +"corrections as sample data runs!")
+        else:
+            configure.cwp_data = options.cwp_data
 
     # Set the chopper phase corrections for empty can data
     if hlr_utils.cli_provide_override(configure, "cwp_ecan", "--cwp-ecan"):
@@ -249,6 +251,9 @@ def DgsConfiguration(parser, configure, options, args):
             if len(configure.ecan) != len(configure.cwp_ecan):
                 parser.error("Need the same number of chopper phase "\
                              +"corrections as empty can data runs!")
+        else:
+            configure.cwp_ecan = options.cwp_ecan
+
 
     # Set the chopper phase corrections for black can data
     if hlr_utils.cli_provide_override(configure, "cwp_bcan", "--cwp-bcan"):
@@ -258,6 +263,8 @@ def DgsConfiguration(parser, configure, options, args):
             if len(configure.bcan) != len(configure.cwp_bcan):
                 parser.error("Need the same number of chopper phase "\
                              +"corrections as black can data runs!")
+        else:
+            configure.cwp_bcan = options.cwp_bcan
 
     # Set the initial energy
     if hlr_utils.cli_provide_override(configure, "initial_energy",
