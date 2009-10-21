@@ -146,6 +146,7 @@ def add_files_dm(filelist, **kwargs):
                 print "TOF Offset:", dataset_cwp[counter]
 
         if dataset_cwp is not None:
+            import common_lib
             cwp = dataset_cwp[counter]
         else:
             cwp = None
@@ -201,12 +202,20 @@ def add_files_dm(filelist, **kwargs):
             else:
                 m_som1 = None
         else:
-            d_som_t = data_dst.getSOM(data_paths, so_axis, roi_file=signal_roi,
-                                      mask_file=signal_mask, tof_offset=cwp)
-            d_som_t.rekeyNxPars(dataset_type)
+            d_som_t0 = data_dst.getSOM(data_paths, so_axis,
+                                       roi_file=signal_roi,
+                                       mask_file=signal_mask, tof_offset=cwp)
+            d_som_t0.rekeyNxPars(dataset_type)
             
             if timer is not None:
                 timer.getTime(msg="After reading data")
+
+            if dataset_cwp is not None:
+                d_som_t = common_lib.rebin_1D_frac(d_som_t0,
+                                                   d_som1[0].axis[0].val)
+                del d_som_t0
+            else:
+                d_som_t = d_som_t0
 
             d_som1 = common_lib.add_ncerr(d_som_t, d_som1, add_nxpars=True)
 
