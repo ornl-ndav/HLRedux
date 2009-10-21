@@ -189,7 +189,8 @@ def add_files_dm(filelist, **kwargs):
                     print "Reading monitor %d" % counter
 
                 if counter == 0:
-                    m_som1 = data_dst.getSOM(mon_paths, so_axis)
+                    m_som1 = data_dst.getSOM(mon_paths, so_axis,
+                                             tof_offset=cwp)
                     m_som1.rekeyNxPars(dataset_type)
 
                 if verbose:
@@ -228,11 +229,18 @@ def add_files_dm(filelist, **kwargs):
                 timer.getTime(msg="After data SOM deletion")
 
             if mon_paths is not None:
-                m_som_t = data_dst.getSOM(mon_paths, so_axis)
-                m_som_t.rekeyNxPars(dataset_type)
+                m_som_t0 = data_dst.getSOM(mon_paths, so_axis, tof_offset=cwp)
+                m_som_t0.rekeyNxPars(dataset_type)
                 
                 if timer is not None:
                     timer.getTime(msg="After reading monitor data")
+
+                if dataset_cwp is not None:
+                    m_som_t = common_lib.rebin_1D_frac(m_som_t0,
+                                                       m_som1[0].axis[0].val)
+                    del m_som_t0
+                else:
+                    m_som_t = m_som_t0
 
                 m_som1 = common_lib.add_ncerr(m_som_t, m_som1, add_nxpars=True)
 
