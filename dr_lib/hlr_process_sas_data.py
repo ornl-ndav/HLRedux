@@ -635,16 +635,19 @@ def process_sas_data(datalist, conf, **kwargs):
         
     del dp_som7
 
-    # Step 11: Apply SAS correction factor to data
-    if conf.verbose:
-        print "Applying geometrical correction"
+    if conf.facility == "LENS":
+        # Step 11: Apply SAS correction factor to data
+        if conf.verbose:
+            print "Applying geometrical correction"
 
-    if t is not None:
-        t.getTime(False)
+        if t is not None:
+            t.getTime(False)
 
-    dp_som9 = dr_lib.apply_sas_correct(dp_som8)
+        dp_som9 = dr_lib.apply_sas_correct(dp_som8)
 
-    if t is not None:
-        t.getTime(msg="After applying geometrical correction ")
- 
-    return dp_som9
+        if t is not None:
+            t.getTime(msg="After applying geometrical correction ")
+
+        return dp_som9
+    else:
+        return dp_som8
