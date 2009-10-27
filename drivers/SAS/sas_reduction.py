@@ -206,18 +206,21 @@ def run(config, tim=None):
 
     del d_som5
 
-    # Step 18: Scale final spectrum by Q bin centers
-    if config.verbose:
-        print "Scaling final spectrum by Q centers"
+    if config.facility == "LENS":
+        # Step 18: Scale final spectrum by Q bin centers
+        if config.verbose:
+            print "Scaling final spectrum by Q centers"
         
-    if tim is not None:
-        tim.getTime(False)
+        if tim is not None:
+            tim.getTime(False)
 
-    d_som7 = dr_lib.fix_bin_contents(d_som6, scale=True, width=True,
-                                     units="1/Angstroms")
+        d_som7 = dr_lib.fix_bin_contents(d_som6, scale=True, width=True,
+                                         units="1/Angstroms")
 
-    if tim is not None:
-        tim.getTime(msg="After scaling final spectrum")    
+        if tim is not None:
+            tim.getTime(msg="After scaling final spectrum")    
+    else:
+        d_som7 = d_som6
 
     del d_som6
 
