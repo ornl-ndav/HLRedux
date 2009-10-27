@@ -96,24 +96,6 @@ class DgsOptions(hlr_options.InstOptions):
                         help="TOF range for calculating time-independent "\
                         +"background.")
 
-        self.add_option("", "--cwp-data", dest="cwp_data", help="Specify a "\
-                        +"comma delimited list of chopper phase corrections "\
-                        +"for sample data. The units of the parameters "\
-                        +"should be microseconds and there should be as many "\
-                        +"values as datasets.")
-
-        self.add_option("", "--cwp-ecan", dest="cwp_ecan", help="Specify a "\
-                        +"comma delimited list of chopper phase corrections "\
-                        +"for empty can data. The units of the parameters "\
-                        +"should be microseconds and there should be as many "\
-                        +"values as datasets.")
-
-        self.add_option("", "--cwp-bcan", dest="cwp_bcan", help="Specify a "\
-                        +"comma delimited list of chopper phase corrections "\
-                        +"for black can data. The units of the parameters "\
-                        +"should be microseconds and there should be as many "\
-                        +"values as datasets.")       
-
         self.add_option("", "--initial-energy", dest="initial_energy",
                         help="Specify the initial energy, err^2 for the "\
                         +"reduction in units of meV")
@@ -231,40 +213,6 @@ def DgsConfiguration(parser, configure, options, args):
     # Stop is both TIB methods are used
     if configure.tib_const is not None and configure.tib_range is not None:
         parser.error("Please use either --tib-const or --tib-range")
-
-    # Set the chopper phase corrections for sample data
-    if hlr_utils.cli_provide_override(configure, "cwp_data", "--cwp-data"):
-        if options.cwp_data is not None:
-            configure.cwp_data = [float(x) \
-                                  for x in options.cwp_data.split(',')]
-            if len(configure.data) != len(configure.cwp_data):
-                parser.error("Need the same number of chopper phase "\
-                             +"corrections as sample data runs!")
-        else:
-            configure.cwp_data = options.cwp_data
-
-    # Set the chopper phase corrections for empty can data
-    if hlr_utils.cli_provide_override(configure, "cwp_ecan", "--cwp-ecan"):
-        if options.cwp_ecan is not None:
-            configure.cwp_ecan = [float(x) \
-                                  for x in options.cwp_ecan.split(',')]
-            if len(configure.ecan) != len(configure.cwp_ecan):
-                parser.error("Need the same number of chopper phase "\
-                             +"corrections as empty can data runs!")
-        else:
-            configure.cwp_ecan = options.cwp_ecan
-
-
-    # Set the chopper phase corrections for black can data
-    if hlr_utils.cli_provide_override(configure, "cwp_bcan", "--cwp-bcan"):
-        if options.cwp_bcan is not None:
-            configure.cwp_bcan = [float(x) \
-                                  for x in options.cwp_bcan.split(',')]
-            if len(configure.bcan) != len(configure.cwp_bcan):
-                parser.error("Need the same number of chopper phase "\
-                             +"corrections as black can data runs!")
-        else:
-            configure.cwp_bcan = options.cwp_bcan
 
     # Set the initial energy
     if hlr_utils.cli_provide_override(configure, "initial_energy",

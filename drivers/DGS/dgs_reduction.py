@@ -98,7 +98,6 @@ def run(config, tim=None):
                                            dataset_type="black_can",
                                            inst_geom_dst=inst_geom_dst,
                                            tib_const=config.tib_const,
-                                           cwp=config.cwp_bcan,
                                            timer=tim)
     else:
         b_som1 = None
@@ -109,7 +108,6 @@ def run(config, tim=None):
                                            dataset_type="empty_can",
                                            inst_geom_dst=inst_geom_dst,
                                            tib_const=config.tib_const,
-                                           cwp=config.cwp_ecan,
                                            timer=tim)
     else:
         e_som1 = None
@@ -118,7 +116,6 @@ def run(config, tim=None):
     d_som1 = dr_lib.calibrate_dgs_data(config.data, config, dc_som,
                                        inst_geom_dst=inst_geom_dst,
                                        tib_const=config.tib_const,
-                                       cwp=config.cwp_data,
                                        timer=tim)
 
     # Perform Steps 7-16 on sample data
@@ -266,15 +263,6 @@ def run(config, tim=None):
                              path_replacement=config.path_replacement,
                              verbose=config.verbose,
                              message="S(Q,E)")
-
-        hlr_utils.write_file(config.output, "application/x-RedNxs", d_som5_2,
-                             output_ext="nxs",
-                             data_ext=config.ext_replacement,    
-                             path_replacement=config.path_replacement,
-                             verbose=config.verbose,
-                             extra_tag="sqe",
-                             getsom_kwargs={"entry_name": "sqe"},
-                             message="NeXus S(Q,E)")
                                                
     if tim is not None:
         tim.getTime(msg="After calculating S(Q,E) spectrum ")    

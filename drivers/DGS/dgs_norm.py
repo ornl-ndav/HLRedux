@@ -74,7 +74,6 @@ def run(config, tim=None):
                                            dataset_type="black_can",
                                            inst_geom_dst=inst_geom_dst,
                                            tib_const=config.tib_const,
-                                           cwp=config.cwp_data,
                                            timer=tim)
     else:
         b_som1 = None
@@ -85,7 +84,6 @@ def run(config, tim=None):
                                            dataset_type="empty_can",
                                            inst_geom_dst=inst_geom_dst,
                                            tib_const=config.tib_const,
-                                           cwp=config.cwp_ecan,
                                            timer=tim)
     else:
         e_som1 = None
@@ -95,7 +93,6 @@ def run(config, tim=None):
                                        dataset_type="normalization",
                                        inst_geom_dst=inst_geom_dst,
                                        tib_const=config.tib_const,
-                                       cwp=config.cwp_bcan,
                                        timer=tim)
 
     # Perform Steps 7-16 on normalization data
@@ -198,15 +195,6 @@ if __name__ == "__main__":
                                   None, hlr_utils.program_version(), 'error',
                                   " ".join(description))
 
-    # Modify help for cwp-data option
-    parser.get_option("--cwp-data").help = "Specify a comma delimited list "\
-                                           +"of chopper phase corrections "\
-                                           +"for normalization data. The "\
-                                           +"units of the parameters should "\
-                                           +"be microseconds and there "\
-                                           +"should be as many values as "\
-                                           +"datasets."
-    
     # Remove unneeded options
     parser.remove_option("--norm")
     parser.remove_option("--data-trans-coeff")

@@ -61,13 +61,6 @@ def add_files_dm(filelist, **kwargs):
                            The default value is I{data}.
     @type dataset_type: C{string}
 
-    @keyword dataset_cwp: A set of chopper phase corrections for the dataset.
-                          This will instruct the function to shift the TOF
-                          axes of mulitple datasets and perform rebinning. The
-                          TOF axis for the first dataset is the one that all
-                          other datasets will be rebinned to.
-    @type dataset_cwp: C{list} of C{float}s
-
     @keyword Verbose: This is a flag to turn on print statments. The default is
                       I{False}.
     @type Verbose: C{boolean}
@@ -130,8 +123,6 @@ def add_files_dm(filelist, **kwargs):
     except KeyError:
         timer = None
 
-    dataset_cwp = kwargs.get("dataset_cwp")
-
     if signal_roi is not None and signal_mask is not None:
         raise RuntimeError("Cannot specify both ROI and MASK file! Please "\
                            +"choose!")
@@ -142,16 +133,7 @@ def add_files_dm(filelist, **kwargs):
     for filename in filelist:
         if verbose:
             print "File:", filename
-            if dataset_cwp is not None:
-                print "TOF Offset:", dataset_cwp[counter]
-
-        if dataset_cwp is not None:
-            import common_lib
-            cwp = dataset_cwp[counter]
-        else:
-            cwp = None
-
-        print "A:", cwp
+            
         try:
             data_dst = DST.getInstance(dst_type, filename)
         except SystemError:
@@ -166,7 +148,7 @@ def add_files_dm(filelist, **kwargs):
 
         if counter == 0:
             d_som1 = data_dst.getSOM(data_paths, so_axis, roi_file=signal_roi,
-                                     mask_file=signal_mask, tof_offset=cwp)
+                                     mask_file=signal_mask)
             d_som1.rekeyNxPars(dataset_type)
 
             if verbose:
@@ -174,7 +156,6 @@ def add_files_dm(filelist, **kwargs):
                 try:
                     print "# TOF:", len(d_som1[0])
                     print "# TOF Axis:", len(d_som1[0].axis[0].val)
-                    print "# TOF Axis:", d_som1[0].axis[0].val
                 except IndexError:
                     # No data is present so say so again
                     print "information is unavailable since no data "\
@@ -189,8 +170,7 @@ def add_files_dm(filelist, **kwargs):
                     print "Reading monitor %d" % counter
 
                 if counter == 0:
-                    m_som1 = data_dst.getSOM(mon_paths, so_axis,
-                                             tof_offset=cwp)
+                    m_som1 = data_dst.getSOM(mon_paths, so_axis)
                     m_som1.rekeyNxPars(dataset_type)
 
                 if verbose:
@@ -203,20 +183,12 @@ def add_files_dm(filelist, **kwargs):
             else:
                 m_som1 = None
         else:
-            d_som_t0 = data_dst.getSOM(data_paths, so_axis,
-                                       roi_file=signal_roi,
-                                       mask_file=signal_mask, tof_offset=cwp)
-            d_som_t0.rekeyNxPars(dataset_type)
+            d_som_t = data_dst.getSOM(data_paths, so_axis, roi_file=signal_roi,
+                                      mask_file=signal_mask)
+            d_som_t.rekeyNxPars(dataset_type)
             
             if timer is not None:
                 timer.getTime(msg="After reading data")
-
-            if dataset_cwp is not None:
-                d_som_t = common_lib.rebin_1D_frac(d_som_t0,
-                                                   d_som1[0].axis[0].val)
-                del d_som_t0
-            else:
-                d_som_t = d_som_t0
 
             d_som1 = common_lib.add_ncerr(d_som_t, d_som1, add_nxpars=True)
 
@@ -229,18 +201,11 @@ def add_files_dm(filelist, **kwargs):
                 timer.getTime(msg="After data SOM deletion")
 
             if mon_paths is not None:
-                m_som_t0 = data_dst.getSOM(mon_paths, so_axis, tof_offset=cwp)
-                m_som_t0.rekeyNxPars(dataset_type)
+                m_som_t = data_dst.getSOM(mon_paths, so_axis)
+                m_som_t.rekeyNxPars(dataset_type)
                 
                 if timer is not None:
                     timer.getTime(msg="After reading monitor data")
-
-                if dataset_cwp is not None:
-                    m_som_t = common_lib.rebin_1D_frac(m_som_t0,
-                                                       m_som1[0].axis[0].val)
-                    del m_som_t0
-                else:
-                    m_som_t = m_som_t0
 
                 m_som1 = common_lib.add_ncerr(m_som_t, m_som1, add_nxpars=True)
 
