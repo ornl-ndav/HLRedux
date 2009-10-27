@@ -212,8 +212,8 @@ def add_files_dm(filelist, **kwargs):
                 timer.getTime(msg="After reading data")
 
             if dataset_cwp is not None:
-                d_som_t = common_lib.rebin_1D_frac(d_som_t0,
-                                                   d_som1[0].axis[0].val)
+                d_som_t = common_lib.rebin_axis_1D_frac(d_som_t0,
+                                                        d_som1[0].axis[0].val)
                 del d_som_t0
             else:
                 d_som_t = d_som_t0
@@ -236,8 +236,8 @@ def add_files_dm(filelist, **kwargs):
                     timer.getTime(msg="After reading monitor data")
 
                 if dataset_cwp is not None:
-                    m_som_t = common_lib.rebin_1D_frac(m_som_t0,
-                                                       m_som1[0].axis[0].val)
+                    m_som_t = common_lib.rebin_axis_1D_frac(m_som_t0,
+                                                        m_som1[0].axis[0].val)
                     del m_som_t0
                 else:
                     m_som_t = m_som_t0
