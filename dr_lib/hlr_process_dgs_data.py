@@ -53,6 +53,10 @@ def process_dgs_data(obj, conf, bcan, ecan, tcoeff, **kwargs):
                            The default value is I{data}.
     @type dataset_type: C{string}
 
+    @keyword cwp_used: A flag signalling the use of the chopper phase
+                       corrections.
+    @type cwp_used: C{bool}
+
     @keyword timer: Timing object so the function can perform timing estimates.
     @type timer: C{sns_timer.DiffTime}
 
@@ -76,6 +80,8 @@ def process_dgs_data(obj, conf, bcan, ecan, tcoeff, **kwargs):
     except KeyError:
         t = None
 
+    cwp_used = kwargs.get("cwp_used", False)
+        
     if conf.verbose:
         print "Processing %s information" % dataset_type
 
@@ -121,10 +127,17 @@ def process_dgs_data(obj, conf, bcan, ecan, tcoeff, **kwargs):
         print "Creating background spectra for %s" % dataset_type
     
     if bcan1 is not None and ecan1 is not None:
+        if cwp_used:
+            ecan2 = common_lib.rebin_axis_1D_frac(ecan1, bcan1[0].axis[0].val)
+        else:
+            ecan2 = ecan1
+
+        del ecan1
+        
         if t is not None:
             t.getTime(False)
 
-        b_som = common_lib.add_ncerr(bcan1, ecan1)
+        b_som = common_lib.add_ncerr(bcan1, ecan2)
 
         if t is not None:
             t.getTime(msg="After creating background spectra ")
@@ -136,14 +149,21 @@ def process_dgs_data(obj, conf, bcan, ecan, tcoeff, **kwargs):
         b_som = None
 
     del bcan1, ecan1
+
+    if cwp_used:
+        b_som1 = common_lib.rebin_axis_1D_frac(b_som, obj[0].axis[0].val)
+    else:
+        b_som1 = b_som
+
+    del b_som
         
     # Step 10: Subtract background from data
-    obj1 = dr_lib.subtract_bkg_from_data(obj, b_som, verbose=conf.verbose,
+    obj1 = dr_lib.subtract_bkg_from_data(obj, b_som1, verbose=conf.verbose,
                                          timer=t,
                                          dataset1=dataset_type,
                                          dataset2="background")
 
-    del obj, b_som
+    del obj, b_som1
 
     # Step 11: Calculate initial velocity
     if conf.verbose:
