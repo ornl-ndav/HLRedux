@@ -74,7 +74,7 @@ def run(config, tim=None):
                                            dataset_type="black_can",
                                            inst_geom_dst=inst_geom_dst,
                                            tib_const=config.tib_const,
-                                           cwp=config.cwp_data,
+                                           cwp=config.cwp_bcan,
                                            timer=tim)
     else:
         b_som1 = None
@@ -95,7 +95,7 @@ def run(config, tim=None):
                                        dataset_type="normalization",
                                        inst_geom_dst=inst_geom_dst,
                                        tib_const=config.tib_const,
-                                       cwp=config.cwp_bcan,
+                                       cwp=config.cwp_data,
                                        timer=tim)
 
     # Perform Steps 7-16 on normalization data
