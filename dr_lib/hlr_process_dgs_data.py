@@ -128,6 +128,9 @@ def process_dgs_data(obj, conf, bcan, ecan, tcoeff, **kwargs):
     
     if bcan1 is not None and ecan1 is not None:
         if cwp_used:
+            if conf.verbose:
+                print "Rebinning empty can to black can axis."
+                
             ecan2 = common_lib.rebin_axis_1D_frac(ecan1, bcan1[0].axis[0].val)
         else:
             ecan2 = ecan1
@@ -151,6 +154,9 @@ def process_dgs_data(obj, conf, bcan, ecan, tcoeff, **kwargs):
     del bcan1, ecan1
 
     if cwp_used:
+        if conf.verbose:
+            print "Rebinning background spectra to %s" % dataset_type
+            
         b_som1 = common_lib.rebin_axis_1D_frac(b_som, obj[0].axis[0].val)
     else:
         b_som1 = b_som
