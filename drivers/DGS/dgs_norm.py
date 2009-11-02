@@ -104,9 +104,23 @@ def run(config, tim=None):
     else:
         norm_trans_coeff = config.norm_trans_coeff.toValErrTuple()
 
+    # Determine if we need to rebin the empty or black can data
+    if config.ecan is not None and e_som1 is not None:
+        ecan_cwp = True
+    else:
+        ecan_cwp = False
+
+    if config.bcan is not None and b_som1 is not None:
+        bcan_cwp = True
+    else:
+        bcan_cwp = False        
+
+    cwp_used = ecan_cwp or bcan_cwp
+
     n_som2 = dr_lib.process_dgs_data(n_som1, config, b_som1, e_som1,
                                      norm_trans_coeff,
                                      dataset_type="normalization",
+                                     cwp_used=cwp_used,
                                      timer=tim)
         
     del n_som1, b_som1, e_som1
