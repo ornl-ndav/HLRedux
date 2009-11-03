@@ -156,12 +156,23 @@ def process_dgs_data(obj, conf, bcan, ecan, tcoeff, **kwargs):
     if cwp_used:
         if conf.verbose:
             print "Rebinning background spectra to %s" % dataset_type
-            
+
         b_som1 = common_lib.rebin_axis_1D_frac(b_som, obj[0].axis[0].val)
     else:
         b_som1 = b_som
 
     del b_som
+
+    if conf.dump_ctof_comb:
+        b_som_1 = dr_lib.sum_all_spectra(b_som1)
+        hlr_utils.write_file(conf.output, "text/Spec", b_som_1,
+                             output_ext="ctof",
+                             extra_tag="background",
+                             data_ext=conf.ext_replacement,    
+                             path_replacement=conf.path_replacement,
+                             verbose=conf.verbose,
+                             message="combined background TOF information")
+        del b_som_1
         
     # Step 10: Subtract background from data
     obj1 = dr_lib.subtract_bkg_from_data(obj, b_som1, verbose=conf.verbose,
