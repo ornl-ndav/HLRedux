@@ -163,7 +163,7 @@ def process_dgs_data(obj, conf, bcan, ecan, tcoeff, **kwargs):
 
     del b_som
 
-    if conf.dump_ctof_comb:
+    if conf.dump_ctof_comb and b_som1 is not None:
         b_som_1 = dr_lib.sum_all_spectra(b_som1)
         hlr_utils.write_file(conf.output, "text/Spec", b_som_1,
                              output_ext="ctof",
