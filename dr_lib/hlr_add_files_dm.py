@@ -151,7 +151,6 @@ def add_files_dm(filelist, **kwargs):
         else:
             cwp = None
 
-        print "A:", cwp
         try:
             data_dst = DST.getInstance(dst_type, filename)
         except SystemError:
@@ -174,7 +173,6 @@ def add_files_dm(filelist, **kwargs):
                 try:
                     print "# TOF:", len(d_som1[0])
                     print "# TOF Axis:", len(d_som1[0].axis[0].val)
-                    print "# TOF Axis:", d_som1[0].axis[0].val
                 except IndexError:
                     # No data is present so say so again
                     print "information is unavailable since no data "\
