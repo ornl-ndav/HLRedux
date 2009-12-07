@@ -134,12 +134,15 @@ class NxPath(object):
         @return: The XML node with the C{NxPath} object information
         @rtype: C{xml.dom.minidom.Node}
         """
-        import xml.dom.minidom
+        if self.__data_paths is None:
+            return None
+        else:
+            import xml.dom.minidom
 
-        tnode = doc.createTextNode(str(self.toPath()))
-        node.appendChild(tnode)
+            tnode = doc.createTextNode(str(self.toPath()))
+            node.appendChild(tnode)
 
-        return node
+            return node
 
 def NxPathFromXmlConfig(node):
     """
