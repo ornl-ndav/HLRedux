@@ -147,17 +147,29 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
     else:
         y_sort = False
 
-    d_som2 = dr_lib.sum_all_spectra(d_som1, y_sort=y_sort, stripe=True,
+    d_som1A = dr_lib.sum_all_spectra(d_som1, y_sort=y_sort, stripe=True,
                                     pixel_fix=127)
 
     del d_som1
     
     if b_som1 is not None:
-        b_som2 = dr_lib.sum_all_spectra(b_som1, y_sort=y_sort, stripe=True,
+        b_som1A = dr_lib.sum_all_spectra(b_som1, y_sort=y_sort, stripe=True,
                                         pixel_fix=127)
         del b_som1
     else:
-        b_som2 = b_som1
+        b_som1A = b_som1
+
+    # Cut the spectra if necessary
+    d_som2 = dr_lib.cut_spectra(d_som1A, conf.tof_cut_min, conf.tof_cut_max)
+
+    del d_som1A
+
+    if b_som1A is not None:
+        b_som2 = dr_lib.cut_spectra(b_som1A, conf.tof_cut_min,
+                                    conf.tof_cut_max)
+        del b_som1A
+    else:
+        b_som2 = b_som1A
 
     # Fix TOF cuts to make them list of integers
     try:
