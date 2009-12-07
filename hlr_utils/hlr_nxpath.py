@@ -27,7 +27,12 @@ class NxPath(object):
     This class creates U{NeXus<www.nexusformat.org>} path,signal groups from an
     incoming comma-separated string. The string needs to have an even number of
     entries. The string should have the following form:
-    I{/entry/bank1,1/entry/bank2,1}.
+    I{/entry/bank1,1/entry/bank2,1}. The string can also be just a listing of
+    numeric bank numbers: I{1-4,7-10}. One can also add alternate path
+    destinations for the numeric specification. A colon is used as the
+    delimiter I{:} to designate that what follows is the path. The path is
+    given as a comma delimited list with the final part being the string that
+    the numeric entries will be appended to: I{1:entry,monitor}.
     """
 
     def __init__(self, infostr):
