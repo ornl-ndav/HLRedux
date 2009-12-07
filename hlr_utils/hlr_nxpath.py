@@ -45,10 +45,21 @@ class NxPath(object):
         self.__data_paths = []
         
         if infostr[0].isdigit():
+            if ":" in infostr:
+                (bankstr, paths) = infostr.split(':')
+                paths = paths.split(',')
+            else:
+                paths = None
+                bankstr = infostr
+            
             import sns_inst_util
-            banks = sns_inst_util.generateList([infostr])
+            banks = sns_inst_util.generateList([bankstr])
             for bank in banks:
-                self.__data_paths.append(("/entry/bank"+str(bank), 1))
+                if paths is None:
+                    self.__data_paths.append(("/entry/bank"+str(bank), 1))
+                else:
+                    self.__data_paths.append(("/"+"/".join(paths)+str(bank),
+                                              1))
 
             # Count of entry + signal
             self.__length = len(banks) * 2
