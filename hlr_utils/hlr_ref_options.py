@@ -114,6 +114,14 @@ class RefOptions(hlr_options.InstOptions):
                         +"estimation and subtraction")
         self.set_defaults(no_norm_bkg=False)
 
+        self.add_option("", "--tof-cut-min", dest="tof_cut_min",
+                        help="Set the minimum TOF channel for spectrum "\
+                        +"cutting")
+
+        self.add_option("", "--tof-cut-max", dest="tof_cut_max",
+                        help="Set the maximum TOF channel for spectrum "\
+                        +"cutting")        
+
         self.add_option("", "--mom-trans-bins", dest="Q_bins",
                         help="Specify the minimum and maximum momentum "\
                         +"transfer values and the momentum transfer bin "\
@@ -283,6 +291,16 @@ def RefConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "no_norm_bkg",
                                       "--no-norm-bkg"):    
         configure.no_norm_bkg = options.no_norm_bkg
+
+    # Set the minimum TOF channel for spectrum cutting
+    if hlr_utils.cli_provide_override(configure, "tof_cut_min",
+                                      "--tof-cut-min"):
+        configure.tof_cut_min = options.tof_cut_min
+
+    # Set the maximum TOF channel for spectrum cutting
+    if hlr_utils.cli_provide_override(configure, "tof_cut_max",
+                                      "--tof-cut-max"):
+        configure.tof_cut_max = options.tof_cut_max        
 
     # Set the TOF bins to zero out from the data and normalization spectra
     if hlr_utils.cli_provide_override(configure, "tof_cuts", "--tof-cuts"):
