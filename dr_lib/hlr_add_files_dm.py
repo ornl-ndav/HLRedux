@@ -146,7 +146,6 @@ def add_files_dm(filelist, **kwargs):
                 print "TOF Offset:", dataset_cwp[counter]
 
         if dataset_cwp is not None:
-            import common_lib
             cwp = dataset_cwp[counter]
         else:
             cwp = None
