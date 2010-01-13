@@ -69,7 +69,7 @@ def run(config):
                                   logx=config.logx, logy=config.logy,
                                   line=config.line)
         else:
-            drplot.plot_2D_so(d_som, logz=config.logz, box=config.box)
+            drplot.plot_2D_so(d_som, logz=config.logz)
     elif dst_type == "text/num-info":
         drplot.plot_numinfo(d_som)
     else:
@@ -170,10 +170,6 @@ if __name__ == "__main__":
     parser.add_option("-l", "--line", dest="line", action="store_true",
                       help="Draw a line connecting points for 1D plots.")
 
-    parser.add_option("-b", "--box", dest="box", action="store_true",
-                      help="Plot 2D distribution as a box plot.")
-    parser.set_defaults(box=False)
-    
     # Do not need to use the following options
     parser.remove_option("--config")
     parser.remove_option("--data")
@@ -234,9 +230,6 @@ if __name__ == "__main__":
 
     # Set the flag for a connecting line in 1D plots
     configure.line = options.line
-
-    # Set the flag to make a 2D box plot
-    configure.box = options.box
 
     # Run the program
     run(configure)
