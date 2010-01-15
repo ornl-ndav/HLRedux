@@ -274,13 +274,23 @@ def plot_1D_slices(som, axis, arange, **kwargs):
 
     @param kwargs: A list of keyword arguments that the function accepts. The
                    function also takes keywords for L{drplot.plot_1D_slice}.
+
+    @keyword clip: A set of numbers that specify the range to plot on the axis
+                   chosen for the slice or projection. Both the minimum and
+                   maximum range values must be specified.
+    @type clip: C{tuple} of two numbers
     """
+
+    aclip = kwargs.get("clip", (None, None))
+    
     if axis == "y":
         iaxis = 0
-        yslice = (None, None)
+        yslice = (__find_index(som[0].axis[1].val.toNumPy(), aclip[0]),
+                  __find_index(som[0].axis[1].val.toNumPy(), aclip[1]))
     elif axis == "x":
         iaxis = 1
-        xslice = (None, None)
+        xslice = (__find_index(som[0].axis[0].val.toNumPy(), aclip[0]),
+                  __find_index(som[0].axis[0].val.toNumPy(), aclip[1]))
     else:
         raise RuntimeError("Only understand x or y for axis and not: %s" \
                            % axis)
