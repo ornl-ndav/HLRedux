@@ -61,11 +61,11 @@ def run(config):
                                  logx=config.logx, logy=config.logy,
                                  line=config.line)
         elif config.slicex:
-            drplot.plot_1D_slices(d_som, "y", config.range,
+            drplot.plot_1D_slices(d_som, "y", config.range, clip=config.clip,
                                   logx=config.logx, logy=config.logy,
                                   line=config.line)
         elif config.slicey:
-            drplot.plot_1D_slices(d_som, "x", config.range,
+            drplot.plot_1D_slices(d_som, "x", config.range, clip=config.clip,
                                   logx=config.logx, logy=config.logy,
                                   line=config.line)
         else:
@@ -157,6 +157,11 @@ if __name__ == "__main__":
                       help="Set the range to filter on the opposite "\
                       +"axis when projecting or slicing a 2D distribution.")
 
+    parser.add_option("", "--clip", dest="clip", type="float", nargs=2,
+                      help="Set the range to clip the axis for the "\
+                      +"projection or slice. Please specify both minimum "\
+                      +"and maximum values.")
+
     parser.add_option("", "--slicex", dest="slicex", action="store_true",
                       help="Show x distributions for each y from a 2D "\
                       +"distribution.")
@@ -220,7 +225,13 @@ if __name__ == "__main__":
     if options.range is None:
         configure.range = (None, None)
     else:
-        configure.range = options.range    
+        configure.range = options.range
+
+    # Set the clipping range for the chosen projection or slicing scheme
+    if options.clip is None:
+        configure.clip = (None, None)
+    else:
+        configure.clip = options.clip            
 
     # Set the flag to make slices along the y-axis
     configure.slicex = options.slicex
