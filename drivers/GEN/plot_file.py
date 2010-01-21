@@ -53,11 +53,11 @@ def run(config):
         __plot_a3c(d_som, config)
     elif dst_type == "text/Dave2d":
         if config.projx:
-            drplot.plot_1D_slice(d_som, "y", config.range, (None, None),
+            drplot.plot_1D_slice(d_som, "y", config.range, config.clip,
                                  logx=config.logx, logy=config.logy,
                                  line=config.line)
         elif config.projy:
-            drplot.plot_1D_slice(d_som, "x", (None, None), config.range,
+            drplot.plot_1D_slice(d_som, "x", config.clip, config.range,
                                  logx=config.logx, logy=config.logy,
                                  line=config.line)
         elif config.slicex:
