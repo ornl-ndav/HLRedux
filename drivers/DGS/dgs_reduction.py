@@ -249,6 +249,13 @@ def run(config, tim=None):
                              verbose=config.verbose,
                              message="PHX information")
 
+        hlr_utils.write_file(config.output, "text/PAR", d_som5,
+                             output_ext="par",
+                             data_ext=config.ext_replacement,    
+                             path_replacement=config.path_replacement,
+                             verbose=config.verbose,
+                             message="PAR information")
+
         hlr_utils.write_file(config.output, "text/SPE", d_som5,
                              output_ext="spe",
                              data_ext=config.ext_replacement,    
