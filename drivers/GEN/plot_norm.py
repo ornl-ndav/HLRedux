@@ -128,6 +128,10 @@ def run(config):
                        xlabel="Bank Number", title=title,
                        logz=config.logz, colormap=colormap, nocb=True)
 
+    # Clip view so tube grid is correct
+    pylab.xlim(0, x.shape[0])
+    pylab.ylim(0, y.shape[0])
+
     # Set grid lines to dilineate the banks
     tl = [str(i+1) for i in range(offset, offset+num_banks+1)]
     drplot.grid_setter(locator=num_banks, ticklabels=tl, rotation='vertical')
