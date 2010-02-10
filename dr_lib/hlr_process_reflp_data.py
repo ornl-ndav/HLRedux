@@ -127,11 +127,9 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
     # Set sorting for REF_L
     if conf.verbose:
         print "Summing over low resolution direction"
-        
-    if conf.inst == "REF_L":
-        y_sort = True
-    else:
-        y_sort = False
+
+    # Set sorting
+    y_sort = hlr_utils.get_ref_integration_direction(conf.int_dir, conf.inst)   
 
     if t is not None:
         t.getTime(False)
