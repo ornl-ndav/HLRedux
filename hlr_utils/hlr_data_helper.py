@@ -698,7 +698,7 @@ def scale_proton_charge(ipc, scale_units):
     """
     scale_info = {"C": {"scale": 1.0e-12, "units": "Coulomb"},
                   "mC": {"scale": 1.0e-9, "units": "milliCoulomb"},
-                  "uC": {"scale": 1.0e-6, "units": "microCoulomb"}
+                  "uC": {"scale": 1.0e-6, "units": "microCoulomb"}}
 
     pc_new = ipc.getValue() * scale_info[scale_units]["scale"]
 
