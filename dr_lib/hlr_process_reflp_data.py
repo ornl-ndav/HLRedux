@@ -56,6 +56,7 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
     @return: Object that has undergone all requested processing steps
     @rtype: C{SOM.SOM}
     """
+    import hlr_utils
     import common_lib
     import dr_lib
 
