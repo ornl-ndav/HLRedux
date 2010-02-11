@@ -663,7 +663,7 @@ def get_ref_integration_direction(direc, inst_name):
     @type inst_name: C{string}
 
     @return: The direction of integration. This is C{True} for y and C{False}
-    for x.
+             for x.
     @rtype: C{boolean}
     """
     if inst_name is None or inst_name == "":
