@@ -681,3 +681,26 @@ def get_ref_integration_direction(direc, inst_name):
         if direc == "y":
             return True
 
+def scale_proton_charge(ipc, scale_units):
+    """
+    This function takes a proton charge and scales it to either Coulombs
+    (I{C}), milliCoulombs (I{mC}) or microCoulombs (I{uC}).
+
+    @param ipc: The proton charge to be scaled
+    @type ipc: C{SOM.NxParameter}
+
+    @param scale_units: The short units to scale the proton charge into
+    @type scale_units: C{string}
+
+
+    @return: The scaled proton charge
+    @rtype: C{SOM.NxParameter}
+    """
+    scale_info = {"C": {"scale": 1.0e-12, "units": "Coulomb"},
+                  "mC": {"scale": 1.0e-9, "units": "milliCoulomb"},
+                  "uC": {"scale": 1.0e-6, "units": "microCoulomb"}
+
+    pc_new = ipc.getValue() * scale_info[scale_units]["scale"]
+
+    import SOM                  
+    return SOM.NxParameter(pc_new, scale_info[scale_units]["units"])
