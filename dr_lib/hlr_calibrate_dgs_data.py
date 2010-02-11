@@ -236,6 +236,9 @@ def calibrate_dgs_data(datalist, conf, dkcur, **kwargs):
 
         # Scale the proton charge and then set the scale PC back to attributes
         if conf.scale_pc is not None:
+            if conf.verbose:
+                print "Scaling %s proton charge" % dataset_type
+
             pc = hlr_utils.scale_proton_charge(pc, conf.scale_pc)
             dp_som1.attr_list[pc_tag] = pc
 
