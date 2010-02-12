@@ -141,11 +141,8 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
 
     # Step 1: Sum all spectra along the low resolution direction
     
-    # Set sorting for REF_L 
-    if conf.inst == "REF_L":
-        y_sort = True
-    else:
-        y_sort = False
+    # Set sorting
+    y_sort = hlr_utils.get_ref_integration_direction(conf.int_dir, conf.inst)
 
     d_som1A = dr_lib.sum_all_spectra(d_som1, y_sort=y_sort, stripe=True,
                                     pixel_fix=127)

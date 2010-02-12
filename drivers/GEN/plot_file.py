@@ -53,23 +53,23 @@ def run(config):
         __plot_a3c(d_som, config)
     elif dst_type == "text/Dave2d":
         if config.projx:
-            drplot.plot_1D_slice(d_som, "y", config.range, (None, None),
+            drplot.plot_1D_slice(d_som, "y", config.range, config.clip,
                                  logx=config.logx, logy=config.logy,
                                  line=config.line)
         elif config.projy:
-            drplot.plot_1D_slice(d_som, "x", (None, None), config.range,
+            drplot.plot_1D_slice(d_som, "x", config.clip, config.range,
                                  logx=config.logx, logy=config.logy,
                                  line=config.line)
         elif config.slicex:
-            drplot.plot_1D_slices(d_som, "y", config.range,
+            drplot.plot_1D_slices(d_som, "y", config.range, clip=config.clip,
                                   logx=config.logx, logy=config.logy,
                                   line=config.line)
         elif config.slicey:
-            drplot.plot_1D_slices(d_som, "x", config.range,
+            drplot.plot_1D_slices(d_som, "x", config.range, clip=config.clip,
                                   logx=config.logx, logy=config.logy,
                                   line=config.line)
         else:
-            drplot.plot_2D_so(d_som, logz=config.logz, box=config.box)
+            drplot.plot_2D_so(d_som, logz=config.logz)
     elif dst_type == "text/num-info":
         drplot.plot_numinfo(d_som)
     else:
@@ -157,6 +157,11 @@ if __name__ == "__main__":
                       help="Set the range to filter on the opposite "\
                       +"axis when projecting or slicing a 2D distribution.")
 
+    parser.add_option("", "--clip", dest="clip", type="float", nargs=2,
+                      help="Set the range to clip the axis for the "\
+                      +"projection or slice. Please specify both minimum "\
+                      +"and maximum values.")
+
     parser.add_option("", "--slicex", dest="slicex", action="store_true",
                       help="Show x distributions for each y from a 2D "\
                       +"distribution.")
@@ -170,10 +175,6 @@ if __name__ == "__main__":
     parser.add_option("-l", "--line", dest="line", action="store_true",
                       help="Draw a line connecting points for 1D plots.")
 
-    parser.add_option("-b", "--box", dest="box", action="store_true",
-                      help="Plot 2D distribution as a box plot.")
-    parser.set_defaults(box=False)
-    
     # Do not need to use the following options
     parser.remove_option("--config")
     parser.remove_option("--data")
@@ -224,7 +225,13 @@ if __name__ == "__main__":
     if options.range is None:
         configure.range = (None, None)
     else:
-        configure.range = options.range    
+        configure.range = options.range
+
+    # Set the clipping range for the chosen projection or slicing scheme
+    if options.clip is None:
+        configure.clip = (None, None)
+    else:
+        configure.clip = options.clip            
 
     # Set the flag to make slices along the y-axis
     configure.slicex = options.slicex
@@ -234,9 +241,6 @@ if __name__ == "__main__":
 
     # Set the flag for a connecting line in 1D plots
     configure.line = options.line
-
-    # Set the flag to make a 2D box plot
-    configure.box = options.box
 
     # Run the program
     run(configure)
