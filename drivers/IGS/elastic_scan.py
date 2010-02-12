@@ -52,7 +52,6 @@ def run(config, tim=None):
     int_so = SOM.SO()
 
     # Read in all data files
-    counter = 0
     for datafile in config.data:
         som = dr_lib.add_files([datafile], dst_type=dst_type,
                                Verbose=config.verbose)
@@ -76,7 +75,6 @@ def run(config, tim=None):
             scan_err2.append(value[1])
 
         is_init = True
-        counter += 1
 
     # Reorient data to make groups of temps for a single Q bin
     final_data = nessi_list.NessiList()
