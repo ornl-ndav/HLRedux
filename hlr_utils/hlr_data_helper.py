@@ -702,5 +702,4 @@ def scale_proton_charge(ipc, scale_units):
 
     pc_new = ipc.getValue() * scale_info[scale_units]["scale"]
 
-    import SOM                  
     return SOM.NxParameter(pc_new, scale_info[scale_units]["units"])
