@@ -139,7 +139,7 @@ def grid_setter(axis="x", which="major", linestyle="-", locator=None,
     @type rotation: C{string}
 
 
-    @raise: RuntimeError if the axis specified is not x, y or z.
+    @raise RuntimeError: if the axis specified is not x, y or z.
     """
     import pylab
     

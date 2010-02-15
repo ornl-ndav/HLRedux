@@ -131,6 +131,10 @@ class DgsOptions(hlr_options.InstOptions):
                         +"normalization. This will only be done if monitor "\
                         +"normalization is turned off.")
 
+        self.add_option("", "--scale-pc", dest="scale_pc", help="Set the "\
+                        +"units to which the proton charge will be scaled. "\
+                        +"Choices are: C, mC, uC")
+
         self.add_option("", "--mon-int-range", dest="mon_int_range",
                         type="float", nargs=2, help="Set the minimum and "\
                         +"maximum values in TOF [microseconds] for the "\
@@ -287,6 +291,10 @@ def DgsConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "pc_norm",
                                       "--pc-norm"):
         configure.pc_norm = options.pc_norm        
+
+    # Set the proton charge scaling parameter
+    if hlr_utils.cli_provide_override(configure, "scale_pc", "--scale-pc"):
+        configure.scale_pc = options.scale_pc
 
     # Set the TOF range for the monitor integration
     if hlr_utils.cli_provide_override(configure, "mon_int_range",

@@ -150,7 +150,10 @@ class RefOptions(hlr_options.InstOptions):
         self.add_option("", "--norm-peak-excl", dest="norm_peak_excl",
                         type="int", nargs=2,
                         help="Peak exclusion range pixel IDs for "\
-                        +"normalization data.")    
+                        +"normalization data.")
+
+        self.add_option("", "--int-dir", dest="int_dir", choices=["x", "y"],
+                        help="Set the integration direction.")
 
         self.add_option("", "--dump-specular", action="store_true",
                         dest="dump_specular",
@@ -330,6 +333,10 @@ def RefConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "norm_peak_excl",
                                       "--norm-peak-excl"):
         configure.norm_peak_excl = options.norm_peak_excl        
+
+    # Set the integration direction
+    if hlr_utils.cli_provide_override(configure, "int_dir", "--int-dir"):
+        configure.int_dir = options.int_dir
 
     # Set the ability to dump the combined specular TOF information
     if hlr_utils.cli_provide_override(configure, "dump_specular",

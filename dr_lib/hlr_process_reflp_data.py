@@ -56,6 +56,7 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
     @return: Object that has undergone all requested processing steps
     @rtype: C{SOM.SOM}
     """
+    import hlr_utils
     import common_lib
     import dr_lib
 
@@ -127,11 +128,9 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
     # Set sorting for REF_L
     if conf.verbose:
         print "Summing over low resolution direction"
-        
-    if conf.inst == "REF_L":
-        y_sort = True
-    else:
-        y_sort = False
+
+    # Set sorting
+    y_sort = hlr_utils.get_ref_integration_direction(conf.int_dir, conf.inst)   
 
     if t is not None:
         t.getTime(False)

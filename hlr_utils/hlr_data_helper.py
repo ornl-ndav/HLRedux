@@ -648,3 +648,58 @@ def check_lojac(obj):
             return False
     else:
         return False
+
+def get_ref_integration_direction(direc, inst_name):
+    """
+    This function finds the integration direction for the I{REF_L} and I{REF_M}
+    instruments. If direc is C{None}, the default behavior is the y direction
+    for I{REF_L} and the x direction for I{REF_M}.
+
+    @param direc: The direction of the integration. This should be either I{x}
+                  or I{y}.
+    @type direc: C{string}
+
+    @param inst_name: The name of the reflectometer.
+    @type inst_name: C{string}
+
+    @return: The direction of integration. This is C{True} for y and C{False}
+             for x.
+    @rtype: C{boolean}
+    """
+    if inst_name is None or inst_name == "":
+        raise RuntimeError("You need to specify a reflectometer instrument "\
+                           +"name for this function.")
+
+    if direc is None:
+        if inst_name == "REF_L":
+            return True
+        if inst_name == "REF_M":
+            return False
+    else:
+        if direc == "x":
+            return False
+        if direc == "y":
+            return True
+
+def scale_proton_charge(ipc, scale_units):
+    """
+    This function takes a proton charge and scales it to either Coulombs
+    (I{C}), milliCoulombs (I{mC}) or microCoulombs (I{uC}).
+
+    @param ipc: The proton charge to be scaled
+    @type ipc: C{SOM.NxParameter}
+
+    @param scale_units: The short units to scale the proton charge into
+    @type scale_units: C{string}
+
+
+    @return: The scaled proton charge
+    @rtype: C{SOM.NxParameter}
+    """
+    scale_info = {"C": {"scale": 1.0e-12, "units": "Coulomb"},
+                  "mC": {"scale": 1.0e-9, "units": "milliCoulomb"},
+                  "uC": {"scale": 1.0e-6, "units": "microCoulomb"}}
+
+    pc_new = ipc.getValue() * scale_info[scale_units]["scale"]
+
+    return SOM.NxParameter(pc_new, scale_info[scale_units]["units"])
