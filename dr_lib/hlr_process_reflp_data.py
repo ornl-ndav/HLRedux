@@ -121,6 +121,7 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
         
         if t is not None:
             t.getTime(msg="After reading monitor data ")
+            
     else:
         dm_som1 = None
 
@@ -138,13 +139,18 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
     if t is not None:
         t.getTime(False)
 
-    d_som2 = dr_lib.sum_all_spectra(d_som1, y_sort=y_sort, stripe=True,
-                                    pixel_fix=cent_pixel)
+    d_som1A = dr_lib.sum_all_spectra(d_som1, y_sort=y_sort, stripe=True,
+                                     pixel_fix=cent_pixel)
 
     if t is not None:
         t.getTime(msg="After summing low resolution direction ")
         
     del d_som1
+
+    # Cut the spectra if necessary
+    d_som2 = dr_lib.cut_spectra(d_som1A, conf.tof_cut_min, conf.tof_cut_max)
+
+    del d_som1A
 
     # Step N: Convert TOF to wavelength
     if conf.verbose:
