@@ -84,7 +84,7 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
     if conf.verbose:
         print "Reading %s file" % dataset_type
 
-    if conf.norm_data_paths is not None and dataset_type == "norm":
+    if len(conf.norm_data_paths) and dataset_type == "norm":
         data_path = conf.norm_data_paths.toPath()
     else:
         data_path = conf.data_paths.toPath()

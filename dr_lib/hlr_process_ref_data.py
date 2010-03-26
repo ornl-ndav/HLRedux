@@ -107,7 +107,7 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
     if conf.verbose:
         print "Reading %s file" % dataset_type
 
-    if conf.norm_data_paths is not None and dataset_type == "norm":
+    if len(conf.norm_data_paths) and dataset_type == "norm":
         data_path = conf.norm_data_paths.toPath()
     else:
         data_path = conf.data_paths.toPath()
