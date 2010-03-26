@@ -107,7 +107,7 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
     if conf.verbose:
         print "Reading %s file" % dataset_type
 
-    if conf.norm_data_paths is not None and dataset_type == "norm":
+    if len(conf.norm_data_paths) and dataset_type == "norm":
         data_path = conf.norm_data_paths.toPath()
     else:
         data_path = conf.data_paths.toPath()
@@ -142,16 +142,19 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
     # Step 1: Sum all spectra along the low resolution direction
     
     # Set sorting
-    y_sort = hlr_utils.get_ref_integration_direction(conf.int_dir, conf.inst)
+    (y_sort,
+     cent_pixel) = hlr_utils.get_ref_integration_direction(conf.int_dir,
+                                                           conf.inst,
+                                                  d_som1.attr_list.instrument)
 
     d_som1A = dr_lib.sum_all_spectra(d_som1, y_sort=y_sort, stripe=True,
-                                    pixel_fix=127)
+                                     pixel_fix=cent_pixel)
 
     del d_som1
     
     if b_som1 is not None:
         b_som1A = dr_lib.sum_all_spectra(b_som1, y_sort=y_sort, stripe=True,
-                                        pixel_fix=127)
+                                         pixel_fix=cent_pixel)
         del b_som1
     else:
         b_som1A = b_som1
