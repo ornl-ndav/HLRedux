@@ -147,8 +147,29 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
         
     del d_som1
 
-    # Cut the spectra if necessary
-    d_som2 = dr_lib.cut_spectra(d_som1A, conf.tof_cut_min, conf.tof_cut_max)
+    # Zero the spectra if necessary
+    if conf.tof_cut_min is not None or conf.tof_cut_max is not None:
+        import bisect
+        # Find the indicies for the no zero range
+        if conf.tof_cut_min is None:
+            start_index = 0
+        else:
+            start_index = bisect.bisect(d_som1A[0].axis[0].val,
+                                        conf.tof_cut_min)
+        
+        if conf.tof_cut_max is None:
+            end_index = len(d_som1A[0].axis[0].val) - 1
+        else:
+            end_index = bisect.bisect(d_som1A[0].axis[0].val,
+                                      conf.tof_cut_max)
+
+        nz_list = []
+        for i in xrange(hlr_utils.get_length(d_som1A)):
+            nz_list.append((start_index, end_index))
+        
+        d_som2 = dr_lib.zero_spectra(d_som1A, nz_list, use_bin_index=True)
+    else:
+        d_som2 = d_som1A
 
     del d_som1A
 
