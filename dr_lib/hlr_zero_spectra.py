@@ -22,7 +22,7 @@
 
 # $Id$
 
-def zero_spectra(obj, nz_range):
+def zero_spectra(obj, nz_range, **kwargs):
     """
     This function takes spectra and a corrsponding range and zeros the values
     in the spectra outside the given range.
@@ -33,7 +33,13 @@ def zero_spectra(obj, nz_range):
     @param nz_range: Range pairs where the spectra will not be zeroed
     @type nz_range: C{list} of C{tuple}s
 
+    @param kwargs: A list of keyword arguments that the function accepts:
 
+    @keyword use_bin_index: A flag that tells the function to use the
+                            information in C{nz_range} as the range index.
+    @type use_bin_index: C{boolean}
+    
+    
     @return: Object containing the zeroed spectra
     @rtype: C{SOM.SOM}
 
@@ -46,6 +52,9 @@ def zero_spectra(obj, nz_range):
     # Kickout if incoming object is NoneType
     if obj is None:
         return obj
+
+    # Get keyword arguments
+    use_bin_index = kwargs.get("use_bin_index", False)
 
     # Length cross-check
     if len(obj) != len(nz_range):
@@ -74,9 +83,13 @@ def zero_spectra(obj, nz_range):
         y_new = nessi_list.NessiList(len(y_val))
         var_y_new = nessi_list.NessiList(len(y_err2))
 
-        # Find the bins for the range to not zero
-        i_start = bisect.bisect(x_axis, nz_range[i][0]) - 1
-        i_end = bisect.bisect(x_axis, nz_range[i][1]) - 1
+        if not use_bin_index:
+            # Find the bins for the range to not zero
+            i_start = bisect.bisect(x_axis, nz_range[i][0]) - 1
+            i_end = bisect.bisect(x_axis, nz_range[i][1]) - 1
+        else:
+            i_start = nz_range[i][0]
+            i_end = nz_range[i][1]
         
         for j in xrange(i_start, i_end+1):
             try:
