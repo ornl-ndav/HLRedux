@@ -150,7 +150,7 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
     # Zero the spectra if necessary
     if conf.tof_cut_min is not None or conf.tof_cut_max is not None:
         import bisect
-        # Find the indicies for the no zero range
+        # Find the indicies for the non zero range
         if conf.tof_cut_min is None:
             start_index = 0
         else:
