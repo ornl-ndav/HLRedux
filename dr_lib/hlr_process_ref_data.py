@@ -72,6 +72,7 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
     @return: Object that has undergone all requested processing steps
     @rtype: C{SOM.SOM}
     """
+    import common_lib
     import dr_lib
     import hlr_utils
 
@@ -177,7 +178,7 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
     # This will trigger if tof_cuts is None
     except TypeError:
         pass
-
+        
     d_som3 = dr_lib.zero_bins(d_som2, tof_cuts)
 
     del d_som2
@@ -188,7 +189,7 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
         del b_som2
     else:
         b_som3 = b_som2
-        
+
     if conf.dump_specular:
         hlr_utils.write_file(conf.output, "text/Spec", d_som3,
                              output_ext="sdc",
@@ -277,8 +278,6 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
 
         pc_ratio = conf.scale_ecell * (pc_sample / pc_ecell)
 
-        import common_lib
-
         # Scale transmission by proton charge ratio
         if conf.verbose:
             print "Scaling transmission by proton charge ratio"
@@ -346,4 +345,11 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
     if conf.store_dtot:
         d_som5.attr_list["extra_som"] = dtot
 
-    return d_som5
+    # Step 6: Scale by proton charge
+    pc = d_som5.attr_list[dataset_type+"-proton_charge"]
+    pc_new = hlr_utils.scale_proton_charge(pc, "C")
+    d_som6 = common_lib.div_ncerr(d_som5, (pc_new.getValue(), 0.0))
+
+    del d_som5
+
+    return d_som6
