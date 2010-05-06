@@ -70,7 +70,7 @@ def run(config, tim):
     else:
         norm_inst_geom_dst = None        
     
-    # Perform Steps 1-5 on sample data
+    # Perform Steps 1-6 on sample data
     d_som1 = dr_lib.process_ref_data(config.data, config,
                                      config.data_roi_file,
                                      config.dbkg_roi_file,
@@ -79,7 +79,7 @@ def run(config, tim):
                                      inst_geom_dst=data_inst_geom_dst,
                                      timer=tim)
 
-    # Perform Steps 1-5 on normalization data
+    # Perform Steps 1-6 on normalization data
     if config.norm is not None:
         n_som1 = dr_lib.process_ref_data(config.norm, config,
                                          config.norm_roi_file,
@@ -100,7 +100,7 @@ def run(config, tim):
     if norm_inst_geom_dst is not None:
         norm_inst_geom_dst.release_resource()        
 
-    # Step 6: Sum all normalization spectra together
+    # Step 7: Sum all normalization spectra together
     if config.norm is not None:
         n_som2 = dr_lib.sum_all_spectra(n_som1)
     else:
@@ -108,7 +108,7 @@ def run(config, tim):
 
     del n_som1
 
-    # Step 7: Divide data by normalization
+    # Step 8: Divide data by normalization
     if config.verbose and config.norm is not None:
         print "Scale data by normalization"
 
@@ -147,7 +147,7 @@ def run(config, tim):
                              message="R(TOF) information")
         del d_som2_1
 
-    # Step 8: Convert TOF to scalar Q
+    # Step 9: Convert TOF to scalar Q
     if config.verbose:
         print "Converting TOF to scalar Q"
 
@@ -208,7 +208,7 @@ def run(config, tim):
 
     del d_som3
 
-    # Rebin all spectra to final Q axis
+    # Step 10: Rebin all spectra to final Q axis
     if config.Q_bins is None:
         config.Q_bins = dr_lib.create_axis_from_data(d_som4)
 
@@ -236,6 +236,7 @@ def run(config, tim):
                              message="pixel R(Q) (after rebinning) "\
                              +"information")
 
+    # Step 11: Sum all rebinned spectra
     if config.verbose:
         print "Summing spectra"
 

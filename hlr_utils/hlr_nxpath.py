@@ -105,6 +105,16 @@ class NxPath(object):
         """
         return str(self.toPath())
 
+    def __len__(self):
+        """
+        This method returns the length of the C{NxPath} object. This is the
+        sum of entry + signal.
+
+        @return: The length of the C{NxPath} object
+        @rtype: C{int}
+        """
+        return self.__length
+
     def toPath(self):
         """
         This method returns a tuple or list of tuples of NeXus path, signal
