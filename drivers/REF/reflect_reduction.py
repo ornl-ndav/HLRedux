@@ -92,6 +92,11 @@ def run(config, tim):
     else:
         n_som1 = None
 
+    if config.Q_bins is None and config.scatt_angle is not None:
+        import copy
+        tof_axis = copy.deepcopy(d_som1[0].axis[0].val)
+        tof_axis_err2 = copy.deepcopy(d_som1[0].axis[0].var)
+
     # Closing sample data instrument geometry file
     if data_inst_geom_dst is not None:
         data_inst_geom_dst.release_resource()
@@ -210,9 +215,41 @@ def run(config, tim):
 
     # Step 10: Rebin all spectra to final Q axis
     if config.Q_bins is None:
-        config.Q_bins = dr_lib.create_axis_from_data(d_som4)
+        if config.scatt_angle is None:
+            config.Q_bins = dr_lib.create_axis_from_data(d_som4)
+            rebin_axis = config.Q_bins.toNessiList()
+        else:
+            # Get scattering angle and make Q conversion from TOF axis
+            # Check on units, scattering angle must be in radians
+            sa_temp = config.scatt_angle.toFullTuple(True)
+            if sa_temp[2] == "degrees" or sa_temp[2] == "degree":
+                import math
+                deg_to_rad =  (math.pi / 180.0)
+                sa_rads = sa_temp[0] * deg_to_rad
+                sa_err2_rads = sa_temp[1] * deg_to_rad * deg_to_rad
+            else:
+                sa_rads = sa_temp[0]
+                sa_err2_rads = sa_temp[1]
 
-    rebin_axis = config.Q_bins.toNessiList()
+            sa = (sa_rads, sa_err2_rads)
+
+            pl = d_som4.attr_list.instrument.get_total_path(d_som4[0].id,
+                                                            det_secondary=True)
+
+            print "A:", pl
+            print "B:", sa
+            
+            import axis_manip
+            rebin_axis = axis_manip.tof_to_scalar_Q(tof_axis,
+                                                    tof_axis_err2,
+                                                    pl[0], pl[1],
+                                                    sa[0], sa[1])[0]
+
+            print "C:", tof_axis
+            print "D:", rebin_axis
+
+    else:
+        rebin_axis = config.Q_bins.toNessiList()
 
     if config.verbose:
         print "Rebinning spectra"
