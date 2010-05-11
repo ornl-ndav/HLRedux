@@ -139,6 +139,19 @@ def run(config, tim):
                              path_replacement=config.path_replacement,
                              message="combined R(TOF) information")
 
+        if config.inst == "REF_M":
+            import utils
+            tof_bc = utils.calc_bin_centers(d_som2_2[0].axis[0].val)
+            d_som2_2[0].axis[0].val = tof_bc
+            d_som2_2.setDataSetType("density")
+
+            hlr_utils.write_file(config.output, "text/Spec", d_som2_2,
+                                 output_ext="crtof2",
+                                 verbose=config.verbose,
+                                 data_ext=config.ext_replacement,
+                                 path_replacement=config.path_replacement,
+                                 message="bc combined R(TOF) information")
+
         del d_som2_2
 
     if config.dump_rtof:
