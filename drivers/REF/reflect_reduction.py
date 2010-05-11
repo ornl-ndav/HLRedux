@@ -41,6 +41,8 @@ def run(config, tim):
     @type tim: C{sns_time.DiffTime}
     """
     import DST
+    if config.inst == "REF_M":
+        import utils
 
     if tim is not None:
         tim.getTime(False)
@@ -140,9 +142,8 @@ def run(config, tim):
                              message="combined R(TOF) information")
 
         if config.inst == "REF_M":
-            import utils
             tof_bc = utils.calc_bin_centers(d_som2_2[0].axis[0].val)
-            d_som2_2[0].axis[0].val = tof_bc
+            d_som2_2[0].axis[0].val = tof_bc[0]
             d_som2_2.setDataSetType("density")
 
             hlr_utils.write_file(config.output, "text/Spec", d_som2_2,
@@ -313,6 +314,19 @@ def run(config, tim):
                          data_ext=config.ext_replacement,
                          path_replacement=config.path_replacement,
                          message="metadata")
+
+    if config.inst == "REF_M":
+        Q_bc = utils.calc_bin_centers(d_som6[0].axis[0].val)
+        d_som6[0].axis[0].val = Q_bc[0]
+        d_som6.setDataSetType("density")
+        hlr_utils.write_file(config.output, "text/Spec", d_som6,
+                             output_ext="txt2",
+                             verbose=config.verbose,
+                             data_ext=config.ext_replacement,
+                             path_replacement=config.path_replacement,
+                             verbose=config.verbose,
+                             message="bc combined Reflectivity information")
+
 
     if tim is not None:
         tim.setOldTime(old_time)
