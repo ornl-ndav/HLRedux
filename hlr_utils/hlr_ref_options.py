@@ -155,6 +155,11 @@ class RefOptions(hlr_options.InstOptions):
         self.add_option("", "--int-dir", dest="int_dir", choices=["x", "y"],
                         help="Set the integration direction.")
 
+        self.add_option("", "--scatt-angle", dest="scatt_angle",
+                        help="Specify the scattering (polar) angle for "\
+                        +"converting the TOF axis to Q. angle, err^2, and "\
+                        +"units=<degrees or radians>")
+
         self.add_option("", "--dump-specular", action="store_true",
                         dest="dump_specular",
                         help="Flag to dump the combined specular TOF "\
@@ -337,6 +342,12 @@ def RefConfiguration(parser, configure, options, args):
     # Set the integration direction
     if hlr_utils.cli_provide_override(configure, "int_dir", "--int-dir"):
         configure.int_dir = options.int_dir
+
+    # Get the scattering (polar) angle for axis TOF to Q conversion
+    if hlr_utils.cli_provide_override(configure, "scatt_angle",
+                                      "--scatt-angle"):
+        configure.scatt_angle = hlr_utils.DrParameterFromString(\
+            options.scatt_angle, True)
 
     # Set the ability to dump the combined specular TOF information
     if hlr_utils.cli_provide_override(configure, "dump_specular",
