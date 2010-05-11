@@ -250,8 +250,9 @@ def run(config, tim):
             pl = d_som4.attr_list.instrument.get_total_path(d_som4[0].id,
                                                             det_secondary=True)
 
-            print "A:", pl
-            print "B:", sa
+            print "0:", tof_axis, tof_axis.__type__
+            print "A:", pl[0], pl[1]
+            print "B:", sa[0], sa[1]
             
             import axis_manip
             rebin_axis = axis_manip.tof_to_scalar_Q(tof_axis,
