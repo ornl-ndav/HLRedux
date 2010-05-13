@@ -41,6 +41,7 @@ def run(config, tim):
     @type tim: C{sns_time.DiffTime}
     """
     import DST
+    import math
     if config.inst == "REF_M":
         import axis_manip
         import utils
@@ -176,7 +177,6 @@ def run(config, tim):
             # Check on units, offset must be in radians
             p_temp = config.angle_offset.toFullTuple(True)
             if p_temp[2] == "degrees" or p_temp[2] == "degree":
-                import math
                 deg_to_rad =  (math.pi / 180.0)
                 p_off_rads = p_temp[0] * deg_to_rad
                 p_off_err2_rads = p_temp[1] * deg_to_rad * deg_to_rad
@@ -240,7 +240,6 @@ def run(config, tim):
             # Check on units, scattering angle must be in radians
             sa_temp = config.scatt_angle.toFullTuple(True)
             if sa_temp[2] == "degrees" or sa_temp[2] == "degree":
-                import math
                 deg_to_rad =  (math.pi / 180.0)
                 sa_rads = sa_temp[0] * deg_to_rad
                 sa_err2_rads = sa_temp[1] * deg_to_rad * deg_to_rad
@@ -333,7 +332,6 @@ def run(config, tim):
         d_som6.setDataSetType("density")
         hlr_utils.write_file(config.output, "text/Spec", d_som6,
                              output_ext="txt2",
-                             verbose=config.verbose,
                              data_ext=config.ext_replacement,
                              path_replacement=config.path_replacement,
                              verbose=config.verbose,
