@@ -251,8 +251,6 @@ def run(config, tim):
 
             import nessi_list
             tof_axis_err2 = nessi_list.NessiList(len(tof_axis))
-            print "A:", pl[0], pl[1]
-            print "B:", sa[0], sa[1]
 
             import axis_manip
             rebin_axis = axis_manip.tof_to_scalar_Q(tof_axis,
@@ -260,11 +258,7 @@ def run(config, tim):
                                                     pl[0], pl[1],
                                                     sa[0], sa[1])[0]
 
-            axis_manip.reverse_array_nc(rebin_axis)
-            
-            print "C:", tof_axis, len(tof_axis)
-            print "D:", rebin_axis, len(rebin_axis)
-
+            axis_manip.reverse_array_nc(rebin_axis)            
     else:
         rebin_axis = config.Q_bins.toNessiList()
 
