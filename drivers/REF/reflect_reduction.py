@@ -165,66 +165,69 @@ def run(config, tim):
                              message="R(TOF) information")
         del d_som2_1
 
-    # Step 9: Convert TOF to scalar Q
-    if config.verbose:
-        print "Converting TOF to scalar Q"
-
-    # Check to see if polar angle offset is necessary
-    if config.angle_offset is not None:
-        # Check on units, offset must be in radians
-        p_temp = config.angle_offset.toFullTuple(True)
-        if p_temp[2] == "degrees" or p_temp[2] == "degree":
-            import math
-            deg_to_rad =  (math.pi / 180.0)
-            p_off_rads = p_temp[0] * deg_to_rad
-            p_off_err2_rads = p_temp[1] * deg_to_rad * deg_to_rad
-        else:
-            p_off_rads = p_temp[0]
-            p_off_err2_rads = p_temp[1]
-
-        p_offset = (p_off_rads, p_off_err2_rads)
-
-        d_som2.attr_list["angle_offset"] = config.angle_offset
-    else:
-        p_offset = None
-
-    if tim is not None:
-        tim.getTime(False)
-
-    d_som3 = common_lib.tof_to_scalar_Q(d_som2, units="microsecond",
-                                        angle_offset=p_offset,
-                                        lojac=False)
-
-    del d_som2
-        
-    if tim is not None:
-        tim.getTime(msg="After converting wavelength to scalar Q ")
-
-    if config.dump_rq:
-        d_som3_1 = dr_lib.data_filter(d_som3, clean_axis=True)
-        hlr_utils.write_file(config.output, "text/Spec", d_som3_1,
-                             output_ext="rq",
-                             verbose=config.verbose,
-                             data_ext=config.ext_replacement,
-                             path_replacement=config.path_replacement,
-                             message="pixel R(Q) information")
-        del d_som3_1
-
-    if not config.no_filter:
+    if config.inst == "REF_L":
+        # Step 9: Convert TOF to scalar Q
         if config.verbose:
-            print "Filtering final data"
-        
+            print "Converting TOF to scalar Q"
+    
+        # Check to see if polar angle offset is necessary
+        if config.angle_offset is not None:
+            # Check on units, offset must be in radians
+            p_temp = config.angle_offset.toFullTuple(True)
+            if p_temp[2] == "degrees" or p_temp[2] == "degree":
+                import math
+                deg_to_rad =  (math.pi / 180.0)
+                p_off_rads = p_temp[0] * deg_to_rad
+                p_off_err2_rads = p_temp[1] * deg_to_rad * deg_to_rad
+            else:
+                p_off_rads = p_temp[0]
+                p_off_err2_rads = p_temp[1]
+    
+            p_offset = (p_off_rads, p_off_err2_rads)
+    
+            d_som2.attr_list["angle_offset"] = config.angle_offset
+        else:
+            p_offset = None
+    
         if tim is not None:
             tim.getTime(False)
-        
-        d_som4 = dr_lib.data_filter(d_som3)
-
+    
+        d_som3 = common_lib.tof_to_scalar_Q(d_som2, units="microsecond",
+                                            angle_offset=p_offset,
+                                            lojac=False)
+    
+        del d_som2
+            
         if tim is not None:
-            tim.getTime(msg="After filtering data")
+            tim.getTime(msg="After converting wavelength to scalar Q ")
+    
+        if config.dump_rq:
+            d_som3_1 = dr_lib.data_filter(d_som3, clean_axis=True)
+            hlr_utils.write_file(config.output, "text/Spec", d_som3_1,
+                                 output_ext="rq",
+                                 verbose=config.verbose,
+                                 data_ext=config.ext_replacement,
+                                 path_replacement=config.path_replacement,
+                                 message="pixel R(Q) information")
+            del d_som3_1
+                    
+        if not config.no_filter:
+            if config.verbose:
+                print "Filtering final data"
+            
+            if tim is not None:
+                tim.getTime(False)
+            
+            d_som4 = dr_lib.data_filter(d_som3)
+    
+            if tim is not None:
+                tim.getTime(msg="After filtering data")
+        else:
+            d_som4 = d_som3
+    
+        del d_som3
     else:
-        d_som4 = d_som3
-
-    del d_som3
+        d_som4 = d_som2
 
     # Step 10: Rebin all spectra to final Q axis
     if config.Q_bins is None:
@@ -262,41 +265,53 @@ def run(config, tim):
     else:
         rebin_axis = config.Q_bins.toNessiList()
 
-    if config.verbose:
-        print "Rebinning spectra"
+    if config.inst == "REF_L":
+        if config.verbose:
+            print "Rebinning spectra"
 
-    if tim is not None:
-        tim.getTime(False)
-        
-    d_som5 = common_lib.rebin_axis_1D_linint(d_som4, rebin_axis)
+        if tim is not None:
+            tim.getTime(False)
+            
+        d_som5 = common_lib.rebin_axis_1D_linint(d_som4, rebin_axis)
+    
+        if tim is not None:
+            tim.getTime(msg="After rebinning spectra")
+    
+        del d_som4
+    
+        if config.dump_rqr:
+            hlr_utils.write_file(config.output, "text/Spec", d_som5,
+                                 output_ext="rqr",
+                                 verbose=config.verbose,
+                                 data_ext=config.ext_replacement,
+                                 path_replacement=config.path_replacement,
+                                 message="pixel R(Q) (after rebinning) "\
+                                 +"information")
+    
+        # Step 11: Sum all rebinned spectra
+        if config.verbose:
+            print "Summing spectra"
+    
+        if tim is not None:
+            tim.getTime(False)
+    
+        d_som6 = dr_lib.sum_all_spectra(d_som5)
+    
+        if tim is not None:
+            tim.getTime(msg="After summing spectra")
+    
+        del d_som5
+    else:
+        d_som5 = d_som4
 
-    if tim is not None:
-        tim.getTime(msg="After rebinning spectra")
-
-    del d_som4
-
-    if config.dump_rqr:
-        hlr_utils.write_file(config.output, "text/Spec", d_som5,
-                             output_ext="rqr",
-                             verbose=config.verbose,
-                             data_ext=config.ext_replacement,
-                             path_replacement=config.path_replacement,
-                             message="pixel R(Q) (after rebinning) "\
-                             +"information")
-
-    # Step 11: Sum all rebinned spectra
-    if config.verbose:
-        print "Summing spectra"
-
-    if tim is not None:
-        tim.getTime(False)
-
-    d_som6 = dr_lib.sum_all_spectra(d_som5)
-
-    if tim is not None:
-        tim.getTime(msg="After summing spectra")
-
-    del d_som5
+    if config.inst == "REF_M":
+        d_som5A = dr_lib.sum_all_spectra(d_som5)
+        del d_som5
+        d_som6 = dr_lib.data_filter(d_som5A)
+        del d_som5A
+        d_som6[0].axis[0].val = rebin_axis
+        axis_manip.reverse_array_nc(d_som6[0].y)
+        axis_manip.reverse_array_nc(d_som6[0].var_y)
 
     hlr_utils.write_file(config.output, "text/Spec", d_som6,
                          replace_ext=False,
