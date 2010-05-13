@@ -97,7 +97,6 @@ def run(config, tim):
     if config.Q_bins is None and config.scatt_angle is not None:
         import copy
         tof_axis = copy.deepcopy(d_som1[0].axis[0].val)
-        tof_axis_err2 = copy.deepcopy(d_som1[0].axis[0].var)
 
     # Closing sample data instrument geometry file
     if data_inst_geom_dst is not None:
@@ -250,18 +249,21 @@ def run(config, tim):
             pl = d_som4.attr_list.instrument.get_total_path(d_som4[0].id,
                                                             det_secondary=True)
 
-            print "0:", tof_axis, tof_axis.__type__
+            import nessi_list
+            tof_axis_err2 = nessi_list.NessiList(len(tof_axis))
             print "A:", pl[0], pl[1]
             print "B:", sa[0], sa[1]
-            
+
             import axis_manip
             rebin_axis = axis_manip.tof_to_scalar_Q(tof_axis,
                                                     tof_axis_err2,
                                                     pl[0], pl[1],
                                                     sa[0], sa[1])[0]
 
-            print "C:", tof_axis
-            print "D:", rebin_axis
+            axis_manip.reverse_array_nc(rebin_axis)
+            
+            print "C:", tof_axis, len(tof_axis)
+            print "D:", rebin_axis, len(rebin_axis)
 
     else:
         rebin_axis = config.Q_bins.toNessiList()
