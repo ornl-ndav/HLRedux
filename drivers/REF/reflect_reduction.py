@@ -42,6 +42,7 @@ def run(config, tim):
     """
     import DST
     if config.inst == "REF_M":
+        import axis_manip
         import utils
 
     if tim is not None:
@@ -255,7 +256,6 @@ def run(config, tim):
             import nessi_list
             tof_axis_err2 = nessi_list.NessiList(len(tof_axis))
 
-            import axis_manip
             rebin_axis = axis_manip.tof_to_scalar_Q(tof_axis,
                                                     tof_axis_err2,
                                                     pl[0], pl[1],
