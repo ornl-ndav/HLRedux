@@ -312,6 +312,11 @@ def run(config, tim):
         axis_manip.reverse_array_nc(d_som6[0].y)
         axis_manip.reverse_array_nc(d_som6[0].var_y)
 
+        d_som6.setYLabel("Intensity")
+        d_som6.setYUnits("Counts/A-1")
+        d_som6.setAllAxisLabels(["scalar wavevector transfer"])
+        d_som6.setAllAxisUnits(["1/Angstroms"])
+
     hlr_utils.write_file(config.output, "text/Spec", d_som6,
                          replace_ext=False,
                          replace_path=False,
