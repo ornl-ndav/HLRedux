@@ -72,6 +72,7 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
     @return: Object that has undergone all requested processing steps
     @rtype: C{SOM.SOM}
     """
+    import common_lib
     import dr_lib
     import hlr_utils
 
@@ -107,7 +108,7 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
     if conf.verbose:
         print "Reading %s file" % dataset_type
 
-    if conf.norm_data_paths is not None and dataset_type == "norm":
+    if len(conf.norm_data_paths) and dataset_type == "norm":
         data_path = conf.norm_data_paths.toPath()
     else:
         data_path = conf.data_paths.toPath()
@@ -142,16 +143,19 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
     # Step 1: Sum all spectra along the low resolution direction
     
     # Set sorting
-    y_sort = hlr_utils.get_ref_integration_direction(conf.int_dir, conf.inst)
+    (y_sort,
+     cent_pixel) = hlr_utils.get_ref_integration_direction(conf.int_dir,
+                                                           conf.inst,
+                                                  d_som1.attr_list.instrument)
 
     d_som1A = dr_lib.sum_all_spectra(d_som1, y_sort=y_sort, stripe=True,
-                                    pixel_fix=127)
+                                     pixel_fix=cent_pixel)
 
     del d_som1
     
     if b_som1 is not None:
         b_som1A = dr_lib.sum_all_spectra(b_som1, y_sort=y_sort, stripe=True,
-                                        pixel_fix=127)
+                                         pixel_fix=cent_pixel)
         del b_som1
     else:
         b_som1A = b_som1
@@ -174,7 +178,7 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
     # This will trigger if tof_cuts is None
     except TypeError:
         pass
-
+        
     d_som3 = dr_lib.zero_bins(d_som2, tof_cuts)
 
     del d_som2
@@ -185,7 +189,7 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
         del b_som2
     else:
         b_som3 = b_som2
-        
+
     if conf.dump_specular:
         hlr_utils.write_file(conf.output, "text/Spec", d_som3,
                              output_ext="sdc",
@@ -274,8 +278,6 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
 
         pc_ratio = conf.scale_ecell * (pc_sample / pc_ecell)
 
-        import common_lib
-
         # Scale transmission by proton charge ratio
         if conf.verbose:
             print "Scaling transmission by proton charge ratio"
@@ -343,4 +345,11 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
     if conf.store_dtot:
         d_som5.attr_list["extra_som"] = dtot
 
-    return d_som5
+    # Step 6: Scale by proton charge
+    pc = d_som5.attr_list[dataset_type+"-proton_charge"]
+    pc_new = hlr_utils.scale_proton_charge(pc, "C")
+    d_som6 = common_lib.div_ncerr(d_som5, (pc_new.getValue(), 0.0))
+
+    del d_som5
+
+    return d_som6

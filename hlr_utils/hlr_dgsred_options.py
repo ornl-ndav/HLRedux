@@ -109,6 +109,11 @@ class DgsRedOptions(hlr_dgs_options.DgsOptions):
                         +"slice.")
         self.set_defaults(qmesh=False)
 
+        self.add_option("", "--no-zero-supp", dest="no_zero_supp",
+                        action="store_true", help="Flag to turn off the zero "\
+                        +"suppression for single crystal data.")
+        self.set_defaults(no_zero_supp=False)
+
         self.add_option("-x", "--fixed", action="store_true",
                         dest="fixed", help="Dump the Q vector information to "\
                         +"a fixed grid.")
@@ -203,6 +208,11 @@ def DgsRedConfiguration(parser, configure, options, args):
     # Set the ability to write out fixed grid mesh files
     if hlr_utils.cli_provide_override(configure, "fixed", "--fixed", "-x"):
         configure.fixed = options.fixed        
+
+    # Set the ability to turn off zero suppression for single crystal data
+    if hlr_utils.cli_provide_override(configure, "no_zero_supp",
+                                      "--no-zero-supp"):
+        configure.no_zero_supp = options.no_zero_supp
 
     # Set the ability to dump the combined energy transfer information
     if hlr_utils.cli_provide_override(configure, "dump_et_comb",

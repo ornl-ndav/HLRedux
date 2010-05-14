@@ -256,29 +256,37 @@ def create_Qvec_vs_E_dgs(som, E_i, conf, **kwargs):
     print >> hfile, linestr
     hfile.close()
 
+    import utils
+    use_zero_supp = not conf.no_zero_supp
+    
     for k in xrange(len_E):
         ofile = open(os.path.join(topdir, "%s%04d.in" % (filehead, k)), "w")
         if make_fixed:
             ofile1 = open(os.path.join(topdir, "%s%04d.in" % (filehead1, k)),
                           "w")
         for pid in CNT:
-            result = []
-            result.append(str(k))
-            result.append(str(E_t[k]))
-            result.append(str(E_t[k+1]))
-            result.append(str(CNT[pid][k]))
-            result.append(str(ERR2[pid][k]))
-            __get_coords(V1, pid, k, result)
-            __get_coords(V2, pid, k, result)
-            __get_coords(V3, pid, k, result)
-            __get_coords(V4, pid, k, result)
-            __get_coords(V1, pid, k+1, result)
-            __get_coords(V2, pid, k+1, result)
-            __get_coords(V3, pid, k+1, result)
-            __get_coords(V4, pid, k+1, result)
+            if use_zero_supp:
+                write_value = not utils.compare(CNT[pid][k], 0.0) == 0
+            else:
+                write_value = True
 
+            if write_value:
+                result = []
+                result.append(str(k))
+                result.append(str(E_t[k]))
+                result.append(str(E_t[k+1]))
+                result.append(str(CNT[pid][k]))
+                result.append(str(ERR2[pid][k]))
+                __get_coords(V1, pid, k, result)
+                __get_coords(V2, pid, k, result)
+                __get_coords(V3, pid, k, result)
+                __get_coords(V4, pid, k, result)
+                __get_coords(V1, pid, k+1, result)
+                __get_coords(V2, pid, k+1, result)
+                __get_coords(V3, pid, k+1, result)
+                __get_coords(V4, pid, k+1, result)
 
-            print >> ofile, " ".join(result)
+                print >> ofile, " ".join(result)
 
             if make_fixed:
                 result1 = []
