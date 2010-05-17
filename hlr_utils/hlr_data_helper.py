@@ -649,11 +649,11 @@ def check_lojac(obj):
     else:
         return False
 
-def get_ref_integration_direction(direc, inst_name):
+def get_ref_integration_direction(direc, inst_name, inst):
     """
-    This function finds the integration direction for the I{REF_L} and I{REF_M}
-    instruments. If direc is C{None}, the default behavior is the y direction
-    for I{REF_L} and the x direction for I{REF_M}.
+    This function finds the integration direction and the central pixel for
+    the I{REF_L} and I{REF_M} instruments. If direc is C{None}, the default
+    behavior is the y direction for I{REF_L} and the x direction for I{REF_M}.
 
     @param direc: The direction of the integration. This should be either I{x}
                   or I{y}.
@@ -662,9 +662,13 @@ def get_ref_integration_direction(direc, inst_name):
     @param inst_name: The name of the reflectometer.
     @type inst_name: C{string}
 
-    @return: The direction of integration. This is C{True} for y and C{False}
-             for x.
-    @rtype: C{boolean}
+    @param inst: The instrument geometry for the detector
+    @type inst: C{SOM.Instrument}
+
+    @return: The direction of integration and the central pixel for the
+             opposing direction. This direction of integration is C{True} for
+             y and C{False} for x.
+    @rtype: C{tuple} of (C{boolean}, C{int})
     """
     if inst_name is None or inst_name == "":
         raise RuntimeError("You need to specify a reflectometer instrument "\
@@ -672,14 +676,25 @@ def get_ref_integration_direction(direc, inst_name):
 
     if direc is None:
         if inst_name == "REF_L":
-            return True
+            int_dir = True
         if inst_name == "REF_M":
-            return False
+            int_dir = False
     else:
         if direc == "x":
-            return False
+            int_dir = False
         if direc == "y":
-            return True
+            int_dir = True
+
+    # Get the detector direction opposite the integration direction
+    if int_dir:
+        cpixel = inst.get_num_x()
+    else:
+        cpixel = inst.get_num_y()
+
+    # Make this the centerline value (to low side)
+    cpixel = (cpixel / 2) - 1
+
+    return (int_dir, cpixel)
 
 def scale_proton_charge(ipc, scale_units):
     """

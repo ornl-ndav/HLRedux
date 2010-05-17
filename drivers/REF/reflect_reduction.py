@@ -41,6 +41,10 @@ def run(config, tim):
     @type tim: C{sns_time.DiffTime}
     """
     import DST
+    import math
+    if config.inst == "REF_M":
+        import axis_manip
+        import utils
 
     if tim is not None:
         tim.getTime(False)
@@ -70,7 +74,7 @@ def run(config, tim):
     else:
         norm_inst_geom_dst = None        
     
-    # Perform Steps 1-5 on sample data
+    # Perform Steps 1-6 on sample data
     d_som1 = dr_lib.process_ref_data(config.data, config,
                                      config.data_roi_file,
                                      config.dbkg_roi_file,
@@ -79,7 +83,7 @@ def run(config, tim):
                                      inst_geom_dst=data_inst_geom_dst,
                                      timer=tim)
 
-    # Perform Steps 1-5 on normalization data
+    # Perform Steps 1-6 on normalization data
     if config.norm is not None:
         n_som1 = dr_lib.process_ref_data(config.norm, config,
                                          config.norm_roi_file,
@@ -92,6 +96,10 @@ def run(config, tim):
     else:
         n_som1 = None
 
+    if config.Q_bins is None and config.scatt_angle is not None:
+        import copy
+        tof_axis = copy.deepcopy(d_som1[0].axis[0].val)
+
     # Closing sample data instrument geometry file
     if data_inst_geom_dst is not None:
         data_inst_geom_dst.release_resource()
@@ -100,7 +108,7 @@ def run(config, tim):
     if norm_inst_geom_dst is not None:
         norm_inst_geom_dst.release_resource()        
 
-    # Step 6: Sum all normalization spectra together
+    # Step 7: Sum all normalization spectra together
     if config.norm is not None:
         n_som2 = dr_lib.sum_all_spectra(n_som1)
     else:
@@ -108,7 +116,7 @@ def run(config, tim):
 
     del n_som1
 
-    # Step 7: Divide data by normalization
+    # Step 8: Divide data by normalization
     if config.verbose and config.norm is not None:
         print "Scale data by normalization"
 
@@ -134,6 +142,18 @@ def run(config, tim):
                              path_replacement=config.path_replacement,
                              message="combined R(TOF) information")
 
+        if config.inst == "REF_M":
+            tof_bc = utils.calc_bin_centers(d_som2_2[0].axis[0].val)
+            d_som2_2[0].axis[0].val = tof_bc[0]
+            d_som2_2.setDataSetType("density")
+
+            hlr_utils.write_file(config.output, "text/Spec", d_som2_2,
+                                 output_ext="crtof2",
+                                 verbose=config.verbose,
+                                 data_ext=config.ext_replacement,
+                                 path_replacement=config.path_replacement,
+                                 message="bc combined R(TOF) information")
+
         del d_som2_2
 
     if config.dump_rtof:
@@ -147,107 +167,155 @@ def run(config, tim):
                              message="R(TOF) information")
         del d_som2_1
 
-    # Step 8: Convert TOF to scalar Q
-    if config.verbose:
-        print "Converting TOF to scalar Q"
-
-    # Check to see if polar angle offset is necessary
-    if config.angle_offset is not None:
-        # Check on units, offset must be in radians
-        p_temp = config.angle_offset.toFullTuple(True)
-        if p_temp[2] == "degrees" or p_temp[2] == "degree":
-            import math
-            deg_to_rad =  (math.pi / 180.0)
-            p_off_rads = p_temp[0] * deg_to_rad
-            p_off_err2_rads = p_temp[1] * deg_to_rad * deg_to_rad
-        else:
-            p_off_rads = p_temp[0]
-            p_off_err2_rads = p_temp[1]
-
-        p_offset = (p_off_rads, p_off_err2_rads)
-
-        d_som2.attr_list["angle_offset"] = config.angle_offset
-    else:
-        p_offset = None
-
-    if tim is not None:
-        tim.getTime(False)
-
-    d_som3 = common_lib.tof_to_scalar_Q(d_som2, units="microsecond",
-                                        angle_offset=p_offset,
-                                        lojac=False)
-
-    del d_som2
-        
-    if tim is not None:
-        tim.getTime(msg="After converting wavelength to scalar Q ")
-
-    if config.dump_rq:
-        d_som3_1 = dr_lib.data_filter(d_som3, clean_axis=True)
-        hlr_utils.write_file(config.output, "text/Spec", d_som3_1,
-                             output_ext="rq",
-                             verbose=config.verbose,
-                             data_ext=config.ext_replacement,
-                             path_replacement=config.path_replacement,
-                             message="pixel R(Q) information")
-        del d_som3_1
-
-    if not config.no_filter:
+    if config.inst == "REF_L":
+        # Step 9: Convert TOF to scalar Q
         if config.verbose:
-            print "Filtering final data"
-        
+            print "Converting TOF to scalar Q"
+    
+        # Check to see if polar angle offset is necessary
+        if config.angle_offset is not None:
+            # Check on units, offset must be in radians
+            p_temp = config.angle_offset.toFullTuple(True)
+            if p_temp[2] == "degrees" or p_temp[2] == "degree":
+                deg_to_rad =  (math.pi / 180.0)
+                p_off_rads = p_temp[0] * deg_to_rad
+                p_off_err2_rads = p_temp[1] * deg_to_rad * deg_to_rad
+            else:
+                p_off_rads = p_temp[0]
+                p_off_err2_rads = p_temp[1]
+    
+            p_offset = (p_off_rads, p_off_err2_rads)
+    
+            d_som2.attr_list["angle_offset"] = config.angle_offset
+        else:
+            p_offset = None
+    
         if tim is not None:
             tim.getTime(False)
-        
-        d_som4 = dr_lib.data_filter(d_som3)
+    
+        d_som3 = common_lib.tof_to_scalar_Q(d_som2, units="microsecond",
+                                            angle_offset=p_offset,
+                                            lojac=False)
+    
+        del d_som2
+            
+        if tim is not None:
+            tim.getTime(msg="After converting wavelength to scalar Q ")
+    
+        if config.dump_rq:
+            d_som3_1 = dr_lib.data_filter(d_som3, clean_axis=True)
+            hlr_utils.write_file(config.output, "text/Spec", d_som3_1,
+                                 output_ext="rq",
+                                 verbose=config.verbose,
+                                 data_ext=config.ext_replacement,
+                                 path_replacement=config.path_replacement,
+                                 message="pixel R(Q) information")
+            del d_som3_1
+                    
+        if not config.no_filter:
+            if config.verbose:
+                print "Filtering final data"
+            
+            if tim is not None:
+                tim.getTime(False)
+            
+            d_som4 = dr_lib.data_filter(d_som3)
+    
+            if tim is not None:
+                tim.getTime(msg="After filtering data")
+        else:
+            d_som4 = d_som3
+    
+        del d_som3
+    else:
+        d_som4 = d_som2
+
+    # Step 10: Rebin all spectra to final Q axis
+    if config.Q_bins is None:
+        if config.scatt_angle is None:
+            config.Q_bins = dr_lib.create_axis_from_data(d_som4)
+            rebin_axis = config.Q_bins.toNessiList()
+        else:
+            # Get scattering angle and make Q conversion from TOF axis
+            # Check on units, scattering angle must be in radians
+            sa_temp = config.scatt_angle.toFullTuple(True)
+            if sa_temp[2] == "degrees" or sa_temp[2] == "degree":
+                deg_to_rad =  (math.pi / 180.0)
+                sa_rads = sa_temp[0] * deg_to_rad
+                sa_err2_rads = sa_temp[1] * deg_to_rad * deg_to_rad
+            else:
+                sa_rads = sa_temp[0]
+                sa_err2_rads = sa_temp[1]
+
+            sa = (sa_rads, sa_err2_rads)
+
+            pl = d_som4.attr_list.instrument.get_total_path(d_som4[0].id,
+                                                            det_secondary=True)
+
+            import nessi_list
+            tof_axis_err2 = nessi_list.NessiList(len(tof_axis))
+
+            rebin_axis = axis_manip.tof_to_scalar_Q(tof_axis,
+                                                    tof_axis_err2,
+                                                    pl[0], pl[1],
+                                                    sa[0], sa[1])[0]
+
+            axis_manip.reverse_array_nc(rebin_axis)            
+    else:
+        rebin_axis = config.Q_bins.toNessiList()
+
+    if config.inst == "REF_L":
+        if config.verbose:
+            print "Rebinning spectra"
 
         if tim is not None:
-            tim.getTime(msg="After filtering data")
+            tim.getTime(False)
+            
+        d_som5 = common_lib.rebin_axis_1D_linint(d_som4, rebin_axis)
+    
+        if tim is not None:
+            tim.getTime(msg="After rebinning spectra")
+    
+        del d_som4
+    
+        if config.dump_rqr:
+            hlr_utils.write_file(config.output, "text/Spec", d_som5,
+                                 output_ext="rqr",
+                                 verbose=config.verbose,
+                                 data_ext=config.ext_replacement,
+                                 path_replacement=config.path_replacement,
+                                 message="pixel R(Q) (after rebinning) "\
+                                 +"information")
+    
+        # Step 11: Sum all rebinned spectra
+        if config.verbose:
+            print "Summing spectra"
+    
+        if tim is not None:
+            tim.getTime(False)
+    
+        d_som6 = dr_lib.sum_all_spectra(d_som5)
+    
+        if tim is not None:
+            tim.getTime(msg="After summing spectra")
+    
+        del d_som5
     else:
-        d_som4 = d_som3
+        d_som5 = d_som4
 
-    del d_som3
+    if config.inst == "REF_M":
+        d_som5A = dr_lib.sum_all_spectra(d_som5)
+        del d_som5
+        d_som6 = dr_lib.data_filter(d_som5A)
+        del d_som5A
+        d_som6[0].axis[0].val = rebin_axis
+        axis_manip.reverse_array_nc(d_som6[0].y)
+        axis_manip.reverse_array_nc(d_som6[0].var_y)
 
-    # Rebin all spectra to final Q axis
-    if config.Q_bins is None:
-        config.Q_bins = dr_lib.create_axis_from_data(d_som4)
-
-    rebin_axis = config.Q_bins.toNessiList()
-
-    if config.verbose:
-        print "Rebinning spectra"
-
-    if tim is not None:
-        tim.getTime(False)
-        
-    d_som5 = common_lib.rebin_axis_1D_linint(d_som4, rebin_axis)
-
-    if tim is not None:
-        tim.getTime(msg="After rebinning spectra")
-
-    del d_som4
-
-    if config.dump_rqr:
-        hlr_utils.write_file(config.output, "text/Spec", d_som5,
-                             output_ext="rqr",
-                             verbose=config.verbose,
-                             data_ext=config.ext_replacement,
-                             path_replacement=config.path_replacement,
-                             message="pixel R(Q) (after rebinning) "\
-                             +"information")
-
-    if config.verbose:
-        print "Summing spectra"
-
-    if tim is not None:
-        tim.getTime(False)
-
-    d_som6 = dr_lib.sum_all_spectra(d_som5)
-
-    if tim is not None:
-        tim.getTime(msg="After summing spectra")
-
-    del d_som5
+        d_som6.setYLabel("Intensity")
+        d_som6.setYUnits("Counts/A-1")
+        d_som6.setAllAxisLabels(["scalar wavevector transfer"])
+        d_som6.setAllAxisUnits(["1/Angstroms"])
 
     hlr_utils.write_file(config.output, "text/Spec", d_som6,
                          replace_ext=False,
@@ -262,6 +330,18 @@ def run(config, tim):
                          data_ext=config.ext_replacement,
                          path_replacement=config.path_replacement,
                          message="metadata")
+
+    if config.inst == "REF_M":
+        Q_bc = utils.calc_bin_centers(d_som6[0].axis[0].val)
+        d_som6[0].axis[0].val = Q_bc[0]
+        d_som6.setDataSetType("density")
+        hlr_utils.write_file(config.output, "text/Spec", d_som6,
+                             output_ext="txt2",
+                             data_ext=config.ext_replacement,
+                             path_replacement=config.path_replacement,
+                             verbose=config.verbose,
+                             message="bc combined Reflectivity information")
+
 
     if tim is not None:
         tim.setOldTime(old_time)
