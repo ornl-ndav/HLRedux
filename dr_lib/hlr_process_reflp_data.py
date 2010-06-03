@@ -148,7 +148,8 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
     del d_som1
 
     # Zero the spectra if necessary
-    if conf.tof_cut_min is not None or conf.tof_cut_max is not None:
+    if roi_file is None and (conf.tof_cut_min is not None or \
+                             conf.tof_cut_max is not None):
         import utils
         # Find the indicies for the non zero range
         if conf.tof_cut_min is None:
