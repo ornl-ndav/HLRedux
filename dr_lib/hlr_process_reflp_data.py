@@ -148,20 +148,21 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
     del d_som1
 
     # Zero the spectra if necessary
-    if conf.tof_cut_min is not None or conf.tof_cut_max is not None:
-        import bisect
+    if roi_file is None and (conf.tof_cut_min is not None or \
+                             conf.tof_cut_max is not None):
+        import utils
         # Find the indicies for the non zero range
         if conf.tof_cut_min is None:
             start_index = 0
         else:
-            start_index = bisect.bisect(d_som1A[0].axis[0].val,
-                                        conf.tof_cut_min)
-        
+            start_index = utils.bisect_helper(d_som1A[0].axis[0].val,
+                                              conf.tof_cut_min)
+
         if conf.tof_cut_max is None:
             end_index = len(d_som1A[0].axis[0].val) - 1
         else:
-            end_index = bisect.bisect(d_som1A[0].axis[0].val,
-                                      conf.tof_cut_max)
+            end_index = utils.bisect_helper(d_som1A[0].axis[0].val,
+                                            conf.tof_cut_max)
 
         nz_list = []
         for i in xrange(hlr_utils.get_length(d_som1A)):
