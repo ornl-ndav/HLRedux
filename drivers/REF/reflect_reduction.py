@@ -134,6 +134,11 @@ def run(config, tim):
         d_som2_1 = dr_lib.sum_all_spectra(d_som2)
         d_som2_2 = dr_lib.data_filter(d_som2_1)
         del d_som2_1
+
+        if config.inst == "REF_M":
+            tof_bc = utils.calc_bin_centers(d_som2_2[0].axis[0].val)
+            d_som2_2[0].axis[0].val = tof_bc[0]
+            d_som2_2.setDataSetType("density")
         
         hlr_utils.write_file(config.output, "text/Spec", d_som2_2,
                              output_ext="crtof",
@@ -141,18 +146,6 @@ def run(config, tim):
                              data_ext=config.ext_replacement,
                              path_replacement=config.path_replacement,
                              message="combined R(TOF) information")
-
-        if config.inst == "REF_M":
-            tof_bc = utils.calc_bin_centers(d_som2_2[0].axis[0].val)
-            d_som2_2[0].axis[0].val = tof_bc[0]
-            d_som2_2.setDataSetType("density")
-
-            hlr_utils.write_file(config.output, "text/Spec", d_som2_2,
-                                 output_ext="crtof2",
-                                 verbose=config.verbose,
-                                 data_ext=config.ext_replacement,
-                                 path_replacement=config.path_replacement,
-                                 message="bc combined R(TOF) information")
 
         del d_som2_2
 
@@ -308,7 +301,6 @@ def run(config, tim):
         del d_som5
         d_som6 = dr_lib.data_filter(d_som5A)
         del d_som5A
-        d_som6[0].axis[0].val = rebin_axis
         axis_manip.reverse_array_nc(d_som6[0].y)
         axis_manip.reverse_array_nc(d_som6[0].var_y)
 
@@ -316,6 +308,10 @@ def run(config, tim):
         d_som6.setYUnits("Counts/A-1")
         d_som6.setAllAxisLabels(["scalar wavevector transfer"])
         d_som6.setAllAxisUnits(["1/Angstroms"])
+
+        Q_bc = utils.calc_bin_centers(rebin_axis)
+        d_som6[0].axis[0].val = Q_bc[0]
+        d_som6.setDataSetType("density")
 
     hlr_utils.write_file(config.output, "text/Spec", d_som6,
                          replace_ext=False,
@@ -330,18 +326,6 @@ def run(config, tim):
                          data_ext=config.ext_replacement,
                          path_replacement=config.path_replacement,
                          message="metadata")
-
-    if config.inst == "REF_M":
-        Q_bc = utils.calc_bin_centers(d_som6[0].axis[0].val)
-        d_som6[0].axis[0].val = Q_bc[0]
-        d_som6.setDataSetType("density")
-        hlr_utils.write_file(config.output, "text/Spec", d_som6,
-                             output_ext="txt2",
-                             data_ext=config.ext_replacement,
-                             path_replacement=config.path_replacement,
-                             verbose=config.verbose,
-                             message="bc combined Reflectivity information")
-
 
     if tim is not None:
         tim.setOldTime(old_time)
