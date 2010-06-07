@@ -309,7 +309,7 @@ def run(config, tim):
         d_som6.setAllAxisLabels(["scalar wavevector transfer"])
         d_som6.setAllAxisUnits(["1/Angstroms"])
 
-        Q_bc = utils.calc_bin_centers(d_som6[0].axis[0].val)
+        Q_bc = utils.calc_bin_centers(rebin_axis)
         d_som6[0].axis[0].val = Q_bc[0]
         d_som6.setDataSetType("density")
 
