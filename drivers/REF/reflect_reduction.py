@@ -150,7 +150,10 @@ def run(config, tim):
         del d_som2_2
 
     if config.dump_rtof:
-        d_som2_1 = dr_lib.filter_ref_data(d_som2)
+        if config.inst == "REF_M":
+            d_som2_1 = d_som2
+        else:
+            d_som2_1 = dr_lib.filter_ref_data(d_som2)
         
         hlr_utils.write_file(config.output, "text/Spec", d_som2_1,
                              output_ext="rtof",
