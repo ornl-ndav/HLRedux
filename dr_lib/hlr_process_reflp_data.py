@@ -181,7 +181,8 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
     if t is not None:
         t.getTime(False)
 
-    d_som3 = common_lib.tof_to_wavelength(d_som2, units="microsecond")
+    d_som3 = common_lib.tof_to_wavelength(d_som2, inst_param="total",
+                                          units="microsecond")
     if dm_som1 is not None:
         dm_som2 = common_lib.tof_to_wavelength(dm_som1, units="microsecond")
     else:
