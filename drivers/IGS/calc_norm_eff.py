@@ -194,7 +194,7 @@ if __name__ == "__main__":
     # Set defaults for imported options
     parser.set_defaults(inst="BSS")
     parser.set_defaults(data_paths="/entry/bank1,1,/entry/bank2,1")
-    parser.set_defaults(mon_path="/entry/monitor,1")
+    parser.set_defaults(mon_path="/entry/monitor1,1")
     parser.set_defaults(norm_start="6.24")
     parser.set_defaults(norm_end="6.30")
 

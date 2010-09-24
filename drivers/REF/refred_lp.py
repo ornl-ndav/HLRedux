@@ -178,7 +178,6 @@ def run(config, tim):
 
         config.lambdap_bins = dr_lib.create_axis_from_data(d_som3,
                                                        width=delta_lambdap[0])
-
     else:
         # Do nothing, got the binning scheme
         pass
@@ -194,15 +193,50 @@ def run(config, tim):
 
     del d_som3
 
+    if config.inst == "REF_M":
+        # Clean up spectrum
+        if config.tof_cut_min is not None:
+            tof_cut_min = float(config.tof_cut_min)
+        else:
+            tof_cut_min = config.TOF_min
+
+        if config.tof_cut_max is not None:
+            tof_cut_max = float(config.tof_cut_max)
+        else:
+            tof_cut_max = config.TOF_max
+
+        pathlength = d_som4.attr_list.instrument.get_total_path(
+            det_secondary=True)
+
+        lambda_min = common_lib.tof_to_wavelength((tof_cut_min, 0.0),
+                                                  pathlength=pathlength)
+
+        lambda_T_min = common_lib.div_ncerr(lambda_min, sin_theta_rads)
+        
+        lambda_max = common_lib.tof_to_wavelength((tof_cut_max, 0.0),
+                                                  pathlength=pathlength)
+
+        lambda_T_max = common_lib.div_ncerr(lambda_max, sin_theta_rads)
+
+        nz_list = []
+        for i in xrange(hlr_utils.get_length(d_som4)):
+            nz_list.append((lambda_T_min[0], lambda_T_max[0]))
+        
+        d_som4A = dr_lib.zero_spectra(d_som4, nz_list)
+    else:
+        d_som4A = d_som4
+
+    del d_som4
+
     # Step 8: Write out all spectra to a file
-    hlr_utils.write_file(config.output, "text/Spec", d_som4,
+    hlr_utils.write_file(config.output, "text/Spec", d_som4A,
                          replace_ext=False,
                          replace_path=False,
                          verbose=config.verbose,
                          message="Reflectivity information")
 
     if config.dump_twod:
-        d_som5 = dr_lib.create_X_vs_pixpos(d_som4,
+        d_som5 = dr_lib.create_X_vs_pixpos(d_som4A,
                                            config.lambdap_bins.toNessiList(),
                                            rebin=False,
                                            y_label="R",
@@ -216,9 +250,9 @@ def run(config, tim):
                              path_replacement=config.path_replacement,
                              message="2D Reflectivity information")
 
-    d_som4.attr_list["config"] = config
+    d_som4A.attr_list["config"] = config
 
-    hlr_utils.write_file(config.output, "text/rmd", d_som4,
+    hlr_utils.write_file(config.output, "text/rmd", d_som4A,
                          output_ext="rmd", verbose=config.verbose,
                          data_ext=config.ext_replacement,
                          path_replacement=config.path_replacement,
