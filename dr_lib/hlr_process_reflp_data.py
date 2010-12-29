@@ -217,7 +217,7 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
         if t is not None:
             t.getTime(False)
 
-        d_som4 = common_lib.mult_ncerr(d_som3, (proton_charge.getValue(), 0.0))
+        d_som4 = common_lib.div_ncerr(d_som3, (proton_charge.getValue(), 0.0))
 
         if t is not None:
             t.getTime(msg="After scaling by proton charge ")
