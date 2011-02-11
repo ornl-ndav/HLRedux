@@ -267,7 +267,7 @@ def run(config, tim):
         if tim is not None:
             tim.getTime(False)
             
-        d_som5 = common_lib.rebin_axis_1D_linint(d_som4, rebin_axis)
+        d_som5 = common_lib.rebin_axis_1D_frac(d_som4, rebin_axis)
     
         if tim is not None:
             tim.getTime(msg="After rebinning spectra")
