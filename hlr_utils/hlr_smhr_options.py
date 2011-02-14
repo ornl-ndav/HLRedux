@@ -31,8 +31,9 @@ class SmhrOptions(hlr_ref_options.RefOptions):
     This class provides options for the REF specmh_reduction driver.
     """
 
-    def __init__(self, usage=None, option_list=None, version=None,
-                 conflict_handler='error', description=None, **kwargs):
+    def __init__(self, usage=None, option_list=None, options_class=None,
+                 version=None, conflict_handler='error', description=None,
+                 **kwargs):
         """
         Constructor for C{SmhrOptions}
 
