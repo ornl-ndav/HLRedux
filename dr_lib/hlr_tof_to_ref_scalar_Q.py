@@ -56,7 +56,12 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
     @keyword units: The expected units for this function. The default for this
                     function is I{microseconds}.
     @type units: C{string}
- 
+
+    @keyword configure: This is the object containing the driver configuration.
+                        This will signal the function to write out the counts
+                        and fractional area to files.
+    @type configure: C{Configure}
+
 
     @return: Object with a primary axis in time-of-flight converted to
              reflectometer scalar Q
@@ -89,7 +94,13 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
     units = kwargs.get("units", "microseconds")
     lojac = kwargs.get("lojac", hlr_utils.check_lojac(obj))
     angle_offset = kwargs.get("angle_offset")
-        
+    config = kwargs.get("configure")
+
+    if config is None:
+        beamdiv_corr = False
+    else:
+        beamdiv_corr = config.beamdiv_corr
+    
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
     if o_descr == "SOM":
