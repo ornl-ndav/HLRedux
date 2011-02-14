@@ -285,7 +285,6 @@ if __name__ == "__main__":
     parser.set_defaults(data_paths="/entry/bank1,1")
 
     # Setup REF specific options
-    
     parser.add_option("", "--timing", action="store_true", dest="timing",
                       help="Flag to turn on timing of code")
     parser.set_defaults(timing=False)
