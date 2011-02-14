@@ -349,9 +349,9 @@ if __name__ == "__main__":
     result.append("documentation.")
     
     # Set up the options available
-    parser = hlr_utils.RefOptions("usage: %prog [options] <datafile>", None,
-                                  None, hlr_utils.program_version(), 'error',
-                                  " ".join(result))
+    parser = hlr_utils.SmhrOptions("usage: %prog [options] <datafile>", None,
+                                   None, hlr_utils.program_version(), 'error',
+                                   " ".join(result))
 
     # Defaults for REF
     parser.set_defaults(data_paths="/entry/bank1,1")
@@ -388,8 +388,8 @@ if __name__ == "__main__":
     # Set up the configuration
     configure = hlr_utils.Configure()
 
-    # Call the configuration setter for RefRedOptions
-    hlr_utils.RefConfiguration(parser, configure, options, args)
+    # Call the configuration setter for SmhrOptions
+    hlr_utils.SmhrConfiguration(parser, configure, options, args)
 
     # Setup the empty cell file list
     if hlr_utils.cli_provide_override(configure, "ecell", "--ecell"):
