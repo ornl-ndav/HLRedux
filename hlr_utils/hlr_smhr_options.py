@@ -62,6 +62,11 @@ class SmhrOptions(hlr_ref_options.RefOptions):
                                             Option, version, conflict_handler,
                                             description)        
 
+        self.add_option("", "--beamdiv-corr", dest="beamdiv_corr",
+                        action="store_true", help="Flag to turn on the beam "\
+                        +"divergence correction.")
+        self.set_defaults(beamdiv_corr=False)
+
 def SmhrConfiguration(parser, configure, options, args):
     """
     This function sets the incoming C{Configure} object with all the options
@@ -83,3 +88,7 @@ def SmhrConfiguration(parser, configure, options, args):
     # Call the configuration setter for RefOptions
     hlr_ref_options.RefConfiguration(parser, configure, options, args)
 
+    # Set the beam divergence calculation flag
+    if hlr_utils.cli_provide_override(configure, "beamdiv_corr",
+                                      "--beamdiv-corr"):
+        configure.beamdiv_corr = options.beamdiv_corr
