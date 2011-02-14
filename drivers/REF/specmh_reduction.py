@@ -223,20 +223,36 @@ def run(config, tim):
     
     del d_som3
 
-    # Sum all spectra
-    d_som5 = dr_lib.sum_all_spectra(d_som4)
+    if config.Q_bins is not None:
+        d_som5 = common_lib.rebin_axis_1D_frac(d_som4,
+                                               config.Q_bins.toNessiList())
+        
+        if config.dump_rqr:
+            hlr_utils.write_file(config.output, "text/Spec", d_som5,
+                                 output_ext="rqr",
+                                 verbose=config.verbose,
+                                 data_ext=config.ext_replacement,
+                                 path_replacement=config.path_replacement,
+                                 message="rebinned pixel R(Q) information")
+    else:
+        d_som5 = d_som4
 
     del d_som4
 
-    hlr_utils.write_file(config.output, "text/Spec", d_som5,
+    # Sum all spectra since everything is on same axis
+    d_som6 = dr_lib.sum_all_spectra(d_som5)
+
+    del d_som5
+
+    hlr_utils.write_file(config.output, "text/Spec", d_som6,
                          replace_ext=False,
                          replace_path=False,
                          verbose=config.verbose,
                          message="combined Reflectivity information")
 
-    d_som5.attr_list["config"] = config
+    d_som6.attr_list["config"] = config
 
-    hlr_utils.write_file(config.output, "text/rmd", d_som5,
+    hlr_utils.write_file(config.output, "text/rmd", d_som6,
                          output_ext="rmd", verbose=config.verbose,
                          data_ext=config.ext_replacement,
                          path_replacement=config.path_replacement,
