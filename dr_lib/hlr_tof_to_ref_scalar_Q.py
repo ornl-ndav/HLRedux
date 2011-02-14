@@ -149,16 +149,18 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
     else:
         pass
 
-    if pathlength is not None:
-        p_descr = hlr_utils.get_descr(pathlength)
+    if pathlength is None:
+        (pl, pl_err2) = obj.attr_list.instrument.get_total_path(obj[0].id,
+                                                             det_secondary=True)
     else:
-        pass
+        (pl, pl_err2) = pathlength
 
-    if polar is not None:
-        a_descr = hlr_utils.get_descr(polar)
+    if polar is None:
+        (angle, angle_err2) = hlr_utils.get_special(obj.attr_list["Theta"],
+                                                    obj[0])
     else:
-        pass
-
+        (angle, angle_err2) = polar
+        
     # iterate through the values
     import axis_manip
     if lojac:
@@ -169,19 +171,6 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
         err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
 
         map_so = hlr_utils.get_map_so(obj, None, i)
-
-        if pathlength is None:
-            (pl, pl_err2) = hlr_utils.get_parameter("total", map_so, inst)
-        else:
-            pl = hlr_utils.get_value(pathlength, i, p_descr)
-            pl_err2 = hlr_utils.get_err2(pathlength, i, p_descr)
-
-        if polar is None:
-            (angle, angle_err2) = hlr_utils.get_parameter("polar", map_so,
-                                                          inst)
-        else:
-            angle = hlr_utils.get_value(polar, i, a_descr)
-            angle_err2 = hlr_utils.get_err2(polar, i, a_descr)
 
         if angle_offset is not None:
             angle += angle_offset[0]
@@ -231,6 +220,7 @@ if __name__ == "__main__":
     som1 = hlr_test.generate_som()
     som1.setAllAxisUnits(["microseconds"])
     som1.attr_list.instrument = SOM.ASG_Instrument()
+    som1.attr_list["Theta"] = ao
 
     print "********** SOM1"
     print "* ", som1[0]
