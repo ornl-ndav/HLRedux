@@ -1,4 +1,4 @@
 #!/bin/sh
 
 loc=`python -c "import drivers.REF; print drivers.REF.__path__[0]"`
-python $loc/spechmh_reduction.py $@
+python $loc/specmh_reduction.py $@
