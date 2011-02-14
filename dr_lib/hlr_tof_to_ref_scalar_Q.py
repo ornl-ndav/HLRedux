@@ -167,11 +167,18 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
     if lojac:
         import utils
 
+    if beamdiv_corr:
+        import dr_lib
+
     for i in xrange(hlr_utils.get_length(obj)):
         val = hlr_utils.get_value(obj, i, o_descr, "x", axis)
         err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
 
         map_so = hlr_utils.get_map_so(obj, None, i)
+
+        if beamdiv_corr:
+            dangle = dr_lib.ref_beamdiv_correct(obj.attr_list, map_so.id)
+            angle += dangle
 
         value = axis_manip.tof_to_scalar_Q(val, err2, pl, pl_err2, angle,
                                            angle_err2)
