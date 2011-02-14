@@ -71,6 +71,7 @@ from hlr_process_sas_data import process_sas_data
 from hlr_rebin_axis_1D_frac import *
 from hlr_rebin_efficiency import *
 from hlr_rebin_monitor import *
+from hlr_ref_beamdiv_correct import *
 from hlr_scaled_summed_data import *
 from hlr_shift_spectrum import *
 from hlr_subtract_axis_dep_bkg import *
