@@ -67,6 +67,10 @@ class SmhrOptions(hlr_ref_options.RefOptions):
                         +"divergence correction.")
         self.set_defaults(beamdiv_corr=False)
 
+        self.add_option("", "--det-spat-res", dest="det_spat_res", type="float",
+                        nargs=1, help="Specify the detector spatial "\
+                        +"resolution (mm).")
+
 def SmhrConfiguration(parser, configure, options, args):
     """
     This function sets the incoming C{Configure} object with all the options
@@ -92,3 +96,13 @@ def SmhrConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "beamdiv_corr",
                                       "--beamdiv-corr"):
         configure.beamdiv_corr = options.beamdiv_corr
+
+    # Set the detector spatial resolution
+    if hlr_utils.cli_provide_override(configure, "det_spat_res",
+                                      "--det-spat-res"):
+        if options.det_spat_res is None:
+            configure.det_spat_res = options.det_spat_res
+        else:
+            # Set this to half it's values for the acceptance polygon
+            # and convert units to meters
+            configure.det_spat_res = 0.5 * options.det_spat_res * 1.0e-3
