@@ -22,9 +22,50 @@
 
 # $Id$
 
-def ref_beamdiv_correct(obj, **kwargs):
+import math
+
+def ref_beamdiv_correct(attrs, pix_id, **kwargs):
     """
 
+    @param attrs: The attribute list of a C{SOM.SOM}
+    @type attrs: C{SOM.AttributeList}
+
+    @param pix_id: The pixel ID for which the correction will be calculated
+    @type pix_id: C{tuple}
+
+
+    @return: The beam divergence correction to the scattering angle
+    @type: float
+
+    @raise RuntimeError: If the instrument name is not recognized.
     """
-    pass
+    # Set instrument specific strings
+    inst_name = attrs["instrument_name"]
+    if inst_name == "REF_L":
+        first_slit_size = "data-slit1_size"
+        last_slit_size = "data-slit2_size"
+        last_slit_distot = "data-slit12_distance"
+    elif inst_name == "REF_M":
+        first_slit_size = "data-slit1_size"
+        last_slit_size = "data-slit3_size"
+        last_slit_distot = "data-slit13_distance"
+    else:
+        raise RuntimeError("Do not know how to handle instrument %s" \
+                           % inst_name)
+    
+    gamma_plus = math.atan2(0.5 * (attrs[first_slit_size][0] + \
+                                   attrs[last_slit_size][0]),
+                            attrs[last_slit_distot][0])
+    
+    gamma_minus = math.atan2(0.5 * (attrs[first_slit_size][0] - \
+                                    attrs[last_slit_size][0]),
+                             attrs[last_slit_distot][0])
+    
+    half_last_aperture = 0.5 * attrs[last_slit_size][0]
+    neg_half_last_aperture = -1.0 * half_last_aperture
+
+    
+    
+
+    return 0
     
