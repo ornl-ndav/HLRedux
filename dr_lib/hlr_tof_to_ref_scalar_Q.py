@@ -165,6 +165,11 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
     if angle_offset is not None:
         angle += angle_offset[0]
         angle_err2 += angle_offset[1]
+
+    # Need to multiply angle by 2.0 in order to make it be Theta to
+    # underlying conversion function
+    angle *= 2.0
+    angle_err2 *= 4.0
         
     # iterate through the values
     import axis_manip
