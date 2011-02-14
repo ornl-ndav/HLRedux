@@ -84,7 +84,7 @@ def calc_delta_theta_over_theta(som, dataset_type="data"):
     else:
         raise RuntimeError("Do not know how to handle instrument %s" \
                            % inst_name)
-    
+
     # Get slit information
     try:
         slit1_ext1 = hlr_utils.get_special(som.attr_list[first_slit_ext1], so)
@@ -179,8 +179,10 @@ def calc_delta_theta_over_theta(som, dataset_type="data"):
 
     if slit12_dist_ok:
         slit12_distance = math.fabs(slit1_dist[0] - slit2_dist[0])
+        slit2_distance = math.fabs(slit2_dist[0])
     else:
         slit12_distance = float('nan')
+        slit2_distance = float('nan')
 
     # Calculate delta theta
     if slit1_size_ok and not slit2_size_ok:
@@ -213,6 +215,8 @@ def calc_delta_theta_over_theta(som, dataset_type="data"):
     last_slit_dist_tag = "-%s_distance" % last_slit_distot
     som.attr_list[dataset_type+last_slit_dist_tag] = (slit12_distance,
                                                       slit1_dist[2])
+    som.attr_list[dataset_type+"-"+last_slit_dis.lower()] = (slit2_distance,
+                                                             slit1_dist[2])
     som.attr_list[dataset_type+"-delta_theta"] = (dtheta, "radians")
     som.attr_list[dataset_type+"-theta"] = (theta_rads, "radians")
     som.attr_list[dataset_type+"-dtheta_over_theta"] = dtheta_over_theta
