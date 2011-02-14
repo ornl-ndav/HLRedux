@@ -190,7 +190,8 @@ def run(config, tim):
     
     d_som3 = dr_lib.tof_to_ref_scalar_Q(d_som2, units="microsecond",
                                         angle_offset=p_offset,
-                                        lojac=False)
+                                        lojac=False,
+                                        configure=config)
     
     del d_som2
             
