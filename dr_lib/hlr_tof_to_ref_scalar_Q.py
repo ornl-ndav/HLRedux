@@ -156,7 +156,7 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
         (pl, pl_err2) = pathlength
 
     if polar is None:
-        # Function returns 3-tuple, only need first to elements
+        # Function returns 3-tuple, only need first two elements
         (angle, angle_err2) = hlr_utils.get_special(obj.attr_list["Theta"],
                                                     obj[0])[:2]
     else:
