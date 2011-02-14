@@ -161,6 +161,10 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
                                                     obj[0])[:2]
     else:
         (angle, angle_err2) = polar
+
+    if angle_offset is not None:
+        angle += angle_offset[0]
+        angle_err2 += angle_offset[1]
         
     # iterate through the values
     import axis_manip
@@ -172,10 +176,6 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
         err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
 
         map_so = hlr_utils.get_map_so(obj, None, i)
-
-        if angle_offset is not None:
-            angle += angle_offset[0]
-            angle_err2 += angle_offset[1]
 
         value = axis_manip.tof_to_scalar_Q(val, err2, pl, pl_err2, angle,
                                            angle_err2)
