@@ -84,30 +84,11 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
         pass
 
     # Setup keyword arguments
-    try:
-        polar = kwargs["polar"]
-    except KeyError:
-        polar = None
-
-    try:
-        pathlength = kwargs["pathlength"]
-    except KeyError:
-        pathlength = None
-
-    try:
-        units = kwargs["units"]
-    except KeyError:
-        units = "microseconds"
-
-    try:
-        lojac = kwargs["lojac"]
-    except KeyError:
-        lojac = hlr_utils.check_lojac(obj)
-
-    try:
-        angle_offset = kwargs["angle_offset"]
-    except KeyError:
-        angle_offset = None
+    polar = kwargs.get("polar")
+    pathlength = kwargs.get("pathlength")
+    units = kwargs.get("units", "microseconds")
+    lojac = kwargs.get("lojac", hlr_utils.check_lojac(obj))
+    angle_offset = kwargs.get("angle_offset")
         
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
@@ -225,7 +206,7 @@ if __name__ == "__main__":
     som1 = hlr_test.generate_som()
     som1.setAllAxisUnits(["microseconds"])
     som1.attr_list.instrument = SOM.ASG_Instrument()
-    som1.attr_list["Theta"] = ao
+    som1.attr_list["data-theta"] = ao
 
     print "********** SOM1"
     print "* ", som1[0]
