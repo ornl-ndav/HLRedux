@@ -226,7 +226,7 @@ def run(config, tim):
     
     del d_som3
 
-    if config.Q_bins is not None:
+    if config.Q_bins is not None or config.beamdiv_corr:
         d_som5 = common_lib.rebin_axis_1D_frac(d_som4,
                                                config.Q_bins.toNessiList())
         
