@@ -166,6 +166,8 @@ def run(config, tim):
     # Step 9: Convert TOF to scalar Q
     if config.verbose:
         print "Converting TOF to scalar Q"
+        if config.beamdiv_corr:
+            print "Applying beam divergence correction"
     
     # Check to see if polar angle offset is necessary
     if config.angle_offset is not None:
