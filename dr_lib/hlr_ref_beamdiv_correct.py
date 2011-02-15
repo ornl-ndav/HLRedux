@@ -133,9 +133,6 @@ def ref_beamdiv_correct(attrs, pix_id, epsilon, cpix, **kwargs):
                          dist_last_aper_det_sin_gamma_plus + epsilon)
     accept_poly_y.append(accept_poly_y[0])
 
-    #print "A3x:", accept_poly_x
-    #print "A3y:", accept_poly_y
-
     if y_sort:
         cur_index = pix_id[1][1]
         if pix_width is None:
@@ -156,8 +153,6 @@ def ref_beamdiv_correct(attrs, pix_id, epsilon, cpix, **kwargs):
     xMinus = (cur_index - cpix - 0.5) * pix_width
     xPlus = (cur_index - cpix + 0.5) * pix_width
 
-    #print "A5:", xMinus, xPlus
-
     # Calculate the intersection
     yLeftCross = -1
     yRightCross = -1
@@ -175,29 +170,29 @@ def ref_beamdiv_correct(attrs, pix_id, epsilon, cpix, **kwargs):
         if xI < xF:
             if xI < xMinus and xF >= xMinus:
                 yLeftCross = yI + (yF - yI) * (xMinus - xI) / (xF - xI)
-                int_poly_y.append(yLeftCross)
-                int_poly_x.append(xMinus)
+                int_poly_x.append(yLeftCross)
+                int_poly_y.append(xMinus)
 
             if xI < xPlus and xF >= xPlus:
                 yRightCross = yI + (yF - yI) * (xPlus - xI) / (xF - xI);
-                int_poly_y.append(yRightCross)
-                int_poly_x.append(xPlus)
+                int_poly_x.append(yRightCross)
+                int_poly_y.append(xPlus)
                 
         else:
             if xF < xPlus and xI >= xPlus:
                 yRightCross = yI + (yF - yI) * (xPlus - xI) / (xF - xI);
-                int_poly_y.append(yRightCross)
-                int_poly_x.append(xPlus)
+                int_poly_x.append(yRightCross)
+                int_poly_y.append(xPlus)
 
             if xF < xMinus and xI >= xMinus:
                 yLeftCross = yI + (yF - yI) * (xMinus - xI) / (xF - xI);
-                int_poly_y.append(yLeftCross)
-                int_poly_x.append(xMinus)
+                int_poly_x.append(yLeftCross)
+                int_poly_y.append(xMinus)
                 
         # This catches points on the polygon inside the range of interest
         if xF >= xMinus and xF < xPlus:
-            int_poly_y.append(yF)
-            int_poly_x.append(xF)
+            int_poly_x.append(yF)
+            int_poly_y.append(xF)
 
         xI = xF
         yI = yF
@@ -215,18 +210,17 @@ def ref_beamdiv_correct(attrs, pix_id, epsilon, cpix, **kwargs):
     # Calculate intersection polygon aread
     import utils
     area = utils.calc_area_2D_polygon(int_poly_x, int_poly_y,
-                                      len(int_poly_x) - 2)
+                                      len(int_poly_x) - 2, True)
 
-    #print "A8:", area
     return __calc_center_of_mass(int_poly_x, int_poly_y, area)
 
 def __calc_center_of_mass(arr_x, arr_y, A):
     center_of_mass = 0.0;
     SIXTH = 1. / 6.
-    for j in xrange(len(arr_x) -2):
-        center_of_mass += (arr_y[j] + arr_y[j + 1]) \
-                          * ((arr_y[j] * arr_x[j + 1]) - \
-                             (arr_y[j + 1] * arr_x[j]))
+    for j in xrange(len(arr_x) - 2):
+        center_of_mass += (arr_x[j] + arr_x[j + 1]) \
+                          * ((arr_x[j] * arr_y[j + 1]) - \
+                             (arr_x[j + 1] * arr_y[j]))
 
     if A != 0.0:
         return (SIXTH * center_of_mass) / A
