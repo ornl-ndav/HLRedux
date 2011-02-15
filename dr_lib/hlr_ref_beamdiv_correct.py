@@ -130,13 +130,13 @@ def ref_beamdiv_correct(attrs, pix_id, epsilon, **kwargs):
     accept_poly_y.append(accept_poly_y[0])
 
     if y_sort:
-        cur_offset = attrs.instrument.get_y_offset(pix_id)
+        cur_offset = attrs.instrument.get_y_pix_offset(pix_id)
         next_id = (pix_id[0], (pix_id[1][0], pix_id[1][1]+1))
-        next_offset = attrs.instrument.get_y_offset(next_id)
+        next_offset = attrs.instrument.get_y_pix_offset(next_id)
     else:
-        cur_offset = attrs.instrument.get_x_offset(pix_id)
+        cur_offset = attrs.instrument.get_x_pix_offset(pix_id)
         next_id = (pix_id[0], (pix_id[1][0]+1, pix_id[1][1]))
-        next_offset = attrs.instrument.get_x_offset(next_id)
+        next_offset = attrs.instrument.get_x_pix_offset(next_id)
 
     pix_width = math.fabs(next_offset - cur_offset)
 
@@ -207,9 +207,9 @@ def __calc_center_of_mass(arr_x, arr_y, A):
     center_of_mass = 0.0;
     SIXTH = 1. / 6.
     for j in xrange(len(arr_x) -2):
-        center_of_mass += (arr_y[i] + arr_y[i + 1]) \
-                          * ((arr_y[i] * arr_x[i + 1]) - \
-                             (arr_y[i + 1] * arr_x[i]))
+        center_of_mass += (arr_y[j] + arr_y[j + 1]) \
+                          * ((arr_y[j] * arr_x[j + 1]) - \
+                             (arr_y[j + 1] * arr_x[j]))
 
     if A != 0.0:
         return (SIXTH * center_of_mass) / A
