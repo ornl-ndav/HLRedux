@@ -71,6 +71,9 @@ class SmhrOptions(hlr_ref_options.RefOptions):
                         nargs=1, help="Specify the detector spatial "\
                         +"resolution (mm).")
 
+        self.add_option("", "--center-pix", dest="center_pix", type="float",
+                        nargs=1, help="Specify the center pixel.")
+
 def SmhrConfiguration(parser, configure, options, args):
     """
     This function sets the incoming C{Configure} object with all the options
@@ -106,3 +109,7 @@ def SmhrConfiguration(parser, configure, options, args):
             # Set this to half it's values for the acceptance polygon
             # and convert units to meters
             configure.det_spat_res = 0.5 * options.det_spat_res * 1.0e-3
+
+    # Set the center pixel for the beam divergence calculation
+    if hlr_utils.cli_provide_override(configure, "center_pix", "--center-pix"):
+        configure.center_pix = options.center_pix
