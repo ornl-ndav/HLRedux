@@ -25,7 +25,7 @@
 import math
 import nessi_list
 
-def ref_beamdiv_correct(attrs, pix_id, epsilon, **kwargs):
+def ref_beamdiv_correct(attrs, pix_id, epsilon, cpix, **kwargs):
     """
 
     @param attrs: The attribute list of a C{SOM.SOM}
@@ -36,6 +36,9 @@ def ref_beamdiv_correct(attrs, pix_id, epsilon, **kwargs):
 
     @param epsilon: The pixel spatial resolution in units of meters
     @type epsilon: C{float}
+
+    @param cpix: The center pixel for the calculation
+    @type cpix: C{float}
 
     @param kwargs: A list of keyword arguments that the function accepts:
 
@@ -85,6 +88,10 @@ def ref_beamdiv_correct(attrs, pix_id, epsilon, **kwargs):
     # This is currently set to the same number for both REF_L and REF_M
     if epsilon is None:
         epsilon = 0.5 * 1.3 * 1.0e-3
+
+    # Set the center pixel to something
+    if cpix is None:
+        cpix = 133.5
     
     gamma_plus = math.atan2(0.5 * (attrs[first_slit_size][0] + \
                                    attrs[last_slit_size][0]),
@@ -130,18 +137,22 @@ def ref_beamdiv_correct(attrs, pix_id, epsilon, **kwargs):
     accept_poly_y.append(accept_poly_y[0])
 
     if y_sort:
+        num_pix = attrs.instrument.get_num_y()
         cur_offset = attrs.instrument.get_y_pix_offset(pix_id)
         next_id = (pix_id[0], (pix_id[1][0], pix_id[1][1]+1))
         next_offset = attrs.instrument.get_y_pix_offset(next_id)
     else:
+        num_pix = attrs.instrument.get_num_x()
         cur_offset = attrs.instrument.get_x_pix_offset(pix_id)
         next_id = (pix_id[0], (pix_id[1][0]+1, pix_id[1][1]))
         next_offset = attrs.instrument.get_x_pix_offset(next_id)
 
+    pix_diff = (0.5 * num_pix) - cpix
     pix_width = math.fabs(next_offset - cur_offset)
+    shift = (pix_diff - 0.5) * pix_width
 
-    xMinus = cur_offset - (0.5 * pix_width)
-    xPlus = cur_offset + (0.5 * pix_width)
+    xMinus = cur_offset + shift - (0.5 * pix_width)
+    xPlus = cur_offset + shift + (0.5 * pix_width)
 
     yLeftCross = -1
     yRightCross = -1
