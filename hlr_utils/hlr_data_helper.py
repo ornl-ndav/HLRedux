@@ -718,3 +718,27 @@ def scale_proton_charge(ipc, scale_units):
     pc_new = ipc.getValue() * scale_info[scale_units]["scale"]
 
     return SOM.NxParameter(pc_new, scale_info[scale_units]["units"])
+
+def angle_to_radians(angle):
+    """
+    This function converts the incoming angle to radians if it was given
+    in degrees. If the incoming angle is already radians, it is returned
+    in the proper form.
+
+    @param angle: The angle to check
+    @type angle: C{hlr_utils.DrParameter}
+
+    @return: The converted angle
+    @rtype: C{tuple}
+    """
+    import math
+    p_temp = angle.toFullTuple(True)
+    if p_temp[2] == "degrees" or p_temp[2] == "degree":
+        deg_to_rad =  (math.pi / 180.0)
+        p_off_rads = p_temp[0] * deg_to_rad
+        p_off_err2_rads = p_temp[1] * deg_to_rad * deg_to_rad
+    else:
+        p_off_rads = p_temp[0]
+        p_off_err2_rads = p_temp[1]
+
+    return (p_off_rads, p_off_err2_rads)
