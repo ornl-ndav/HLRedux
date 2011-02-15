@@ -189,12 +189,32 @@ def ref_beamdiv_correct(attrs, pix_id, epsilon, **kwargs):
     if len(int_poly_x) > 2:
         int_poly_x.append(int_poly_x[0])
         int_poly_y.append(int_poly_y[0])
+        int_poly_x.append(int_poly_x[1])
+        int_poly_y.append(int_poly_y[1])
     else:
         # Intersection polygon is NULL, point or line, so has no area
         # Therefore there is no angle correction
         return 0.0
+
+    # Calculate intersection polygon aread
+    import utils
+    area = utils.calc_area_2D_polygon(int_poly_x, int_poly_y,
+                                      len(int_poly_x) - 2)
     
-    return 0
+    return __calc_center_of_mass(int_poly_x, int_poly_y, area)
+
+def __calc_center_of_mass(arr_x, arr_y, A):
+    center_of_mass = 0.0;
+    SIXTH = 1. / 6.
+    for j in xrange(len(arr_x) -2):
+        center_of_mass += (arr_y[i] + arr_y[i + 1]) \
+                          * ((arr_y[i] * arr_x[i + 1]) - \
+                             (arr_y[i + 1] * arr_x[i]))
+
+    if A != 0.0:
+        return (SIXTH * center_of_mass) / A
+    else:
+        return 0.0
 
 def __get_pixel_width(iname):
     None
