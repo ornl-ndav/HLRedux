@@ -147,6 +147,8 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
      cent_pixel) = hlr_utils.get_ref_integration_direction(conf.int_dir,
                                                            conf.inst,
                                                   d_som1.attr_list.instrument)
+    if dataset_type == "data":
+        d_som1.attr_list["ref_sort"] = y_sort
 
     d_som1A = dr_lib.sum_all_spectra(d_som1, y_sort=y_sort, stripe=True,
                                      pixel_fix=cent_pixel)
