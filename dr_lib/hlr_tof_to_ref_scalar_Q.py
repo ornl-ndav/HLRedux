@@ -177,7 +177,7 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
         map_so = hlr_utils.get_map_so(obj, None, i)
 
         if beamdiv_corr:
-            dangle = dr_lib.ref_beamdiv_correct(obj.attr_list, map_so.id, pl,
+            dangle = dr_lib.ref_beamdiv_correct(obj.attr_list, map_so.id,
                                                 config.det_spat_res)
             angle += dangle
 
