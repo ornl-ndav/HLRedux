@@ -176,6 +176,12 @@ def run(config, tim):
         d_som2.attr_list["angle_offset"] = config.angle_offset
     else:
         p_offset = None
+
+    # Check to see if scattering angle is requested
+    if config.scatt_angle is not None:
+        scatt_angle = hlr_utils.angle_to_radians(config.scatt_angle)
+    else:
+        scatt_angle = None
     
     if tim is not None:
         tim.getTime(False)
@@ -183,6 +189,7 @@ def run(config, tim):
     d_som3 = dr_lib.tof_to_ref_scalar_Q(d_som2, units="microsecond",
                                         angle_offset=p_offset,
                                         lojac=False,
+                                        polar=scatt_angle,
                                         configure=config)
     
     del d_som2
