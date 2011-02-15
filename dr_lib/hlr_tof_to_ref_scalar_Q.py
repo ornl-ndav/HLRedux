@@ -179,7 +179,7 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
         if beamdiv_corr:
             dangle = dr_lib.ref_beamdiv_correct(obj.attr_list, map_so.id,
                                                 config.det_spat_res)
-            angle += dangle
+            angle += (2.0 * dangle)
 
         value = axis_manip.tof_to_scalar_Q(val, err2, pl, pl_err2, angle,
                                            angle_err2)
