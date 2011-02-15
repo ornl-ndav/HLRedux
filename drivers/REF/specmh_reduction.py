@@ -172,17 +172,7 @@ def run(config, tim):
     # Check to see if polar angle offset is necessary
     if config.angle_offset is not None:
         # Check on units, offset must be in radians
-        p_temp = config.angle_offset.toFullTuple(True)
-        if p_temp[2] == "degrees" or p_temp[2] == "degree":
-            deg_to_rad =  (math.pi / 180.0)
-            p_off_rads = p_temp[0] * deg_to_rad
-            p_off_err2_rads = p_temp[1] * deg_to_rad * deg_to_rad
-        else:
-            p_off_rads = p_temp[0]
-            p_off_err2_rads = p_temp[1]
-    
-        p_offset = (p_off_rads, p_off_err2_rads)
-    
+        p_offset = hlr_utils.angle_to_radians(config.angle_offset)
         d_som2.attr_list["angle_offset"] = config.angle_offset
     else:
         p_offset = None
