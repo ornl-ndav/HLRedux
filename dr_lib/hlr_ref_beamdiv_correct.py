@@ -82,9 +82,6 @@ def ref_beamdiv_correct(attrs, pix_id, epsilon, cpix, **kwargs):
     if det_secondary is None:
         det_secondary = attrs.instrument.get_det_secondary()[0]
 
-    if pix_width is None:
-        pix_width = __get_pixel_width(inst_name)
-
     # This is currently set to the same number for both REF_L and REF_M
     if epsilon is None:
         epsilon = 0.5 * 1.3 * 1.0e-3
@@ -92,6 +89,8 @@ def ref_beamdiv_correct(attrs, pix_id, epsilon, cpix, **kwargs):
     # Set the center pixel to something
     if cpix is None:
         cpix = 133.5
+
+    print "A0:", epsilon, cpix, attrs[first_slit_size], attrs[last_slit_size]
     
     gamma_plus = math.atan2(0.5 * (attrs[first_slit_size][0] + \
                                    attrs[last_slit_size][0]),
@@ -100,11 +99,15 @@ def ref_beamdiv_correct(attrs, pix_id, epsilon, cpix, **kwargs):
     gamma_minus = math.atan2(0.5 * (attrs[first_slit_size][0] - \
                                     attrs[last_slit_size][0]),
                              attrs[slit_dist][0])
+
+    print "A1:", gamma_plus, gamma_minus
     
     half_last_aperture = 0.5 * attrs[last_slit_size][0]
     neg_half_last_aperture = -1.0 * half_last_aperture
 
     last_slit_to_det = attrs[last_slit_dist][0] + det_secondary
+
+    print "A2:", det_secondary, last_slit_to_det
 
     dist_last_aper_det_sin_gamma_plus = last_slit_to_det * math.sin(gamma_plus)
     dist_last_aper_det_sin_gamma_minus = last_slit_to_det * \
@@ -136,23 +139,35 @@ def ref_beamdiv_correct(attrs, pix_id, epsilon, cpix, **kwargs):
                          dist_last_aper_det_sin_gamma_plus + epsilon)
     accept_poly_y.append(accept_poly_y[0])
 
+    print "A3x:", accept_poly_x
+    print "A3y:", accept_poly_y
+
     if y_sort:
-        num_pix = attrs.instrument.get_num_y()
-        cur_offset = attrs.instrument.get_y_pix_offset(pix_id)
-        next_id = (pix_id[0], (pix_id[1][0], pix_id[1][1]+1))
-        next_offset = attrs.instrument.get_y_pix_offset(next_id)
+        #num_pix = attrs.instrument.get_num_y()
+        cur_index = pix_id[1][1]
+        if pix_width is None:
+            cur_offset = attrs.instrument.get_y_pix_offset(pix_id)
+            next_id = (pix_id[0], (pix_id[1][0], pix_id[1][1]+1))
+            next_offset = attrs.instrument.get_y_pix_offset(next_id)
     else:
-        num_pix = attrs.instrument.get_num_x()
-        cur_offset = attrs.instrument.get_x_pix_offset(pix_id)
-        next_id = (pix_id[0], (pix_id[1][0]+1, pix_id[1][1]))
-        next_offset = attrs.instrument.get_x_pix_offset(next_id)
+        #num_pix = attrs.instrument.get_num_x()
+        cur_index = pix_id[1][0]
+        if pix_width is None:
+            cur_offset = attrs.instrument.get_x_pix_offset(pix_id)
+            next_id = (pix_id[0], (pix_id[1][0]+1, pix_id[1][1]))
+            next_offset = attrs.instrument.get_x_pix_offset(next_id)
 
-    pix_diff = (0.5 * num_pix) - cpix
-    pix_width = math.fabs(next_offset - cur_offset)
-    shift = (pix_diff - 0.5) * pix_width
+    #pix_diff = (0.5 * num_pix) - cpix
+    if pix_width is None:
+        pix_width = math.fabs(next_offset - cur_offset)
+    #shift = (pix_diff - 0.5) * pix_width
 
-    xMinus = cur_offset + shift - (0.5 * pix_width)
-    xPlus = cur_offset + shift + (0.5 * pix_width)
+    #print "A4:", cur_index, pix_diff, pix_width, shift
+
+    xMinus = (cur_index - cpix - 0.5) * pix_width
+    xPlus = (cur_index - cpix + 0.5) * pix_width
+
+    print "A5:", xMinus, xPlus
 
     yLeftCross = -1
     yRightCross = -1
@@ -197,6 +212,9 @@ def ref_beamdiv_correct(attrs, pix_id, epsilon, cpix, **kwargs):
         xI = xF
         yI = yF
 
+    print "A6x:", int_poly_x
+    print "A6y:", int_poly_y
+
     if len(int_poly_x) > 2:
         int_poly_x.append(int_poly_x[0])
         int_poly_y.append(int_poly_y[0])
@@ -211,6 +229,8 @@ def ref_beamdiv_correct(attrs, pix_id, epsilon, cpix, **kwargs):
     import utils
     area = utils.calc_area_2D_polygon(int_poly_x, int_poly_y,
                                       len(int_poly_x) - 2)
+
+    print "A8:", area
     
     return __calc_center_of_mass(int_poly_x, int_poly_y, area)
 
@@ -239,12 +259,17 @@ if __name__ == "__main__":
     attrs["data-slit2_size"] = (1.54e-4, "metre")
     attrs["data-slit12_distance"] = (0.885, "metre")
     attrs["data-slit2_distance"] = (0.654, "metre")
+    attrs["ref_sort"] = True
 
-    pix_id = ("bank1", (172, 126))
+    pix_id = ("bank1", (151, 172))
     pl = 1.35
     epsilon = None
+    center_pixel = 173.3
+    pixel_width = 0.0007
 
-    print "************ ref_beam_div_correct"
-    print "* ref_beam_div_correct: ", ref_beam_div_correct(attrs, pix_id,
-                                                           epsilon,
-                                                           det_secondary=pl)
+    print "************ ref_beamdiv_correct"
+    print "* ref_beamdiv_correct: ", ref_beamdiv_correct(attrs, pix_id,
+                                                         epsilon,
+                                                         center_pixel,
+                                                         det_secondary=pl,
+                                                         pix_width=pixel_width)
