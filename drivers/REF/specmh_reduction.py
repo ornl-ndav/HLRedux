@@ -214,12 +214,14 @@ def run(config, tim):
                                                config.Q_bins.toNessiList())
         
         if config.dump_rqr:
-            hlr_utils.write_file(config.output, "text/Spec", d_som4,
+            d_som4_1 = dr_lib.data_filter(d_som4, clean_axis=True)
+            hlr_utils.write_file(config.output, "text/Spec", d_som4_1,
                                  output_ext="rqr",
                                  verbose=config.verbose,
                                  data_ext=config.ext_replacement,
                                  path_replacement=config.path_replacement,
                                  message="rebinned pixel R(Q) information")
+            del d_som4_1
     else:
         d_som4 = d_som3
 
@@ -243,7 +245,8 @@ def run(config, tim):
 
     # Sum all spectra since everything is on same axis
     d_som6 = dr_lib.sum_all_spectra(d_som5)
-
+    #d_som6 = dr_lib.sum_spectra_weighted_ave(d_som5)
+    
     del d_som5
 
     hlr_utils.write_file(config.output, "text/Spec", d_som6,
