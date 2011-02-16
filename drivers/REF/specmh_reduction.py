@@ -207,6 +207,24 @@ def run(config, tim):
                              message="pixel R(Q) information")
         del d_som3_1
                     
+    if config.Q_bins is not None or config.beamdiv_corr:
+        if config.verbose:
+            print "Rebinning data"
+        d_som4 = common_lib.rebin_axis_1D_frac(d_som3,
+                                               config.Q_bins.toNessiList())
+        
+        if config.dump_rqr:
+            hlr_utils.write_file(config.output, "text/Spec", d_som4,
+                                 output_ext="rqr",
+                                 verbose=config.verbose,
+                                 data_ext=config.ext_replacement,
+                                 path_replacement=config.path_replacement,
+                                 message="rebinned pixel R(Q) information")
+    else:
+        d_som4 = d_som3
+
+    del d_som3
+
     if not config.no_filter:
         if config.verbose:
             print "Filtering final data"
@@ -214,29 +232,13 @@ def run(config, tim):
         if tim is not None:
             tim.getTime(False)
             
-        d_som4 = dr_lib.data_filter(d_som3)
+        d_som5 = dr_lib.data_filter(d_som4)
     
         if tim is not None:
             tim.getTime(msg="After filtering data")
     else:
-        d_som4 = d_som3
-    
-    del d_som3
-
-    if config.Q_bins is not None or config.beamdiv_corr:
-        d_som5 = common_lib.rebin_axis_1D_frac(d_som4,
-                                               config.Q_bins.toNessiList())
-        
-        if config.dump_rqr:
-            hlr_utils.write_file(config.output, "text/Spec", d_som5,
-                                 output_ext="rqr",
-                                 verbose=config.verbose,
-                                 data_ext=config.ext_replacement,
-                                 path_replacement=config.path_replacement,
-                                 message="rebinned pixel R(Q) information")
-    else:
         d_som5 = d_som4
-
+    
     del d_som4
 
     # Sum all spectra since everything is on same axis
