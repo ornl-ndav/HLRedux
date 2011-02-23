@@ -63,6 +63,9 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
 
     @keyword tof_cuts: Time-of-flight bins to remove (zero) from the data
     @type tof_cuts: C{list} of C{string}s
+
+    @keyword no_tof_cuts: Flag to stop application of the TOF cuts
+    @type no_tof_cuts: C{boolean}
     
     @keyword timer:  Timing object so the function can perform timing
                      estimates.
@@ -101,6 +104,8 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
         tof_cuts = kwargs["tof_cuts"]
     except KeyError:
         tof_cuts = None
+
+    no_tof_cuts = kwargs.get("no_tof_cuts", False)
     
     so_axis = "time_of_flight"
 
@@ -147,6 +152,8 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
      cent_pixel) = hlr_utils.get_ref_integration_direction(conf.int_dir,
                                                            conf.inst,
                                                   d_som1.attr_list.instrument)
+    if dataset_type == "data":
+        d_som1.attr_list["ref_sort"] = y_sort
 
     d_som1A = dr_lib.sum_all_spectra(d_som1, y_sort=y_sort, stripe=True,
                                      pixel_fix=cent_pixel)
@@ -160,14 +167,21 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
     else:
         b_som1A = b_som1
 
+    # Set the TOF cuts
+    if no_tof_cuts:
+        tof_cut_min = None
+        tof_cut_max = None
+    else:
+        tof_cut_min = conf.tof_cut_min
+        tof_cut_max = conf.tof_cut_max
+
     # Cut the spectra if necessary
-    d_som2 = dr_lib.cut_spectra(d_som1A, conf.tof_cut_min, conf.tof_cut_max)
+    d_som2 = dr_lib.cut_spectra(d_som1A, tof_cut_min, tof_cut_max)
 
     del d_som1A
 
     if b_som1A is not None:
-        b_som2 = dr_lib.cut_spectra(b_som1A, conf.tof_cut_min,
-                                    conf.tof_cut_max)
+        b_som2 = dr_lib.cut_spectra(b_som1A, tof_cut_min, tof_cut_max)
         del b_som1A
     else:
         b_som2 = b_som1A
@@ -191,13 +205,16 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
         b_som3 = b_som2
 
     if conf.dump_specular:
-        hlr_utils.write_file(conf.output, "text/Spec", d_som3,
+        d_som3_1 = dr_lib.cut_spectra(d_som3, conf.tof_cut_min,
+                                      conf.tof_cut_max)
+        hlr_utils.write_file(conf.output, "text/Spec", d_som3_1,
                              output_ext="sdc",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
                              data_ext=conf.ext_replacement,
                              path_replacement=conf.path_replacement,
                              message="specular TOF information")
+        del d_som3_1
 
     # Steps 2-4: Determine background spectrum
     if conf.verbose and not no_bkg:
@@ -219,13 +236,15 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
         t.getTime(msg="After background determination")
 
     if not no_bkg and conf.dump_bkg:
-        hlr_utils.write_file(conf.output, "text/Spec", B,
+        B_1 = dr_lib.cut_spectra(B, conf.tof_cut_min, conf.tof_cut_max)
+        hlr_utils.write_file(conf.output, "text/Spec", B_1,
                              output_ext="bkg",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
                              data_ext=conf.ext_replacement,
                              path_replacement=conf.path_replacement,
                              message="background TOF information")
+        del B_1
 
     # Step 5: Subtract background spectrum from data spectra
     if not no_bkg:
@@ -239,117 +258,30 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
 
     del d_som3
 
-    # If empty cell subtraction is requested, get data set
-    if conf.ecell is not None and dataset_type != "norm":
-        if conf.verbose:
-            print "Reading %s file" % "empty_cell"
-
-        e_som1 = dr_lib.add_files(conf.ecell,
-                                  Data_Paths=data_path,
-                                  SO_Axis=so_axis,
-                                  dataset_type="empty_cell",
-                                  Signal_ROI=signal_roi_file,
-                                  Verbose=conf.verbose,
-                                  Timer=t)
-
-        e_som2 = dr_lib.sum_all_spectra(e_som1, y_sort=y_sort, stripe=True,
-                                        pixel_fix=127)
-
-        del e_som1
-        
-        if t is not None:
-            t.getTime(msg="After reading %s " % "empty_cell")
-
-        if conf.verbose:
-            print "Calculating substrate transmission"
-
-        if t is not None:
-            t.getTime(False)
-            
-        T = dr_lib.calc_substrate_trans(e_som2, conf.subtrans_coeff,
-                                        conf.substrate_diam)
-
-        if t is not None:
-            t.getTime(msg="After calculating substrate transmission")
-
-        # Get proton charges:
-        pc_sample = d_som4.attr_list[dataset_type+"-proton_charge"].getValue()
-        pc_ecell = e_som2.attr_list["empty_cell-proton_charge"].getValue()
-
-        pc_ratio = conf.scale_ecell * (pc_sample / pc_ecell)
-
-        # Scale transmission by proton charge ratio
-        if conf.verbose:
-            print "Scaling transmission by proton charge ratio"
-        
-        if t is not None:
-            t.getTime(False)
-
-        T1 = common_lib.mult_ncerr(T, (pc_ratio, 0.0))
-
-        if t is not None:
-            t.getTime(msg="After scaling transmission by proton charge ratio")
-
-        del T
-
-        # Scale empty cell by scaled transmission
-        if conf.verbose:
-            print "Scaling empty cell by scaled transmission"
-        
-        if t is not None:
-            t.getTime(False)
-
-        e_som3 = common_lib.mult_ncerr(e_som2, T1)
-
-        if t is not None:
-            t.getTime(msg="After scaling empty cell by scaled transmission")
-            
-        del e_som2, T1
-
-        if conf.dump_ecell_rtof:
-            hlr_utils.write_file(conf.output, "text/Spec", e_som3,
-                             output_ext="ertof",
-                             extra_tag=dataset_type,
-                             verbose=conf.verbose,
-                             data_ext=conf.ext_replacement,
-                             path_replacement=conf.path_replacement,
-                             message="empty cell TOF information")
-
-        # Subtract scaled empty cell from sample data
-        d_som5 = dr_lib.subtract_bkg_from_data(d_som4, e_som3,
-                                               verbose=conf.verbose,
-                                               timer=t,
-                                               dataset1=dataset_type,
-                                               dataset2="empty_cell")
-        
-        del e_som3
-    else:
-        d_som5 = d_som4
-
-    del d_som4
-
-    if (not no_bkg or conf.ecell is not None) and conf.dump_sub:
-        hlr_utils.write_file(conf.output, "text/Spec", d_som5,
+    if not no_bkg and conf.dump_sub:
+        d_som4_1 = dr_lib.cut_spectra(d_som4, conf.tof_cut_min,
+                                      conf.tof_cut_max)
+        hlr_utils.write_file(conf.output, "text/Spec", d_som4_1,
                              output_ext="sub",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
                              data_ext=conf.ext_replacement,
                              path_replacement=conf.path_replacement,
                              message="subtracted TOF information")
-
+        del d_som4_1
 
     dtot_int = dr_lib.integrate_axis_py(dtot, avg=True)
     param_key = dataset_type+"-dt_over_t"
-    d_som5.attr_list[param_key] = dtot_int[0]
+    d_som4.attr_list[param_key] = dtot_int[0]
 
     if conf.store_dtot:
-        d_som5.attr_list["extra_som"] = dtot
+        d_som4.attr_list["extra_som"] = dtot
 
     # Step 6: Scale by proton charge
-    pc = d_som5.attr_list[dataset_type+"-proton_charge"]
+    pc = d_som4.attr_list[dataset_type+"-proton_charge"]
     pc_new = hlr_utils.scale_proton_charge(pc, "C")
-    d_som6 = common_lib.div_ncerr(d_som5, (pc_new.getValue(), 0.0))
+    d_som5 = common_lib.div_ncerr(d_som4, (pc_new.getValue(), 0.0))
 
-    del d_som5
+    del d_som4
 
-    return d_som6
+    return d_som5

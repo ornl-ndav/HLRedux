@@ -84,7 +84,8 @@ instrument_scripts = {
     ],
     "REF" : [
     'reflect_reduction',
-    'refred_lp'
+    'refred_lp',
+    'specmh_reduction'
     ],
     "SAS" : [
     'sas_background',
