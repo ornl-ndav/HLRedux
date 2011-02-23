@@ -216,19 +216,20 @@ def run(config, tim):
                        polar_angle[1] + p_offset[1])
 
     pl = d_som3.attr_list.instrument.get_total_path(det_secondary=True)
+    # Since Q ~ 1/T, need to reverse cut designation
     if config.tof_cut_min is not None:
-        Q_cut_min = dr_lib.tof_to_ref_scalar_Q((float(config.tof_cut_min), 0.0),
-                                               pathlength=pl,
-                                               polar=polar_angle)[0]
-    else:
-        Q_cut_min = None
-        
-    if config.tof_cut_max is not None:
-        Q_cut_max = dr_lib.tof_to_ref_scalar_Q((float(config.tof_cut_max), 0.0),
+        Q_cut_max = dr_lib.tof_to_ref_scalar_Q((float(config.tof_cut_min), 0.0),
                                                pathlength=pl,
                                                polar=polar_angle)[0]
     else:
         Q_cut_max = None
+        
+    if config.tof_cut_max is not None:
+        Q_cut_min = dr_lib.tof_to_ref_scalar_Q((float(config.tof_cut_max), 0.0),
+                                               pathlength=pl,
+                                               polar=polar_angle)[0]
+    else:
+        Q_cut_min = None
     
     if config.dump_rq:
         d_som3_1 = dr_lib.data_filter(d_som3, clean_axis=True)
@@ -251,7 +252,7 @@ def run(config, tim):
         if config.dump_rqr:
             d_som4_1 = dr_lib.data_filter(d_som4, clean_axis=True)
             d_som4_2 = dr_lib.cut_spectra(d_som4_1, Q_cut_min, Q_cut_max)
-            del d_som4_2
+            del d_som4_1
             hlr_utils.write_file(config.output, "text/Spec", d_som4_2,
                                  output_ext="rqr",
                                  verbose=config.verbose,
