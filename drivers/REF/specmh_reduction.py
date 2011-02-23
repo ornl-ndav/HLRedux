@@ -187,13 +187,15 @@ def run(config, tim):
 
     # Check to see if scattering angle is requested
     if config.scatt_angle is not None:
+        # Mainly used by REF_M
         scatt_angle = hlr_utils.angle_to_radians(config.scatt_angle)
+        scatt_angle = (scatt_angle[0]/2.0, scatt_angle[1])
     else:
         scatt_angle = None
     
     if tim is not None:
         tim.getTime(False)
-    
+
     d_som3 = dr_lib.tof_to_ref_scalar_Q(d_som2, units="microsecond",
                                         angle_offset=p_offset,
                                         lojac=False,
@@ -207,7 +209,7 @@ def run(config, tim):
 
     # Calculate the Q cut range from the TOF cuts range
     if scatt_angle is not None:
-        polar_angle = scatt_angle
+        polar_angle = (scatt_angle[0]/2.0, scatt_angle[1])
     else:
         polar_angle = (d_som3.attr_list["data-theta"][0], 0)
 
