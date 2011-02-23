@@ -74,6 +74,11 @@ class SmhrOptions(hlr_ref_options.RefOptions):
         self.add_option("", "--center-pix", dest="center_pix", type="float",
                         nargs=1, help="Specify the center pixel.")
 
+        self.add_option("", "--num-bins-clean", dest="num_bins_clean",
+                        type="int", nargs=1, help="Specify the number of "\
+                        +"extra bins to clean from the cuts.")
+        self.set_defaults(num_bins_clean=0)
+
 def SmhrConfiguration(parser, configure, options, args):
     """
     This function sets the incoming C{Configure} object with all the options
@@ -113,3 +118,9 @@ def SmhrConfiguration(parser, configure, options, args):
     # Set the center pixel for the beam divergence calculation
     if hlr_utils.cli_provide_override(configure, "center_pix", "--center-pix"):
         configure.center_pix = options.center_pix
+
+    # Set the number of bins to clean from a cut spectra
+    if hlr_utils.cli_provide_override(configure, "num_bins_clean",
+                                      "--num-bins-clean"):
+        configure.num_bins_clean = options.num_bins_clean
+        
