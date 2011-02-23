@@ -81,6 +81,7 @@ def run(config, tim):
                                      config.no_bkg,
                                      tof_cuts=config.tof_cuts,
                                      inst_geom_dst=data_inst_geom_dst,
+                                     no_tof_cuts=True,
                                      timer=tim)
 
     # Perform Steps 1-6 on normalization data
@@ -92,6 +93,7 @@ def run(config, tim):
                                          dataset_type="norm",
                                          tof_cuts=config.tof_cuts,
                                          inst_geom_dst=norm_inst_geom_dst,
+                                         no_tof_cuts=True,
                                          timer=tim)
     else:
         n_som1 = None
@@ -139,7 +141,7 @@ def run(config, tim):
             tof_bc = utils.calc_bin_centers(d_som2_2[0].axis[0].val)
             d_som2_2[0].axis[0].val = tof_bc[0]
             d_som2_2.setDataSetType("density")
-        
+
         hlr_utils.write_file(config.output, "text/Spec", d_som2_2,
                              output_ext="crtof",
                              verbose=config.verbose,
