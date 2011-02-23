@@ -205,8 +205,11 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
         b_som3 = b_som2
 
     if conf.dump_specular:
-        d_som3_1 = dr_lib.cut_spectra(d_som3, conf.tof_cut_min,
-                                      conf.tof_cut_max)
+        if no_tof_cuts:
+            d_som3_1 = dr_lib.cut_spectra(d_som3, conf.tof_cut_min,
+                                          conf.tof_cut_max)
+        else:
+            d_som3_1 = d_som3
         hlr_utils.write_file(conf.output, "text/Spec", d_som3_1,
                              output_ext="sdc",
                              extra_tag=dataset_type,
@@ -236,7 +239,10 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
         t.getTime(msg="After background determination")
 
     if not no_bkg and conf.dump_bkg:
-        B_1 = dr_lib.cut_spectra(B, conf.tof_cut_min, conf.tof_cut_max)
+        if no_tof_cuts:
+            B_1 = dr_lib.cut_spectra(B, conf.tof_cut_min, conf.tof_cut_max)
+        else:
+            B_1 = B
         hlr_utils.write_file(conf.output, "text/Spec", B_1,
                              output_ext="bkg",
                              extra_tag=dataset_type,
@@ -259,8 +265,11 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
     del d_som3
 
     if not no_bkg and conf.dump_sub:
-        d_som4_1 = dr_lib.cut_spectra(d_som4, conf.tof_cut_min,
-                                      conf.tof_cut_max)
+        if no_tof_cuts:
+            d_som4_1 = dr_lib.cut_spectra(d_som4, conf.tof_cut_min,
+                                          conf.tof_cut_max)
+        else:
+            d_som4_1 = d_som4
         hlr_utils.write_file(conf.output, "text/Spec", d_som4_1,
                              output_ext="sub",
                              extra_tag=dataset_type,
