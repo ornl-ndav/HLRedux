@@ -78,12 +78,17 @@ def cut_spectra(obj, low_cut, high_cut):
         else:
             high_bin = utils.bisect_helper(axis, high_cut)
 
-        # Slice out the requested range
-        y_new = map_so.y[low_bin:high_bin]
-        var_y_new = map_so.var_y[low_bin:high_bin]
-        # Need to increment the high bin for the axis since it carries one
-        # more bin than the data
-        axis_new = axis[low_bin:high_bin+1]
+        if high_bin != 0:
+            # Slice out the requested range
+            y_new = map_so.y[low_bin:high_bin]
+            var_y_new = map_so.var_y[low_bin:high_bin]
+            # Need to increment the high bin for the axis since it carries one
+            # more bin than the data
+            axis_new = axis[low_bin:high_bin+1]
+        else:
+            y_new = map_so.y
+            var_y_new = map_so.var_y
+            axis_new = axis
         
         hlr_utils.result_insert(result, res_descr, (y_new, var_y_new),
                                 map_so, "all", 0, [axis_new])
