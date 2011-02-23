@@ -142,28 +142,34 @@ def run(config, tim):
             d_som2_2[0].axis[0].val = tof_bc[0]
             d_som2_2.setDataSetType("density")
 
-        hlr_utils.write_file(config.output, "text/Spec", d_som2_2,
+        d_som2_3 = dr_lib.cut_spectra(d_som2_2, config.tof_cut_min,
+                                      config.tof_cut_max)
+        del d_som2_2
+        
+        hlr_utils.write_file(config.output, "text/Spec", d_som2_3,
                              output_ext="crtof",
                              verbose=config.verbose,
                              data_ext=config.ext_replacement,
                              path_replacement=config.path_replacement,
                              message="combined R(TOF) information")
-
-        del d_som2_2
+        del d_som2_3
 
     if config.dump_rtof:
         if config.inst == "REF_M":
             d_som2_1 = d_som2
         else:
             d_som2_1 = dr_lib.filter_ref_data(d_som2)
-        
-        hlr_utils.write_file(config.output, "text/Spec", d_som2_1,
+
+        d_som2_2 = dr_lib.cut_spectra(d_som2_1, config.tof_cut_min,
+                                      config.tof_cut_max)
+        del d_som2_1
+        hlr_utils.write_file(config.output, "text/Spec", d_som2_2,
                              output_ext="rtof",
                              verbose=config.verbose,
                              data_ext=config.ext_replacement,
                              path_replacement=config.path_replacement,
                              message="R(TOF) information")
-        del d_som2_1
+        del d_som2_2
 
     # Step 9: Convert TOF to scalar Q
     if config.verbose:
