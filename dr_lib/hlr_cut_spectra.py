@@ -22,7 +22,7 @@
 
 # $Id$
 
-def cut_spectra(obj, low_cut, high_cut):
+def cut_spectra(obj, low_cut, high_cut, **kwargs):
     """
     This function takes 1D histogram spectra and a given set of axis cutoff
     values and produces spectra that is smaller than the original by removing
@@ -38,6 +38,13 @@ def cut_spectra(obj, low_cut, high_cut):
     @param high_cut: The high-side axis cutoff. All values greater than this
                      will be discarded.
     @type high_cut: C{float}    
+
+    @param kwargs: A list of keyword arguments that the function accepts:
+
+    @keyword num_bins_clean: The number of extra bins to cut from the spectra.
+                             The operation will be performed symmetrically if
+                             both cuts are requested.
+    @type num_bins_clean: C{int}
 
 
     @return: Object containing the zeroed spectra
@@ -56,6 +63,9 @@ def cut_spectra(obj, low_cut, high_cut):
 
     result = hlr_utils.copy_som_attr(result, res_descr, obj, o_descr)
 
+    # Check keywords
+    offset = kwargs.get("num_bins_clean", 0)
+
     # iterate through the values
     import utils
 
@@ -69,14 +79,15 @@ def cut_spectra(obj, low_cut, high_cut):
             low_bin = 0
         else:
             low_bin = utils.bisect_helper(axis, low_cut)
-
-        # Need to cut directly at the low bin
-        low_bin += 1
+            # Need to cut directly at the low bin
+            low_bin += 1
+            low_bin += offset
 
         if high_cut is None:
             high_bin = len(axis)
         else:
             high_bin = utils.bisect_helper(axis, high_cut)
+            high_bin -= offset
 
         if high_bin != 0:
             # Slice out the requested range
