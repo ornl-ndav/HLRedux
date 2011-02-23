@@ -63,6 +63,9 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
 
     @keyword tof_cuts: Time-of-flight bins to remove (zero) from the data
     @type tof_cuts: C{list} of C{string}s
+
+    @keyword no_tof_cuts: Flag to stop application of the TOF cuts
+    @type no_tof_cuts: C{boolean}
     
     @keyword timer:  Timing object so the function can perform timing
                      estimates.
@@ -101,6 +104,8 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
         tof_cuts = kwargs["tof_cuts"]
     except KeyError:
         tof_cuts = None
+
+    no_tof_cuts = kwargs.get("no_tof_cuts", False)
     
     so_axis = "time_of_flight"
 
@@ -162,14 +167,21 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
     else:
         b_som1A = b_som1
 
+    # Set the TOF cuts
+    if no_tof_cuts:
+        tof_cut_min = None
+        tof_cut_max = None
+    else:
+        tof_cut_min = conf.tof_cut_min
+        tof_cut_max = conf.tof_cut_max
+
     # Cut the spectra if necessary
-    d_som2 = dr_lib.cut_spectra(d_som1A, conf.tof_cut_min, conf.tof_cut_max)
+    d_som2 = dr_lib.cut_spectra(d_som1A, tof_cut_min, tof_cut_max)
 
     del d_som1A
 
     if b_som1A is not None:
-        b_som2 = dr_lib.cut_spectra(b_som1A, conf.tof_cut_min,
-                                    conf.tof_cut_max)
+        b_som2 = dr_lib.cut_spectra(b_som1A, tof_cut_min, tof_cut_max)
         del b_som1A
     else:
         b_som2 = b_som1A
@@ -193,13 +205,16 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
         b_som3 = b_som2
 
     if conf.dump_specular:
-        hlr_utils.write_file(conf.output, "text/Spec", d_som3,
+        d_som3_1 = dr_lib.cut_spectra(d_som3, conf.tof_cut_min,
+                                      conf.tof_cut_max)
+        hlr_utils.write_file(conf.output, "text/Spec", d_som3_1,
                              output_ext="sdc",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
                              data_ext=conf.ext_replacement,
                              path_replacement=conf.path_replacement,
                              message="specular TOF information")
+        del d_som3_1
 
     # Steps 2-4: Determine background spectrum
     if conf.verbose and not no_bkg:
@@ -221,13 +236,15 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
         t.getTime(msg="After background determination")
 
     if not no_bkg and conf.dump_bkg:
-        hlr_utils.write_file(conf.output, "text/Spec", B,
+        B_1 = dr_lib.cut_spectra(B, conf.tof_cut_min, conf.tof_cut_max)
+        hlr_utils.write_file(conf.output, "text/Spec", B_1,
                              output_ext="bkg",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
                              data_ext=conf.ext_replacement,
                              path_replacement=conf.path_replacement,
                              message="background TOF information")
+        del B_1
 
     # Step 5: Subtract background spectrum from data spectra
     if not no_bkg:
@@ -242,14 +259,16 @@ def process_ref_data(datalist, conf, signal_roi_file, bkg_roi_file=None,
     del d_som3
 
     if not no_bkg and conf.dump_sub:
-        hlr_utils.write_file(conf.output, "text/Spec", d_som4,
+        d_som4_1 = dr_lib.cut_spectra(d_som4, conf.tof_cut_min,
+                                      conf.tof_cut_max)
+        hlr_utils.write_file(conf.output, "text/Spec", d_som4_1,
                              output_ext="sub",
                              extra_tag=dataset_type,
                              verbose=conf.verbose,
                              data_ext=conf.ext_replacement,
                              path_replacement=conf.path_replacement,
                              message="subtracted TOF information")
-
+        del d_som4_1
 
     dtot_int = dr_lib.integrate_axis_py(dtot, avg=True)
     param_key = dataset_type+"-dt_over_t"
