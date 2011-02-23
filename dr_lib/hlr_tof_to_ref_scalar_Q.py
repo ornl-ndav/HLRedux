@@ -180,7 +180,7 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
             dangle = dr_lib.ref_beamdiv_correct(obj.attr_list, map_so.id,
                                                 config.det_spat_res,
                                                 config.center_pix)
-            pangle = angle + (2.0 * dangle)
+            pangle = angle - (2.0 * dangle)
         else:
             pangle = angle
 
