@@ -287,7 +287,8 @@ def run(config, tim):
     
     del d_som5
 
-    d_som7 = dr_lib.cut_spectra(d_som6, Q_cut_min, Q_cut_max)
+    d_som7 = dr_lib.cut_spectra(d_som6, Q_cut_min, Q_cut_max,
+                                num_bins_clean=config.num_bins_clean)
 
     del d_som6
 
