@@ -209,23 +209,22 @@ def run(config, tim):
     if scatt_angle is not None:
         polar_angle = scatt_angle
     else:
-        polar_angle = (d_som3.attr_list["data-theta"].getValue(), 0)
+        polar_angle = (d_som3.attr_list["data-theta"][0], 0)
 
     if p_offset is not None:
         polar_angle = (polar_angle[0] + p_offset[0],
                        polar_angle[1] + p_offset[1])
 
     pl = d_som3.attr_list.instrument.get_total_path(det_secondary=True)
-    
     if config.tof_cut_min is not None:
-        Q_cut_min = dr_lib.tof_to_ref_scalar_Q((config.tof_cut_min,0),
+        Q_cut_min = dr_lib.tof_to_ref_scalar_Q((float(config.tof_cut_min), 0.0),
                                                pathlength=pl,
                                                polar=polar_angle)[0]
     else:
         Q_cut_min = None
         
     if config.tof_cut_max is not None:
-        Q_cut_max = dr_lib.tof_to_ref_scalar_Q((config.tof_cut_max,0),
+        Q_cut_max = dr_lib.tof_to_ref_scalar_Q((float(config.tof_cut_max), 0.0),
                                                pathlength=pl,
                                                polar=polar_angle)[0]
     else:
