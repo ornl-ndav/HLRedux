@@ -204,16 +204,44 @@ def run(config, tim):
             
     if tim is not None:
         tim.getTime(msg="After converting wavelength to scalar Q ")
+
+    # Calculate the Q cut range from the TOF cuts range
+    if scatt_angle is not None:
+        polar_angle = scatt_angle
+    else:
+        polar_angle = (d_som3.attr_list["data-theta"].getValue(), 0)
+
+    if p_offset is not None:
+        polar_angle = (polar_angle[0] + p_offset[0],
+                       polar_angle[1] + p_offset[1])
+
+    pl = d_som3.attr_list.instrument.get_total_path(det_secondary=True)
+    
+    if config.tof_cut_min is not None:
+        Q_cut_min = dr_lib.tof_to_ref_scalar_Q((config.tof_cut_min,0),
+                                               pathlength=pl,
+                                               polar=polar_angle)[0]
+    else:
+        Q_cut_min = None
+        
+    if config.tof_cut_max is not None:
+        Q_cut_max = dr_lib.tof_to_ref_scalar_Q((config.tof_cut_max,0),
+                                               pathlength=pl,
+                                               polar=polar_angle)[0]
+    else:
+        Q_cut_max = None
     
     if config.dump_rq:
         d_som3_1 = dr_lib.data_filter(d_som3, clean_axis=True)
-        hlr_utils.write_file(config.output, "text/Spec", d_som3_1,
+        d_som3_2 = dr_lib.cut_spectra(d_som3_1, Q_cut_min, Q_cut_max)
+        del d_som3_1
+        hlr_utils.write_file(config.output, "text/Spec", d_som3_2,
                              output_ext="rq",
                              verbose=config.verbose,
                              data_ext=config.ext_replacement,
                              path_replacement=config.path_replacement,
                              message="pixel R(Q) information")
-        del d_som3_1
+        del d_som3_2
                     
     if config.Q_bins is not None or config.beamdiv_corr:
         if config.verbose:
@@ -223,13 +251,15 @@ def run(config, tim):
         
         if config.dump_rqr:
             d_som4_1 = dr_lib.data_filter(d_som4, clean_axis=True)
-            hlr_utils.write_file(config.output, "text/Spec", d_som4_1,
+            d_som4_2 = dr_lib.cut_spectra(d_som4_1, Q_cut_min, Q_cut_max)
+            del d_som4_2
+            hlr_utils.write_file(config.output, "text/Spec", d_som4_2,
                                  output_ext="rqr",
                                  verbose=config.verbose,
                                  data_ext=config.ext_replacement,
                                  path_replacement=config.path_replacement,
                                  message="rebinned pixel R(Q) information")
-            del d_som4_1
+            del d_som4_2
     else:
         d_som4 = d_som3
 
@@ -257,15 +287,19 @@ def run(config, tim):
     
     del d_som5
 
-    hlr_utils.write_file(config.output, "text/Spec", d_som6,
+    d_som7 = dr_lib.cut_spectra(d_som6, Q_cut_min, Q_cut_max)
+
+    del d_som6
+
+    hlr_utils.write_file(config.output, "text/Spec", d_som7,
                          replace_ext=False,
                          replace_path=False,
                          verbose=config.verbose,
                          message="combined Reflectivity information")
 
-    d_som6.attr_list["config"] = config
+    d_som7.attr_list["config"] = config
 
-    hlr_utils.write_file(config.output, "text/rmd", d_som6,
+    hlr_utils.write_file(config.output, "text/rmd", d_som7,
                          output_ext="rmd", verbose=config.verbose,
                          data_ext=config.ext_replacement,
                          path_replacement=config.path_replacement,
