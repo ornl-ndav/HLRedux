@@ -283,7 +283,6 @@ def run(config, tim):
 
     # Sum all spectra since everything is on same axis
     d_som6 = dr_lib.sum_all_spectra(d_som5)
-    #d_som6 = dr_lib.sum_spectra_weighted_ave(d_som5)
     
     del d_som5
 
