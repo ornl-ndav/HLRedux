@@ -111,7 +111,7 @@ def SmhrConfiguration(parser, configure, options, args):
         if options.det_spat_res is None:
             configure.det_spat_res = options.det_spat_res
         else:
-            # Set this to half it's values for the acceptance polygon
+            # Set this to half its values for the acceptance polygon
             # and convert units to meters
             configure.det_spat_res = 0.5 * options.det_spat_res * 1.0e-3
 
