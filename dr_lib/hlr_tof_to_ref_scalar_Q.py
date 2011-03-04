@@ -171,6 +171,7 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
         import dr_lib
 
     for i in xrange(hlr_utils.get_length(obj)):
+        skip_pixel = False
         val = hlr_utils.get_value(obj, i, o_descr, "x", axis)
         err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
 
@@ -182,7 +183,11 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
                                                 config.center_pix)
             # We subtract due to the inversion of the z coordinates from the
             # mirror reflection of the beam at the sample.
-            pangle = angle - (2.0 * dangle)
+            if dangle is not None:
+                pangle = angle - (2.0 * dangle)
+            else:
+                pangle = angle
+                skip_pixel = True
         else:
             pangle = angle
 
@@ -214,8 +219,9 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
         else:
             pass
 
-        hlr_utils.result_insert(result, res_descr, rev_value, map_so, "x",
-                                axis)
+        if not skip_pixel:
+            hlr_utils.result_insert(result, res_descr, rev_value, map_so, "x",
+                                    axis)
 
     return result
 
