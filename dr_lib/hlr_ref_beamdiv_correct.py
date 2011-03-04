@@ -205,7 +205,7 @@ def ref_beamdiv_correct(attrs, pix_id, epsilon, cpix, **kwargs):
     else:
         # Intersection polygon is NULL, point or line, so has no area
         # Therefore there is no angle correction
-        return 0.0
+        return None
 
     # Calculate intersection polygon aread
     import utils
