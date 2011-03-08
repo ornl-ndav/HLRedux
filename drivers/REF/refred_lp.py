@@ -287,12 +287,8 @@ if __name__ == "__main__":
     # Remove unneeded options
     parser.remove_option("--angle-offset")
     parser.remove_option("--data-roi-file")
-    parser.remove_option("--dbkg-roi-file")
-    parser.remove_option("--nbkg-roi-file")
     parser.remove_option("--data-peak-excl")
     parser.remove_option("--norm-peak-excl")
-    parser.remove_option("--no-bkg")
-    parser.remove_option("--no-norm-bkg")
     parser.remove_option("--mom-trans-bins")
     parser.remove_option("--tof-cuts")
     parser.remove_option("--no-filter")
