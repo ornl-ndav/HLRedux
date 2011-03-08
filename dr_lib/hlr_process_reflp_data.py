@@ -22,15 +22,17 @@
 
 # $Id$
 
-def process_reflp_data(datalist, conf, roi_file, **kwargs):
+def process_reflp_data(datalist, conf, roi_file, bkg_roi_file=None,
+                     no_bkg=False, **kwargs):
     """
     This function combines Steps 1 through 3 in section 2.4.6.1 of the data
     reduction process for Reduction from TOF to lambda_T as specified by
     the document at
     U{http://neutrons.ornl.gov/asg/projects/SCL/reqspec/DR_Lib_RS.doc}. The
     function takes a list of file names, a L{hlr_utils.Configure} object,
-    region-of-interest (ROI) file for the normalization dataset and processes
-    the data accordingly.
+    region-of-interest (ROI) file for the normalization dataset, a background
+    region-of-interest (ROI) file and an optional flag about background
+    subtractionand processes the data accordingly.
 
     @param datalist: The filenames of the data to be processed
     @type datalist: C{list} of C{string}s
@@ -41,6 +43,14 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
     @param roi_file: The file containing the list of pixel IDs for the region
                      of interest. This only applies to normalization data. 
     @type roi_file: C{string}
+
+    @param bkg_roi_file: The file containing the list of pixel IDs for the
+                         (possible) background region of interest.
+    @type bkg_roi_file: C{string}    
+    
+    @param no_bkg: (OPTIONAL) Flag which determines if the background will be
+                              calculated and subtracted.
+    @type no_bkg: C{boolean}    
 
     @param kwargs: A list of keyword arguments that the function accepts:
 
@@ -89,13 +99,14 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
     else:
         data_path = conf.data_paths.toPath()
 
-    d_som1 = dr_lib.add_files(datalist,
-                              Data_Paths=data_path,
-                              SO_Axis=so_axis,
-                              dataset_type=dataset_type,
-                              Signal_ROI=roi_file,
-                              Verbose=conf.verbose,
-                              Timer=t)
+    (d_som1, b_som1) = dr_lib.add_files_bg(datalist,
+                                           Data_Paths=data_path,
+                                           SO_Axis=so_axis,
+                                           dataset_type=dataset_type,
+                                           Signal_ROI=roi_file,
+                                           Bkg_ROI=bkg_roi_file,
+                                           Verbose=conf.verbose,
+                                           Timer=t)
 
     if t is not None:
         t.getTime(msg="After reading %s " % dataset_type)
@@ -139,13 +150,42 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
     if t is not None:
         t.getTime(False)
 
-    d_som1A = dr_lib.sum_all_spectra(d_som1, y_sort=y_sort, stripe=True,
-                                     pixel_fix=cent_pixel)
+    d_som2 = dr_lib.sum_all_spectra(d_som1, y_sort=y_sort, stripe=True,
+                                    pixel_fix=cent_pixel)
+
+    if b_som1 is not None:
+        b_som2 = dr_lib.sum_all_spectra(b_som1, y_sort=y_sort, stripe=True,
+                                        pixel_fix=cent_pixel)
+        del b_som1
+    else:
+        b_som2 = b_som1
 
     if t is not None:
         t.getTime(msg="After summing low resolution direction ")
         
     del d_som1
+
+    # Determine background spectrum
+    if conf.verbose and not no_bkg:
+        print "Determining %s background" % dataset_type
+
+    if b_som2 is not None:
+        B = dr_lib.calculate_ref_background(b_som2, no_bkg, conf.inst, None,
+                                            aobj=d_som2)
+    if t is not None:
+        t.getTime(msg="After background determination")
+
+    # Subtract background spectrum from data spectra
+    if not no_bkg:
+        d_som3 = dr_lib.subtract_bkg_from_data(d_som2, B,
+                                               verbose=conf.verbose,
+                                               timer=t,
+                                               dataset1="data",
+                                               dataset2="background")
+    else:
+        d_som3 = d_som2
+
+    del d_som2
 
     # Zero the spectra if necessary
     if roi_file is None and (conf.tof_cut_min is not None or \
@@ -153,30 +193,30 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
         import utils
         # Find the indicies for the non zero range
         if conf.tof_cut_min is None:
-            conf.TOF_min = d_som1A[0].axis[0].val[0]
+            conf.TOF_min = d_som3[0].axis[0].val[0]
             start_index = 0
         else:
-            start_index = utils.bisect_helper(d_som1A[0].axis[0].val,
+            start_index = utils.bisect_helper(d_som3[0].axis[0].val,
                                               conf.tof_cut_min)
 
         if conf.tof_cut_max is None:
-            conf.TOF_max = d_som1A[0].axis[0].val[-1]
-            end_index = len(d_som1A[0].axis[0].val) - 1
+            conf.TOF_max = d_som3[0].axis[0].val[-1]
+            end_index = len(d_som3[0].axis[0].val) - 1
         else:
-            end_index = utils.bisect_helper(d_som1A[0].axis[0].val,
+            end_index = utils.bisect_helper(d_som3[0].axis[0].val,
                                             conf.tof_cut_max)
 
         nz_list = []
-        for i in xrange(hlr_utils.get_length(d_som1A)):
+        for i in xrange(hlr_utils.get_length(d_som3)):
             nz_list.append((start_index, end_index))
         
-        d_som2 = dr_lib.zero_spectra(d_som1A, nz_list, use_bin_index=True)
+        d_som4 = dr_lib.zero_spectra(d_som3, nz_list, use_bin_index=True)
     else:
-        conf.TOF_min = d_som1A[0].axis[0].val[0]
-        conf.TOF_max = d_som1A[0].axis[0].val[-1]
-        d_som2 = d_som1A
+        conf.TOF_min = d_som3[0].axis[0].val[0]
+        conf.TOF_max = d_som3[0].axis[0].val[-1]
+        d_som4 = d_som3
 
-    del d_som1A
+    del d_som3
 
     # Step N: Convert TOF to wavelength
     if conf.verbose:
@@ -185,7 +225,7 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
     if t is not None:
         t.getTime(False)
 
-    d_som3 = common_lib.tof_to_wavelength(d_som2, inst_param="total",
+    d_som5 = common_lib.tof_to_wavelength(d_som4, inst_param="total",
                                           units="microsecond")
     if dm_som1 is not None:
         dm_som2 = common_lib.tof_to_wavelength(dm_som1, units="microsecond")
@@ -197,10 +237,10 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
     if t is not None:
         t.getTime(msg="After converting TOF to wavelength ")
 
-    del d_som2
+    del d_som4
 
     if conf.mon_norm:
-        dm_som3 = dr_lib.rebin_monitor(dm_som2, d_som3, rtype="frac")
+        dm_som3 = dr_lib.rebin_monitor(dm_som2, d_som5, rtype="frac")
     else:
         dm_som3 = None
 
@@ -212,12 +252,12 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
             print "Multiply spectra by proton charge"
 
         pc_tag = dataset_type + "-proton_charge"
-        proton_charge = d_som3.attr_list[pc_tag]
+        proton_charge = d_som5.attr_list[pc_tag]
 
         if t is not None:
             t.getTime(False)
 
-        d_som4 = common_lib.div_ncerr(d_som3, (proton_charge.getValue(), 0.0))
+        d_som6 = common_lib.div_ncerr(d_som5, (proton_charge.getValue(), 0.0))
 
         if t is not None:
             t.getTime(msg="After scaling by proton charge ")
@@ -228,25 +268,25 @@ def process_reflp_data(datalist, conf, roi_file, **kwargs):
         if t is not None:
             t.getTime(False)
 
-        d_som4 = common_lib.div_ncerr(d_som2, dm_som3)
+        d_som6 = common_lib.div_ncerr(d_som5, dm_som3)
 
         if t is not None:
             t.getTime(msg="After monitor normalization ")
 
-    del d_som3, dm_som3
+    del d_som5, dm_som3
 
     if roi_file is None:
-        return d_som4
+        return d_som6
     else:
         # Step 3: Make one spectrum for normalization dataset
         # Need to create a final rebinning axis
-        pathlength = d_som4.attr_list.instrument.get_total_path(
+        pathlength = d_som6.attr_list.instrument.get_total_path(
             det_secondary=True)
         
         delta_lambda = common_lib.tof_to_wavelength((conf.delta_TOF, 0.0),
                                                     pathlength=pathlength)
 
-        lambda_bins = dr_lib.create_axis_from_data(d_som4,
+        lambda_bins = dr_lib.create_axis_from_data(d_som6,
                                                    width=delta_lambda[0])
 
-        return dr_lib.sum_by_rebin_frac(d_som4, lambda_bins.toNessiList())
+        return dr_lib.sum_by_rebin_frac(d_som6, lambda_bins.toNessiList())
