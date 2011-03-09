@@ -78,6 +78,8 @@ def run(config, tim):
     
     # Perform Steps 1-2 on sample data
     d_som1 = dr_lib.process_reflp_data(config.data, config, None,
+                                       config.dbkg_roi_file,
+                                       config.no_bkg,
                                        inst_geom_dst=data_inst_geom_dst,
                                        timer=tim)
 
@@ -106,6 +108,8 @@ def run(config, tim):
     if config.norm is not None:
         n_som1 = dr_lib.process_reflp_data(config.norm, config,
                                            config.norm_roi_file,
+                                           config.nbkg_roi_file,
+                                           config.no_norm_bkg,
                                            inst_geom_dst=norm_inst_geom_dst,
                                            timer=tim)
     else:
