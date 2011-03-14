@@ -30,11 +30,14 @@ import sns_inst_util
 COMMAND = "./multi_read_run"
 
 def run_cmd(cmd, lines=True):
-    fin, fout = os.popen4(cmd)
+    import subprocess
+    p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
+                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                         close_fds=True)
     if lines:
-        return fout.readlines()
+        return p.stdout.readlines()
     else:
-        return fout.read()
+        return p.stdout.read()
 
 def clean_str(string):
     return string.rstrip().rstrip(os.linesep)

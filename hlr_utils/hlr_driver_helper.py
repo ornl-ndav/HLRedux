@@ -682,13 +682,14 @@ def __run_cmd(cmd, lines=True):
     This function runs a command and provides the output back. Commands
     returning single lines of output need to set the second argument to False.
     """
-    import os
-    # Returns a tuple: (STDIN, STDOUT+STDERR)
-    streams = os.popen4(cmd)
+    import subprocess
+    p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
+                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                         close_fds=True)
     if lines:
-        return streams[1].readlines()
+        return p.stdout.readlines()
     else:
-        return streams[1].read()
+        return p.stdout.read()
         
 def __run_findnexus(nums, inst, facility, proposal):
     """
