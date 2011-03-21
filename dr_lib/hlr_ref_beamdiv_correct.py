@@ -51,6 +51,7 @@ def ref_beamdiv_correct(attrs, pix_id, epsilon, cpix, **kwargs):
 
     @return: The beam divergence correction to the scattering angle
     @type: float
+    
 
     @raise RuntimeError: If the instrument name is not recognized.
     """
@@ -174,18 +175,18 @@ def ref_beamdiv_correct(attrs, pix_id, epsilon, cpix, **kwargs):
                 int_poly_y.append(xMinus)
 
             if xI < xPlus and xF >= xPlus:
-                yRightCross = yI + (yF - yI) * (xPlus - xI) / (xF - xI);
+                yRightCross = yI + (yF - yI) * (xPlus - xI) / (xF - xI)
                 int_poly_x.append(yRightCross)
                 int_poly_y.append(xPlus)
                 
         else:
             if xF < xPlus and xI >= xPlus:
-                yRightCross = yI + (yF - yI) * (xPlus - xI) / (xF - xI);
+                yRightCross = yI + (yF - yI) * (xPlus - xI) / (xF - xI)
                 int_poly_x.append(yRightCross)
                 int_poly_y.append(xPlus)
 
             if xF < xMinus and xI >= xMinus:
-                yLeftCross = yI + (yF - yI) * (xMinus - xI) / (xF - xI);
+                yLeftCross = yI + (yF - yI) * (xMinus - xI) / (xF - xI)
                 int_poly_x.append(yLeftCross)
                 int_poly_y.append(xMinus)
                 
@@ -215,7 +216,7 @@ def ref_beamdiv_correct(attrs, pix_id, epsilon, cpix, **kwargs):
     return __calc_center_of_mass(int_poly_x, int_poly_y, area)
 
 def __calc_center_of_mass(arr_x, arr_y, A):
-    center_of_mass = 0.0;
+    center_of_mass = 0.0
     SIXTH = 1. / 6.
     for j in xrange(len(arr_x) - 2):
         center_of_mass += (arr_x[j] + arr_x[j + 1]) \
@@ -230,23 +231,23 @@ def __calc_center_of_mass(arr_x, arr_y, A):
 if __name__ == "__main__":
     import SOM
     
-    attrs = SOM.AttributeList()
-    attrs["instrument_name"] = "REF_L"
-    attrs["data-slit1_size"] = (1.52e-4, "metre")
-    attrs["data-slit2_size"] = (1.54e-4, "metre")
-    attrs["data-slit12_distance"] = (0.885, "metre")
-    attrs["data-slit2_distance"] = (0.654, "metre")
-    attrs["ref_sort"] = True
+    som_attrs = SOM.AttributeList()
+    som_attrs["instrument_name"] = "REF_L"
+    som_attrs["data-slit1_size"] = (1.52e-4, "metre")
+    som_attrs["data-slit2_size"] = (1.54e-4, "metre")
+    som_attrs["data-slit12_distance"] = (0.885, "metre")
+    som_attrs["data-slit2_distance"] = (0.654, "metre")
+    som_attrs["ref_sort"] = True
 
-    pix_id = ("bank1", (151, 172))
+    pixel_id = ("bank1", (151, 172))
     pl = 1.35
-    epsilon = None
+    det_epsilon = None
     center_pixel = 173.3
     pixel_width = 0.0007
 
     print "************ ref_beamdiv_correct"
-    print "* ref_beamdiv_correct: ", ref_beamdiv_correct(attrs, pix_id,
-                                                         epsilon,
+    print "* ref_beamdiv_correct: ", ref_beamdiv_correct(som_attrs, pixel_id,
+                                                         det_epsilon,
                                                          center_pixel,
                                                          det_secondary=pl,
                                                          pix_width=pixel_width)
