@@ -221,6 +221,22 @@ def ref_beamdiv_correct(attrs, pix_id, epsilon, cpix, **kwargs):
     return __calc_center_of_mass(int_poly_x, int_poly_y, area)
 
 def __calc_center_of_mass(arr_x, arr_y, A):
+    """
+    Function that calculates the center-of-mass for the given polygon.
+
+    @param arr_x: The array of polygon x coordinates.
+    @type arr_x: C{nessi_list.NessiList}
+
+    @param arr_y: The array of polygon y coordinates.
+    @type arr_y: C{nessi_list.NessiList}
+
+    @param A: The signed area of the polygon
+    @type A: C{float}
+
+
+    @return: The polygon center-of-mass
+    @rtype: C{float}
+    """
     center_of_mass = 0.0
     SIXTH = 1. / 6.
     for j in xrange(len(arr_x) - 2):
