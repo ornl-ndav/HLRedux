@@ -121,7 +121,6 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
         if o_descr == "SOM":
             try:
                 obj.attr_list.instrument.get_primary()
-                inst = obj.attr_list.instrument
             except RuntimeError:
                 raise RuntimeError("A detector was not provided")
         else:
@@ -143,7 +142,7 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
 
     if pathlength is None:
         (pl, pl_err2) = obj.attr_list.instrument.get_total_path(obj[0].id,
-                                                             det_secondary=True)
+                                                            det_secondary=True)
     else:
         (pl, pl_err2) = pathlength
 
