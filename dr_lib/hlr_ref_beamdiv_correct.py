@@ -27,6 +27,11 @@ import nessi_list
 
 def ref_beamdiv_correct(attrs, pix_id, epsilon, cpix, **kwargs):
     """
+    The function implements section 4.1 of the instrument specific data
+    reduction process as specified by the document at
+    U{http://neutrons.ornl.gov/asg/projects/SCL/reqspec/IS_DR_RS.doc}. The
+    function calculates the acceptance diagram, determines pixel overlap and
+    computes the offset to the scattering angle.
 
     @param attrs: The attribute list of a C{SOM.SOM}
     @type attrs: C{SOM.AttributeList}
