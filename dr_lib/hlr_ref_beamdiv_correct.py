@@ -42,15 +42,15 @@ def ref_beamdiv_correct(attrs, pix_id, epsilon, cpix, **kwargs):
 
     @param kwargs: A list of keyword arguments that the function accepts:
 
-    @kwarg det_secondary: The main sample to detector flightpath in meters.
+    @keyword det_secondary: The main sample to detector flightpath in meters.
     @type det_secondary: C{float}
 
-    @kwarg pix_width: The width of a pixel in the high resolution direction
+    @keyword pix_width: The width of a pixel in the high resolution direction
     @type pix_width: C{float}
 
 
     @return: The beam divergence correction to the scattering angle
-    @type: float
+    @rtype: C{float}
     
 
     @raise RuntimeError: If the instrument name is not recognized.
