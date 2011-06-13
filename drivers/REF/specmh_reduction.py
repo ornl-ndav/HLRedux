@@ -41,9 +41,7 @@ def run(config, tim):
     @type tim: C{sns_time.DiffTime}
     """
     import DST
-    import math
     if config.inst == "REF_M":
-        import axis_manip
         import utils
 
     if tim is not None:
@@ -97,10 +95,6 @@ def run(config, tim):
                                          timer=tim)
     else:
         n_som1 = None
-
-    if config.Q_bins is None and config.scatt_angle is not None:
-        import copy
-        tof_axis = copy.deepcopy(d_som1[0].axis[0].val)
 
     # Closing sample data instrument geometry file
     if data_inst_geom_dst is not None:
@@ -209,7 +203,7 @@ def run(config, tim):
 
     # Calculate the Q cut range from the TOF cuts range
     if scatt_angle is not None:
-        polar_angle = (scatt_angle[0]/2.0, scatt_angle[1])
+        polar_angle = scatt_angle
     else:
         polar_angle = (d_som3.attr_list["data-theta"][0], 0)
 
