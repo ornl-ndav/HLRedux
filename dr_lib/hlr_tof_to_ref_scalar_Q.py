@@ -183,7 +183,7 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
             # We subtract due to the inversion of the z coordinates from the
             # mirror reflection of the beam at the sample.
             if dangle is not None:
-                pangle = angle - (2.0 * dangle)
+                pangle = angle + (2.0 * dangle)
             else:
                 pangle = angle
                 skip_pixel = True
