@@ -194,6 +194,7 @@ def run(config, tim):
                                         angle_offset=p_offset,
                                         lojac=False,
                                         polar=scatt_angle,
+                                        pid_range=config.data_peak_excl,
                                         configure=config)
     
     del d_som2
