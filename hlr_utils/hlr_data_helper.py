@@ -742,3 +742,23 @@ def angle_to_radians(angle):
         p_off_err2_rads = p_temp[1]
 
     return (p_off_rads, p_off_err2_rads)
+
+def pid_in_pid_range(pid, direction, pid_range):
+    """
+    This function takes a tuple pixel ID and checks if it is within the given
+    pixel ID range. The direction to check is specified via the function.
+
+    @param pid: The PID to check
+    @type pid: C{tuple}
+
+    @param direction: The x(0) or y(1) component of the PID to check
+    @type direction: C{int}
+
+    @param pid_range: The pixel ID range to check against
+    @type pid_range: C{tuple} of 2 C{int}s
+
+
+    @return: Whether or not the PID is within the PID range
+    @rtype: C{boolean}
+    """
+    return pid_range[0] <= pid[1][direction] <= pid_range[1]

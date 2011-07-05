@@ -22,7 +22,7 @@
 
 # $Id$
 
-def sum_spectra_weighted_ave(obj, **kwargs):
+def sum_spectra_weighted_ave(obj):
     """
     This function takes a set of data and sums the individual bins by weighted
     average. That information is then assembled back into a single spectrum.
@@ -31,8 +31,7 @@ def sum_spectra_weighted_ave(obj, **kwargs):
     @param obj: Object containing data spectra
     @type obj: C{SOM.SOM} or C{SOM.SO}
 
-    @param kwargs: A list of keyword arguments that the function accepts:
-    
+
     @return: The summed spectra (one)
     @rtype: C{SOM.SOM}
     """

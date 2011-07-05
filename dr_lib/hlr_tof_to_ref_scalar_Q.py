@@ -51,7 +51,11 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
     @keyword lojac: A flag that allows one to turn off the calculation of the
                     linear-order Jacobian. The default action is True for
                     histogram data.
-    @type lojac: C{boolean}    
+    @type lojac: C{boolean}
+
+    @keyword pid_range: A pixel ID range for extra cleaning on the beam
+                        divergence correction.
+    @type pid_range: C{tuple} of 2 C{int}s
     
     @keyword units: The expected units for this function. The default for this
                     function is I{microseconds}.
@@ -95,11 +99,17 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
     lojac = kwargs.get("lojac", hlr_utils.check_lojac(obj))
     angle_offset = kwargs.get("angle_offset")
     config = kwargs.get("configure")
+    pid_range = kwargs.get("pid_range")
 
+    int_dir = -1
     if config is None:
         beamdiv_corr = False
     else:
         beamdiv_corr = config.beamdiv_corr
+        if config.int_dir == 'x':
+            int_dir = 0
+        if config.int_dir == 'y':
+            int_dir = 1
     
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
@@ -121,7 +131,6 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
         if o_descr == "SOM":
             try:
                 obj.attr_list.instrument.get_primary()
-                inst = obj.attr_list.instrument
             except RuntimeError:
                 raise RuntimeError("A detector was not provided")
         else:
@@ -143,7 +152,7 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
 
     if pathlength is None:
         (pl, pl_err2) = obj.attr_list.instrument.get_total_path(obj[0].id,
-                                                             det_secondary=True)
+                                                            det_secondary=True)
     else:
         (pl, pl_err2) = pathlength
 
@@ -181,10 +190,12 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
             dangle = dr_lib.ref_beamdiv_correct(obj.attr_list, map_so.id,
                                                 config.det_spat_res,
                                                 config.center_pix)
-            # We subtract due to the inversion of the z coordinates from the
-            # mirror reflection of the beam at the sample.
             if dangle is not None:
-                pangle = angle - (2.0 * dangle)
+                pangle = angle + (2.0 * dangle)
+                if pid_range is not None:
+                    skip_pixel = not hlr_utils.pid_in_pid_range(map_so.id,
+                                                                int_dir,
+                                                                pid_range)
             else:
                 pangle = angle
                 skip_pixel = True
