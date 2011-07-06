@@ -79,6 +79,17 @@ class SmhrOptions(hlr_ref_options.RefOptions):
                         +"extra bins to clean from the cuts.")
         self.set_defaults(num_bins_clean=0)
 
+        self.add_option("", "--cuts-in-Q", dest="cuts_in_Q",
+                        action="store_true", help="Flag to pass Q cuts via "\
+                        +"the TOF cuts flag.")
+        self.set_defaults(cuts_in_Q=False)
+
+        self.add_option("", "--theta-vals", dest="theta_vals", help="A list "\
+                        +"of scattering angles for the incoming data.")
+
+        self.add_option("", "--theta-vals-units", dest="theta_vals_units",
+                        help="The units for the scattering angle value list.")
+
 def SmhrConfiguration(parser, configure, options, args):
     """
     This function sets the incoming C{Configure} object with all the options
@@ -123,4 +134,20 @@ def SmhrConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "num_bins_clean",
                                       "--num-bins-clean"):
         configure.num_bins_clean = options.num_bins_clean
+
+    # Set the flag for passing Q cuts via the TOF cut options
+    if hlr_utils.cli_provide_override(configure, "cuts_in_Q", "--cuts-in-Q"):
+        configure.cuts_in_Q = options.cuts_in_Q
+
+    # Set the scattering angle value list
+    if hlr_utils.cli_provide_override(configure, "theta_vals", "--theta-vals"):
+        configure.theta_vals = options.theta_vals
+
+    # Set the units for the scattering angle list
+    if hlr_utils.cli_provide_override(configure, "theta_vals_units",
+                                      "--theta-vals-units"):
+        configure.theta_vals_units = options.theta_vals_units
+    
+    if configure.theta_vals is not None and configure.theta_vals_units is None:
+        parser.error("The scattering angle list units must be provided!")
         
