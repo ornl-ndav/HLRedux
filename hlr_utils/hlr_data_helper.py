@@ -22,6 +22,7 @@
 
 # $Id$
 
+import math
 import nessi_list
 import SOM
 
@@ -728,10 +729,10 @@ def angle_to_radians(angle):
     @param angle: The angle to check
     @type angle: C{hlr_utils.DrParameter}
 
+
     @return: The converted angle
     @rtype: C{tuple}
     """
-    import math
     p_temp = angle.toFullTuple(True)
     if p_temp[2] == "degrees" or p_temp[2] == "degree":
         deg_to_rad =  (math.pi / 180.0)
@@ -762,3 +763,27 @@ def pid_in_pid_range(pid, direction, pid_range):
     @rtype: C{boolean}
     """
     return pid_range[0] <= pid[1][direction] <= pid_range[1]
+
+def angle_list_to_radians(angles, units):
+    """
+    This function turns a comma separated list of angles, converts them to
+    radians if necessary and creates a list of two-tuples.
+
+    @param angles: The comma separated list of angles.
+    @type angles: C{string}
+
+    @param units: The units for the angle list.
+    @type units: C{string}
+
+
+    @return: The converted angles.
+    @rtype: C{list} of C{tuple}s
+    """
+    angle_list = []
+    for angle in angles.split(','):
+        fa = float(angle)
+        if units == "degrees" or units == "degree":
+            fa *= (math.pi / 180.0)
+
+    angle_list.append((fa, 0.0))
+    return angle_list
