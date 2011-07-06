@@ -764,7 +764,7 @@ def pid_in_pid_range(pid, direction, pid_range):
     """
     return pid_range[0] <= pid[1][direction] <= pid_range[1]
 
-def angle_list_to_radians(angles, units):
+def angle_list_to_radians(angles, units, half_angle=False):
     """
     This function turns a comma separated list of angles, converts them to
     radians if necessary and creates a list of two-tuples.
@@ -775,6 +775,9 @@ def angle_list_to_radians(angles, units):
     @param units: The units for the angle list.
     @type units: C{string}
 
+    @param half_angle: A flag to divided the angle by 2.
+    @type half_angle: C{boolean}
+    
 
     @return: The converted angles.
     @rtype: C{list} of C{tuple}s
@@ -784,6 +787,8 @@ def angle_list_to_radians(angles, units):
         fa = float(angle)
         if units == "degrees" or units == "degree":
             fa *= (math.pi / 180.0)
+        if half_angle:
+            fa *= 0.5
 
     angle_list.append((fa, 0.0))
     return angle_list
