@@ -151,3 +151,6 @@ def SmhrConfiguration(parser, configure, options, args):
     if configure.theta_vals is not None and configure.theta_vals_units is None:
         parser.error("The scattering angle list units must be provided!")
         
+    if configure.theta_vals is not None and configure.scatt_angle is not None:
+        parser.error("Please specify a single scattering angle or a list of "\
+                     +"scattering angles.")
