@@ -210,7 +210,10 @@ def run(config, tim):
 
     # Calculate the Q cut range from the TOF cuts range
     if scatt_angle is not None:
-        polar_angle = scatt_angle
+        if config.cuts_in_Q:
+            polar_angle = scatt_angle[0]
+        else:
+            polar_angle = scatt_angle
     else:
         polar_angle = (d_som3.attr_list["data-theta"][0], 0)
 
