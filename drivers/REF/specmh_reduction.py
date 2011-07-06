@@ -193,9 +193,6 @@ def run(config, tim):
         scatt_angle = hlr_utils.angle_list_to_radians(config.theta_vals,
                                                       config.theta_vals_units,
                                                       True)
-    else:
-        scatt_angle = None
-    
     if tim is not None:
         tim.getTime(False)
 
