@@ -159,17 +159,9 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
     if polar is None:
         angle = hlr_utils.get_special(obj.attr_list["data-theta"], obj[0])[0]
         angle_err2 = 0.0
+        (angle, angle_err2) = __fix_angle(angle, angle_err2, angle_offset)
     else:
-        (angle, angle_err2) = polar
-
-    if angle_offset is not None:
-        angle += angle_offset[0]
-        angle_err2 += angle_offset[1]
-
-    # Need to multiply angle by 2.0 in order to make it be Theta to
-    # underlying conversion function
-    angle *= 2.0
-    angle_err2 *= 4.0
+        p_descr = hlr_utils.get_descr(polar)
 
     # iterate through the values
     import axis_manip
@@ -180,6 +172,11 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
         import dr_lib
 
     for i in xrange(hlr_utils.get_length(obj)):
+        if polar is not None:
+            angle = hlr_utils.get_value(polar, i, p_descr)
+            angle_err2 = hlr_utils.get_err2(polar, i, p_descr)
+            (angle, angle_err2) = __fix_angle(angle, angle_err2, angle_offset)
+        
         skip_pixel = False
         val = hlr_utils.get_value(obj, i, o_descr, "x", axis)
         err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
@@ -235,6 +232,35 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
                                     axis)
 
     return result
+
+def __fix_angle(ta, tae, ao):
+    """
+    Private helper function to add the angle offseta and multiply the angle by
+    2.0.
+
+    @param ta: The angle
+    @type ta: C{float}
+
+    @param tae: The angle error^2
+    @type tae: C{float}
+
+    @param ao: The angle offset
+    @type ao: C{tuple}
+
+
+    @return: The corrected angle
+    @rtype: C{tuple} of C{float}s
+    """
+    if ao is not None:
+        ta += ao[0]
+        tae += ao[1]
+        
+    # Need to multiply angle by 2.0 in order to make it be Theta to
+    # underlying conversion function
+    ta *= 2.0
+    tae *= 4.0
+
+    return (ta, tae)
 
 if __name__ == "__main__":
     import hlr_test
