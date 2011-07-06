@@ -215,16 +215,24 @@ def run(config, tim):
     pl = d_som3.attr_list.instrument.get_total_path(det_secondary=True)
     # Since Q ~ 1/T, need to reverse cut designation
     if config.tof_cut_min is not None:
-        Q_cut_max = dr_lib.tof_to_ref_scalar_Q((float(config.tof_cut_min), 0.0),
-                                               pathlength=pl,
-                                               polar=polar_angle)[0]
+        if config.cuts_in_Q:
+            Q_cut_max = float(config.tof_cut_min)
+        else:
+            Q_cut_max = dr_lib.tof_to_ref_scalar_Q((float(config.tof_cut_min),
+                                                    0.0),
+                                                   pathlength=pl,
+                                                   polar=polar_angle)[0]
     else:
         Q_cut_max = None
         
     if config.tof_cut_max is not None:
-        Q_cut_min = dr_lib.tof_to_ref_scalar_Q((float(config.tof_cut_max), 0.0),
-                                               pathlength=pl,
-                                               polar=polar_angle)[0]
+        if config.cuts_in_Q:
+            Q_cut_min = float(config.tof_cut_max)
+        else:
+            Q_cut_min = dr_lib.tof_to_ref_scalar_Q((float(config.tof_cut_max),
+                                                    0.0),
+                                                   pathlength=pl,
+                                                   polar=polar_angle)[0]
     else:
         Q_cut_min = None
     
