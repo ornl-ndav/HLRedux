@@ -186,6 +186,15 @@ def run(config, tim):
         scatt_angle = (scatt_angle[0]/2.0, scatt_angle[1])
     else:
         scatt_angle = None
+
+    # Check to see if the scattering angle list is requested
+    if config.theta_vals is not None:
+        # Used by REF_M
+        scatt_angle = hlr_utils.angle_list_to_radians(config.theta_vals,
+                                                      config.theta_vals_units,
+                                                      True)
+    else:
+        scatt_angle = None
     
     if tim is not None:
         tim.getTime(False)
