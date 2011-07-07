@@ -790,5 +790,6 @@ def angle_list_to_radians(angles, units, half_angle=False):
         if half_angle:
             fa *= 0.5
 
-    angle_list.append((fa, 0.0))
+        angle_list.append((fa, 0.0))
+    
     return angle_list
