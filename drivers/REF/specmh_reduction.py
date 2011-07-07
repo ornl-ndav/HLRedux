@@ -41,9 +41,7 @@ def run(config, tim):
     @type tim: C{sns_time.DiffTime}
     """
     import DST
-    import math
     if config.inst == "REF_M":
-        import axis_manip
         import utils
 
     if tim is not None:
@@ -97,10 +95,6 @@ def run(config, tim):
                                          timer=tim)
     else:
         n_som1 = None
-
-    if config.Q_bins is None and config.scatt_angle is not None:
-        import copy
-        tof_axis = copy.deepcopy(d_som1[0].axis[0].val)
 
     # Closing sample data instrument geometry file
     if data_inst_geom_dst is not None:
@@ -189,10 +183,18 @@ def run(config, tim):
     if config.scatt_angle is not None:
         # Mainly used by REF_M
         scatt_angle = hlr_utils.angle_to_radians(config.scatt_angle)
-        scatt_angle = (scatt_angle[0]/2.0, scatt_angle[1])
     else:
         scatt_angle = None
-    
+
+    # Check to see if the scattering angle list is requested
+    if config.theta_vals is not None:
+        # Used by REF_M
+        scatt_angle = hlr_utils.angle_list_to_radians(config.theta_vals,
+                                                      config.theta_vals_units)
+        if len(scatt_angle) != len(d_som2):
+            raise RuntimeError("The list of scattering angles is not the "
+                               +"length as the number of requested pixels.")
+        
     if tim is not None:
         tim.getTime(False)
 
@@ -200,6 +202,7 @@ def run(config, tim):
                                         angle_offset=p_offset,
                                         lojac=False,
                                         polar=scatt_angle,
+                                        pid_range=config.data_peak_excl,
                                         configure=config)
     
     del d_som2
@@ -209,7 +212,10 @@ def run(config, tim):
 
     # Calculate the Q cut range from the TOF cuts range
     if scatt_angle is not None:
-        polar_angle = (scatt_angle[0]/2.0, scatt_angle[1])
+        if type(scatt_angle) == type([]):
+            polar_angle = scatt_angle[0]
+        else:
+            polar_angle = scatt_angle
     else:
         polar_angle = (d_som3.attr_list["data-theta"][0], 0)
 
@@ -225,6 +231,10 @@ def run(config, tim):
                                                polar=polar_angle)[0]
     else:
         Q_cut_max = None
+
+    # Override Q maximum cut if present
+    if config.Q_cut_max is not None:
+        Q_cut_max = float(config.Q_cut_max)
         
     if config.tof_cut_max is not None:
         Q_cut_min = dr_lib.tof_to_ref_scalar_Q((float(config.tof_cut_max), 0.0),
@@ -232,6 +242,10 @@ def run(config, tim):
                                                polar=polar_angle)[0]
     else:
         Q_cut_min = None
+
+    # Override Q minimum cut if present
+    if config.Q_cut_min is not None:
+        Q_cut_min = float(config.Q_cut_min)
     
     if config.dump_rq:
         d_som3_1 = dr_lib.data_filter(d_som3, clean_axis=True)

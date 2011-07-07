@@ -22,6 +22,7 @@
 
 # $Id$
 
+import math
 import nessi_list
 import SOM
 
@@ -728,10 +729,10 @@ def angle_to_radians(angle):
     @param angle: The angle to check
     @type angle: C{hlr_utils.DrParameter}
 
+
     @return: The converted angle
     @rtype: C{tuple}
     """
-    import math
     p_temp = angle.toFullTuple(True)
     if p_temp[2] == "degrees" or p_temp[2] == "degree":
         deg_to_rad =  (math.pi / 180.0)
@@ -742,3 +743,53 @@ def angle_to_radians(angle):
         p_off_err2_rads = p_temp[1]
 
     return (p_off_rads, p_off_err2_rads)
+
+def pid_in_pid_range(pid, direction, pid_range):
+    """
+    This function takes a tuple pixel ID and checks if it is within the given
+    pixel ID range. The direction to check is specified via the function.
+
+    @param pid: The PID to check
+    @type pid: C{tuple}
+
+    @param direction: The x(0) or y(1) component of the PID to check
+    @type direction: C{int}
+
+    @param pid_range: The pixel ID range to check against
+    @type pid_range: C{tuple} of 2 C{int}s
+
+
+    @return: Whether or not the PID is within the PID range
+    @rtype: C{boolean}
+    """
+    return pid_range[0] <= pid[1][direction] <= pid_range[1]
+
+def angle_list_to_radians(angles, units, half_angle=False):
+    """
+    This function turns a comma separated list of angles, converts them to
+    radians if necessary and creates a list of two-tuples.
+
+    @param angles: The comma separated list of angles.
+    @type angles: C{string}
+
+    @param units: The units for the angle list.
+    @type units: C{string}
+
+    @param half_angle: A flag to divided the angle by 2.
+    @type half_angle: C{boolean}
+    
+
+    @return: The converted angles.
+    @rtype: C{list} of C{tuple}s
+    """
+    angle_list = []
+    for angle in angles.split(','):
+        fa = float(angle)
+        if units == "degrees" or units == "degree":
+            fa *= (math.pi / 180.0)
+        if half_angle:
+            fa *= 0.5
+
+        angle_list.append((fa, 0.0))
+    
+    return angle_list

@@ -51,7 +51,11 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
     @keyword lojac: A flag that allows one to turn off the calculation of the
                     linear-order Jacobian. The default action is True for
                     histogram data.
-    @type lojac: C{boolean}    
+    @type lojac: C{boolean}
+
+    @keyword pid_range: A pixel ID range for extra cleaning on the beam
+                        divergence correction.
+    @type pid_range: C{tuple} of 2 C{int}s
     
     @keyword units: The expected units for this function. The default for this
                     function is I{microseconds}.
@@ -95,11 +99,17 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
     lojac = kwargs.get("lojac", hlr_utils.check_lojac(obj))
     angle_offset = kwargs.get("angle_offset")
     config = kwargs.get("configure")
+    pid_range = kwargs.get("pid_range")
 
+    int_dir = -1
     if config is None:
         beamdiv_corr = False
     else:
         beamdiv_corr = config.beamdiv_corr
+        if config.int_dir == 'x':
+            int_dir = 0
+        if config.int_dir == 'y':
+            int_dir = 1
     
     # Primary axis for transformation. If a SO is passed, the function, will
     # assume the axis for transformation is at the 0 position
@@ -121,7 +131,6 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
         if o_descr == "SOM":
             try:
                 obj.attr_list.instrument.get_primary()
-                inst = obj.attr_list.instrument
             except RuntimeError:
                 raise RuntimeError("A detector was not provided")
         else:
@@ -143,24 +152,16 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
 
     if pathlength is None:
         (pl, pl_err2) = obj.attr_list.instrument.get_total_path(obj[0].id,
-                                                             det_secondary=True)
+                                                            det_secondary=True)
     else:
         (pl, pl_err2) = pathlength
 
     if polar is None:
         angle = hlr_utils.get_special(obj.attr_list["data-theta"], obj[0])[0]
         angle_err2 = 0.0
+        (angle, angle_err2) = __fix_angle(angle, angle_err2, angle_offset)
     else:
-        (angle, angle_err2) = polar
-
-    if angle_offset is not None:
-        angle += angle_offset[0]
-        angle_err2 += angle_offset[1]
-
-    # Need to multiply angle by 2.0 in order to make it be Theta to
-    # underlying conversion function
-    angle *= 2.0
-    angle_err2 *= 4.0
+        p_descr = hlr_utils.get_descr(polar)
 
     # iterate through the values
     import axis_manip
@@ -171,6 +172,11 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
         import dr_lib
 
     for i in xrange(hlr_utils.get_length(obj)):
+        if polar is not None:
+            angle = hlr_utils.get_value(polar, i, p_descr)
+            angle_err2 = hlr_utils.get_err2(polar, i, p_descr)
+            (angle, angle_err2) = __fix_angle(angle, angle_err2, angle_offset)
+        
         skip_pixel = False
         val = hlr_utils.get_value(obj, i, o_descr, "x", axis)
         err2 = hlr_utils.get_err2(obj, i, o_descr, "x", axis)
@@ -181,10 +187,12 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
             dangle = dr_lib.ref_beamdiv_correct(obj.attr_list, map_so.id,
                                                 config.det_spat_res,
                                                 config.center_pix)
-            # We subtract due to the inversion of the z coordinates from the
-            # mirror reflection of the beam at the sample.
             if dangle is not None:
-                pangle = angle - (2.0 * dangle)
+                pangle = angle + (2.0 * dangle)
+                if pid_range is not None:
+                    skip_pixel = not hlr_utils.pid_in_pid_range(map_so.id,
+                                                                int_dir,
+                                                                pid_range)
             else:
                 pangle = angle
                 skip_pixel = True
@@ -224,6 +232,35 @@ def tof_to_ref_scalar_Q(obj, **kwargs):
                                     axis)
 
     return result
+
+def __fix_angle(ta, tae, ao):
+    """
+    Private helper function to add the angle offseta and multiply the angle by
+    2.0.
+
+    @param ta: The angle
+    @type ta: C{float}
+
+    @param tae: The angle error^2
+    @type tae: C{float}
+
+    @param ao: The angle offset
+    @type ao: C{tuple}
+
+
+    @return: The corrected angle
+    @rtype: C{tuple} of C{float}s
+    """
+    if ao is not None:
+        ta += ao[0]
+        tae += ao[1]
+        
+    # Need to multiply angle by 2.0 in order to make it be Theta to
+    # underlying conversion function
+    ta *= 2.0
+    tae *= 4.0
+
+    return (ta, tae)
 
 if __name__ == "__main__":
     import hlr_test

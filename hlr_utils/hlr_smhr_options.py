@@ -79,6 +79,20 @@ class SmhrOptions(hlr_ref_options.RefOptions):
                         +"extra bins to clean from the cuts.")
         self.set_defaults(num_bins_clean=0)
 
+        self.add_option("", "--Q-cut-min", dest="Q_cut_min",
+                        help="Set the minimum Q channel for spectrum "\
+                        +"cutting")
+
+        self.add_option("", "--Q-cut-max", dest="Q_cut_max",
+                        help="Set the maximum Q channel for spectrum "\
+                        +"cutting")        
+
+        self.add_option("", "--theta-vals", dest="theta_vals", help="A list "\
+                        +"of scattering angles for the incoming data.")
+
+        self.add_option("", "--theta-vals-units", dest="theta_vals_units",
+                        help="The units for the scattering angle value list.")
+
 def SmhrConfiguration(parser, configure, options, args):
     """
     This function sets the incoming C{Configure} object with all the options
@@ -123,4 +137,27 @@ def SmhrConfiguration(parser, configure, options, args):
     if hlr_utils.cli_provide_override(configure, "num_bins_clean",
                                       "--num-bins-clean"):
         configure.num_bins_clean = options.num_bins_clean
+
+    # Set the minimum Q channel for spectrum cutting
+    if hlr_utils.cli_provide_override(configure, "Q_cut_min", "--Q-cut-min"):
+        configure.Q_cut_min = options.Q_cut_min
+
+    # Set the maximum Q channel for spectrum cutting
+    if hlr_utils.cli_provide_override(configure, "Q_cut_max", "--Q-cut-max"):
+        configure.Q_cut_max = options.Q_cut_max        
+
+    # Set the scattering angle value list
+    if hlr_utils.cli_provide_override(configure, "theta_vals", "--theta-vals"):
+        configure.theta_vals = options.theta_vals
+
+    # Set the units for the scattering angle list
+    if hlr_utils.cli_provide_override(configure, "theta_vals_units",
+                                      "--theta-vals-units"):
+        configure.theta_vals_units = options.theta_vals_units
+    
+    if configure.theta_vals is not None and configure.theta_vals_units is None:
+        parser.error("The scattering angle list units must be provided!")
         
+    if configure.theta_vals is not None and configure.scatt_angle is not None:
+        parser.error("Please specify a single scattering angle or a list of "\
+                     +"scattering angles.")
