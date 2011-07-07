@@ -183,7 +183,6 @@ def run(config, tim):
     if config.scatt_angle is not None:
         # Mainly used by REF_M
         scatt_angle = hlr_utils.angle_to_radians(config.scatt_angle)
-        scatt_angle = (scatt_angle[0]/2.0, scatt_angle[1])
     else:
         scatt_angle = None
 
