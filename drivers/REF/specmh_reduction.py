@@ -191,8 +191,7 @@ def run(config, tim):
     if config.theta_vals is not None:
         # Used by REF_M
         scatt_angle = hlr_utils.angle_list_to_radians(config.theta_vals,
-                                                      config.theta_vals_units,
-                                                      True)
+                                                      config.theta_vals_units)
         if len(scatt_angle) != len(d_som2):
             raise RuntimeError("The list of scattering angles is not the "
                                +"length as the number of requested pixels.")
