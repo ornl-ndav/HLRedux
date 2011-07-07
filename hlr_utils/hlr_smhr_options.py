@@ -79,10 +79,13 @@ class SmhrOptions(hlr_ref_options.RefOptions):
                         +"extra bins to clean from the cuts.")
         self.set_defaults(num_bins_clean=0)
 
-        self.add_option("", "--cuts-in-Q", dest="cuts_in_Q",
-                        action="store_true", help="Flag to pass Q cuts via "\
-                        +"the TOF cuts flag.")
-        self.set_defaults(cuts_in_Q=False)
+        self.add_option("", "--Q-cut-min", dest="Q_cut_min",
+                        help="Set the minimum Q channel for spectrum "\
+                        +"cutting")
+
+        self.add_option("", "--Q-cut-max", dest="Q_cut_max",
+                        help="Set the maximum Q channel for spectrum "\
+                        +"cutting")        
 
         self.add_option("", "--theta-vals", dest="theta_vals", help="A list "\
                         +"of scattering angles for the incoming data.")
@@ -135,9 +138,13 @@ def SmhrConfiguration(parser, configure, options, args):
                                       "--num-bins-clean"):
         configure.num_bins_clean = options.num_bins_clean
 
-    # Set the flag for passing Q cuts via the TOF cut options
-    if hlr_utils.cli_provide_override(configure, "cuts_in_Q", "--cuts-in-Q"):
-        configure.cuts_in_Q = options.cuts_in_Q
+    # Set the minimum Q channel for spectrum cutting
+    if hlr_utils.cli_provide_override(configure, "Q_cut_min", "--Q-cut-min"):
+        configure.Q_cut_min = options.Q_cut_min
+
+    # Set the maximum Q channel for spectrum cutting
+    if hlr_utils.cli_provide_override(configure, "Q_cut_max", "--Q-cut-max"):
+        configure.Q_cut_max = options.Q_cut_max        
 
     # Set the scattering angle value list
     if hlr_utils.cli_provide_override(configure, "theta_vals", "--theta-vals"):
